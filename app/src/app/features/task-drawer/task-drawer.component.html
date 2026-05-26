@@ -1,0 +1,297 @@
+<!-- Board task (legacy) — TaskItem -->
+<div
+  *ngIf="workspace.drawerOpen && workspace.selectedTaskKind === 'board-task' && workspace.selectedTask as task"
+  class="drawer-backdrop"
+  role="presentation"
+  (click)="workspace.closeTaskDrawer()"
+>
+  <aside class="task-drawer" role="dialog" aria-label="Task details" (click)="$event.stopPropagation()">
+    <header class="drawer-header">
+      <div>
+        <span class="eyebrow">{{ 'drawer.eyebrow' | t }}</span>
+        <h2>{{ task.title }}</h2>
+      </div>
+      <button type="button" class="ghost-action" (click)="workspace.closeTaskDrawer()">{{ 'common.close' | t }}</button>
+    </header>
+
+    <div class="drawer-status-bar">
+      <span class="status-chip" [ngClass]="workspace.statusClass(task.status)">{{ ('status.' + workspace.statusClass(task.status)) | t }}</span>
+      <span class="priority" [ngClass]="workspace.statusClass(task.priority)">{{ ('priority.' + workspace.statusClass(task.priority)) | t }}</span>
+      <span *ngIf="task.sourceMeetingId" class="source-pill">{{ 'drawer.fromMeeting' | t }}</span>
+    </div>
+
+    <label class="field-control">
+      {{ 'common.title' | t }}
+      <input [ngModel]="task.title" (ngModelChange)="workspace.updateTask(task.id, { title: $event })" />
+    </label>
+
+    <label class="field-control">
+      {{ 'common.description' | t }}
+      <textarea rows="4" [ngModel]="task.description" (ngModelChange)="workspace.updateTask(task.id, { description: $event })"></textarea>
+    </label>
+
+    <div class="detail-grid">
+      <label class="field-control">
+        {{ 'common.status' | t }}
+        <select [ngModel]="task.status" (ngModelChange)="workspace.updateStatus(task, $event)">
+          <option *ngFor="let status of workspace.statuses" [ngValue]="status">{{ ('status.' + workspace.statusClass(status)) | t }}</option>
+        </select>
+      </label>
+
+      <label class="field-control">
+        {{ 'common.priority' | t }}
+        <select [ngModel]="task.priority" (ngModelChange)="workspace.updateTask(task.id, { priority: $event })">
+          <option *ngFor="let priority of priorities" [ngValue]="priority">{{ ('priority.' + workspace.statusClass(priority)) | t }}</option>
+        </select>
+      </label>
+
+      <label class="field-control">
+        {{ 'common.owner' | t }}
+        <select [ngModel]="task.assigneeIds[0]" (ngModelChange)="updateSingleAssignee(task, $event)">
+          <option *ngFor="let member of workspace.members" [ngValue]="member.id">{{ member.name }}</option>
+        </select>
+      </label>
+
+      <label class="field-control">
+        {{ 'common.dueDate' | t }}
+        <input type="date" [ngModel]="task.dueDate" (ngModelChange)="workspace.updateTask(task.id, { dueDate: $event })" />
+      </label>
+
+      <label class="field-control detail-wide">
+        {{ 'common.board' | t }}
+        <input [ngModel]="task.board" (ngModelChange)="workspace.updateTask(task.id, { board: $event })" />
+      </label>
+
+      <label class="field-control detail-wide">
+        {{ 'common.blockedBy' | t }}
+        <input [ngModel]="task.blockedBy || ''" (ngModelChange)="workspace.updateTask(task.id, { blockedBy: $event })" [placeholder]="'placeholders.optionalBlocker' | t" />
+      </label>
+    </div>
+
+    <section class="drawer-section">
+      <div class="panel-header compact">
+        <div>
+          <span class="eyebrow">{{ 'common.checklist' | t }}</span>
+          <h3>{{ 'myWork.checklistComplete' | t: { progress: workspace.checklistProgress(task) } }}</h3>
+        </div>
+      </div>
+      <div class="progress-track">
+        <span [style.width.%]="workspace.checklistProgress(task)"></span>
+      </div>
+      <div class="checklist">
+        <label *ngFor="let item of task.checklist">
+          <input
+            type="checkbox"
+            [ngModel]="item.done"
+            (ngModelChange)="workspace.updateChecklistItem(task, item, $event)"
+          />
+          <span>{{ item.label }}</span>
+        </label>
+      </div>
+      <form class="inline-create" (ngSubmit)="addChecklistItem(task)">
+        <input name="checklistText" [(ngModel)]="checklistText" [placeholder]="'drawer.addChecklistPlaceholder' | t" />
+        <button type="submit" class="ghost-action" [disabled]="!checklistText.trim()">{{ 'common.add' | t }}</button>
+      </form>
+    </section>
+
+    <section class="drawer-section">
+      <div class="panel-header compact">
+        <div>
+          <span class="eyebrow">{{ 'common.watchers' | t }}</span>
+          <h3>{{ 'drawer.peopleFollowing' | t }}</h3>
+        </div>
+      </div>
+      <div class="watcher-box">
+        <label *ngFor="let member of workspace.members">
+          <input
+            type="checkbox"
+            [ngModel]="task.watcherIds.includes(member.id)"
+            (ngModelChange)="toggleWatcher(task, member.id, $event)"
+          />
+          <span>{{ member.name }}</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="drawer-section">
+      <div class="panel-header compact">
+        <div>
+          <span class="eyebrow">{{ 'drawer.discussion' | t }}</span>
+          <h3>{{ 'common.comments' | t }}</h3>
+        </div>
+      </div>
+      <form class="comment-form" (ngSubmit)="addComment(task)">
+        <textarea name="commentText" rows="3" [(ngModel)]="commentText" [placeholder]="'drawer.commentPlaceholder' | t"></textarea>
+        <button type="submit" class="primary-action" [disabled]="!commentText.trim()">{{ 'common.comment' | t }}</button>
+      </form>
+
+      <div *ngIf="workspace.commentsForTask(task.id).length; else noDrawerComments" class="comment-list">
+        <article *ngFor="let comment of workspace.commentsForTask(task.id)" class="comment">
+          <strong>{{ workspace.memberName(comment.createdByUserId) }}</strong>
+          <p>{{ comment.body }}</p>
+          <small>{{ comment.createdAt }}</small>
+        </article>
+      </div>
+
+      <ng-template #noDrawerComments>
+        <div class="empty-state compact-empty">{{ 'drawer.noComments' | t }}</div>
+      </ng-template>
+    </section>
+
+    <footer class="drawer-footer">
+      <button type="button" class="ghost-action" (click)="workspace.promoteTask(task, 'In Progress')">{{ 'drawer.start' | t }}</button>
+      <button type="button" class="primary-action" (click)="workspace.promoteTask(task, 'Done')">{{ 'drawer.markDone' | t }}</button>
+      <button type="button" class="danger-action" (click)="workspace.archiveTask(task)">{{ 'common.archive' | t }}</button>
+    </footer>
+  </aside>
+</div>
+
+<!-- Meeting task (v3) — MeetingTask -->
+<div
+  *ngIf="workspace.drawerOpen && workspace.selectedTaskKind === 'meeting-task' && workspace.selectedMeetingTask as task"
+  class="drawer-backdrop"
+  role="presentation"
+  (click)="workspace.closeTaskDrawer()"
+>
+  <aside class="task-drawer" role="dialog" aria-label="Meeting task details" (click)="$event.stopPropagation()">
+    <header class="drawer-header">
+      <div>
+        <span class="eyebrow">{{ 'meetingTask.title' | t }}</span>
+        <h2>{{ task.title }}</h2>
+      </div>
+      <button type="button" class="ghost-action" (click)="workspace.closeTaskDrawer()">{{ 'common.close' | t }}</button>
+    </header>
+
+    <div class="drawer-status-bar">
+      <span class="status-chip" [ngClass]="workspace.statusClass(task.status)">
+        {{ ('meetingTask.statusValues.' + task.status) | t }}
+      </span>
+      <span class="priority" [ngClass]="workspace.statusClass(task.priority)">
+        {{ ('priority.' + workspace.statusClass(task.priority)) | t }}
+      </span>
+      <span class="source-pill">
+        {{ 'meetingTask.customer' | t }}: {{ workspace.customer(task.customerId)?.name }}
+      </span>
+    </div>
+
+    <label class="field-control">
+      {{ 'meetingTask.taskTitle' | t }}
+      <input
+        [ngModel]="task.title"
+        (ngModelChange)="updateMeetingTaskField(task, 'title', $event)"
+      />
+    </label>
+
+    <label class="field-control">
+      {{ 'meetingTask.description' | t }}
+      <textarea
+        rows="3"
+        [ngModel]="task.description"
+        (ngModelChange)="updateMeetingTaskField(task, 'description', $event)"
+      ></textarea>
+    </label>
+
+    <div class="detail-grid">
+      <label class="field-control">
+        {{ 'meetingTask.status' | t }}
+        <select
+          [ngModel]="task.status"
+          (ngModelChange)="updateMeetingTaskStatus(task, $event)"
+        >
+          <option *ngFor="let s of workspace.meetingTaskStatuses" [ngValue]="s">
+            {{ ('meetingTask.statusValues.' + s) | t }}
+          </option>
+        </select>
+      </label>
+
+      <label class="field-control">
+        {{ 'meetingTask.priority' | t }}
+        <select
+          [ngModel]="task.priority"
+          (ngModelChange)="updateMeetingTaskField(task, 'priority', $event)"
+        >
+          <option *ngFor="let p of priorities" [ngValue]="p">
+            {{ ('priority.' + workspace.statusClass(p)) | t }}
+          </option>
+        </select>
+      </label>
+
+      <label class="field-control">
+        {{ 'meetingTask.assignedTo' | t }}
+        <select
+          [ngModel]="task.assignedToEmployeeId"
+          (ngModelChange)="updateMeetingTaskField(task, 'assignedToEmployeeId', $event)"
+        >
+          <option *ngFor="let e of workspace.employees" [ngValue]="e.id">
+            {{ e.fullName }}
+          </option>
+        </select>
+      </label>
+
+      <label class="field-control">
+        {{ 'meetingTask.openedBy' | t }}
+        <input disabled [value]="workspace.employeeName(task.openedByEmployeeId)" />
+      </label>
+
+      <label class="field-control">
+        {{ 'meetingTask.dueDate' | t }}
+        <input
+          type="date"
+          [ngModel]="task.dueDate"
+          (ngModelChange)="updateMeetingTaskField(task, 'dueDate', $event)"
+        />
+      </label>
+
+      <label class="field-control">
+        {{ 'meetingTask.sourceMeeting' | t }}
+        <input disabled [value]="workspace.customerMeeting(task.sourceMeetingId)?.subject || '—'" />
+      </label>
+
+      <label class="field-control detail-wide">
+        {{ 'meetingTask.treatmentNotes' | t }}
+        <textarea
+          rows="3"
+          [ngModel]="task.treatmentNotes"
+          (ngModelChange)="updateMeetingTaskField(task, 'treatmentNotes', $event)"
+          [placeholder]="'meetingTask.treatmentNotesPlaceholder' | t"
+        ></textarea>
+      </label>
+    </div>
+
+    <section class="drawer-section">
+      <div class="panel-header compact">
+        <div>
+          <span class="eyebrow">{{ 'meetingTask.notifications' | t }}</span>
+          <h3>{{ task.notifications.length }}</h3>
+        </div>
+      </div>
+      <div *ngIf="!task.notifications.length" class="empty-state compact-empty">
+        {{ 'meetingTask.noNotifications' | t }}
+      </div>
+      <ul class="notification-log">
+        <li *ngFor="let n of task.notifications">
+          <strong>{{ ('meetingTask.notificationEvents.' + n.event) | t }}</strong>
+          → {{ workspace.employeeName(n.recipientEmployeeId) }}
+          <small>{{ n.sentAt | slice:0:16 }}</small>
+        </li>
+      </ul>
+    </section>
+
+    <footer class="drawer-footer">
+      <button
+        type="button"
+        class="ghost-action"
+        (click)="updateMeetingTaskStatus(task, 'In Progress')"
+      >
+        {{ 'drawer.start' | t }}
+      </button>
+      <button
+        type="button"
+        class="primary-action"
+        (click)="updateMeetingTaskStatus(task, 'Done')"
+      >
+        {{ 'drawer.markDone' | t }}
+      </button>
+    </footer>
+  </aside>
+</div>

@@ -1,0 +1,231 @@
+<section class="home-screen">
+  <!-- HERO -->
+  <header class="home-hero">
+    <div class="hero-text">
+      <span class="hero-eyebrow">{{ todayLabel() }}</span>
+      <h1>{{ greeting() }}, {{ firstName() }}.</h1>
+      <p>{{ summaryLine() }}</p>
+    </div>
+    <div class="hero-actions">
+      <button type="button" class="primary-action" (click)="openView('my-work')">
+        <app-icon name="check-square" [size]="14"></app-icon>
+        <span>Plan my day</span>
+      </button>
+      <button type="button" class="ghost-action" (click)="openView('inbox')">
+        <app-icon name="inbox" [size]="14"></app-icon>
+        <span>Triage inbox</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- CALENDAR + TODAY -->
+  <div class="home-grid">
+    <section class="home-calendar">
+      <app-calendar (daySelected)="onDaySelected($event)"></app-calendar>
+    </section>
+
+    <aside class="home-today">
+      <div class="today-card next">
+        <span class="card-eyebrow">Next up</span>
+        <ng-container *ngIf="nextEvent() as evt; else noNext">
+          <h3>{{ evt.title }}</h3>
+          <p class="next-meta">
+            <span class="dot" [class.customer]="evt.kind === 'customer'" [class.internal]="evt.kind === 'internal'"></span>
+            <span>{{ formatEventTime(evt) }}</span>
+            <span *ngIf="evt.customerName">· {{ evt.customerName }}</span>
+            <span *ngIf="evt.linkedBoard && !evt.customerName">· {{ evt.linkedBoard }}</span>
+          </p>
+          <button class="ghost-action small" type="button" (click)="openView('meetings')">Open meetings</button>
+        </ng-container>
+        <ng-template #noNext>
+          <h3>No meetings on the horizon</h3>
+          <p class="muted-small">Time to do deep work.</p>
+        </ng-template>
+      </div>
+
+      <div class="today-card">
+        <div class="today-head">
+          <strong>{{ selectedDateLabel() }}</strong>
+          <span class="muted-small">{{ selectedDayEvents().length }} event{{ selectedDayEvents().length === 1 ? '' : 's' }}</span>
+        </div>
+        <ul class="today-events" *ngIf="selectedDayEvents().length; else dayEmpty">
+          <li *ngFor="let evt of selectedDayEvents(); trackBy: trackEvent">
+            <span class="time-pill">{{ formatEventTime(evt) }}</span>
+            <span class="event-text">
+              <strong>{{ evt.title }}</strong>
+              <small *ngIf="evt.customerName">{{ evt.customerName }}</small>
+              <small *ngIf="!evt.customerName && evt.linkedBoard">{{ evt.linkedBoard }}</small>
+            </span>
+            <span class="event-kind" [class.customer]="evt.kind === 'customer'" [class.internal]="evt.kind === 'internal'">
+              {{ evt.kind === 'customer' ? 'Customer' : 'Internal' }}
+            </span>
+          </li>
+        </ul>
+        <ng-template #dayEmpty>
+          <p class="muted-small">Nothing scheduled.</p>
+        </ng-template>
+      </div>
+
+      <div class="today-card">
+        <div class="today-head">
+          <strong>My top 3</strong>
+          <button type="button" class="link-btn" (click)="openView('my-work')">My work →</button>
+        </div>
+        <ul class="top-three" *ngIf="workspace.topThreeToday.length; else noTop">
+          <li *ngFor="let task of workspace.topThreeToday">
+            <button type="button" class="top-three-item" (click)="workspace.openTaskDrawer(task)">
+              <span class="status-dot" [ngClass]="workspace.statusClass(task.status)"></span>
+              <span class="top-text">
+                <strong>{{ task.title }}</strong>
+                <small>{{ task.board }} · {{ 'common.due' | t }} {{ task.dueDate }}</small>
+              </span>
+              <span class="priority" [ngClass]="workspace.statusClass(task.priority)">{{ ('priority.' + workspace.statusClass(task.priority)) | t }}</span>
+            </button>
+          </li>
+        </ul>
+        <ng-template #noTop>
+          <p class="muted-small">No priorities for today. Plan something forward.</p>
+        </ng-template>
+      </div>
+    </aside>
+  </div>
+
+  <!-- METRICS -->
+  <div class="metric-grid home-metrics">
+    <article class="metric">
+      <span>{{ 'home.openWork' | t }}</span>
+      <strong>{{ workspace.openTasks.length }}</strong>
+      <small>{{ 'home.acrossBoards' | t }}</small>
+    </article>
+    <article class="metric attention">
+      <span>{{ 'home.overdue' | t }}</span>
+      <strong>{{ workspace.overdueTasks.length }}</strong>
+      <small>{{ 'home.needsReview' | t }}</small>
+    </article>
+    <article class="metric">
+      <span>{{ 'home.blocked' | t }}</span>
+      <strong>{{ workspace.blockedTasks.length }}</strong>
+      <small>{{ 'home.needsAttention' | t }}</small>
+    </article>
+    <article class="metric">
+      <span>{{ 'home.followUpDebt' | t }}</span>
+      <strong>{{ workspace.unconvertedActionCount }}</strong>
+      <small>{{ 'home.actionsWaiting' | t }}</small>
+    </article>
+  </div>
+
+  <!-- RISK + WORKLOAD -->
+  <div class="two-column">
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <span class="eyebrow">{{ 'home.riskRadar' | t }}</span>
+          <h2>{{ 'home.overdueAndDueSoon' | t }}</h2>
+        </div>
+        <div class="inline-actions">
+          <button type="button" class="ghost-action" (click)="openView('inbox')">{{ 'app.openInbox' | t }}</button>
+          <button type="button" class="ghost-action" (click)="openView('boards')">{{ 'home.openBoard' | t }}</button>
+        </div>
+      </div>
+
+      <div *ngIf="workspace.overdueTasks.length || workspace.dueSoonTasks.length; else noRiskItems" class="work-list">
+        <button
+          *ngFor="let task of workspace.overdueTasks.slice(0, 3)"
+          type="button"
+          class="work-row"
+          [class.selected]="workspace.selectedTaskId === task.id"
+          (click)="workspace.selectTask(task)"
+        >
+          <span class="status-dot waiting"></span>
+          <span>
+            <strong>{{ task.title }}</strong>
+            <small>{{ task.board }} · {{ 'home.overdue' | t }} {{ task.dueDate }}</small>
+          </span>
+          <span class="priority" [ngClass]="workspace.statusClass(task.priority)">{{ ('priority.' + workspace.statusClass(task.priority)) | t }}</span>
+        </button>
+
+        <button
+          *ngFor="let task of workspace.dueSoonTasks.slice(0, 4)"
+          type="button"
+          class="work-row"
+          [class.selected]="workspace.selectedTaskId === task.id"
+          (click)="workspace.selectTask(task)"
+        >
+          <span class="status-dot" [ngClass]="workspace.statusClass(task.status)"></span>
+          <span>
+            <strong>{{ task.title }}</strong>
+            <small>{{ task.board }} · {{ 'common.due' | t }} {{ task.dueDate }}</small>
+          </span>
+          <span class="priority" [ngClass]="workspace.statusClass(task.priority)">{{ ('priority.' + workspace.statusClass(task.priority)) | t }}</span>
+        </button>
+      </div>
+
+      <ng-template #noRiskItems>
+        <div class="empty-state">
+          <strong>{{ 'home.noRiskTitle' | t }}</strong>
+          <span>{{ 'home.noRiskText' | t }}</span>
+        </div>
+      </ng-template>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <span class="eyebrow">{{ 'home.teamWorkload' | t }}</span>
+          <h2>{{ 'home.ownersAndBlockers' | t }}</h2>
+        </div>
+      </div>
+
+      <div class="workload-list">
+        <article *ngFor="let workload of workspace.teamWorkload" class="workload-row">
+          <span class="avatar">{{ workspace.initials(workload.member.id) }}</span>
+          <div>
+            <strong>{{ workload.member.name }}</strong>
+            <small>{{ workload.member.team }} · {{ workload.openCount }} {{ 'common.open' | t }} · {{ workload.blockedCount }} {{ 'common.blocked' | t }}</small>
+          </div>
+        </article>
+      </div>
+    </section>
+  </div>
+
+  <!-- MEETING NOTES + ACTIVITY -->
+  <div class="two-column">
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <span class="eyebrow">{{ 'home.meetingMemory' | t }}</span>
+          <h2>{{ workspace.meeting.title }}</h2>
+        </div>
+        <button type="button" class="ghost-action" (click)="openView('meetings')">{{ 'home.runMeeting' | t }}</button>
+      </div>
+
+      <div class="note-stack">
+        <article
+          *ngFor="let note of workspace.meeting.notes.slice(0, 3)"
+          class="note"
+          [ngClass]="workspace.statusClass(note.type)"
+        >
+          <span>{{ ('noteType.' + note.type) | t }}</span>
+          <p>{{ note.content }}</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <span class="eyebrow">{{ 'home.activity' | t }}</span>
+          <h2>{{ 'home.recentChanges' | t }}</h2>
+        </div>
+      </div>
+
+      <div class="activity-list">
+        <article *ngFor="let activity of workspace.activity" class="activity-row">
+          <strong>{{ activity.action }}</strong>
+          <span>{{ activity.detail }}</span>
+          <small>{{ activity.createdAt | slice:0:10 }}</small>
+        </article>
+      </div>
+    </section>
+  </div>
+</section>

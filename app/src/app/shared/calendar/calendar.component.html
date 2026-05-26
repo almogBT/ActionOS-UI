@@ -1,0 +1,57 @@
+<div class="calendar">
+  <header class="calendar-header">
+    <button
+      type="button"
+      class="cal-nav"
+      (click)="prevMonth()"
+      aria-label="Previous month"
+    >
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2">
+        <path d="M15 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </button>
+    <div class="cal-title">{{ monthLabel() }}</div>
+    <button type="button" class="cal-today" (click)="jumpToToday()">Today</button>
+    <button
+      type="button"
+      class="cal-nav"
+      (click)="nextMonth()"
+      aria-label="Next month"
+    >
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2">
+        <path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </button>
+  </header>
+
+  <div class="cal-weekdays" role="row">
+    <span *ngFor="let day of weekdayLabels()" role="columnheader">{{ day }}</span>
+  </div>
+
+  <div class="cal-grid" role="grid">
+    <button
+      *ngFor="let day of days(); trackBy: trackDay"
+      type="button"
+      role="gridcell"
+      class="cal-cell"
+      [class.out]="!day.inMonth"
+      [class.today]="day.isToday"
+      [class.selected]="day.isSelected"
+      [class.has-events]="day.events.length > 0"
+      (click)="selectDay(day)"
+      [attr.aria-current]="day.isToday ? 'date' : null"
+    >
+      <span class="cal-day-num">{{ day.dayNumber }}</span>
+      <span class="cal-dots" *ngIf="day.events.length">
+        <span
+          *ngFor="let event of day.events.slice(0, 3); trackBy: trackEvent"
+          class="cal-dot"
+          [class.customer]="event.kind === 'customer'"
+          [class.internal]="event.kind === 'internal'"
+          aria-hidden="true"
+        ></span>
+        <span class="cal-overflow" *ngIf="day.events.length > 3">+{{ day.events.length - 3 }}</span>
+      </span>
+    </button>
+  </div>
+</div>

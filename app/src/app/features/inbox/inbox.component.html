@@ -1,0 +1,144 @@
+<section class="screen">
+  <div class="screen-title hero-title">
+    <div>
+      <span class="eyebrow">{{ 'inbox.eyebrow' | t }}</span>
+      <h2>{{ 'inbox.title' | t }}</h2>
+      <p>{{ 'inbox.subtitle' | t }}</p>
+    </div>
+    <div class="inline-actions">
+      <button type="button" class="ghost-action" (click)="openView('meetings')">{{ 'inbox.reviewMeeting' | t }}</button>
+      <button type="button" class="primary-action" (click)="openView('boards')">{{ 'inbox.openBoard' | t }}</button>
+    </div>
+  </div>
+
+  <div class="metric-grid">
+    <article class="metric attention">
+      <span>{{ 'inbox.needsTriage' | t }}</span>
+      <strong>{{ workspace.triageQueue.length }}</strong>
+      <small>{{ 'inbox.triageHint' | t }}</small>
+    </article>
+    <article class="metric">
+      <span>{{ 'inbox.inboxTasks' | t }}</span>
+      <strong>{{ workspace.inboxTasks.length }}</strong>
+      <small>{{ 'inbox.readyToClassify' | t }}</small>
+    </article>
+    <article class="metric">
+      <span>{{ 'inbox.meetingActions' | t }}</span>
+      <strong>{{ workspace.openMeetingActions.length }}</strong>
+      <small>{{ 'inbox.waitingForTasks' | t }}</small>
+    </article>
+    <article class="metric">
+      <span>{{ 'inbox.blocked' | t }}</span>
+      <strong>{{ workspace.blockedTasks.length }}</strong>
+      <small>{{ 'inbox.needsUnblockOwner' | t }}</small>
+    </article>
+  </div>
+
+  <div class="two-column">
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <span class="eyebrow">{{ 'inbox.decisionQueue' | t }}</span>
+          <h2>{{ 'inbox.classifyWork' | t }}</h2>
+        </div>
+      </div>
+
+      <div *ngIf="workspace.triageQueue.length; else clearInbox" class="triage-list">
+        <article *ngFor="let task of workspace.triageQueue" class="triage-card">
+          <button type="button" class="triage-main" (click)="workspace.openTaskDrawer(task)">
+            <span class="status-dot" [ngClass]="workspace.statusClass(task.status)"></span>
+            <span>
+              <strong>{{ task.title }}</strong>
+              <small>{{ task.board }} - {{ ('priority.' + workspace.statusClass(task.priority)) | t }} - {{ 'common.due' | t }} {{ task.dueDate }}</small>
+            </span>
+          </button>
+          <div class="triage-actions">
+            <button type="button" class="ghost-action" (click)="promote(task, 'Planned')">{{ 'inbox.plan' | t }}</button>
+            <button type="button" class="ghost-action" (click)="promote(task, 'In Progress')">{{ 'inbox.start' | t }}</button>
+            <button type="button" class="ghost-action" (click)="promote(task, 'Waiting')">{{ 'inbox.wait' | t }}</button>
+            <button type="button" class="primary-action" (click)="promote(task, 'Done')">{{ 'inbox.done' | t }}</button>
+          </div>
+        </article>
+      </div>
+
+      <ng-template #clearInbox>
+        <div class="empty-state">
+          <strong>{{ 'inbox.clearTitle' | t }}</strong>
+          <span>{{ 'inbox.clearText' | t }}</span>
+        </div>
+      </ng-template>
+    </section>
+
+    <aside class="detail-panel">
+      <span class="eyebrow">{{ 'inbox.workflowRule' | t }}</span>
+      <h2>{{ 'inbox.oneTouchTriage' | t }}</h2>
+      <div class="workflow-steps">
+        <span>{{ 'inbox.step1' | t }}</span>
+        <span>{{ 'inbox.step2' | t }}</span>
+        <span>{{ 'inbox.step3' | t }}</span>
+        <span>{{ 'inbox.step4' | t }}</span>
+      </div>
+      <button type="button" class="primary-action wide-action" (click)="workspace.convertAllOpenActions()" [disabled]="!workspace.openMeetingActions.length">
+        {{ 'inbox.convertAll' | t }}
+      </button>
+    </aside>
+  </div>
+
+  <div class="two-column">
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <span class="eyebrow">{{ 'inbox.meetingFollowUp' | t }}</span>
+          <h2>{{ 'inbox.actionsWaiting' | t }}</h2>
+        </div>
+      </div>
+
+      <div *ngIf="workspace.openMeetingActions.length; else noActions" class="note-stack">
+        <article *ngFor="let note of workspace.openMeetingActions" class="note action">
+          <div>
+            <span>{{ 'noteType.action' | t }}</span>
+            <p>{{ note.content }}</p>
+            <small *ngIf="note.ownerId">{{ 'common.owner' | t }}: {{ workspace.memberName(note.ownerId) }} - {{ 'common.due' | t }} {{ note.dueDate }}</small>
+          </div>
+          <button type="button" class="convert-action" (click)="convert(note)">{{ 'common.convert' | t }}</button>
+        </article>
+      </div>
+
+      <ng-template #noActions>
+        <div class="empty-state">
+          <strong>{{ 'inbox.noActionsTitle' | t }}</strong>
+          <span>{{ 'inbox.noActionsText' | t }}</span>
+        </div>
+      </ng-template>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <span class="eyebrow">{{ 'inbox.blockerLane' | t }}</span>
+          <h2>{{ 'inbox.needsRescue' | t }}</h2>
+        </div>
+      </div>
+
+      <div *ngIf="workspace.blockedTasks.length; else noBlockers" class="task-stack">
+        <article *ngFor="let task of workspace.blockedTasks.slice(0, 5)" class="task-card" (click)="workspace.openTaskDrawer(task)">
+          <div class="task-main">
+            <span class="status-dot waiting"></span>
+            <div>
+              <h3>{{ task.title }}</h3>
+              <p>{{ task.blockedBy || 'Waiting for next input' }}</p>
+            </div>
+          </div>
+          <span class="priority" [ngClass]="workspace.statusClass(task.priority)">{{ ('priority.' + workspace.statusClass(task.priority)) | t }}</span>
+        </article>
+      </div>
+
+      <ng-template #noBlockers>
+        <div class="empty-state">
+          <strong>{{ 'inbox.noBlockersTitle' | t }}</strong>
+          <span>{{ 'inbox.noBlockersText' | t }}</span>
+        </div>
+      </ng-template>
+    </section>
+  </div>
+</section>

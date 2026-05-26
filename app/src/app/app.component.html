@@ -1,0 +1,35 @@
+<main class="actionos-shell" [ngClass]="shellClass()">
+  <app-sidebar
+    [activeView]="activeView()"
+    [collapsed]="sidebarCollapsed()"
+    [mobileOpen]="mobileNavOpen()"
+    (viewSelected)="setView($event)"
+    (toggleCollapsed)="toggleSidebar()"
+    (closeMobile)="closeMobileNav()"
+  ></app-sidebar>
+
+  <section class="workspace">
+    <app-header
+      [activeView]="activeView()"
+      [sidebarCollapsed]="sidebarCollapsed()"
+      (toggleSidebar)="toggleSidebar()"
+      (mobileMenu)="openMobileNav()"
+      (captured)="onCaptured()"
+      (navigate)="setView($event)"
+    ></app-header>
+
+    <div class="workspace-body">
+      <ng-container [ngSwitch]="activeView()">
+        <app-workspace-home *ngSwitchCase="'home'" (viewChange)="setView($event)" />
+        <app-inbox *ngSwitchCase="'inbox'" (viewChange)="setView($event)" />
+        <app-my-work *ngSwitchCase="'my-work'" (viewChange)="setView($event)" />
+        <app-boards *ngSwitchCase="'boards'" (viewChange)="setView($event)" />
+        <app-meetings *ngSwitchCase="'meetings'" (viewChange)="setView($event)" />
+        <app-customers *ngSwitchCase="'customers'" />
+        <app-members *ngSwitchCase="'members'" />
+      </ng-container>
+    </div>
+  </section>
+
+  <app-task-drawer />
+</main>

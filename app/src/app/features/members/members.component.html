@@ -1,0 +1,62 @@
+<section class="screen">
+  <div class="screen-title">
+    <div>
+      <span class="eyebrow">{{ 'members.eyebrow' | t }}</span>
+      <h2>{{ 'members.title' | t }}</h2>
+    </div>
+  </div>
+
+  <section class="panel">
+    <form class="task-capture" (ngSubmit)="addMember()">
+      <div class="capture-header">
+        <div>
+          <span class="eyebrow">{{ 'members.mockInvitation' | t }}</span>
+          <h3>{{ 'members.addMember' | t }}</h3>
+        </div>
+        <button type="submit" class="primary-action" [disabled]="!newMember.name.trim()">{{ 'members.inviteMember' | t }}</button>
+      </div>
+
+      <div class="capture-grid member-create-grid">
+        <label class="field-control">
+          {{ 'members.name' | t }}
+          <input name="name" type="text" [(ngModel)]="newMember.name" [placeholder]="'members.namePlaceholder' | t" />
+        </label>
+
+        <label class="field-control">
+          {{ 'members.role' | t }}
+          <select name="role" [(ngModel)]="newMember.role">
+            <option [ngValue]="'Owner'">{{ 'members.roles.owner' | t }}</option>
+            <option [ngValue]="'Admin'">{{ 'members.roles.admin' | t }}</option>
+            <option [ngValue]="'Manager'">{{ 'members.roles.manager' | t }}</option>
+            <option [ngValue]="'Member'">{{ 'members.roles.member' | t }}</option>
+            <option [ngValue]="'Viewer'">{{ 'members.roles.viewer' | t }}</option>
+            <option [ngValue]="'Guest'">{{ 'members.roles.guest' | t }}</option>
+          </select>
+        </label>
+
+        <label class="field-control">
+          {{ 'members.team' | t }}
+          <input name="team" type="text" [(ngModel)]="newMember.team" />
+        </label>
+      </div>
+    </form>
+  </section>
+
+  <section class="panel member-table">
+    <div class="table-row table-head">
+      <span>{{ 'members.name' | t }}</span>
+      <span>{{ 'members.role' | t }}</span>
+      <span>{{ 'members.team' | t }}</span>
+      <span>{{ 'members.availability' | t }}</span>
+    </div>
+    <div *ngFor="let member of workspace.members" class="table-row">
+      <span class="member-cell">
+        <span class="avatar">{{ workspace.initials(member.id) }}</span>
+        <strong>{{ member.name }}</strong>
+      </span>
+      <span>{{ ('members.roles.' + workspace.statusClass(member.role)) | t }}</span>
+      <span>{{ member.team }}</span>
+      <span class="status-chip" [ngClass]="workspace.statusClass(member.availability)">{{ ('members.availabilityValues.' + workspace.statusClass(member.availability)) | t }}</span>
+    </div>
+  </section>
+</section>

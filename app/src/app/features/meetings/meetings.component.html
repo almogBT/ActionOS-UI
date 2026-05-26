@@ -1,0 +1,206 @@
+<section class="screen">
+  <div class="screen-title">
+    <div>
+      <span class="eyebrow">{{ workspace.meeting.time }}</span>
+      <h2>{{ workspace.meeting.title }}</h2>
+    </div>
+    <button type="button" class="ghost-action" (click)="openView('my-work')">{{ 'meetings.openMyWork' | t }}</button>
+  </div>
+
+  <section class="panel meeting-runway">
+    <article>
+      <span class="eyebrow">{{ 'meetings.runMode' | t }}</span>
+      <strong>{{ 'meetings.agenda' | t }}</strong>
+      <small>{{ 'meetings.agendaText' | t }}</small>
+    </article>
+    <article>
+      <span class="eyebrow">{{ 'meetings.liveCapture' | t }}</span>
+      <strong>{{ 'meetings.notesBecomeWork' | t }}</strong>
+      <small>{{ 'meetings.notesBecomeWorkText' | t }}</small>
+    </article>
+    <article>
+      <span class="eyebrow">{{ 'meetings.closeout' | t }}</span>
+      <strong>{{ 'meetings.followUpDebt' | t }}</strong>
+      <small>{{ 'meetings.actionsNeedConversion' | t: { count: workspace.openMeetingActions.length } }}</small>
+    </article>
+    <div class="inline-actions">
+      <button type="button" class="ghost-action" (click)="publishSummary()">{{ 'meetings.publishSummary' | t }}</button>
+      <button type="button" class="primary-action" [disabled]="!workspace.openMeetingActions.length" (click)="convertAllActions()">{{ 'meetings.convertAllActions' | t }}</button>
+    </div>
+  </section>
+
+  <div class="meeting-layout">
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <span class="eyebrow">{{ 'meetings.agenda' | t }}</span>
+          <h2>{{ 'meetings.runTheSync' | t }}</h2>
+        </div>
+        <span class="status-chip in-progress">{{ 'status.in-progress' | t }}</span>
+      </div>
+
+      <form class="inline-create" (ngSubmit)="addAgendaItem()">
+        <input name="agendaTitle" [(ngModel)]="newAgendaTitle" [placeholder]="'meetings.addAgendaPlaceholder' | t" />
+        <button type="submit" class="ghost-action" [disabled]="!newAgendaTitle.trim()">{{ 'common.add' | t }}</button>
+      </form>
+
+      <ol class="agenda-list">
+        <li *ngFor="let agendaItem of workspace.meeting.agenda">
+          <label class="agenda-check">
+            <input
+              type="checkbox"
+              [ngModel]="agendaItem.completed"
+              [ngModelOptions]="{ standalone: true }"
+              (ngModelChange)="workspace.toggleAgendaItem(agendaItem, $event)"
+            />
+            <span [class.completed]="agendaItem.completed">{{ agendaItem.title }}</span>
+          </label>
+        </li>
+      </ol>
+
+      <form class="meeting-capture" (ngSubmit)="addNote()">
+        <div class="capture-header">
+          <div>
+            <span class="eyebrow">{{ 'meetings.liveCapture' | t }}</span>
+            <h3>{{ 'meetings.addMeetingOutput' | t }}</h3>
+          </div>
+          <button type="submit" class="primary-action" [disabled]="!newNote.content.trim()">{{ 'meetings.addNote' | t }}</button>
+        </div>
+
+        <label class="field-control">
+          {{ 'common.content' | t }}
+          <textarea
+            name="content"
+            [(ngModel)]="newNote.content"
+            rows="3"
+            [placeholder]="'meetings.contentPlaceholder' | t"
+          ></textarea>
+        </label>
+
+        <div class="capture-grid">
+          <label class="field-control">
+            {{ 'common.type' | t }}
+            <select name="type" [(ngModel)]="newNote.type">
+              <option *ngFor="let type of noteTypes" [ngValue]="type">{{ ('noteType.' + type) | t }}</option>
+            </select>
+          </label>
+
+          <label class="field-control">
+            {{ 'common.owner' | t }}
+            <select name="ownerId" [(ngModel)]="newNote.ownerId">
+              <option value="">{{ 'common.unassigned' | t }}</option>
+              <option *ngFor="let member of workspace.members" [ngValue]="member.id">{{ member.name }}</option>
+            </select>
+          </label>
+
+          <label class="field-control">
+            {{ 'common.dueDate' | t }}
+            <input name="dueDate" type="date" [(ngModel)]="newNote.dueDate" />
+          </label>
+        </div>
+      </form>
+
+      <div class="note-filter">
+        <button
+          *ngFor="let filter of noteFilters"
+          type="button"
+          [class.active]="noteFilter === filter"
+          (click)="noteFilter = filter"
+        >
+          {{ ('noteType.' + filter) | t }}
+        </button>
+      </div>
+
+      <div *ngIf="filteredNotes.length; else noMeetingNotes" class="note-stack">
+        <article *ngFor="let note of filteredNotes" class="note" [ngClass]="workspace.statusClass(note.type)">
+          <div>
+            <span>{{ ('noteType.' + note.type) | t }}</span>
+            <p>{{ note.content }}</p>
+            <small *ngIf="note.ownerId">{{ 'common.owner' | t }}: {{ workspace.memberName(note.ownerId) }} - {{ 'common.due' | t }} {{ note.dueDate }}</small>
+            <small *ngIf="note.convertedTaskId">{{ 'common.converted' | t }} {{ note.convertedTaskId }}</small>
+          </div>
+          <button
+            *ngIf="note.type === 'action'"
+            type="button"
+            class="convert-action"
+            [disabled]="!!note.convertedTaskId"
+            (click)="startConversion(note)"
+          >
+            {{ note.convertedTaskId ? ('common.converted' | t) : ('common.convert' | t) }}
+          </button>
+
+          <form *ngIf="convertingNoteId === note.id && !note.convertedTaskId" class="conversion-box" (ngSubmit)="confirmConversion(note)">
+            <label class="field-control">
+              {{ 'meetings.taskTitle' | t }}
+              <input name="conversionTitle" [(ngModel)]="conversionInput.title" />
+            </label>
+            <div class="capture-grid">
+              <label class="field-control">
+                {{ 'common.owner' | t }}
+                <select name="conversionOwner" [(ngModel)]="conversionInput.assigneeId">
+                  <option *ngFor="let member of workspace.members" [ngValue]="member.id">{{ member.name }}</option>
+                </select>
+              </label>
+              <label class="field-control">
+                {{ 'common.priority' | t }}
+                <select name="conversionPriority" [(ngModel)]="conversionInput.priority">
+                  <option *ngFor="let priority of priorities" [ngValue]="priority">{{ ('priority.' + workspace.statusClass(priority)) | t }}</option>
+                </select>
+              </label>
+              <label class="field-control">
+                {{ 'common.dueDate' | t }}
+                <input name="conversionDueDate" type="date" [(ngModel)]="conversionInput.dueDate" />
+              </label>
+            </div>
+            <div class="inline-actions">
+              <button type="submit" class="primary-action" [disabled]="!conversionInput.title.trim()">{{ 'meetings.createTask' | t }}</button>
+              <button type="button" class="ghost-action" (click)="cancelConversion()">{{ 'common.cancel' | t }}</button>
+            </div>
+          </form>
+        </article>
+      </div>
+
+      <ng-template #noMeetingNotes>
+        <div class="empty-state">
+          <strong>{{ 'meetings.noNotesTitle' | t }}</strong>
+          <span>{{ 'meetings.noNotesText' | t }}</span>
+        </div>
+      </ng-template>
+    </section>
+
+    <aside class="detail-panel">
+      <span class="eyebrow">{{ 'meetings.followUpPanel' | t }}</span>
+      <h2>{{ 'meetings.meetingOutput' | t }}</h2>
+      <div class="output-stat">
+        <strong>{{ workspace.meeting.notes.length }}</strong>
+        <span>{{ 'meetings.totalNotes' | t }}</span>
+      </div>
+      <div class="output-stat">
+        <strong>{{ workspace.unconvertedActionCount }}</strong>
+        <span>{{ 'meetings.openActions' | t }}</span>
+      </div>
+
+      <div class="followup-lane">
+        <div class="panel-header compact">
+          <div>
+            <span class="eyebrow">{{ 'meetings.openActions' | t }}</span>
+            <h3>{{ 'meetings.carryIntoWork' | t }}</h3>
+          </div>
+        </div>
+        <div *ngIf="workspace.openMeetingActions.length; else noFollowups" class="mini-stack">
+          <article *ngFor="let note of workspace.openMeetingActions" class="mini-card">
+            <strong>{{ note.content }}</strong>
+            <small *ngIf="note.ownerId">{{ workspace.memberName(note.ownerId) }} - {{ note.dueDate }}</small>
+          </article>
+        </div>
+        <ng-template #noFollowups>
+          <div class="empty-state compact-empty">{{ 'meetings.noOpenDebt' | t }}</div>
+        </ng-template>
+      </div>
+
+      <div class="attendees">
+        <span *ngFor="let attendeeId of workspace.meeting.attendeeIds" class="avatar">{{ workspace.initials(attendeeId) }}</span>
+      </div>
+    </aside>
+  </div>
+</section>

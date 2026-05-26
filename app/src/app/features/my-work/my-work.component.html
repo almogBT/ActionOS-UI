@@ -1,0 +1,186 @@
+<section class="screen">
+  <div class="screen-title">
+    <div>
+      <span class="eyebrow">{{ 'myWork.eyebrow' | t }}</span>
+      <h2>{{ 'myWork.title' | t }}</h2>
+    </div>
+    <button type="button" class="ghost-action" (click)="openView('meetings')">{{ 'myWork.convertAnother' | t }}</button>
+  </div>
+
+  <div class="workbench">
+    <section class="panel">
+      <div class="tab-strip">
+        <button
+          *ngFor="let tab of tabs"
+          type="button"
+          [class.active]="activeTab === tab.id"
+          (click)="setTab(tab.id)"
+        >
+          {{ ('myWork.tabs.' + tab.id) | t }}
+        </button>
+      </div>
+
+      <!-- Meeting tasks first — meetings are the spine of the app -->
+      <div *ngIf="displayedMeetingTasks.length" class="task-stack">
+        <article
+          *ngFor="let task of displayedMeetingTasks"
+          class="task-card"
+          [class.selected]="workspace.selectedTaskKind === 'meeting-task' && workspace.selectedTaskId === task.id"
+          (click)="openMeetingTask(task)"
+        >
+          <div class="task-main">
+            <span class="status-dot" [ngClass]="workspace.statusClass(task.status)"></span>
+            <div>
+              <h3>{{ task.title }}</h3>
+              <p>{{ workspace.customer(task.customerId)?.name }} <ng-container *ngIf="task.dueDate">· {{ 'common.due' | t }} {{ task.dueDate }}</ng-container></p>
+            </div>
+          </div>
+          <div class="task-meta">
+            <span class="priority" [ngClass]="workspace.statusClass(task.priority)">{{ ('priority.' + workspace.statusClass(task.priority)) | t }}</span>
+            <span class="source-pill meeting-pill">{{ 'common.meeting' | t }}</span>
+          </div>
+        </article>
+      </div>
+
+      <div *ngIf="displayedTasks.length; else noMyWorkTasks" class="task-stack">
+        <article
+          *ngFor="let task of displayedTasks"
+          class="task-card"
+          [class.selected]="workspace.selectedTaskKind === 'board-task' && workspace.selectedTaskId === task.id"
+          (click)="workspace.selectBoardTask(task)"
+        >
+          <div class="task-main">
+            <span class="status-dot" [ngClass]="workspace.statusClass(task.status)"></span>
+            <div>
+              <h3>{{ task.title }}</h3>
+              <p>{{ task.board }} - {{ 'common.due' | t }} {{ task.dueDate }}</p>
+            </div>
+          </div>
+          <div class="task-meta">
+            <span class="priority" [ngClass]="workspace.statusClass(task.priority)">{{ ('priority.' + workspace.statusClass(task.priority)) | t }}</span>
+            <span *ngIf="task.sourceMeetingId" class="source-pill">{{ 'myWork.fromMeeting' | t }}</span>
+          </div>
+        </article>
+      </div>
+
+      <ng-template #noMyWorkTasks>
+        <div *ngIf="!displayedMeetingTasks.length" class="empty-state">
+          <strong>{{ 'myWork.noTasksTitle' | t }}</strong>
+          <span>{{ 'myWork.noTasksText' | t }}</span>
+        </div>
+      </ng-template>
+    </section>
+
+    <aside class="detail-panel" *ngIf="workspace.selectedTask as task">
+      <span class="eyebrow">{{ 'myWork.selectedItem' | t }}</span>
+      <label class="field-control">
+        {{ 'common.title' | t }}
+        <input [ngModel]="task.title" (ngModelChange)="workspace.updateTask(task.id, { title: $event })" />
+      </label>
+
+      <label class="field-control">
+        {{ 'common.description' | t }}
+        <textarea rows="4" [ngModel]="task.description" (ngModelChange)="workspace.updateTask(task.id, { description: $event })"></textarea>
+      </label>
+
+      <div class="detail-grid">
+        <label class="field-control">
+          {{ 'common.status' | t }}
+          <select [ngModel]="task.status" (ngModelChange)="workspace.updateStatus(task, $event)">
+            <option *ngFor="let status of workspace.statuses" [ngValue]="status">{{ ('status.' + workspace.statusClass(status)) | t }}</option>
+          </select>
+        </label>
+
+        <label class="field-control">
+          {{ 'common.priority' | t }}
+          <select [ngModel]="task.priority" (ngModelChange)="workspace.updateTask(task.id, { priority: $event })">
+            <option *ngFor="let priority of priorities" [ngValue]="priority">{{ ('priority.' + workspace.statusClass(priority)) | t }}</option>
+          </select>
+        </label>
+
+        <label class="field-control">
+          {{ 'common.owner' | t }}
+          <select [ngModel]="task.assigneeIds[0]" (ngModelChange)="updateSingleAssignee(task, $event)">
+            <option *ngFor="let member of workspace.members" [ngValue]="member.id">{{ member.name }}</option>
+          </select>
+        </label>
+
+        <label class="field-control">
+          {{ 'common.dueDate' | t }}
+          <input type="date" [ngModel]="task.dueDate" (ngModelChange)="workspace.updateTask(task.id, { dueDate: $event })" />
+        </label>
+
+        <label class="field-control detail-wide">
+          {{ 'common.board' | t }}
+          <input [ngModel]="task.board" (ngModelChange)="workspace.updateTask(task.id, { board: $event })" />
+        </label>
+
+        <label class="field-control detail-wide">
+          {{ 'common.blockedBy' | t }}
+          <input [ngModel]="task.blockedBy || ''" (ngModelChange)="workspace.updateTask(task.id, { blockedBy: $event })" [placeholder]="'placeholders.optionalBlocker' | t" />
+        </label>
+      </div>
+
+      <div class="watcher-box">
+        <span class="eyebrow">{{ 'common.watchers' | t }}</span>
+        <label *ngFor="let member of workspace.members">
+          <input
+            type="checkbox"
+            [ngModel]="task.watcherIds.includes(member.id)"
+            (ngModelChange)="toggleWatcher(task, member.id, $event)"
+          />
+          <span>{{ member.name }}</span>
+        </label>
+      </div>
+
+      <div class="owner-row">
+        <span *ngFor="let assigneeId of task.assigneeIds" class="avatar">{{ workspace.initials(assigneeId) }}</span>
+        <small>{{ 'myWork.ownerCount' | t: { count: task.assigneeIds.length } }}</small>
+      </div>
+
+      <div class="progress-track">
+        <span [style.width.%]="workspace.checklistProgress(task)"></span>
+      </div>
+      <small>{{ 'myWork.checklistComplete' | t: { progress: workspace.checklistProgress(task) } }}</small>
+
+      <div class="checklist">
+        <label *ngFor="let item of task.checklist">
+          <input
+            type="checkbox"
+            [ngModel]="item.done"
+            (ngModelChange)="workspace.updateChecklistItem(task, item, $event)"
+          />
+          <span>{{ item.label }}</span>
+        </label>
+      </div>
+
+      <section class="comments-panel">
+        <div class="panel-header compact">
+          <div>
+            <span class="eyebrow">{{ 'myWork.discussion' | t }}</span>
+            <h3>{{ 'common.comments' | t }}</h3>
+          </div>
+        </div>
+
+        <form class="comment-form" (ngSubmit)="addComment(task)">
+          <textarea name="comment" rows="3" [(ngModel)]="commentText" [placeholder]="'myWork.addCommentPlaceholder' | t"></textarea>
+          <button type="submit" class="primary-action" [disabled]="!commentText.trim()">{{ 'common.comment' | t }}</button>
+        </form>
+
+        <div *ngIf="workspace.commentsForTask(task.id).length; else noComments" class="comment-list">
+          <article *ngFor="let comment of workspace.commentsForTask(task.id)" class="comment">
+            <strong>{{ workspace.memberName(comment.createdByUserId) }}</strong>
+            <p>{{ comment.body }}</p>
+            <small>{{ comment.createdAt }}</small>
+          </article>
+        </div>
+
+        <ng-template #noComments>
+          <div class="empty-state compact-empty">{{ 'myWork.noComments' | t }}</div>
+        </ng-template>
+      </section>
+
+      <button type="button" class="danger-action" (click)="workspace.archiveTask(task)">{{ 'myWork.archiveTask' | t }}</button>
+    </aside>
+  </div>
+</section>
