@@ -1,25 +1,14 @@
-import {
-  Attachment,
-  BoardTemplate,
-  Customer,
-  CustomerMeeting,
-  Employee,
-  Meeting,
-  MeetingTask,
-  Member,
-  NavItem,
-  TaskItem,
-  TaskStatus,
-} from '../models/actionos.models';
+import { Attachment, BoardTemplate, Customer, CustomerMeeting, Employee, Meeting, Member, NavItem, Task, TaskStatus } from '../models/actionos.models';
 
 export const ACTIONOS_NAV_ITEMS: NavItem[] = [
-  { id: 'home', label: 'Home', shortcut: 'H' },
-  { id: 'inbox', label: 'Inbox', shortcut: 'I' },
-  { id: 'my-work', label: 'My Work', shortcut: 'M' },
-  { id: 'boards', label: 'Boards', shortcut: 'B' },
-  { id: 'meetings', label: 'Meetings', shortcut: 'N' },
-  { id: 'customers', label: 'Customers', shortcut: 'C' },
-  { id: 'members', label: 'Members', shortcut: 'U' }
+  { id: 'home',     label: 'Home',     shortcut: 'H', section: 'main' },
+  { id: 'meetings', label: 'Meetings', shortcut: 'N', section: 'main' },
+  { id: 'my-work',  label: 'My Work',  shortcut: 'M', section: 'work' },
+  { id: 'boards',   label: 'Boards',   shortcut: 'B', section: 'work' },
+  // 'customers' is intentionally omitted: the customer list now lives on Home.
+  // The 'customers' view still exists to host the Customer 360 detail flow,
+  // reached by clicking a customer row on Home (see AppComponent).
+  // 'members' is intentionally omitted: team member info is available on Home.
 ];
 
 export const ACTIONOS_TASK_STATUSES: TaskStatus[] = ['Inbox', 'Planned', 'In Progress', 'Waiting', 'Done'];
@@ -31,17 +20,19 @@ export const ACTIONOS_MEMBERS: Member[] = [
   { id: 'u4', name: 'Noa Shafir', role: 'Admin', team: 'Finance', availability: 'Available' }
 ];
 
-export const ACTIONOS_TASKS: TaskItem[] = [
+export const ACTIONOS_TASKS: Partial<Task>[] = [
   {
     id: 'task-1',
     title: 'Map HomePage external module handshake',
     description: 'Document token, language, org, module slug, and environment payloads for host integration.',
+    source: 'board',
     board: 'Platform Integration',
     status: 'In Progress',
     priority: 'High',
     dueDate: '2026-05-27',
     assigneeIds: ['u1', 'u4'],
     watcherIds: ['u2'],
+    createdByUserId: 'u2',
     createdAt: '2026-05-25T08:15:00.000Z',
     updatedAt: '2026-05-25T09:30:00.000Z',
     checklist: [
@@ -54,13 +45,15 @@ export const ACTIONOS_TASKS: TaskItem[] = [
     id: 'task-2',
     title: 'Design meeting action conversion flow',
     description: 'Make the conversion from meeting action to assigned task feel obvious and recoverable.',
-    board: 'ActionOS Core',
+    source: 'board',
+    board: 'Fritz Meetings',
     status: 'Planned',
     priority: 'Critical',
     dueDate: '2026-05-26',
     assigneeIds: ['u1'],
     watcherIds: ['u2', 'u4'],
     sourceMeetingId: 'meet-1',
+    createdByUserId: 'u1',
     createdAt: '2026-05-25T08:45:00.000Z',
     updatedAt: '2026-05-25T08:45:00.000Z',
     checklist: [
@@ -73,13 +66,15 @@ export const ACTIONOS_TASKS: TaskItem[] = [
     id: 'task-3',
     title: 'Define default board columns for MVP',
     description: 'Lock the first set of columns before moving toward API contracts.',
-    board: 'ActionOS Core',
+    source: 'board',
+    board: 'Fritz Meetings',
     status: 'Waiting',
     priority: 'Medium',
     dueDate: '2026-05-29',
     assigneeIds: ['u2'],
     watcherIds: ['u1'],
     blockedBy: 'Needs final field list',
+    createdByUserId: 'u1',
     createdAt: '2026-05-25T09:05:00.000Z',
     updatedAt: '2026-05-25T09:05:00.000Z',
     checklist: [
@@ -92,12 +87,14 @@ export const ACTIONOS_TASKS: TaskItem[] = [
     id: 'task-4',
     title: 'Create first customer onboarding board template',
     description: 'Draft a reusable workflow that proves ActionOS can support non-task-list workflows.',
+    source: 'board',
     board: 'Templates',
     status: 'Inbox',
     priority: 'Medium',
     dueDate: '2026-06-02',
     assigneeIds: ['u3'],
     watcherIds: ['u1'],
+    createdByUserId: 'u3',
     createdAt: '2026-05-25T09:20:00.000Z',
     updatedAt: '2026-05-25T09:20:00.000Z',
     checklist: [
@@ -110,12 +107,14 @@ export const ACTIONOS_TASKS: TaskItem[] = [
     id: 'task-5',
     title: 'Review local MVP with team',
     description: 'Use the local prototype and record what needs to change before backend work.',
-    board: 'ActionOS Core',
+    source: 'board',
+    board: 'Fritz Meetings',
     status: 'Inbox',
     priority: 'High',
     dueDate: '2026-05-25',
     assigneeIds: ['u1'],
     watcherIds: ['u2'],
+    createdByUserId: 'u1',
     createdAt: '2026-05-25T10:00:00.000Z',
     updatedAt: '2026-05-25T10:00:00.000Z',
     checklist: [
@@ -136,12 +135,12 @@ const legacyMeetingStart = (() => {
 
 export const ACTIONOS_MEETING: Meeting = {
   id: 'meet-1',
-  title: 'ActionOS v1 planning sync',
+  title: 'Fritz Meetings planning sync',
   time: 'Today, 14:30',
   startsAt: legacyMeetingStart,
   durationMinutes: 60,
   attendeeIds: ['u1', 'u2', 'u4'],
-  linkedBoard: 'ActionOS Core',
+  linkedBoard: 'Fritz Meetings',
   agenda: [
     { id: 'agenda-1', title: 'Lock standalone-first architecture', completed: true },
     { id: 'agenda-2', title: 'Review meeting-to-task flow', completed: false },
@@ -430,7 +429,9 @@ export const ACTIONOS_CUSTOMER_MEETINGS: CustomerMeeting[] = [
     notes: [
       { id: 'cnote-5', type: 'blocker', content: 'Two temperature deviations in April; root cause partially identified.' },
       { id: 'cnote-6', type: 'action', content: 'Build remediation plan with measurable SLA targets.', ownerId: 'emp-1', dueDate: '2026-05-24', convertedTaskId: 'mtask-3' },
-      { id: 'cnote-7', type: 'decision', content: 'Escalation path: incident -> ops lead within 15 minutes.' }
+      { id: 'cnote-7', type: 'decision', content: 'Escalation path: incident -> ops lead within 15 minutes.' },
+      { id: 'cnote-10', type: 'action', content: 'Send Tnuva a draft SLA addendum for legal review.', createdByEmployeeId: 'emp-1', dueDate: '2026-06-04' },
+      { id: 'cnote-11', type: 'action', content: 'Schedule follow-up call with Tnuva ops lead to walk through the remediation plan.', createdByEmployeeId: 'emp-1', dueDate: '2026-06-02' }
     ],
     nextMeetingDate: '2026-06-09T13:00:00.000Z',
     status: 'Tasks Created',
@@ -452,7 +453,8 @@ export const ACTIONOS_CUSTOMER_MEETINGS: CustomerMeeting[] = [
     summary: 'Strauss is launching 12 new SKUs in Q3. Volume estimate: +8% over Q2. No immediate change to allocations needed; revisit after launch.',
     notes: [
       { id: 'cnote-8', type: 'note', content: '12 new SKUs in Q3.' },
-      { id: 'cnote-9', type: 'decision', content: 'Revisit allocations post-launch (mid-Q3).' }
+      { id: 'cnote-9', type: 'decision', content: 'Revisit allocations post-launch (mid-Q3).' },
+      { id: 'cnote-12', type: 'action', content: 'Model volume impact on warehouse capacity for +8% Q3 SKU increase.', createdByEmployeeId: 'emp-1', dueDate: '2026-06-06' }
     ],
     nextMeetingDate: '2026-05-15T10:00:00.000Z',
     status: 'Closed',
@@ -464,11 +466,12 @@ export const ACTIONOS_CUSTOMER_MEETINGS: CustomerMeeting[] = [
 
 // Meeting tasks across statuses, including overdue and waiting-for-customer
 // (today is 2026-05-26 per the workspace clock; dueDate < today + open = overdue)
-export const ACTIONOS_MEETING_TASKS: MeetingTask[] = [
+export const ACTIONOS_MEETING_TASKS: Partial<Task>[] = [
   {
     id: 'mtask-1',
     title: 'Q3 freight allocation proposal',
     description: 'Build proposal covering Asia-EU and Asia-IL lanes.',
+    source: 'meeting',
     customerId: 'cust-1',
     sourceMeetingId: 'cmeet-1',
     openedByEmployeeId: 'emp-2',
@@ -477,6 +480,11 @@ export const ACTIONOS_MEETING_TASKS: MeetingTask[] = [
     priority: 'High',
     status: 'In Progress',
     attachmentIds: [],
+    watcherEmployeeIds: ['emp-2', 'emp-1'],
+    checklist: [
+      { label: 'Validate lane assumptions with finance', done: true },
+      { label: 'Share draft with customer team', done: false }
+    ],
     treatmentNotes: 'Draft outline ready, waiting on rate sheet from finance.',
     notifications: [
       { event: 'assigned', channel: 'email', sentAt: '2026-05-15T12:30:00.000Z', recipientEmployeeId: 'emp-2' }
@@ -488,6 +496,7 @@ export const ACTIONOS_MEETING_TASKS: MeetingTask[] = [
     id: 'mtask-2',
     title: 'Draft weekly EU customs status template',
     description: 'Single-page status template for customs broker updates.',
+    source: 'meeting',
     customerId: 'cust-1',
     sourceMeetingId: 'cmeet-1',
     openedByEmployeeId: 'emp-2',
@@ -496,6 +505,12 @@ export const ACTIONOS_MEETING_TASKS: MeetingTask[] = [
     priority: 'Medium',
     status: 'Done',
     attachmentIds: [],
+    watcherEmployeeIds: ['emp-2', 'emp-3'],
+    checklist: [
+      { label: 'Draft template', done: true },
+      { label: 'Obtain procurement approval', done: true }
+    ],
+    completedAt: '2026-05-21T17:00:00.000Z',
     treatmentNotes: 'Template approved by Strauss procurement on 2026-05-21.',
     notifications: [
       { event: 'assigned', channel: 'email', sentAt: '2026-05-15T12:30:00.000Z', recipientEmployeeId: 'emp-3' },
@@ -508,6 +523,7 @@ export const ACTIONOS_MEETING_TASKS: MeetingTask[] = [
     id: 'mtask-3',
     title: 'Tnuva remediation plan with SLA targets',
     description: 'Document and circulate corrective actions with measurable SLAs.',
+    source: 'meeting',
     customerId: 'cust-2',
     sourceMeetingId: 'cmeet-2',
     openedByEmployeeId: 'emp-1',
@@ -516,6 +532,11 @@ export const ACTIONOS_MEETING_TASKS: MeetingTask[] = [
     priority: 'Critical',
     status: 'In Progress',
     attachmentIds: [],
+    watcherEmployeeIds: ['emp-1', 'emp-5'],
+    checklist: [
+      { label: 'Draft remediation plan', done: true },
+      { label: 'Get operations sign-off', done: false }
+    ],
     treatmentNotes: 'First draft circulated internally; awaiting ops lead review.',
     notifications: [
       { event: 'assigned', channel: 'email', sentAt: '2026-05-19T15:00:00.000Z', recipientEmployeeId: 'emp-1' }
@@ -527,6 +548,7 @@ export const ACTIONOS_MEETING_TASKS: MeetingTask[] = [
     id: 'mtask-4',
     title: 'Confirm customs broker change-over date',
     description: 'Get a firm date from customer for new customs broker switchover.',
+    source: 'meeting',
     customerId: 'cust-1',
     sourceMeetingId: 'cmeet-1',
     openedByEmployeeId: 'emp-2',
@@ -535,6 +557,12 @@ export const ACTIONOS_MEETING_TASKS: MeetingTask[] = [
     priority: 'Medium',
     status: 'Waiting For Customer',
     attachmentIds: [],
+    watcherEmployeeIds: ['emp-2', 'emp-3'],
+    checklist: [
+      { label: 'Send change-over request', done: true },
+      { label: 'Receive confirmed date', done: false }
+    ],
+    waitingReason: 'Waiting for customer confirmation on broker switchover date.',
     treatmentNotes: 'Email sent 2026-05-23; awaiting reply.',
     notifications: [
       { event: 'assigned', channel: 'email', sentAt: '2026-05-15T12:30:00.000Z', recipientEmployeeId: 'emp-3' }
@@ -546,6 +574,7 @@ export const ACTIONOS_MEETING_TASKS: MeetingTask[] = [
     id: 'mtask-5',
     title: 'Internal review of Tnuva escalation path',
     description: 'Confirm ops lead availability windows for the 15-minute escalation.',
+    source: 'meeting',
     customerId: 'cust-2',
     sourceMeetingId: 'cmeet-2',
     openedByEmployeeId: 'emp-1',
@@ -554,6 +583,12 @@ export const ACTIONOS_MEETING_TASKS: MeetingTask[] = [
     priority: 'High',
     status: 'Waiting For Internal',
     attachmentIds: [],
+    watcherEmployeeIds: ['emp-1', 'emp-5'],
+    checklist: [
+      { label: 'Escalate to operations director', done: true },
+      { label: 'Confirm availability windows', done: false }
+    ],
+    waitingReason: 'Operations director unavailable until return from PTO.',
     treatmentNotes: 'Operations director on PTO; expected response 2026-05-27.',
     notifications: [
       { event: 'assigned', channel: 'email', sentAt: '2026-05-19T15:00:00.000Z', recipientEmployeeId: 'emp-5' }
@@ -565,6 +600,7 @@ export const ACTIONOS_MEETING_TASKS: MeetingTask[] = [
     id: 'mtask-6',
     title: 'Send updated rate card to Strauss procurement',
     description: 'Forward refreshed rate card; flag SKU expansion items.',
+    source: 'meeting',
     customerId: 'cust-1',
     sourceMeetingId: 'cmeet-3',
     openedByEmployeeId: 'emp-2',
@@ -573,6 +609,12 @@ export const ACTIONOS_MEETING_TASKS: MeetingTask[] = [
     priority: 'Medium',
     status: 'Done',
     attachmentIds: [],
+    watcherEmployeeIds: ['emp-2'],
+    checklist: [
+      { label: 'Update rate card', done: true },
+      { label: 'Send procurement package', done: true }
+    ],
+    completedAt: '2026-04-24T15:00:00.000Z',
     treatmentNotes: 'Sent on 2026-04-24; confirmation received.',
     notifications: [
       { event: 'assigned', channel: 'email', sentAt: '2026-04-20T10:00:00.000Z', recipientEmployeeId: 'emp-2' },

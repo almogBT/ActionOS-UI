@@ -1,4 +1,6 @@
 <header class="app-header">
+
+  <!-- Left: menu toggle + breadcrumb / title -->
   <div class="header-left">
     <button
       type="button"
@@ -17,36 +19,18 @@
       <app-icon name="menu" [size]="18"></app-icon>
     </button>
     <div class="page-title">
-      <span class="eyebrow">{{ 'app.brand' | t }}</span>
+      <div class="breadcrumb">
+        <span class="bc-root">{{ 'app.brand' | t }}</span>
+        <ng-container *ngIf="breadcrumb">
+          <span class="bc-sep" aria-hidden="true">›</span>
+          <span class="bc-section">{{ breadcrumb }}</span>
+        </ng-container>
+      </div>
       <h1>{{ ('nav.' + activeView) | t }}</h1>
     </div>
   </div>
 
-  <form class="command-bar" (ngSubmit)="submitCommand()">
-    <span class="cmd-icon" aria-hidden="true">
-      <app-icon name="sparkles" [size]="16"></app-icon>
-    </span>
-    <select
-      class="cmd-kind"
-      name="quickCaptureType"
-      [(ngModel)]="quickCaptureType"
-      aria-label="Capture type"
-    >
-      <option *ngFor="let type of quickCaptureTypes" [ngValue]="type">{{ ('quickCapture.' + type) | t }}</option>
-    </select>
-    <input
-      class="cmd-input"
-      name="commandText"
-      type="text"
-      [(ngModel)]="commandText"
-      [placeholder]="'app.commandPlaceholder' | t"
-      aria-label="Global ActionOS command"
-    />
-    <button type="submit" class="cmd-submit" [disabled]="!commandText.trim()">
-      {{ 'common.capture' | t }}
-    </button>
-  </form>
-
+  <!-- Right: theme · notifications · settings · user -->
   <div class="header-right">
     <button
       type="button"
@@ -58,6 +42,7 @@
       <app-icon [name]="themeIcon()" [size]="18"></app-icon>
     </button>
 
+    <!-- Notifications -->
     <div class="popover-host">
       <button
         type="button"
@@ -67,27 +52,52 @@
         aria-label="Notifications"
       >
         <app-icon name="bell" [size]="18"></app-icon>
-        <span class="dot" *ngIf="dueTodayTasks().length"></span>
+        <span class="badge" *ngIf="notificationCount() > 0" aria-hidden="true">
+          {{ notificationCount() > 9 ? '9+' : notificationCount() }}
+        </span>
       </button>
       <div class="popover popover-md" *ngIf="notificationsOpen()" (click)="$event.stopPropagation()">
         <div class="popover-head">
-          <strong>Due today</strong>
-          <span class="muted">{{ dueTodayTasks().length }} task(s)</span>
+          <strong>Notifications</strong>
+          <span class="muted">{{ notificationCount() }} pending</span>
         </div>
-        <ul class="popover-list" *ngIf="dueTodayTasks().length; else noNotifs">
-          <li *ngFor="let task of dueTodayTasks().slice(0, 6)">
-            <button type="button" class="popover-item" (click)="jumpToTask(task.id)">
-              <span class="popover-item-title">{{ task.title }}</span>
-              <span class="popover-item-meta">{{ task.board }}</span>
-            </button>
-          </li>
-        </ul>
+        <ng-container *ngIf="notificationCount() > 0; else noNotifs">
+          <div class="notif-group" *ngIf="overdueTasks().length">
+            <span class="notif-group-label danger">Overdue</span>
+            <ul class="popover-list">
+              <li *ngFor="let task of overdueTasks().slice(0, 4)">
+                <button type="button" class="popover-item" (click)="jumpToTask(task.id)">
+                  <span class="popover-item-title">{{ task.title }}</span>
+                  <span class="popover-item-meta">
+                    <span class="priority-dot" [ngClass]="'dot-' + task.priority.toLowerCase()" aria-hidden="true"></span>
+                    {{ task.board }}
+                  </span>
+                </button>
+              </li>
+            </ul>
+          </div>
+          <div class="notif-group" *ngIf="dueTodayOnlyTasks().length">
+            <span class="notif-group-label">Due today</span>
+            <ul class="popover-list">
+              <li *ngFor="let task of dueTodayOnlyTasks().slice(0, 4)">
+                <button type="button" class="popover-item" (click)="jumpToTask(task.id)">
+                  <span class="popover-item-title">{{ task.title }}</span>
+                  <span class="popover-item-meta">
+                    <span class="priority-dot" [ngClass]="'dot-' + task.priority.toLowerCase()" aria-hidden="true"></span>
+                    {{ task.board }}
+                  </span>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </ng-container>
         <ng-template #noNotifs>
-          <p class="popover-empty">Nothing on fire. Nice.</p>
+          <p class="popover-empty">All clear — nothing pending.</p>
         </ng-template>
       </div>
     </div>
 
+    <!-- Settings -->
     <div class="popover-host">
       <button
         type="button"
@@ -100,37 +110,23 @@
       </button>
       <div class="popover popover-md" *ngIf="settingsOpen()" (click)="$event.stopPropagation()">
         <div class="popover-head"><strong>Preferences</strong></div>
-
         <div class="setting-row">
           <span class="setting-label">Appearance</span>
           <div class="seg">
-            <button
-              type="button"
-              [class.active]="theme.preference() === 'light'"
-              (click)="theme.setPreference('light')"
-            >
+            <button type="button" [class.active]="theme.preference() === 'light'" (click)="theme.setPreference('light')">
               <app-icon name="sun" [size]="14"></app-icon>
               <span>Light</span>
             </button>
-            <button
-              type="button"
-              [class.active]="theme.preference() === 'dark'"
-              (click)="theme.setPreference('dark')"
-            >
+            <button type="button" [class.active]="theme.preference() === 'dark'" (click)="theme.setPreference('dark')">
               <app-icon name="moon" [size]="14"></app-icon>
               <span>Dark</span>
             </button>
-            <button
-              type="button"
-              [class.active]="theme.preference() === 'system'"
-              (click)="theme.setPreference('system')"
-            >
+            <button type="button" [class.active]="theme.preference() === 'system'" (click)="theme.setPreference('system')">
               <app-icon name="monitor" [size]="14"></app-icon>
               <span>System</span>
             </button>
           </div>
         </div>
-
         <div class="setting-row">
           <span class="setting-label">Language</span>
           <div class="seg">
@@ -144,9 +140,26 @@
             </button>
           </div>
         </div>
+        <div class="popover-divider"></div>
+        <div class="setting-row">
+          <span class="setting-label">{{ 'settings.mailNotifications' | t }}</span>
+          <ul class="notif-pref-list">
+            <li *ngFor="let key of mailNotifKeys">
+              <button
+                type="button"
+                class="notif-pref-btn"
+                (click)="workspace.toggleMailNotif(key)"
+              >
+                <span class="notif-pref-circle" [class.active]="workspace.mailNotifPrefs()[key]"></span>
+                <span>{{ ('settings.mailNotif.' + key) | t }}</span>
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
 
+    <!-- User menu -->
     <div class="popover-host">
       <button
         type="button"
@@ -191,4 +204,5 @@
       </div>
     </div>
   </div>
+
 </header>

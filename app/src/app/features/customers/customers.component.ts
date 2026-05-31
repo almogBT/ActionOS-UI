@@ -1,20 +1,22 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { Customer } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
-import { CustomerListComponent } from './customer-list.component';
 import { Customer360Component } from './customer-360.component';
-import { CustomerMeetingFormComponent } from './customer-meeting-form.component';
+import { CustomerMeetingFormComponent, MeetingFormSavedEvent } from './customer-meeting-form.component';
 import { MeetingPrepComponent } from './meeting-prep.component';
 
-export type CustomersSubView = 'list' | 'detail' | 'meeting-form' | 'prep';
+// 'list' is no longer hosted here — the customer list lives on the Home screen.
+export type CustomersSubView = 'detail' | 'meeting-form' | 'prep';
 
 /**
- * Top-level Customers container. Owns sub-view routing for the new module
- * without introducing a router — matches the existing prototype's ngSwitch
- * navigation pattern (see app.component.html).
+ * Customer detail container. Since the customer list moved onto the Home
+ * screen, this view is only ever entered for a specific customer (passed in
+ * via [initialCustomer]). Its "back" action returns to Home rather than to an
+ * in-module list. Still uses ngSwitch sub-view routing (no router), matching
+ * the existing prototype navigation pattern.
  */
 @Component({
   selector: 'app-customers',
@@ -23,49 +25,42 @@ export type CustomersSubView = 'list' | 'detail' | 'meeting-form' | 'prep';
     CommonModule,
     FormsModule,
     TranslatePipe,
-    CustomerListComponent,
     Customer360Component,
     CustomerMeetingFormComponent,
     MeetingPrepComponent
   ],
   template: `
-    <section class="screen">
+    <section class="screen" *ngIf="activeCustomer as customer">
       <div class="screen-title">
         <div>
           <span class="eyebrow">{{ 'customers.eyebrow' | t }}</span>
           <h2>{{ pageTitle | t }}</h2>
         </div>
-        <div class="topbar-actions" *ngIf="subView !== 'list'">
-          <button type="button" class="ghost-action" (click)="goToList()">
-            {{ 'customer360.backToList' | t }}
+        <div class="topbar-actions">
+          <button type="button" class="ghost-action" (click)="backToHome()">
+            {{ 'customer360.backToHome' | t }}
           </button>
         </div>
       </div>
 
       <ng-container [ngSwitch]="subView">
-        <app-customer-list
-          *ngSwitchCase="'list'"
-          (openCustomer)="openCustomer($event)"
-          (prepareMeeting)="prepareForCustomer($event)"
-        />
-
         <app-customer-360
           *ngSwitchCase="'detail'"
-          [customer]="activeCustomer!"
+          [customer]="customer"
           (newMeeting)="newMeetingFor($event)"
           (prepareMeeting)="prepareForCustomer($event)"
         />
 
         <app-customer-meeting-form
           *ngSwitchCase="'meeting-form'"
-          [customer]="activeCustomer!"
+          [customer]="customer"
           (saved)="onMeetingSaved($event)"
           (cancelled)="returnToDetail()"
         />
 
         <app-meeting-prep
           *ngSwitchCase="'prep'"
-          [customer]="activeCustomer!"
+          [customer]="customer"
           (back)="returnToDetail()"
           (startMeeting)="newMeetingFor($event)"
         />
@@ -76,28 +71,38 @@ export type CustomersSubView = 'list' | 'detail' | 'meeting-form' | 'prep';
     :host { display: block; min-width: 0; }
   `]
 })
-export class CustomersComponent {
-  subView: CustomersSubView = 'list';
+export class CustomersComponent implements OnChanges {
+  /** The customer to open, handed off from the Home screen list. */
+  @Input() initialCustomer: Customer | null = null;
+  /** Which sub-view to land on: detail (default) or meeting prep. */
+  @Input() initialView: CustomersSubView = 'detail';
+  /** Emitted when the user leaves the detail flow — AppComponent returns to Home. */
+  @Output() exit = new EventEmitter<void>();
+
+  subView: CustomersSubView = 'detail';
   activeCustomer: Customer | null = null;
 
   constructor(public workspace: ActionosWorkspaceService) {}
 
+  ngOnChanges(_changes: SimpleChanges): void {
+    if (this.initialCustomer) {
+      this.activeCustomer = this.initialCustomer;
+      this.subView = this.initialView;
+    } else {
+      // No customer to show — bounce back to Home.
+      this.exit.emit();
+    }
+  }
+
   get pageTitle(): string {
     switch (this.subView) {
-      case 'detail':
-        return 'customer360.title';
       case 'meeting-form':
         return 'customerMeeting.title';
       case 'prep':
         return 'meetingPrep.title';
       default:
-        return 'customers.title';
+        return 'customer360.title';
     }
-  }
-
-  openCustomer(customer: Customer): void {
-    this.activeCustomer = customer;
-    this.subView = 'detail';
   }
 
   newMeetingFor(customer: Customer): void {
@@ -110,20 +115,21 @@ export class CustomersComponent {
     this.subView = 'prep';
   }
 
-  goToList(): void {
-    this.subView = 'list';
-    this.activeCustomer = null;
+  backToHome(): void {
+    this.exit.emit();
   }
 
   returnToDetail(): void {
     if (this.activeCustomer) {
       this.subView = 'detail';
     } else {
-      this.goToList();
+      this.backToHome();
     }
   }
 
-  onMeetingSaved(_meetingId: string): void {
-    this.returnToDetail();
+  onMeetingSaved(event: MeetingFormSavedEvent): void {
+    if (event.intent === 'close') {
+      this.returnToDetail();
+    }
   }
 }

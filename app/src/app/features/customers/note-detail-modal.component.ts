@@ -2,10 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import {
-  CustomerMeeting,
-  MeetingNote,
-  MeetingTask
-} from '../../core/models/actionos.models';
+  CustomerMeeting, MeetingNote, Task } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
 
 /**
@@ -71,7 +68,7 @@ import { ActionosWorkspaceService } from '../../core/services/actionos-workspace
           <button type="button" class="task-link" (click)="openTask()">
             <strong>{{ linkedTask.title }}</strong>
             <span class="status-chip" [ngClass]="workspace.statusClass(linkedTask.status)">
-              {{ ('meetingTask.statusValues.' + linkedTask.status) | t }}
+              {{ ('Task.statusValues.' + linkedTask.status) | t }}
             </span>
           </button>
         </section>
@@ -83,7 +80,7 @@ import { ActionosWorkspaceService } from '../../core/services/actionos-workspace
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(24, 34, 31, 0.45);
+      background: rgba(20, 30, 50, 0.45);
       display: grid;
       place-items: center;
       z-index: 50;
@@ -185,11 +182,11 @@ export class NoteDetailModalComponent {
     return employee !== '—' ? employee : this.workspace.memberName(this.note.ownerId);
   }
 
-  get linkedTask(): MeetingTask | undefined {
+  get linkedTask(): Task | undefined {
     if (!this.note.convertedTaskId) {
       return undefined;
     }
-    return this.workspace.meetingTask(this.note.convertedTaskId);
+    return this.workspace.Task(this.note.convertedTaskId);
   }
 
   openTask(): void {

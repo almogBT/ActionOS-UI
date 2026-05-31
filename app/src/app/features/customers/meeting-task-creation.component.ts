@@ -1,18 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActionosI18nService } from '../../core/i18n/actionos-i18n.service';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import {
-  CreateMeetingTaskInput,
-  MeetingNote,
-  Priority
-} from '../../core/models/actionos.models';
+  CreateMeetingTaskInput, MeetingNote, Priority } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
+import { SearchableSelectComponent, SelectOption } from '../../shared/searchable-select/searchable-select.component';
 
 @Component({
   selector: 'app-meeting-task-creation',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, TranslatePipe, SearchableSelectComponent],
   template: `
     <section class="panel inline-create" (click)="$event.stopPropagation()">
       <div class="panel-header">
@@ -30,7 +29,7 @@ import { ActionosWorkspaceService } from '../../core/services/actionos-workspace
             [disabled]="!canCreate()"
             (click)="create()"
           >
-            {{ 'common.createTask' | t }}
+            {{ 'meetingTask.createTask' | t }}
           </button>
         </div>
       </div>
@@ -58,12 +57,11 @@ import { ActionosWorkspaceService } from '../../core/services/actionos-workspace
 
         <label class="field-control">
           {{ 'meetingTask.assignedTo' | t }}
-          <select name="taskAssignee" [(ngModel)]="form.assignedToEmployeeId">
-            <option [ngValue]="''">{{ 'meetingTask.selectAssignee' | t }}</option>
-            <option *ngFor="let e of workspace.employees" [value]="e.id">
-              {{ e.fullName }} ({{ e.email }})
-            </option>
-          </select>
+          <app-searchable-select
+            name="taskAssignee"
+            [(ngModel)]="form.assignedToEmployeeId"
+            [options]="assigneeOptions"
+          ></app-searchable-select>
           <small class="muted">{{ 'meetingTask.assignedToHint' | t }}</small>
         </label>
 
@@ -79,9 +77,11 @@ import { ActionosWorkspaceService } from '../../core/services/actionos-workspace
 
         <label class="field-control">
           {{ 'meetingTask.priority' | t }}
-          <select name="taskPriority" [(ngModel)]="form.priority">
-            <option *ngFor="let p of priorities" [value]="p">{{ ('priority.' + p.toLowerCase()) | t }}</option>
-          </select>
+          <app-searchable-select
+            name="taskPriority"
+            [(ngModel)]="form.priority"
+            [options]="priorityOptions"
+          ></app-searchable-select>
         </label>
       </div>
     </section>
@@ -89,6 +89,8 @@ import { ActionosWorkspaceService } from '../../core/services/actionos-workspace
   styles: [`
     :host { display: block; min-width: 0; }
     .inline-create {
+      display: block;
+      margin-top: 0;
       border-color: rgba(96, 165, 250, 0.4);
     }
     .form-grid {
@@ -120,7 +122,20 @@ export class MeetingTaskCreationComponent {
     priority: 'Medium'
   };
 
-  constructor(public workspace: ActionosWorkspaceService) {}
+  constructor(public workspace: ActionosWorkspaceService, private i18n: ActionosI18nService) {}
+
+  get assigneeOptions(): SelectOption[] {
+    return [
+      { value: '', label: this.i18n.translate('meetingTask.selectAssignee') },
+      ...this.workspace.employees.map(e => ({ value: e.id, label: `${e.fullName} (${e.email})` }))
+    ];
+  }
+
+  get priorityOptions(): SelectOption[] {
+    return this.priorities.map(p => ({
+      value: p, label: this.i18n.translate('priority.' + p.toLowerCase())
+    }));
+  }
 
   ngOnInit(): void {
     this.form.sourceMeetingId = this.meetingId;

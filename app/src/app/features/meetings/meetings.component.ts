@@ -1,14 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActionosI18nService } from '../../core/i18n/actionos-i18n.service';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import {
-  CustomerMeeting,
-  CustomerMeetingStatus,
-  ViewId
-} from '../../core/models/actionos.models';
+  Customer, CustomerMeeting, CustomerMeetingStatus, ViewId } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
-import { CustomerMeetingFormComponent } from '../customers/customer-meeting-form.component';
+import { SearchableSelectComponent, SelectOption } from '../../shared/searchable-select/searchable-select.component';
+import { CustomerMeetingFormComponent, MeetingFormSavedEvent } from '../customers/customer-meeting-form.component';
 
 type MeetingsSubView = 'overview' | 'editor';
 type MeetingLane = 'upcoming' | 'in-progress' | 'closed';
@@ -29,7 +28,7 @@ interface LaneBucket {
 @Component({
   selector: 'app-meetings',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe, CustomerMeetingFormComponent],
+  imports: [CommonModule, FormsModule, TranslatePipe, SearchableSelectComponent, CustomerMeetingFormComponent],
   template: `
     <section class="screen" *ngIf="subView === 'overview'">
       <div class="screen-title">
@@ -39,6 +38,19 @@ interface LaneBucket {
           <p class="screen-subtitle">{{ 'meetingsOverview.subtitle' | t }}</p>
         </div>
         <div class="topbar-actions">
+          <ng-container *ngIf="showPrepPicker; else planBtn">
+            <app-searchable-select
+              class="filter-select"
+              [(ngModel)]="prepPickerCustomerId"
+              (ngModelChange)="onPrepCustomerSelected($event)"
+              [options]="prepPickerOptions"
+              [placeholder]="'meetingsOverview.selectCustomer' | t"
+            ></app-searchable-select>
+            <button type="button" class="ghost-action" (click)="showPrepPicker = false; prepPickerCustomerId = ''">{{ 'common.cancel' | t }}</button>
+          </ng-container>
+          <ng-template #planBtn>
+            <button type="button" class="ghost-action" (click)="showPrepPicker = true">{{ 'meetingsOverview.planMeeting' | t }}</button>
+          </ng-template>
           <button type="button" class="primary-action" (click)="newMeeting()">
             + {{ 'meetingsOverview.newMeeting' | t }}
           </button>
@@ -52,10 +64,11 @@ interface LaneBucket {
             <h3>{{ 'meetingsOverview.allMeetings' | t }}</h3>
           </div>
           <div class="topbar-actions">
-            <select [(ngModel)]="customerFilter" class="filter-select">
-              <option [ngValue]="'all'">{{ 'meetingsOverview.allCustomers' | t }}</option>
-              <option *ngFor="let c of workspace.customers" [value]="c.id">{{ c.name }}</option>
-            </select>
+            <app-searchable-select
+              [(ngModel)]="customerFilter"
+              [options]="customerFilterOptions"
+              class="filter-select"
+            ></app-searchable-select>
           </div>
         </div>
 
@@ -158,12 +171,6 @@ interface LaneBucket {
     }
     .kpi-card strong { font-size: 28px; }
     .filter-select {
-      min-height: 38px;
-      padding: 0 32px 0 14px;
-      border: 1px solid var(--line);
-      border-radius: var(--radius-md);
-      background-color: var(--bg-elevated);
-      color: var(--ink);
       min-width: 200px;
     }
     .meeting-row {
@@ -215,14 +222,46 @@ interface LaneBucket {
     }
   `]
 })
-export class MeetingsComponent {
+export class MeetingsComponent implements OnInit, OnChanges {
+  @Input() openNewTick = 0;
   @Output() viewChange = new EventEmitter<ViewId>();
+  @Output() prepareMeeting = new EventEmitter<Customer>();
 
   subView: MeetingsSubView = 'overview';
   customerFilter: 'all' | string = 'all';
   editingMeetingId: string | null = null;
+  showPrepPicker = false;
+  prepPickerCustomerId = '';
 
-  constructor(public workspace: ActionosWorkspaceService) {}
+  constructor(public workspace: ActionosWorkspaceService, private i18n: ActionosI18nService) {}
+
+  ngOnInit(): void {
+    const id = this.workspace.pendingOpenMeetingId;
+    if (id) {
+      this.workspace.pendingOpenMeetingId = null;
+      const meeting = this.workspace.customerMeetings.find(m => m.id === id);
+      if (meeting) { this.openMeeting(meeting); }
+    } else if (this.openNewTick > 0) {
+      this.newMeeting();
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['openNewTick'] && !changes['openNewTick'].firstChange) {
+      this.newMeeting();
+    }
+  }
+
+  get customerFilterOptions(): SelectOption[] {
+    return [
+      { value: 'all', label: this.i18n.translate('meetingsOverview.allCustomers') },
+      ...this.workspace.customers.map(c => ({ value: c.id, label: c.name }))
+    ];
+  }
+
+  get prepPickerOptions(): SelectOption[] {
+    return this.workspace.customers.map(c => ({ value: c.id, label: c.name }));
+  }
 
   get filteredMeetings(): CustomerMeeting[] {
     const all = this.workspace.customerMeetings;
@@ -255,18 +294,29 @@ export class MeetingsComponent {
     return this.workspace.meetingTasksByMeeting(m.id);
   }
 
+  onPrepCustomerSelected(customerId: string): void {
+    const customer = this.workspace.customers.find(c => c.id === customerId);
+    if (customer) {
+      this.showPrepPicker = false;
+      this.prepPickerCustomerId = '';
+      this.prepareMeeting.emit(customer);
+    }
+  }
+
   newMeeting(): void {
     this.editingMeetingId = null;
     this.subView = 'editor';
   }
 
   openMeeting(m: CustomerMeeting): void {
-    this.editingMeetingId = m.id;
-    this.subView = 'editor';
+    this.workspace.openMeetingDrawer(m.id);
   }
 
-  onMeetingSaved(_id: string): void {
-    // stay on the editor so the user can keep adding notes / tasks
+  onMeetingSaved(event: MeetingFormSavedEvent): void {
+    this.editingMeetingId = event.meetingId;
+    if (event.intent === 'close') {
+      this.backToOverview();
+    }
   }
 
   backToOverview(): void {

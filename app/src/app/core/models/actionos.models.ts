@@ -1,5 +1,15 @@
-export type ViewId = 'home' | 'inbox' | 'my-work' | 'boards' | 'meetings' | 'customers' | 'members';
-export type TaskStatus = 'Inbox' | 'Planned' | 'In Progress' | 'Waiting' | 'Done';
+export type ViewId = 'home' | 'inbox' | 'my-work' | 'boards' | 'meetings' | 'customers';
+export type TaskStatus =
+  | 'Inbox'
+  | 'Planned'
+  | 'In Progress'
+  | 'Waiting'
+  | 'New'
+  | 'Sent To Owner'
+  | 'Waiting For Customer'
+  | 'Waiting For Internal'
+  | 'Done'
+  | 'Cancelled';
 export type Priority = 'Low' | 'Medium' | 'High' | 'Critical';
 export type NoteType = 'note' | 'decision' | 'action' | 'blocker';
 export type QuickCaptureType = 'task' | NoteType;
@@ -7,10 +17,13 @@ export type MyWorkTab = 'today' | 'upcoming' | 'watched' | 'blocked';
 export type ActivityTargetType = 'task' | 'meeting' | 'member' | 'agenda' | 'template';
 export type CommentTargetType = 'task' | 'meeting';
 
+export type NavSection = 'main' | 'work';
+
 export interface NavItem {
   id: ViewId;
   label: string;
   shortcut: string;
+  section: NavSection;
 }
 
 export interface Member {
@@ -32,30 +45,58 @@ export interface ChecklistItem {
   done: boolean;
 }
 
-export interface TaskItem {
+export type TaskSource = 'board' | 'meeting';
+
+export interface ProgressionNote {
+  id: string;
+  content: string;
+  authorEmployeeId: string;
+  createdAt: string;
+}
+
+export interface Task {
   id: string;
   title: string;
   description: string;
+  source: TaskSource;
   board: string;
+  customerId: string;
   status: TaskStatus;
   priority: Priority;
   dueDate: string;
   assigneeIds: string[];
   watcherIds: string[];
-  sourceMeetingId?: string;
+  assignedToEmployeeId: string;
+  openedByEmployeeId: string;
+  watcherEmployeeIds: string[];
+  attachmentIds: string[];
+  notifications: NotificationLogEntry[];
+  sourceMeetingId: string;
+  waitingReason?: string;
+  completedAt?: string;
+  treatmentNotes?: string;
   blockedBy?: string;
   checklist: ChecklistItem[];
   archivedAt?: string;
   createdAt: string;
   updatedAt: string;
+  progressionNotes?: ProgressionNote[];
+  /** Member id of whoever opened/created the task. Drives the "I opened" /
+   *  "assigned to me by others" people-filters on the Home metric popups. */
+  createdByUserId?: string;
 }
 
 export interface CreateTaskInput {
   title: string;
-  board: string;
+  board?: string;
+  source?: TaskSource;
+  customerId?: string;
+  sourceMeetingId?: string;
+  openedByEmployeeId?: string;
+  assignedToEmployeeId?: string;
   priority: Priority;
-  dueDate: string;
-  assigneeId: string;
+  dueDate?: string;
+  assigneeId?: string;
   description?: string;
 }
 
@@ -68,6 +109,7 @@ export interface UpdateTaskInput {
   dueDate?: string;
   assigneeIds?: string[];
   watcherIds?: string[];
+  sourceMeetingId?: string;
   blockedBy?: string;
 }
 
@@ -78,6 +120,7 @@ export interface MeetingNote {
   ownerId?: string;
   dueDate?: string;
   convertedTaskId?: string;
+  attachmentIds?: string[];
   /** v3+: who wrote this note. May be a member id (legacy) or employee id (v3). */
   createdByEmployeeId?: string;
   /** v3+: when the note was written. ISO timestamp. */
@@ -89,6 +132,14 @@ export interface CreateMeetingNoteInput {
   content: string;
   ownerId?: string;
   dueDate?: string;
+}
+
+export interface UpdateMeetingNoteInput {
+  type?: NoteType;
+  content?: string;
+  ownerId?: string;
+  dueDate?: string;
+  attachmentIds?: string[];
 }
 
 export interface AgendaItem {
@@ -109,7 +160,7 @@ export interface Meeting {
   notes: MeetingNote[];
 }
 
-export type CalendarEventKind = 'internal' | 'customer';
+export type CalendarEventKind = 'internal' | 'customer' | 'task';
 
 export interface CalendarEvent {
   id: string;
@@ -201,6 +252,7 @@ export type CustomerMeetingStatus = 'Planned' | 'Draft Summary' | 'Tasks Created
 export interface CustomerParticipant {
   name: string;
   email?: string;
+  phone?: string;
   role?: string;
 }
 
@@ -214,8 +266,10 @@ export interface CustomerMeeting {
   customerParticipants: CustomerParticipant[];
   goal?: string;
   summary?: string;
+  publishedRecap?: string;
   notes: MeetingNote[];
   nextMeetingDate?: string;
+  nextMeetingNotes?: string;
   status: CustomerMeetingStatus;
   attachmentIds: string[];
   externalCrmMeetingId?: string;
@@ -241,18 +295,11 @@ export interface UpdateCustomerMeetingInput {
   customerParticipants?: CustomerParticipant[];
   goal?: string;
   summary?: string;
+  publishedRecap?: string;
   nextMeetingDate?: string;
+  nextMeetingNotes?: string;
   status?: CustomerMeetingStatus;
 }
-
-export type MeetingTaskStatus =
-  | 'New'
-  | 'Sent To Owner'
-  | 'In Progress'
-  | 'Waiting For Customer'
-  | 'Waiting For Internal'
-  | 'Done'
-  | 'Cancelled';
 
 export type NotificationEvent = 'assigned' | 'status-changed' | 'due-soon';
 export type NotificationChannel = 'email' | 'in-app';
@@ -264,28 +311,12 @@ export interface NotificationLogEntry {
   recipientEmployeeId: string;
 }
 
-export interface MeetingTask {
-  id: string;
-  title: string;
-  description: string;
-  customerId: string;
-  sourceMeetingId: string;
-  openedByEmployeeId: string;
-  assignedToEmployeeId: string;
-  dueDate?: string;
-  priority: Priority;
-  status: MeetingTaskStatus;
-  attachmentIds: string[];
-  treatmentNotes?: string;
-  notifications: NotificationLogEntry[];
-  createdAt: string;
-  updatedAt: string;
-}
-
 export interface CreateMeetingTaskInput {
   title: string;
   description?: string;
   sourceMeetingId: string;
+  customerId?: string;
+  openedByEmployeeId?: string;
   assignedToEmployeeId: string;
   dueDate?: string;
   priority?: Priority;
@@ -297,11 +328,16 @@ export interface UpdateMeetingTaskInput {
   assignedToEmployeeId?: string;
   dueDate?: string;
   priority?: Priority;
-  status?: MeetingTaskStatus;
+  status?: TaskStatus;
+  watcherEmployeeIds?: string[];
+  checklist?: ChecklistItem[];
+  waitingReason?: string;
+  completedAt?: string;
   treatmentNotes?: string;
+  progressionNotes?: ProgressionNote[];
 }
 
-export type AttachmentEntityType = 'customer-meeting' | 'meeting-task' | 'customer';
+export type AttachmentEntityType = 'customer-meeting' | 'meeting-task' | 'meeting-note' | 'customer';
 
 export interface Attachment {
   id: string;
@@ -318,10 +354,17 @@ export interface Attachment {
 export interface CustomerPreparationSummary {
   customerId: string;
   priorMeetings: CustomerMeeting[];
-  openTasks: MeetingTask[];
-  overdueTasks: MeetingTask[];
-  completedSinceLastMeeting: MeetingTask[];
-  waitingForCustomer: MeetingTask[];
+  openTasks: Task[];
+  overdueTasks: Task[];
+  completedSinceLastMeeting: Task[];
+  waitingForCustomer: Task[];
   latestMeetingDate?: string;
   nextMeetingDate?: string;
+}
+
+export interface MailNotificationPrefs {
+  newTasks: boolean;
+  overdueTasks: boolean;
+  dueTodayTasks: boolean;
+  meetingSummaries: boolean;
 }

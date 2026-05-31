@@ -1,4 +1,5 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+import { HostContextService } from '../services/host-context.service';
 
 export type ActionosLanguage = 'en' | 'he';
 type TranslationValue = string | TranslationDictionary;
@@ -12,6 +13,8 @@ export class ActionosI18nService {
   private readonly storageKey = 'actionos.language';
   private readonly languageState = signal<ActionosLanguage>('en');
   private readonly dictionaryState = signal<TranslationDictionary>({});
+  private readonly hostContext = inject(HostContextService);
+  private hostSubscriptionAttached = false;
 
   readonly languages: { code: ActionosLanguage; label: string; nativeLabel: string }[] = [
     { code: 'en', label: 'English', nativeLabel: 'English' },
@@ -27,8 +30,19 @@ export class ActionosI18nService {
   }
 
   async init(): Promise<void> {
+    const hostLanguage = this.hostContext.snapshot.lang;
     const savedLanguage = this.readSavedLanguage();
-    await this.setLanguage(savedLanguage, false);
+    const initialLanguage: ActionosLanguage = hostLanguage === 'he' ? 'he' : savedLanguage;
+    await this.setLanguage(initialLanguage, false);
+
+    if (!this.hostSubscriptionAttached) {
+      this.hostSubscriptionAttached = true;
+      this.hostContext.language$.subscribe((language) => {
+        if (language !== this.languageState()) {
+          void this.setLanguage(language, false);
+        }
+      });
+    }
   }
 
   async setLanguage(language: ActionosLanguage, persist = true): Promise<void> {

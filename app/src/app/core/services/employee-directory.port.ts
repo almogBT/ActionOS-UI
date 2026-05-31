@@ -30,7 +30,9 @@ export class InMemoryEmployeeDirectory implements EmployeeDirectoryPort {
   constructor(private readonly state: EmployeeState) {}
 
   list(): Employee[] {
-    return this.state.employees.filter((e) => e.isActive && hasFritzDomain(e.email));
+    return this.state.employees.filter(
+      (e) => e.isActive && (e.sourceSystem === 'Fritz' || hasFritzDomain(e.email))
+    );
   }
 
   get(id: string): Employee | undefined {
@@ -42,6 +44,6 @@ export class InMemoryEmployeeDirectory implements EmployeeDirectoryPort {
     if (!employee) {
       return false;
     }
-    return employee.isActive && hasFritzDomain(employee.email);
+    return employee.isActive && (employee.sourceSystem === 'Fritz' || hasFritzDomain(employee.email));
   }
 }

@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
-import { Customer, CustomerPreparationSummary, MeetingTask } from '../../core/models/actionos.models';
+import { Customer, CustomerPreparationSummary, Task } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
 
 @Component({
@@ -61,7 +61,7 @@ import { ActionosWorkspaceService } from '../../core/services/actionos-workspace
           <li *ngFor="let task of prep.openTasks" (click)="openTask(task)">
             <strong>{{ task.title }}</strong>
             <span class="status-chip" [ngClass]="workspace.statusClass(task.status)">
-              {{ ('meetingTask.statusValues.' + task.status) | t }}
+              {{ ('Task.statusValues.' + task.status) | t }}
             </span>
             <span class="muted">{{ workspace.employeeName(task.assignedToEmployeeId) }}</span>
           </li>
@@ -131,7 +131,7 @@ export class MeetingPrepComponent {
     return this.workspace.getCustomerPreparationSummary(this.customer.id);
   }
 
-  openTask(task: MeetingTask): void {
+  openTask(task: Task): void {
     this.workspace.selectMeetingTask(task, true);
   }
 

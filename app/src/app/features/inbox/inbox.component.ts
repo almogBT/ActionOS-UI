@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
-import { MeetingNote, TaskItem, TaskStatus, ViewId } from '../../core/models/actionos.models';
+import { CustomerMeeting, MeetingNote, Task, TaskStatus, ViewId } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
 
 @Component({
@@ -22,19 +22,21 @@ export class InboxComponent {
     this.viewChange.emit(view);
   }
 
-  promote(task: TaskItem, status: TaskStatus): void {
+  promote(task: Task, status: TaskStatus): void {
     this.workspace.promoteTask(task, status);
   }
 
-  convert(note: MeetingNote): void {
-    const task = this.workspace.convertAction(note);
-
-    if (task) {
-      this.workspace.openTaskDrawer(task);
-    }
+  convert(item: { note: MeetingNote; meeting: CustomerMeeting }): void {
+    this.workspace.convertMeetingAction(item.meeting.id, item.note.id);
   }
 
   convertAll(): void {
-    this.workspace.convertAllOpenActions();
+    for (const item of this.workspace.myUnconvertedActionItems) {
+      this.workspace.convertMeetingAction(item.meeting.id, item.note.id);
+    }
+  }
+
+  scrollToSection(id: string): void {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 }

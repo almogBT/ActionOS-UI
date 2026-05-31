@@ -1,9 +1,4 @@
-import {
-  Customer,
-  CreateCustomerInput,
-  CustomerStatus,
-  CustomerType,
-} from '../models/actionos.models';
+import { Customer, CreateCustomerInput, CustomerStatus, CustomerType } from '../models/actionos.models';
 
 /**
  * Boundary for customer storage.

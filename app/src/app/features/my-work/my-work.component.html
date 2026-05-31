@@ -1,186 +1,204 @@
 <section class="screen">
+
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
   <div class="screen-title">
     <div>
       <span class="eyebrow">{{ 'myWork.eyebrow' | t }}</span>
       <h2>{{ 'myWork.title' | t }}</h2>
     </div>
-    <button type="button" class="ghost-action" (click)="openView('meetings')">{{ 'myWork.convertAnother' | t }}</button>
   </div>
 
-  <div class="workbench">
-    <section class="panel">
-      <div class="tab-strip">
-        <button
-          *ngFor="let tab of tabs"
-          type="button"
-          [class.active]="activeTab === tab.id"
-          (click)="setTab(tab.id)"
-        >
-          {{ ('myWork.tabs.' + tab.id) | t }}
-        </button>
+  <!-- ── Tab strip ──────────────────────────────────────────────────────── -->
+  <div class="tab-strip">
+    <button type="button" [class.active]="activeTab() === 'inbox'" (click)="activeTab.set('inbox')">
+      {{ 'myWork.tabs.inbox' | t }}
+    </button>
+    <button type="button" [class.active]="activeTab() === 'tasks'" (click)="activeTab.set('tasks')">
+      {{ 'myWork.tabs.tasks' | t }}
+      <span *ngIf="myFilteredTasks.length" class="tab-count"
+        [class.tab-count-danger]="myGroupedTasks.at(0)?.isDanger">
+        {{ myFilteredTasks.length }}
+      </span>
+    </button>
+    <button type="button" [class.active]="activeTab() === 'meetings'" (click)="activeTab.set('meetings')">
+      {{ 'myWork.tabs.meetings' | t }}
+      <span *ngIf="workspace.myUnconvertedActionItems.length" class="tab-count tab-count-danger">
+        {{ workspace.myUnconvertedActionItems.length }}
+      </span>
+    </button>
+  </div>
+
+  <!-- ── Inbox Tab ──────────────────────────────────────────────────────── -->
+  <ng-container *ngIf="activeTab() === 'inbox'">
+    <app-inbox (viewChange)="openView($event)"></app-inbox>
+  </ng-container>
+
+  <!-- ── Tasks Tab ──────────────────────────────────────────────────────── -->
+  <ng-container *ngIf="activeTab() === 'tasks'">
+
+    <div class="tab-section-header">
+      <div>
+        <span class="eyebrow">{{ 'myWork.tasks.eyebrow' | t }}</span>
+        <h3>{{ 'myWork.tasks.title' | t }}</h3>
       </div>
+      <span class="count-badge" [class.badge-danger]="myGroupedTasks.at(0)?.isDanger">
+        {{ myFilteredTasks.length }}
+      </span>
+    </div>
 
-      <!-- Meeting tasks first — meetings are the spine of the app -->
-      <div *ngIf="displayedMeetingTasks.length" class="task-stack">
-        <article
-          *ngFor="let task of displayedMeetingTasks"
-          class="task-card"
-          [class.selected]="workspace.selectedTaskKind === 'meeting-task' && workspace.selectedTaskId === task.id"
-          (click)="openMeetingTask(task)"
-        >
-          <div class="task-main">
-            <span class="status-dot" [ngClass]="workspace.statusClass(task.status)"></span>
-            <div>
-              <h3>{{ task.title }}</h3>
-              <p>{{ workspace.customer(task.customerId)?.name }} <ng-container *ngIf="task.dueDate">· {{ 'common.due' | t }} {{ task.dueDate }}</ng-container></p>
-            </div>
-          </div>
-          <div class="task-meta">
-            <span class="priority" [ngClass]="workspace.statusClass(task.priority)">{{ ('priority.' + workspace.statusClass(task.priority)) | t }}</span>
-            <span class="source-pill meeting-pill">{{ 'common.meeting' | t }}</span>
-          </div>
-        </article>
-      </div>
+    <div class="filter-strip">
+      <button
+        *ngFor="let f of taskFilterOptions"
+        type="button"
+        [class.active]="taskFilter === f.id"
+        (click)="taskFilter = f.id"
+      >{{ f.labelKey | t }}</button>
+    </div>
 
-      <div *ngIf="displayedTasks.length; else noMyWorkTasks" class="task-stack">
-        <article
-          *ngFor="let task of displayedTasks"
-          class="task-card"
-          [class.selected]="workspace.selectedTaskKind === 'board-task' && workspace.selectedTaskId === task.id"
-          (click)="workspace.selectBoardTask(task)"
-        >
-          <div class="task-main">
-            <span class="status-dot" [ngClass]="workspace.statusClass(task.status)"></span>
-            <div>
-              <h3>{{ task.title }}</h3>
-              <p>{{ task.board }} - {{ 'common.due' | t }} {{ task.dueDate }}</p>
-            </div>
-          </div>
-          <div class="task-meta">
-            <span class="priority" [ngClass]="workspace.statusClass(task.priority)">{{ ('priority.' + workspace.statusClass(task.priority)) | t }}</span>
-            <span *ngIf="task.sourceMeetingId" class="source-pill">{{ 'myWork.fromMeeting' | t }}</span>
-          </div>
-        </article>
-      </div>
+    <div *ngIf="hasMyTasks; else noTasks" class="task-groups scroll-box">
+      <div *ngFor="let group of myGroupedTasks" class="task-group">
 
-      <ng-template #noMyWorkTasks>
-        <div *ngIf="!displayedMeetingTasks.length" class="empty-state">
-          <strong>{{ 'myWork.noTasksTitle' | t }}</strong>
-          <span>{{ 'myWork.noTasksText' | t }}</span>
-        </div>
-      </ng-template>
-    </section>
-
-    <aside class="detail-panel" *ngIf="workspace.selectedTask as task">
-      <span class="eyebrow">{{ 'myWork.selectedItem' | t }}</span>
-      <label class="field-control">
-        {{ 'common.title' | t }}
-        <input [ngModel]="task.title" (ngModelChange)="workspace.updateTask(task.id, { title: $event })" />
-      </label>
-
-      <label class="field-control">
-        {{ 'common.description' | t }}
-        <textarea rows="4" [ngModel]="task.description" (ngModelChange)="workspace.updateTask(task.id, { description: $event })"></textarea>
-      </label>
-
-      <div class="detail-grid">
-        <label class="field-control">
-          {{ 'common.status' | t }}
-          <select [ngModel]="task.status" (ngModelChange)="workspace.updateStatus(task, $event)">
-            <option *ngFor="let status of workspace.statuses" [ngValue]="status">{{ ('status.' + workspace.statusClass(status)) | t }}</option>
-          </select>
-        </label>
-
-        <label class="field-control">
-          {{ 'common.priority' | t }}
-          <select [ngModel]="task.priority" (ngModelChange)="workspace.updateTask(task.id, { priority: $event })">
-            <option *ngFor="let priority of priorities" [ngValue]="priority">{{ ('priority.' + workspace.statusClass(priority)) | t }}</option>
-          </select>
-        </label>
-
-        <label class="field-control">
-          {{ 'common.owner' | t }}
-          <select [ngModel]="task.assigneeIds[0]" (ngModelChange)="updateSingleAssignee(task, $event)">
-            <option *ngFor="let member of workspace.members" [ngValue]="member.id">{{ member.name }}</option>
-          </select>
-        </label>
-
-        <label class="field-control">
-          {{ 'common.dueDate' | t }}
-          <input type="date" [ngModel]="task.dueDate" (ngModelChange)="workspace.updateTask(task.id, { dueDate: $event })" />
-        </label>
-
-        <label class="field-control detail-wide">
-          {{ 'common.board' | t }}
-          <input [ngModel]="task.board" (ngModelChange)="workspace.updateTask(task.id, { board: $event })" />
-        </label>
-
-        <label class="field-control detail-wide">
-          {{ 'common.blockedBy' | t }}
-          <input [ngModel]="task.blockedBy || ''" (ngModelChange)="workspace.updateTask(task.id, { blockedBy: $event })" [placeholder]="'placeholders.optionalBlocker' | t" />
-        </label>
-      </div>
-
-      <div class="watcher-box">
-        <span class="eyebrow">{{ 'common.watchers' | t }}</span>
-        <label *ngFor="let member of workspace.members">
-          <input
-            type="checkbox"
-            [ngModel]="task.watcherIds.includes(member.id)"
-            (ngModelChange)="toggleWatcher(task, member.id, $event)"
-          />
-          <span>{{ member.name }}</span>
-        </label>
-      </div>
-
-      <div class="owner-row">
-        <span *ngFor="let assigneeId of task.assigneeIds" class="avatar">{{ workspace.initials(assigneeId) }}</span>
-        <small>{{ 'myWork.ownerCount' | t: { count: task.assigneeIds.length } }}</small>
-      </div>
-
-      <div class="progress-track">
-        <span [style.width.%]="workspace.checklistProgress(task)"></span>
-      </div>
-      <small>{{ 'myWork.checklistComplete' | t: { progress: workspace.checklistProgress(task) } }}</small>
-
-      <div class="checklist">
-        <label *ngFor="let item of task.checklist">
-          <input
-            type="checkbox"
-            [ngModel]="item.done"
-            (ngModelChange)="workspace.updateChecklistItem(task, item, $event)"
-          />
-          <span>{{ item.label }}</span>
-        </label>
-      </div>
-
-      <section class="comments-panel">
-        <div class="panel-header compact">
-          <div>
-            <span class="eyebrow">{{ 'myWork.discussion' | t }}</span>
-            <h3>{{ 'common.comments' | t }}</h3>
-          </div>
+        <div class="group-header" [class.group-danger]="group.isDanger">
+          <span>{{ group.labelKey | t }}</span>
+          <span class="group-count" [class.count-danger]="group.isDanger">{{ group.tasks.length }}</span>
         </div>
 
-        <form class="comment-form" (ngSubmit)="addComment(task)">
-          <textarea name="comment" rows="3" [(ngModel)]="commentText" [placeholder]="'myWork.addCommentPlaceholder' | t"></textarea>
-          <button type="submit" class="primary-action" [disabled]="!commentText.trim()">{{ 'common.comment' | t }}</button>
-        </form>
+        <div class="task-table">
+          <div class="task-table-header">
+            <span>Status</span>
+            <span>Task</span>
+            <span class="col-hide-sm">Customer</span>
+            <span>Priority</span>
+            <span>Due</span>
+            <span class="col-hide-sm">Assignee</span>
+          </div>
 
-        <div *ngIf="workspace.commentsForTask(task.id).length; else noComments" class="comment-list">
-          <article *ngFor="let comment of workspace.commentsForTask(task.id)" class="comment">
-            <strong>{{ workspace.memberName(comment.createdByUserId) }}</strong>
-            <p>{{ comment.body }}</p>
-            <small>{{ comment.createdAt }}</small>
+          <article
+            *ngFor="let task of group.tasks"
+            class="task-row"
+            [class.task-overdue]="isOverdue(task)"
+            [class.task-selected]="workspace.selectedTaskId === task.id"
+            (click)="task.source === 'meeting' ? openMeetingTask(task) : workspace.selectBoardTask(task)"
+          >
+            <div class="cell cell-status">
+              <span class="status-chip compact-chip" [ngClass]="workspace.statusClass(task.status)">
+                {{ ('meetingTask.statusValues.' + task.status) | t }}
+              </span>
+            </div>
+
+            <div class="cell cell-title">
+              <span class="task-title-text">{{ task.title }}</span>
+              <span *ngIf="task.progressionNotes?.length" class="pnote-badge" title="Progression notes">
+                {{ task.progressionNotes!.length }}
+              </span>
+            </div>
+
+            <div class="cell cell-text col-hide-sm">
+              {{ taskContext(task) || '—' }}
+            </div>
+
+            <div class="cell cell-priority">
+              <span class="priority compact-chip" [ngClass]="workspace.statusClass(task.priority)">
+                {{ ('priority.' + workspace.statusClass(task.priority)) | t }}
+              </span>
+            </div>
+
+            <div class="cell cell-due" [class.overdue-date]="isOverdue(task)">
+              {{ task.dueDate ? (task.dueDate | slice:0:10) : '—' }}
+            </div>
+
+            <div class="cell cell-assignee col-hide-sm">
+              <ng-container *ngIf="workspace.employeeName(task.assignedToEmployeeId) as name">
+                <span class="assignee-avatar">{{ getInitials(name) }}</span>
+                <span class="assignee-name">{{ name }}</span>
+              </ng-container>
+              <span *ngIf="!workspace.employeeName(task.assignedToEmployeeId)" class="cell-empty">—</span>
+            </div>
           </article>
         </div>
 
-        <ng-template #noComments>
-          <div class="empty-state compact-empty">{{ 'myWork.noComments' | t }}</div>
-        </ng-template>
-      </section>
+      </div>
+    </div>
 
-      <button type="button" class="danger-action" (click)="workspace.archiveTask(task)">{{ 'myWork.archiveTask' | t }}</button>
-    </aside>
-  </div>
+    <ng-template #noTasks>
+      <div class="empty-state">
+        <strong>{{ 'myWork.noTasksTitle' | t }}</strong>
+        <span>{{ 'myWork.noTasksText' | t }}</span>
+      </div>
+    </ng-template>
+
+  </ng-container>
+
+  <!-- ── Meetings Tab ───────────────────────────────────────────────────── -->
+  <ng-container *ngIf="activeTab() === 'meetings'">
+
+    <div class="tab-section-header">
+      <div>
+        <span class="eyebrow">{{ 'myWork.meetings.eyebrow' | t }}</span>
+        <h3>{{ 'myWork.meetings.title' | t }}</h3>
+      </div>
+      <span class="count-badge" [class.badge-danger]="workspace.myUnconvertedActionItems.length > 0">
+        {{ myMeetings.length }}
+      </span>
+    </div>
+
+    <div class="filter-strip">
+      <button
+        *ngFor="let f of meetingFilterOptions"
+        type="button"
+        [class.active]="meetingFilter === f.id"
+        (click)="meetingFilter = f.id"
+      >{{ f.labelKey | t }}</button>
+    </div>
+
+    <div *ngIf="myMeetings.length; else noMeetings" class="meeting-rail scroll-box">
+      <article
+        *ngFor="let m of myMeetings"
+        class="meeting-tile"
+        [class.tile-led]="isMeetingLed(m)"
+        (click)="openMeetingInView(m)"
+      >
+        <div class="tile-top">
+          <span class="status-chip" [ngClass]="workspace.statusClass(m.status)">
+            {{ ('customerMeeting.statusValues.' + m.status) | t }}
+          </span>
+          <span *ngIf="isMeetingLed(m)" class="led-badge">{{ 'myWork.meetings.ledBadge' | t }}</span>
+        </div>
+        <div class="tile-body">
+          <strong class="tile-customer">{{ workspace.customer(m.customerId)?.name }}</strong>
+          <p class="tile-subject">{{ m.subject }}</p>
+        </div>
+        <div class="tile-footer">
+          <span class="tile-date">{{ m.meetingDate | slice:0:10 }}</span>
+          <span *ngIf="meetingTaskCount(m)" class="tile-task-count">
+            {{ 'myWork.meetings.taskCount' | t : { n: meetingTaskCount(m) } }}
+          </span>
+        </div>
+
+        <!-- Inline pending action items -->
+        <div *ngIf="meetingActionItems(m).length" class="tile-actions" (click)="$event.stopPropagation()">
+          <div class="tile-actions-label">
+            <span>{{ 'myWork.followups.title' | t }}</span>
+            <span class="action-count-badge">{{ meetingActionItems(m).length }}</span>
+          </div>
+          <div *ngFor="let item of meetingActionItems(m)" class="tile-action-row">
+            <span class="action-row-text">{{ item.content }}</span>
+            <button
+              type="button"
+              class="convert-btn ghost-action"
+              (click)="workspace.convertMeetingAction(m.id, item.id)"
+            >{{ 'myWork.followups.convertBtn' | t }}</button>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <ng-template #noMeetings>
+      <div class="empty-state">
+        <strong>{{ 'myWork.meetings.noMeetings' | t }}</strong>
+      </div>
+    </ng-template>
+
+  </ng-container>
+
 </section>

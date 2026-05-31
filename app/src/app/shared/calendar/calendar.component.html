@@ -1,57 +1,181 @@
-<div class="calendar">
-  <header class="calendar-header">
-    <button
-      type="button"
-      class="cal-nav"
-      (click)="prevMonth()"
-      aria-label="Previous month"
-    >
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2">
-        <path d="M15 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round" />
-      </svg>
-    </button>
-    <div class="cal-title">{{ monthLabel() }}</div>
-    <button type="button" class="cal-today" (click)="jumpToToday()">Today</button>
-    <button
-      type="button"
-      class="cal-nav"
-      (click)="nextMonth()"
-      aria-label="Next month"
-    >
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2">
-        <path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
-      </svg>
-    </button>
-  </header>
+<div class="calendar" [class.calendar--expanded]="isExpanded()">
 
-  <div class="cal-weekdays" role="row">
-    <span *ngFor="let day of weekdayLabels()" role="columnheader">{{ day }}</span>
-  </div>
+  <!-- ═══════════════════════════════════════════════════════
+       COMPACT / COLLAPSED — "Next up" strip
+  ════════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="!isExpanded()">
+    <div class="cal-compact">
+      <span class="cal-compact-label">Next up</span>
 
-  <div class="cal-grid" role="grid">
-    <button
-      *ngFor="let day of days(); trackBy: trackDay"
-      type="button"
-      role="gridcell"
-      class="cal-cell"
-      [class.out]="!day.inMonth"
-      [class.today]="day.isToday"
-      [class.selected]="day.isSelected"
-      [class.has-events]="day.events.length > 0"
-      (click)="selectDay(day)"
-      [attr.aria-current]="day.isToday ? 'date' : null"
-    >
-      <span class="cal-day-num">{{ day.dayNumber }}</span>
-      <span class="cal-dots" *ngIf="day.events.length">
-        <span
-          *ngFor="let event of day.events.slice(0, 3); trackBy: trackEvent"
-          class="cal-dot"
-          [class.customer]="event.kind === 'customer'"
-          [class.internal]="event.kind === 'internal'"
-          aria-hidden="true"
-        ></span>
-        <span class="cal-overflow" *ngIf="day.events.length > 3">+{{ day.events.length - 3 }}</span>
-      </span>
-    </button>
-  </div>
+      <ng-container *ngIf="nextEvent() as evt; else compactEmpty">
+        <button type="button" class="cal-compact-event" (click)="openEvent(evt)">
+          <span class="compact-dot" [class.customer]="evt.kind === 'customer'" [class.internal]="evt.kind === 'internal'" [class.task]="evt.kind === 'task'"></span>
+          <span class="compact-title">{{ evt.title }}</span>
+          <span class="compact-meta">
+            {{ formatEventTime(evt) }}
+            <span *ngIf="evt.customerName"> · {{ evt.customerName }}</span>
+            <span *ngIf="evt.linkedBoard && !evt.customerName"> · {{ evt.linkedBoard }}</span>
+          </span>
+        </button>
+      </ng-container>
+
+      <ng-template #compactEmpty>
+        <span class="compact-empty">No upcoming meetings</span>
+      </ng-template>
+
+      <button type="button" class="cal-expand-btn" (click)="toggleExpand()" title="Open calendar">
+        <!-- expand arrows icon -->
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </ng-container>
+
+  <!-- ═══════════════════════════════════════════════════════
+       EXPANDED — full calendar
+  ════════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="isExpanded()">
+
+    <header class="calendar-header">
+      <button type="button" class="cal-nav" (click)="prevPeriod()" aria-label="Previous">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M15 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <div class="cal-title">{{ periodLabel() }}</div>
+
+      <button type="button" class="cal-today" (click)="jumpToToday()">Today</button>
+
+      <div class="cal-mode-toggle" role="group" aria-label="Calendar view">
+        <button type="button" [class.active]="calendarMode() === 'day'" (click)="setMode('day')">Day</button>
+        <button type="button" [class.active]="calendarMode() === 'week'" (click)="setMode('week')">Week</button>
+        <button type="button" [class.active]="calendarMode() === 'month'" (click)="setMode('month')">Month</button>
+      </div>
+
+      <button type="button" class="cal-nav" (click)="nextPeriod()" aria-label="Next">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <button type="button" class="cal-collapse-btn" (click)="toggleExpand()" title="Collapse calendar">
+        <!-- compress/collapse icon -->
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M8 3v5H3M21 8h-5V3M3 16h5v5M16 21v-5h5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <button
+        *ngIf="hasFilter"
+        type="button"
+        class="cal-filter-btn"
+        [class.cal-filter-active]="filterOpen()"
+        (click)="toggleFilter()"
+        title="Filter"
+      >
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </header>
+
+    <div *ngIf="hasFilter && filterOpen()" class="cal-filter-panel">
+      <ng-content select="[calendarFilters]"></ng-content>
+    </div>
+
+    <!-- MONTH VIEW -->
+    <ng-container *ngIf="calendarMode() === 'month'">
+      <div class="cal-weekdays" role="row">
+        <span *ngFor="let day of weekdayLabels()" role="columnheader">{{ day }}</span>
+      </div>
+
+      <div class="cal-grid" role="grid">
+        <button
+          *ngFor="let day of days(); trackBy: trackDay"
+          type="button"
+          role="gridcell"
+          class="cal-cell"
+          [class.out]="!day.inMonth"
+          [class.today]="day.isToday"
+          [class.selected]="day.isSelected"
+          [class.has-events]="day.events.length > 0"
+          (click)="selectDay(day)"
+          [attr.aria-current]="day.isToday ? 'date' : null"
+        >
+          <span class="cal-day-num">{{ day.dayNumber }}</span>
+          <span class="cal-dots" *ngIf="day.events.length">
+            <span
+              *ngFor="let event of day.events.slice(0, 3); trackBy: trackEvent"
+              class="cal-dot"
+              [class.customer]="event.kind === 'customer'"
+              [class.internal]="event.kind === 'internal'"
+              [class.task]="event.kind === 'task'"
+              aria-hidden="true"
+            ></span>
+            <span class="cal-overflow" *ngIf="day.events.length > 3">+{{ day.events.length - 3 }}</span>
+          </span>
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- WEEK VIEW -->
+    <div class="week-view" *ngIf="calendarMode() === 'week'">
+      <div class="wv-header">
+        <div class="wv-gutter"></div>
+        <button
+          *ngFor="let day of weekDays()"
+          type="button"
+          class="wv-day-head"
+          [class.today]="isToday(day)"
+          [class.selected]="isSameDay(day, selected())"
+          (click)="jumpToDay(day)"
+        >
+          <span class="wvdh-name">{{ weekDayLabel(day) }}</span>
+          <span class="wvdh-num">{{ day.getDate() }}</span>
+        </button>
+      </div>
+      <div class="wv-body">
+        <div *ngFor="let hour of hours" class="wv-row">
+          <span class="wv-time">{{ formatHour(hour) }}</span>
+          <div *ngFor="let day of weekDays()" class="wv-cell">
+            <button
+              *ngFor="let evt of eventsForDayHour(day, hour); trackBy: trackEvent"
+              type="button"
+              class="wv-event"
+              [class.customer]="evt.kind === 'customer'"
+              [class.internal]="evt.kind === 'internal'"
+              [class.task]="evt.kind === 'task'"
+              [title]="evt.title"
+              (click)="openEvent(evt)"
+            >{{ evt.title }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DAY VIEW -->
+    <div class="day-view" *ngIf="calendarMode() === 'day'">
+      <div *ngFor="let hour of hours" class="dv-row">
+        <span class="wv-time">{{ formatHour(hour) }}</span>
+        <div class="dv-cell">
+          <button
+            *ngFor="let evt of eventsForDayHour(selected(), hour); trackBy: trackEvent"
+            type="button"
+            class="dv-event"
+            [class.customer]="evt.kind === 'customer'"
+            [class.internal]="evt.kind === 'internal'"
+            [class.task]="evt.kind === 'task'"
+            (click)="openEvent(evt)"
+          >
+            <strong>{{ evt.title }}</strong>
+            <span *ngIf="evt.customerName" class="dv-evt-sub">{{ evt.customerName }}</span>
+            <span class="dv-evt-sub">{{ evt.durationMinutes }}m</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </ng-container>
 </div>

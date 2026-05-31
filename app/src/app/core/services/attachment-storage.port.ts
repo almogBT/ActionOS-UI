@@ -13,12 +13,14 @@ import { Attachment, AttachmentEntityType } from '../models/actionos.models';
  */
 export interface AttachmentStoragePort {
   list(entityType: AttachmentEntityType, entityId: string): Attachment[];
+  getById(id: string): Attachment | undefined;
   upload(
     file: File,
     entityType: AttachmentEntityType,
     entityId: string,
     uploadedByEmployeeId: string,
   ): Promise<Attachment>;
+  clone(sourceId: string, entityType: AttachmentEntityType, entityId: string): Attachment | null;
   remove(id: string): void;
 }
 
@@ -38,6 +40,27 @@ export class InMemoryAttachmentStorage implements AttachmentStoragePort {
     return this.state.attachments.filter(
       (a) => a.linkedEntityType === entityType && a.linkedEntityId === entityId,
     );
+  }
+
+  getById(id: string): Attachment | undefined {
+    return this.state.attachments.find(a => a.id === id);
+  }
+
+  clone(sourceId: string, entityType: AttachmentEntityType, entityId: string): Attachment | null {
+    const source = this.getById(sourceId);
+    if (!source) {
+      return null;
+    }
+    const copy: Attachment = {
+      ...source,
+      id: this.idFactory(),
+      linkedEntityType: entityType,
+      linkedEntityId: entityId,
+      uploadedAt: this.now()
+    };
+    this.state.attachments.push(copy);
+    this.save();
+    return copy;
   }
 
   async upload(

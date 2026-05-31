@@ -1,45 +1,55 @@
-<div class="sidebar-backdrop" (click)="closeMobile.emit()" aria-hidden="true"></div>
+<div class="actionos-sidebar-backdrop" (click)="closeMobile.emit()" aria-hidden="true"></div>
 
-<aside class="sidebar" [class.collapsed]="collapsed">
+<aside class="actionos-sidebar" [class.collapsed]="collapsed">
+
+  <!-- Brand + collapse toggle -->
   <div class="brand">
     <div class="brand-mark" aria-hidden="true">AO</div>
-    <div class="brand-text" *ngIf="!collapsed">
+    <div class="brand-text" *ngIf="!showCollapsedState">
       <strong>{{ 'app.brand' | t }}</strong>
       <span>{{ 'app.tagline' | t }}</span>
     </div>
+    <button
+      type="button"
+      class="collapse-toggle"
+      (click)="toggleCollapsed.emit()"
+      [attr.aria-label]="showCollapsedState ? 'Expand sidebar' : 'Collapse sidebar'"
+      [attr.data-tooltip]="showCollapsedState ? 'Expand sidebar' : null"
+    >
+      <app-icon [name]="showCollapsedState ? 'chevron-right' : 'chevron-left'" [size]="16"></app-icon>
+    </button>
   </div>
 
-  <nav class="nav-list" aria-label="ActionOS sections">
-    <button
-      *ngFor="let item of navItems"
-      type="button"
-      class="nav-item"
-      [class.active]="activeView === item.id"
-      (click)="selectView(item.id)"
-      [attr.title]="collapsed ? (('nav.' + item.id) | t) : null"
-      [attr.aria-label]="('nav.' + item.id) | t"
-    >
-      <span class="nav-icon">
-        <app-icon [name]="iconFor(item.id)" [size]="18"></app-icon>
-      </span>
-      <span class="nav-label" *ngIf="!collapsed">{{ ('nav.' + item.id) | t }}</span>
-      <span class="nav-shortcut" *ngIf="!collapsed" aria-hidden="true">{{ item.shortcut }}</span>
-    </button>
+  <!-- Sectioned navigation -->
+  <nav class="nav-list" aria-label="Fritz Meetings sections">
+    <ng-container *ngFor="let section of navSections; let isFirst = first">
+      <span class="nav-section-label" *ngIf="!showCollapsedState">{{ section.label }}</span>
+      <div class="nav-section-divider" *ngIf="showCollapsedState && !isFirst" aria-hidden="true"></div>
+      <button
+        *ngFor="let item of section.items"
+        type="button"
+        class="nav-item"
+        [class.active]="activeView === item.id"
+        (click)="selectView(item.id)"
+        [attr.data-tooltip]="showCollapsedState ? (('nav.' + item.id) | t) : null"
+        [attr.aria-label]="('nav.' + item.id) | t"
+      >
+        <span class="nav-icon">
+          <app-icon [name]="iconFor(item.id)" [size]="18"></app-icon>
+        </span>
+        <span class="nav-label" *ngIf="!showCollapsedState">{{ ('nav.' + item.id) | t }}</span>
+        <span class="nav-shortcut" *ngIf="!showCollapsedState" aria-hidden="true">{{ item.shortcut }}</span>
+      </button>
+    </ng-container>
   </nav>
 
-  <section class="workspace-card" *ngIf="!collapsed">
+  <!-- Workspace card (expanded only) -->
+  <section class="workspace-card" *ngIf="!showCollapsedState">
     <span class="eyebrow">{{ 'app.workspace' | t }}</span>
     <h2>{{ 'app.workspaceName' | t }}</h2>
     <p>{{ 'app.workspaceDescription' | t }}</p>
   </section>
 
-  <button
-    type="button"
-    class="collapse-toggle"
-    (click)="toggleCollapsed.emit()"
-    [attr.aria-label]="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-  >
-    <app-icon [name]="collapsed ? 'chevron-right' : 'chevron-left'" [size]="16"></app-icon>
-    <span *ngIf="!collapsed">Collapse</span>
-  </button>
+
 </aside>
+

@@ -14,11 +14,176 @@
   box-shadow: var(--shadow-md);
 }
 
+/* ── Compact "Next up" strip ────────────────────────────── */
+.cal-compact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.cal-compact-label {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+.cal-compact-event {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-primary);
+  text-align: start;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.cal-compact-event:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-subtle);
+}
+
+.compact-dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--warning);
+}
+
+.compact-dot.customer { background: var(--accent); }
+.compact-dot.internal { background: var(--warning); }
+.compact-dot.task     { background: var(--success, #10b981); }
+
+.compact-title {
+  font-size: 13px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-primary);
+}
+
+.compact-meta {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+.compact-empty {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  flex: 1;
+}
+
+.cal-expand-btn,
+.cal-collapse-btn {
+  flex-shrink: 0;
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.cal-expand-btn:hover,
+.cal-collapse-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+/* ── Expanded header ────────────────────────────────────── */
 .calendar-header {
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  grid-template-columns: auto 1fr auto auto auto auto auto;
   align-items: center;
   gap: 10px;
+}
+
+.cal-filter-btn {
+  flex-shrink: 0;
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    background var(--duration-fast) var(--ease-out);
+}
+
+.cal-filter-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.cal-filter-btn.cal-filter-active {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.cal-filter-panel {
+  padding: 12px 4px 4px;
+  border-top: 1px solid var(--border-subtle);
+  margin-top: -4px;
+}
+
+/* ── Mode toggle (Day / Week / Month) ───────────────────── */
+.cal-mode-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  background: var(--bg-canvas);
+}
+
+.cal-mode-toggle button {
+  height: 32px;
+  padding: 0 12px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.cal-mode-toggle button.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.cal-mode-toggle button:not(.active):hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .cal-title {
@@ -149,13 +314,9 @@
   background: var(--accent);
 }
 
-.cal-dot.customer {
-  background: var(--accent);
-}
-
-.cal-dot.internal {
-  background: var(--warning);
-}
+.cal-dot.customer { background: var(--accent); }
+.cal-dot.internal { background: var(--warning); }
+.cal-dot.task     { background: var(--success, #10b981); }
 
 .cal-overflow {
   margin-inline-start: 4px;
@@ -163,4 +324,184 @@
   font-weight: 800;
   color: var(--text-tertiary);
   letter-spacing: 0.02em;
+}
+
+/* ── Week view ──────────────────────────────────────────── */
+.week-view {
+  overflow-y: auto;
+  max-height: 400px;
+}
+
+.wv-header {
+  display: grid;
+  grid-template-columns: 52px repeat(7, 1fr);
+  gap: 2px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg-elevated);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 4px;
+}
+
+.wv-gutter { /* spacer to align with time labels */ }
+
+.wv-day-head {
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.wv-day-head.today { background: var(--accent-soft); }
+.wv-day-head.selected { border-color: var(--accent); }
+.wv-day-head:hover:not(.today) { background: var(--bg-hover); }
+
+.wvdh-name {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+}
+
+.wv-day-head.today .wvdh-name { color: var(--accent); }
+
+.wvdh-num {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.wv-body {
+  display: grid;
+  gap: 1px;
+}
+
+.wv-row {
+  display: grid;
+  grid-template-columns: 52px repeat(7, 1fr);
+  gap: 2px;
+  min-height: 40px;
+  align-items: start;
+}
+
+.wv-time {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  text-align: right;
+  padding: 4px 8px 0 0;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.wv-cell {
+  border-left: 1px solid var(--border-subtle);
+  min-height: 40px;
+  padding: 2px 3px;
+  display: grid;
+  gap: 2px;
+  align-content: start;
+}
+
+.wv-event {
+  display: block;
+  width: 100%;
+  text-align: start;
+  border: none;
+  border-radius: 4px;
+  padding: 2px 5px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  background: var(--warning-soft, #fef3c7);
+  color: var(--warning, #d97706);
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.wv-event:hover { opacity: 0.8; }
+
+.wv-event.customer {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.wv-event.task {
+  background: var(--success-soft, #d1fae5);
+  color: var(--success, #10b981);
+}
+
+/* ── Day view ───────────────────────────────────────────── */
+.day-view {
+  overflow-y: auto;
+  max-height: 400px;
+  display: grid;
+  gap: 1px;
+}
+
+.dv-row {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 2px;
+  min-height: 44px;
+  align-items: start;
+}
+
+.dv-cell {
+  border-left: 1px solid var(--border-subtle);
+  min-height: 44px;
+  padding: 4px 8px;
+  display: grid;
+  gap: 4px;
+  align-content: start;
+}
+
+.dv-event {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  text-align: start;
+  border: none;
+  border-left: 3px solid var(--warning, #d97706);
+  border-radius: var(--radius-md);
+  padding: 6px 10px;
+  background: var(--warning-soft, #fef3c7);
+  color: var(--warning, #d97706);
+  cursor: pointer;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.dv-event:hover { opacity: 0.8; }
+
+.dv-event.customer {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-left-color: var(--accent);
+}
+
+.dv-event.task {
+  background: var(--success-soft, #d1fae5);
+  color: var(--success, #10b981);
+  border-left-color: var(--success, #10b981);
+}
+
+.dv-event strong {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.dv-evt-sub {
+  font-size: 11px;
+  opacity: 0.75;
 }

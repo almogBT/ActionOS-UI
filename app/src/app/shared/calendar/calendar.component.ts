@@ -1,17 +1,12 @@
 import { CommonModule } from '@angular/common';
 import {
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  Input,
-  Output,
-  computed,
-  inject,
-  signal
+  ChangeDetectionStrategy, Component, EventEmitter, Input, Output, computed, inject, signal
 } from '@angular/core';
 import { ActionosI18nService } from '../../core/i18n/actionos-i18n.service';
 import { CalendarEvent } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
+
+export type CalendarMode = 'day' | 'week' | 'month';
 
 interface CalendarDay {
   date: Date;
@@ -42,26 +37,64 @@ export class CalendarComponent {
     }
   }
 
+  /** When provided, replaces workspace.calendarEvents as the event source. */
+  @Input() set events(val: CalendarEvent[] | null | undefined) {
+    this._overrideEvents.set(val ?? null);
+  }
+
+  /** Set to true to show the filter toggle button in the header. */
+  @Input() hasFilter = false;
+
   @Output() readonly daySelected = new EventEmitter<Date>();
+  @Output() readonly eventOpened = new EventEmitter<CalendarEvent>();
+  @Output() readonly expandedChange = new EventEmitter<boolean>();
 
   private readonly _cursor = signal<Date>(this.startOfMonth(new Date()));
   private readonly _selected = signal<Date>(this.startOfDay(new Date()));
+  private readonly _overrideEvents = signal<CalendarEvent[] | null>(null);
 
   readonly cursor = this._cursor.asReadonly();
   readonly selected = this._selected.asReadonly();
 
-  readonly monthLabel = computed(() => {
-    const cursor = this._cursor();
-    return new Intl.DateTimeFormat(this.i18n.language === 'he' ? 'he-IL' : 'en-US', {
-      month: 'long',
-      year: 'numeric'
-    }).format(cursor);
+  readonly isExpanded  = signal(false);
+  readonly filterOpen  = signal(false);
+  readonly calendarMode = signal<CalendarMode>('month');
+
+  // Hours displayed in week/day views (7 AM – 8 PM)
+  readonly hours = Array.from({ length: 14 }, (_, i) => i + 7);
+
+  private readonly sourceEvents = computed<CalendarEvent[]>(() =>
+    this._overrideEvents() ?? this.workspace.calendarEvents
+  );
+
+  readonly nextEvent = computed(() => {
+    const now = new Date().toISOString();
+    return this.sourceEvents().find(e => e.kind !== 'task' && e.startsAt >= now);
+  });
+
+  readonly periodLabel = computed(() => {
+    const mode = this.calendarMode();
+    const locale = this.i18n.language === 'he' ? 'he-IL' : 'en-US';
+    if (mode === 'month') {
+      return new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(this._cursor());
+    }
+    const sel = this._selected();
+    if (mode === 'day') {
+      return new Intl.DateTimeFormat(locale, {
+        weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+      }).format(sel);
+    }
+    const start = this.startOfWeek(sel);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    const short = new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric' });
+    const year = new Intl.DateTimeFormat(locale, { year: 'numeric' }).format(end);
+    return `${short.format(start)} – ${short.format(end)}, ${year}`;
   });
 
   readonly weekdayLabels = computed(() => {
     const locale = this.i18n.language === 'he' ? 'he-IL' : 'en-US';
     const fmt = new Intl.DateTimeFormat(locale, { weekday: 'short' });
-    // Sunday-first to match both en-US convention and Hebrew week start.
     const base = new Date(2024, 0, 7); // Sun Jan 7 2024
     return Array.from({ length: 7 }, (_, i) => {
       const d = new Date(base);
@@ -78,8 +111,8 @@ export class CalendarComponent {
 
     const first = this.startOfMonth(cursor);
     const gridStart = new Date(first);
-    gridStart.setDate(first.getDate() - first.getDay()); // back to the prior Sunday
-    const eventCounts = this.workspace.calendarEvents;
+    gridStart.setDate(first.getDate() - first.getDay());
+    const eventCounts = this.sourceEvents();
 
     return Array.from({ length: 42 }, (_, i) => {
       const date = new Date(gridStart);
@@ -99,9 +132,57 @@ export class CalendarComponent {
     });
   });
 
-  readonly selectedDayEvents = computed(() =>
-    this.workspace.calendarEventsForDay(this._selected())
-  );
+  readonly weekDays = computed(() => {
+    const start = this.startOfWeek(this._selected());
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      return d;
+    });
+  });
+
+  readonly selectedDayEvents = computed(() => {
+    const key = this.toIso(this._selected());
+    return this.sourceEvents().filter(e => e.startsAt.slice(0, 10) === key);
+  });
+
+  toggleExpand(): void {
+    this.isExpanded.update(v => !v);
+    this.expandedChange.emit(this.isExpanded());
+    if (!this.isExpanded()) { this.filterOpen.set(false); }
+  }
+
+  toggleFilter(): void {
+    this.filterOpen.update(v => !v);
+  }
+
+  openEvent(evt: CalendarEvent): void {
+    this.eventOpened.emit(evt);
+  }
+
+  setMode(mode: CalendarMode): void {
+    this.calendarMode.set(mode);
+  }
+
+  prevPeriod(): void {
+    const mode = this.calendarMode();
+    if (mode === 'month') { this.prevMonth(); return; }
+    const d = new Date(this._selected());
+    d.setDate(d.getDate() - (mode === 'week' ? 7 : 1));
+    const next = this.startOfDay(d);
+    this._selected.set(next);
+    this.daySelected.emit(next);
+  }
+
+  nextPeriod(): void {
+    const mode = this.calendarMode();
+    if (mode === 'month') { this.nextMonth(); return; }
+    const d = new Date(this._selected());
+    d.setDate(d.getDate() + (mode === 'week' ? 7 : 1));
+    const next = this.startOfDay(d);
+    this._selected.set(next);
+    this.daySelected.emit(next);
+  }
 
   prevMonth(): void {
     const cur = this._cursor();
@@ -120,12 +201,58 @@ export class CalendarComponent {
     this.daySelected.emit(today);
   }
 
+  jumpToDay(date: Date): void {
+    const d = this.startOfDay(date);
+    this._cursor.set(this.startOfMonth(d));
+    this._selected.set(d);
+    this.daySelected.emit(d);
+    this.calendarMode.set('day');
+  }
+
   selectDay(day: CalendarDay): void {
-    this._selected.set(this.startOfDay(day.date));
+    const d = this.startOfDay(day.date);
+    this._selected.set(d);
     if (!day.inMonth) {
       this._cursor.set(this.startOfMonth(day.date));
     }
-    this.daySelected.emit(this.startOfDay(day.date));
+    this.daySelected.emit(d);
+    this.isExpanded.set(true);
+    this.calendarMode.set('day');
+  }
+
+  isToday(date: Date): boolean {
+    return this.toIso(date) === this.toIso(new Date());
+  }
+
+  isSameDay(a: Date, b: Date): boolean {
+    return this.toIso(a) === this.toIso(b);
+  }
+
+  weekDayLabel(date: Date): string {
+    const locale = this.i18n.language === 'he' ? 'he-IL' : 'en-US';
+    return new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(date);
+  }
+
+  formatHour(hour: number): string {
+    const d = new Date(2024, 0, 1, hour, 0);
+    return new Intl.DateTimeFormat(this.i18n.language === 'he' ? 'he-IL' : 'en-US', {
+      hour: 'numeric', minute: '2-digit', hour12: true
+    }).format(d);
+  }
+
+  eventsForDayHour(date: Date, hour: number): CalendarEvent[] {
+    const iso = this.toIso(date);
+    return this.sourceEvents().filter(e => {
+      const d = new Date(e.startsAt);
+      return this.toIso(d) === iso && d.getHours() === hour;
+    });
+  }
+
+  formatEventTime(event: CalendarEvent): string {
+    const d = new Date(event.startsAt);
+    return new Intl.DateTimeFormat(this.i18n.language === 'he' ? 'he-IL' : 'en-US', {
+      hour: '2-digit', minute: '2-digit'
+    }).format(d);
   }
 
   trackDay(_index: number, day: CalendarDay): string {
@@ -136,16 +263,14 @@ export class CalendarComponent {
     return event.id;
   }
 
-  formatEventTime(event: CalendarEvent): string {
-    const d = new Date(event.startsAt);
-    return new Intl.DateTimeFormat(this.i18n.language === 'he' ? 'he-IL' : 'en-US', {
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(d);
-  }
-
   private startOfMonth(date: Date): Date {
     return new Date(date.getFullYear(), date.getMonth(), 1);
+  }
+
+  private startOfWeek(date: Date): Date {
+    const d = new Date(date);
+    d.setDate(d.getDate() - d.getDay()); // back to Sunday
+    return this.startOfDay(d);
   }
 
   private startOfDay(date: Date): Date {
@@ -153,8 +278,6 @@ export class CalendarComponent {
   }
 
   private toIso(date: Date): string {
-    // Local-date ISO (YYYY-MM-DD) — avoids timezone shifting that would push
-    // a calendar cell back/forward a day around midnight UTC.
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');

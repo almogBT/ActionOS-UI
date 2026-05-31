@@ -1,17 +1,11 @@
 import { CommonModule } from '@angular/common';
 import {
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  HostBinding,
-  Input,
-  Output,
-  inject
+  ChangeDetectionStrategy, Component, EventEmitter, HostBinding, Input, Output, inject
 } from '@angular/core';
 import { ActionosI18nService } from '../../../core/i18n/actionos-i18n.service';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { ACTIONOS_NAV_ITEMS } from '../../../core/mock-data/actionos.mock-data';
-import { NavItem, ViewId } from '../../../core/models/actionos.models';
+import { NavItem, NavSection, ViewId } from '../../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../../core/services/actionos-workspace.service';
 import { IconComponent, IconName } from '../../icons/icon.component';
 
@@ -33,7 +27,10 @@ export class SidebarComponent {
 
   readonly i18n = inject(ActionosI18nService);
   readonly workspace = inject(ActionosWorkspaceService);
-  readonly navItems: NavItem[] = ACTIONOS_NAV_ITEMS;
+  readonly navSections: Array<{ id: NavSection; label: string; items: NavItem[] }> = [
+    { id: 'main', label: 'Main', items: ACTIONOS_NAV_ITEMS.filter(i => i.section === 'main') },
+    { id: 'work', label: 'Work', items: ACTIONOS_NAV_ITEMS.filter(i => i.section === 'work') },
+  ];
 
   @HostBinding('class.collapsed') get isCollapsed(): boolean {
     return this.collapsed;
@@ -43,6 +40,17 @@ export class SidebarComponent {
     return this.mobileOpen;
   }
 
+  @HostBinding('class.rtl') get isRtl(): boolean {
+    return this.i18n.direction === 'rtl';
+  }
+
+  /** True when the sidebar should visually appear collapsed (icon-strip mode).
+   *  On mobile, mobileOpen overrides the collapsed input so the full sidebar
+   *  can render as an overlay even when the desktop state is collapsed. */
+  get showCollapsedState(): boolean {
+    return this.collapsed && !this.mobileOpen;
+  }
+
   iconFor(id: ViewId): IconName {
     const map: Record<ViewId, IconName> = {
       home: 'home',
@@ -50,8 +58,7 @@ export class SidebarComponent {
       'my-work': 'check-square',
       boards: 'columns',
       meetings: 'calendar',
-      customers: 'users',
-      members: 'user-group'
+      customers: 'users'
     };
     return map[id] ?? 'home';
   }

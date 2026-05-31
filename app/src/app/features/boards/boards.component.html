@@ -1,4 +1,6 @@
 <section class="screen">
+
+  <!-- Header -->
   <div class="screen-title">
     <div>
       <span class="eyebrow">{{ 'boards.eyebrow' | t }}</span>
@@ -6,249 +8,323 @@
       <p class="screen-subtitle">{{ 'boards.subtitle' | t }}</p>
     </div>
     <div class="inline-actions">
-      <button type="button" class="ghost-action" (click)="openView('inbox')">{{ 'boards.triageInbox' | t }}</button>
+      <button type="button" class="ghost-action" (click)="openView('customers')">{{ 'boards.manageClients' | t }}</button>
       <button type="button" class="primary-action" (click)="openView('meetings')">{{ 'boards.addFromMeeting' | t }}</button>
     </div>
   </div>
 
-  <section class="board-hud">
-    <article>
-      <span>{{ 'boards.visibleItems' | t }}</span>
-      <strong>{{ filteredTasks.length }}</strong>
-    </article>
-    <article>
-      <span>{{ 'boards.inbox' | t }}</span>
-      <strong>{{ workspace.inboxTasks.length }}</strong>
-    </article>
-    <article>
-      <span>{{ 'boards.blocked' | t }}</span>
-      <strong>{{ workspace.blockedTasks.length }}</strong>
-    </article>
-    <article>
-      <span>{{ 'boards.openActions' | t }}</span>
-      <strong>{{ workspace.openMeetingActions.length }}</strong>
-    </article>
-  </section>
-
-  <section class="panel board-composer">
-    <form class="task-capture" (ngSubmit)="addTask()">
-      <div class="capture-header">
-        <div>
-          <span class="eyebrow">{{ 'boards.taskCapture' | t }}</span>
-          <h3>{{ 'boards.createItem' | t }}</h3>
-        </div>
-        <button type="submit" class="primary-action" [disabled]="!newTask.title.trim()">{{ 'boards.addTask' | t }}</button>
-      </div>
-
-      <div class="capture-grid task-create-grid">
-        <label class="field-control">
-          {{ 'common.title' | t }}
-          <input name="title" type="text" [(ngModel)]="newTask.title" [placeholder]="'boards.titlePlaceholder' | t" />
-        </label>
-
-        <label class="field-control">
-          {{ 'common.board' | t }}
-          <input name="board" type="text" [(ngModel)]="newTask.board" />
-        </label>
-
-        <label class="field-control">
-          {{ 'common.owner' | t }}
-          <select name="assigneeId" [(ngModel)]="newTask.assigneeId">
-            <option *ngFor="let member of workspace.members" [ngValue]="member.id">{{ member.name }}</option>
-          </select>
-        </label>
-
-        <label class="field-control">
-          {{ 'common.priority' | t }}
-          <select name="priority" [(ngModel)]="newTask.priority">
-            <option *ngFor="let priority of priorities" [ngValue]="priority">{{ ('priority.' + workspace.statusClass(priority)) | t }}</option>
-          </select>
-        </label>
-
-        <label class="field-control">
-          {{ 'common.dueDate' | t }}
-          <input name="dueDate" type="date" [(ngModel)]="newTask.dueDate" />
-        </label>
-      </div>
+  <!-- Board selector row -->
+  <section class="panel board-selector">
+    <div class="selector-row">
 
       <label class="field-control">
-        {{ 'common.description' | t }}
-        <textarea name="description" rows="2" [(ngModel)]="newTask.description" [placeholder]="'boards.descriptionPlaceholder' | t"></textarea>
+        {{ 'boards.boardType' | t }}
+        <app-searchable-select
+          [(ngModel)]="entityType"
+          (ngModelChange)="onEntityTypeChange()"
+          [options]="boardTypeOptions"
+        ></app-searchable-select>
       </label>
-    </form>
-  </section>
 
-  <section class="panel board-controls board-toolbar">
-    <label class="field-control">
-      {{ 'boards.searchBoard' | t }}
-      <input name="boardSearch" type="search" [(ngModel)]="query" [placeholder]="'boards.searchPlaceholder' | t" />
-    </label>
+      <label *ngIf="entityType === 'client'" class="field-control">
+        {{ 'boards.selectClient' | t }}
+        <app-searchable-select
+          [(ngModel)]="selectedClientId"
+          [options]="clientSelectOptions"
+          [placeholder]="'boards.chooseClient' | t"
+        ></app-searchable-select>
+      </label>
 
-    <label class="field-control">
-      {{ 'common.status' | t }}
-      <select name="statusFilter" [(ngModel)]="statusFilter">
-        <option [ngValue]="'All'">{{ 'noteType.all' | t }}</option>
-        <option *ngFor="let status of workspace.statuses" [ngValue]="status">{{ ('status.' + workspace.statusClass(status)) | t }}</option>
-      </select>
-    </label>
+      <label *ngIf="entityType === 'member'" class="field-control">
+        {{ 'boards.selectMember' | t }}
+        <app-searchable-select
+          [(ngModel)]="selectedMemberId"
+          [options]="memberSelectOptions"
+          [placeholder]="'boards.chooseMember' | t"
+        ></app-searchable-select>
+      </label>
 
-    <label class="field-control">
-      {{ 'boards.template' | t }}
-      <select name="template" [(ngModel)]="selectedTemplateId">
-        <option value="">{{ 'boards.chooseTemplate' | t }}</option>
-        <option *ngFor="let template of workspace.templates" [ngValue]="template.id">{{ template.name }}</option>
-      </select>
-    </label>
+      <label *ngIf="entityType === 'member'" class="field-control">
+        {{ 'common.status' | t }}
+        <app-searchable-select
+          [(ngModel)]="memberStatusFilter"
+          [options]="memberStatusFilterOptions"
+        ></app-searchable-select>
+      </label>
 
-    <button type="button" class="ghost-action align-end" [disabled]="!selectedTemplateId" (click)="applyTemplate()">{{ 'boards.useTemplate' | t }}</button>
-  </section>
+      <label class="field-control selector-search">
+        {{ 'common.search' | t }}
+        <input type="search" [(ngModel)]="boardSearch" [placeholder]="'boards.searchPlaceholder' | t" />
+      </label>
 
-  <section class="panel view-switcher">
-    <div>
-      <span class="eyebrow">{{ 'boards.boardViews' | t }}</span>
-      <h2>{{ 'boards.sameWork' | t }}</h2>
-    </div>
-    <div class="tab-strip">
-      <button
-        *ngFor="let view of boardViews"
-        type="button"
-        [class.active]="boardView === view.id"
-        (click)="boardView = view.id"
-      >
-        {{ ('boards.view.' + view.id) | t }}
-      </button>
     </div>
   </section>
 
-  <section *ngIf="boardView === 'table'" class="panel board-table">
-    <div class="table-row table-head">
-      <span>{{ 'boards.item' | t }}</span>
-      <span>{{ 'common.status' | t }}</span>
-      <span>{{ 'common.owner' | t }}</span>
-      <span>{{ 'common.priority' | t }}</span>
-      <span>{{ 'common.due' | t }}</span>
-      <span>{{ 'common.actions' | t }}</span>
-    </div>
+  <!-- ════════════════════ CLIENT BOARD ════════════════════ -->
+  <ng-container *ngIf="entityType === 'client'">
 
-    <div *ngIf="filteredTasks.length; else noBoardItems">
-      <div
-        *ngFor="let task of filteredTasks"
-        class="table-row editable-row"
-        [class.selected]="workspace.selectedTaskId === task.id"
-      >
-        <span>
-          <button type="button" class="board-title-button" (click)="workspace.openTaskDrawer(task)">
-            <strong>{{ task.title }}</strong>
-            <small>{{ task.board }}</small>
-          </button>
-        </span>
-        <span>
-          <select [ngModel]="task.status" (click)="$event.stopPropagation()" (ngModelChange)="workspace.updateStatus(task, $event)">
-            <option *ngFor="let status of workspace.statuses" [ngValue]="status">{{ ('status.' + workspace.statusClass(status)) | t }}</option>
-          </select>
-        </span>
-        <span>
-          <select [ngModel]="task.assigneeIds[0]" (click)="$event.stopPropagation()" (ngModelChange)="updateSingleAssignee(task, $event)">
-            <option *ngFor="let member of workspace.members" [ngValue]="member.id">{{ member.name }}</option>
-          </select>
-        </span>
-        <span>
-          <select [ngModel]="task.priority" (click)="$event.stopPropagation()" (ngModelChange)="workspace.updateTask(task.id, { priority: $event })">
-            <option *ngFor="let priority of priorities" [ngValue]="priority">{{ ('priority.' + workspace.statusClass(priority)) | t }}</option>
-          </select>
-        </span>
-        <span>
-          <input type="date" [ngModel]="task.dueDate" (click)="$event.stopPropagation()" (ngModelChange)="workspace.updateTask(task.id, { dueDate: $event })" />
-        </span>
-        <span class="row-actions">
-          <button type="button" class="ghost-action small" (click)="workspace.openTaskDrawer(task)">{{ 'common.open' | t }}</button>
-          <button type="button" class="danger-action small" (click)="$event.stopPropagation(); workspace.archiveTask(task)">{{ 'common.archive' | t }}</button>
-        </span>
+    <ng-container *ngIf="selectedClientId; else noClientSelected">
+
+      <!-- HUD -->
+      <section class="board-hud">
+        <article [class.active]="hudPopup === 'meetings'" (click)="toggleHudPopup('meetings')">
+          <span>{{ 'boards.meetings' | t }}</span>
+          <strong>{{ clientMeetingCount }}</strong>
+        </article>
+        <article [class.active]="hudPopup === 'total-tasks'" (click)="toggleHudPopup('total-tasks')">
+          <span>{{ 'boards.totalTasks' | t }}</span>
+          <strong>{{ clientTotalTaskCount }}</strong>
+        </article>
+        <article [class.active]="hudPopup === 'open-tasks'" (click)="toggleHudPopup('open-tasks')">
+          <span>{{ 'boards.openTasks' | t }}</span>
+          <strong>{{ clientOpenTaskCount }}</strong>
+        </article>
+      </section>
+
+      <!-- Two-column panels -->
+      <div class="client-board-grid">
+
+        <!-- Meetings panel -->
+        <section class="panel">
+          <div class="board-panel-head">
+            <span class="eyebrow">{{ 'boards.meetings' | t }}</span>
+            <h3>{{ 'boards.clientMeetingsTitle' | t }}</h3>
+          </div>
+          <div class="entity-list" *ngIf="clientMeetings.length; else noMeetings">
+            <div *ngFor="let meeting of clientMeetings" class="entity-row clickable" (click)="workspace.openMeetingDrawer(meeting.id)">
+              <div class="entity-main">
+                <strong>{{ meeting.subject }}</strong>
+                <small>{{ meeting.meetingDate | slice:0:10 }} · {{ workspace.employeeName(meeting.meetingLeaderEmployeeId) }}</small>
+              </div>
+              <span class="count-badge">{{ meetingTaskCountFor(meeting.id) }} {{ 'boards.tasksLabel' | t }}</span>
+              <span class="status-chip" [ngClass]="workspace.statusClass(meeting.status)">{{ meeting.status }}</span>
+            </div>
+          </div>
+          <ng-template #noMeetings>
+            <div class="empty-state">
+              <strong>{{ 'boards.noMeetings' | t }}</strong>
+            </div>
+          </ng-template>
+        </section>
+
+        <!-- Meeting tasks panel -->
+        <section class="panel">
+          <div class="board-panel-head">
+            <span class="eyebrow">{{ 'boards.tasks' | t }}</span>
+            <h3>{{ 'boards.clientTasksTitle' | t }}</h3>
+          </div>
+          <div class="entity-list" *ngIf="clientAllTasks.length; else noClientTasks">
+            <div *ngFor="let task of clientAllTasks" class="entity-row clickable" (click)="openHudTask(task)">
+              <span class="status-dot" [ngClass]="workspace.statusClass(task.status)"></span>
+              <div class="entity-main">
+                <strong>{{ task.title }}</strong>
+                <small *ngIf="task.source === 'meeting'">{{ workspace.employeeName(task.assignedToEmployeeId) }} · {{ task.dueDate ? task.dueDate : '—' }}</small>
+                <small *ngIf="task.source !== 'meeting'">{{ task.board }} · {{ task.dueDate ? task.dueDate : '—' }}</small>
+              </div>
+              <span class="priority-chip" [ngClass]="workspace.statusClass(task.priority)">
+                {{ ('priority.' + workspace.statusClass(task.priority)) | t }}
+              </span>
+              <span class="status-chip" [ngClass]="workspace.statusClass(task.status)">{{ task.status }}</span>
+            </div>
+          </div>
+          <ng-template #noClientTasks>
+            <div class="empty-state">
+              <strong>{{ 'boards.noTasks' | t }}</strong>
+            </div>
+          </ng-template>
+        </section>
+
       </div>
-    </div>
+    </ng-container>
 
-    <ng-template #noBoardItems>
-      <div class="empty-state">
-        <strong>{{ 'boards.noItemsTitle' | t }}</strong>
-        <span>{{ 'boards.noItemsText' | t }}</span>
-      </div>
-    </ng-template>
-  </section>
-
-  <section *ngIf="boardView === 'kanban'" class="kanban">
-    <article *ngFor="let status of workspace.statuses" class="kanban-column">
-      <header>
-        <strong>{{ ('status.' + workspace.statusClass(status)) | t }}</strong>
-        <span>{{ filteredTasksByStatus(status).length }}</span>
-      </header>
-      <button
-        *ngFor="let task of filteredTasksByStatus(status)"
-        type="button"
-        class="kanban-card"
-        [class.selected]="workspace.selectedTaskId === task.id"
-        (click)="workspace.selectTask(task)"
-      >
-        <strong>{{ task.title }}</strong>
-        <small>{{ ('priority.' + workspace.statusClass(task.priority)) | t }} - {{ task.dueDate }}</small>
-      </button>
-      <div *ngIf="!filteredTasksByStatus(status).length" class="kanban-empty">{{ 'common.empty' | t }}</div>
-    </article>
-  </section>
-
-  <section *ngIf="boardView === 'calendar'" class="calendar-board">
-    <article class="kanban-column">
-      <header>
-        <strong>{{ 'boards.nowOverdue' | t }}</strong>
-        <span>{{ tasksDueIn('today').length }}</span>
-      </header>
-      <button *ngFor="let task of tasksDueIn('today')" type="button" class="kanban-card" (click)="workspace.openTaskDrawer(task)">
-        <strong>{{ task.title }}</strong>
-        <small>{{ task.dueDate }} - {{ ('status.' + workspace.statusClass(task.status)) | t }}</small>
-      </button>
-      <div *ngIf="!tasksDueIn('today').length" class="kanban-empty">{{ 'boards.nothingUrgent' | t }}</div>
-    </article>
-
-    <article class="kanban-column">
-      <header>
-        <strong>{{ 'boards.thisWeek' | t }}</strong>
-        <span>{{ tasksDueIn('week').length }}</span>
-      </header>
-      <button *ngFor="let task of tasksDueIn('week')" type="button" class="kanban-card" (click)="workspace.openTaskDrawer(task)">
-        <strong>{{ task.title }}</strong>
-        <small>{{ task.dueDate }} - {{ ('status.' + workspace.statusClass(task.status)) | t }}</small>
-      </button>
-      <div *ngIf="!tasksDueIn('week').length" class="kanban-empty">{{ 'boards.noScheduledWork' | t }}</div>
-    </article>
-
-    <article class="kanban-column">
-      <header>
-        <strong>{{ 'boards.later' | t }}</strong>
-        <span>{{ tasksDueIn('later').length }}</span>
-      </header>
-      <button *ngFor="let task of tasksDueIn('later')" type="button" class="kanban-card" (click)="workspace.openTaskDrawer(task)">
-        <strong>{{ task.title }}</strong>
-        <small>{{ task.dueDate }} - {{ ('status.' + workspace.statusClass(task.status)) | t }}</small>
-      </button>
-      <div *ngIf="!tasksDueIn('later').length" class="kanban-empty">{{ 'boards.noLaterWork' | t }}</div>
-    </article>
-  </section>
-
-  <section *ngIf="boardView === 'workload'" class="panel workload-board">
-    <article *ngFor="let member of workspace.members" class="workload-card">
-      <div class="owner-row">
-        <span class="avatar">{{ workspace.initials(member.id) }}</span>
-        <div>
-          <strong>{{ member.name }}</strong>
-          <small>{{ member.team }} - {{ 'boards.activeItems' | t: { count: tasksForMember(member.id).length } }}</small>
+    <ng-template #noClientSelected>
+      <section class="panel">
+        <div class="empty-state">
+          <strong>{{ 'boards.selectClientPrompt' | t }}</strong>
         </div>
+      </section>
+    </ng-template>
+
+  </ng-container>
+
+  <!-- ════════════════════ MEMBER BOARD ════════════════════ -->
+  <ng-container *ngIf="entityType === 'member'">
+
+    <ng-container *ngIf="selectedMemberId; else noMemberSelected">
+
+      <!-- HUD -->
+      <section class="board-hud">
+        <article [class.active]="hudPopup === 'total-tasks'" (click)="toggleHudPopup('total-tasks')">
+          <span>{{ 'boards.totalTasks' | t }}</span>
+          <strong>{{ memberTotalCount }}</strong>
+        </article>
+        <article [class.active]="hudPopup === 'open-tasks'" (click)="toggleHudPopup('open-tasks')">
+          <span>{{ 'boards.openTasks' | t }}</span>
+          <strong>{{ memberOpenCount }}</strong>
+        </article>
+        <article [class.active]="hudPopup === 'blocked'" (click)="toggleHudPopup('blocked')">
+          <span>{{ 'boards.blocked' | t }}</span>
+          <strong>{{ memberBlockedCount }}</strong>
+        </article>
+      </section>
+
+      <!-- Task table -->
+      <section class="panel board-table">
+        <div class="table-row table-head">
+          <span>{{ 'boards.item' | t }}</span>
+          <span>{{ 'common.status' | t }}</span>
+          <span>{{ 'common.priority' | t }}</span>
+          <span>{{ 'common.due' | t }}</span>
+          <span>{{ 'common.actions' | t }}</span>
+        </div>
+
+        <div *ngIf="memberTasks.length; else noMemberTasks">
+          <div
+            *ngFor="let task of memberTasks"
+            class="table-row editable-row"
+            [class.selected]="workspace.selectedTaskId === task.id"
+          >
+            <span>
+              <button type="button" class="board-title-button" (click)="workspace.openTaskDrawer(task)">
+                <strong>{{ task.title }}</strong>
+                <small>{{ task.board }}</small>
+              </button>
+            </span>
+            <span>
+              <app-searchable-select
+                [ngModel]="task.status"
+                (ngModelChange)="workspace.updateStatus(task, $event)"
+                [options]="taskStatusOptions"
+              ></app-searchable-select>
+            </span>
+            <span>
+              <app-searchable-select
+                [ngModel]="task.priority"
+                (ngModelChange)="workspace.updateTask(task.id, { priority: $event })"
+                [options]="priorityOptions"
+              ></app-searchable-select>
+            </span>
+            <span>
+              <input type="date" [ngModel]="task.dueDate" (click)="$event.stopPropagation()" (ngModelChange)="workspace.updateTask(task.id, { dueDate: $event })" />
+            </span>
+            <span class="row-actions">
+              <button type="button" class="ghost-action small" (click)="workspace.openTaskDrawer(task)">{{ 'common.open' | t }}</button>
+              <button type="button" class="danger-action small" (click)="$event.stopPropagation(); workspace.archiveTask(task)">{{ 'common.archive' | t }}</button>
+            </span>
+          </div>
+        </div>
+
+        <ng-template #noMemberTasks>
+          <div class="empty-state">
+            <strong>{{ 'boards.noItemsTitle' | t }}</strong>
+            <span>{{ 'boards.noItemsText' | t }}</span>
+          </div>
+        </ng-template>
+      </section>
+
+      <section class="panel board-table">
+        <div class="table-row table-head">
+          <span>{{ 'boards.tasks' | t }} ({{ 'common.meeting' | t }})</span>
+          <span>{{ 'common.status' | t }}</span>
+          <span>{{ 'common.priority' | t }}</span>
+          <span>{{ 'common.due' | t }}</span>
+          <span>{{ 'common.actions' | t }}</span>
+        </div>
+
+        <div *ngIf="memberMeetingTasks.length; else noMemberMeetingTasks">
+          <button
+            *ngFor="let task of memberMeetingTasks"
+            type="button"
+            class="table-row editable-row"
+            [class.selected]="workspace.selectedTaskKind === 'meeting-task' && workspace.selectedTaskId === task.id"
+            (click)="openMeetingTask(task)"
+          >
+            <span>
+              <strong>{{ task.title }}</strong>
+              <small>{{ workspace.customer(task.customerId)?.name }} · {{ workspace.customerMeeting(task.sourceMeetingId)?.subject }}</small>
+            </span>
+            <span class="status-chip" [ngClass]="workspace.statusClass(task.status)">
+              {{ ('Task.statusValues.' + task.status) | t }}
+            </span>
+            <span class="priority-chip" [ngClass]="workspace.statusClass(task.priority)">
+              {{ ('priority.' + workspace.statusClass(task.priority)) | t }}
+            </span>
+            <span>{{ task.dueDate || '—' }}</span>
+            <span class="row-actions">
+              <span class="ghost-action small">{{ 'common.open' | t }}</span>
+            </span>
+          </button>
+        </div>
+
+        <ng-template #noMemberMeetingTasks>
+          <div class="empty-state">
+            <strong>No meeting tasks for this member.</strong>
+          </div>
+        </ng-template>
+      </section>
+
+    </ng-container>
+
+    <ng-template #noMemberSelected>
+      <section class="panel">
+        <div class="empty-state">
+          <strong>{{ 'boards.selectMemberPrompt' | t }}</strong>
+        </div>
+      </section>
+    </ng-template>
+
+  </ng-container>
+
+  <!-- HUD Detail Popup -->
+  <ng-container *ngIf="hudPopup">
+    <div class="hud-popup-backdrop" (click)="hudPopup = null"></div>
+    <section class="hud-popup panel">
+      <div class="hud-popup-header">
+        <strong>{{ hudPopupLabel }}</strong>
+        <button type="button" class="ghost-action small" (click)="hudPopup = null">✕</button>
       </div>
-      <div class="task-stack">
-        <button *ngFor="let task of tasksForMember(member.id)" type="button" class="kanban-card" (click)="workspace.openTaskDrawer(task)">
-          <strong>{{ task.title }}</strong>
-          <small>{{ ('status.' + workspace.statusClass(task.status)) | t }} - {{ 'common.due' | t }} {{ task.dueDate }}</small>
-        </button>
-        <div *ngIf="!tasksForMember(member.id).length" class="kanban-empty">{{ 'boards.noActiveWork' | t }}</div>
-      </div>
-    </article>
-  </section>
+
+      <!-- Meetings list -->
+      <ng-container *ngIf="hudPopup === 'meetings'">
+        <div class="entity-list">
+          <div *ngFor="let meeting of hudPopupMeetings" class="entity-row clickable"
+               (click)="workspace.openMeetingDrawer(meeting.id); hudPopup = null">
+            <div class="entity-main">
+              <strong>{{ meeting.subject }}</strong>
+              <small>{{ meeting.meetingDate | slice:0:10 }} · {{ workspace.employeeName(meeting.meetingLeaderEmployeeId) }}</small>
+            </div>
+            <span class="count-badge">{{ meetingTaskCountFor(meeting.id) }} {{ 'boards.tasksLabel' | t }}</span>
+            <span class="status-chip" [ngClass]="workspace.statusClass(meeting.status)">{{ meeting.status }}</span>
+          </div>
+          <div class="empty-state" *ngIf="!hudPopupMeetings.length">
+            <strong>{{ 'boards.noMeetings' | t }}</strong>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Tasks list -->
+      <ng-container *ngIf="hudPopup !== 'meetings'">
+        <div class="entity-list">
+          <div *ngFor="let task of hudPopupTasks" class="entity-row clickable" (click)="openHudTask(task)">
+            <span class="status-dot" [ngClass]="workspace.statusClass(task.status)"></span>
+            <div class="entity-main">
+              <strong>{{ task.title }}</strong>
+              <small *ngIf="task.source === 'meeting'">
+                {{ workspace.customer(task.customerId)?.name }} · {{ workspace.customerMeeting(task.sourceMeetingId)?.subject }}
+              </small>
+              <small *ngIf="task.source !== 'meeting'">{{ task.board }}</small>
+            </div>
+            <span class="priority-chip" [ngClass]="workspace.statusClass(task.priority)">
+              {{ ('priority.' + workspace.statusClass(task.priority)) | t }}
+            </span>
+            <span class="status-chip" [ngClass]="workspace.statusClass(task.status)">{{ task.status }}</span>
+          </div>
+          <div class="empty-state" *ngIf="!hudPopupTasks.length">
+            <strong>{{ 'boards.noTasks' | t }}</strong>
+          </div>
+        </div>
+      </ng-container>
+    </section>
+  </ng-container>
+
 </section>

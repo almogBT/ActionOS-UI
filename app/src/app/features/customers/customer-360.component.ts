@@ -3,18 +3,16 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import {
-  Customer,
-  CustomerMeeting,
-  MeetingTask
-} from '../../core/models/actionos.models';
+  Customer, CustomerMeeting, Task } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
+import { SearchableSelectComponent, SelectOption } from '../../shared/searchable-select/searchable-select.component';
 
 type Customer360Tab = 'meetings' | 'openTasks' | 'closedTasks' | 'attachments';
 
 @Component({
   selector: 'app-customer-360',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, TranslatePipe, SearchableSelectComponent],
   template: `
     <section class="panel">
       <div class="panel-header">
@@ -95,12 +93,11 @@ type Customer360Tab = 'meetings' | 'openTasks' | 'closedTasks' | 'attachments';
         <div *ngIf="customer.type === 'Prospect'">
           <dt>{{ 'customers.promoteProspect' | t }}</dt>
           <dd class="promote-row" (click)="$event.stopPropagation()">
-            <select [(ngModel)]="promoteGroupId">
-              <option [ngValue]="''">{{ 'customers.selectExternalGroup' | t }}</option>
-              <option *ngFor="let g of workspace.externalCustomerGroups" [value]="g.id">
-                {{ g.name }}
-              </option>
-            </select>
+            <app-searchable-select
+              [(ngModel)]="promoteGroupId"
+              [options]="externalGroupOptions"
+              [placeholder]="'customers.selectExternalGroup' | t"
+            ></app-searchable-select>
             <button
               type="button"
               class="primary-action"
@@ -133,6 +130,8 @@ type Customer360Tab = 'meetings' | 'openTasks' | 'closedTasks' | 'attachments';
           <article
             *ngFor="let m of meetings"
             class="meeting-card"
+            style="cursor:pointer"
+            (click)="workspace.openMeetingDrawer(m.id)"
           >
             <header>
               <div>
@@ -159,11 +158,11 @@ type Customer360Tab = 'meetings' | 'openTasks' | 'closedTasks' | 'attachments';
             <div class="task-main">
               <strong>{{ task.title }}</strong>
               <span class="status-chip" [ngClass]="workspace.statusClass(task.status)">
-                {{ ('meetingTask.statusValues.' + task.status) | t }}
+                {{ ('Task.statusValues.' + task.status) | t }}
               </span>
             </div>
             <div class="task-meta muted">
-              <span>{{ 'meetingTask.assignedTo' | t }}: {{ workspace.employeeName(task.assignedToEmployeeId) }}</span>
+              <span>{{ 'Task.assignedTo' | t }}: {{ workspace.employeeName(task.assignedToEmployeeId) }}</span>
               <span *ngIf="task.dueDate" [class.overdue]="workspace.isMeetingTaskOverdue(task)">
                 {{ 'common.due' | t }} {{ task.dueDate }}
               </span>
@@ -179,7 +178,7 @@ type Customer360Tab = 'meetings' | 'openTasks' | 'closedTasks' | 'attachments';
             <div class="task-main">
               <strong>{{ task.title }}</strong>
               <span class="status-chip" [ngClass]="workspace.statusClass(task.status)">
-                {{ ('meetingTask.statusValues.' + task.status) | t }}
+                {{ ('Task.statusValues.' + task.status) | t }}
               </span>
             </div>
             <div class="task-meta muted">
@@ -266,6 +265,10 @@ export class Customer360Component {
 
   constructor(public workspace: ActionosWorkspaceService) {}
 
+  get externalGroupOptions(): SelectOption[] {
+    return this.workspace.externalCustomerGroups.map(g => ({ value: g.id, label: g.name }));
+  }
+
   get meetings(): CustomerMeeting[] {
     return this.workspace.customerMeetingsByCustomer(this.customer.id);
   }
@@ -274,7 +277,7 @@ export class Customer360Component {
     return this.workspace.getCustomerPreparationSummary(this.customer.id);
   }
 
-  get closedTasks(): MeetingTask[] {
+  get closedTasks(): Task[] {
     return this.workspace
       .meetingTasksByCustomer(this.customer.id)
       .filter((t) => !this.workspace.isOpenMeetingTaskStatus(t.status));
@@ -284,11 +287,11 @@ export class Customer360Component {
     return this.workspace.attachmentsFor('customer', this.customer.id);
   }
 
-  tasksFromMeeting(m: CustomerMeeting): MeetingTask[] {
+  tasksFromMeeting(m: CustomerMeeting): Task[] {
     return this.workspace.meetingTasksByMeeting(m.id);
   }
 
-  openTask(task: MeetingTask): void {
+  openTask(task: Task): void {
     this.workspace.selectMeetingTask(task, true);
   }
 

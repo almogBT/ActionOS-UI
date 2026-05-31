@@ -1,0 +1,12 @@
+{
+  "name": "actionos-ui",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start":   "npm run start --prefix app",
+    "build":   "npm run build --prefix app",
+    "test":    "npm run test  --prefix app",
+    "watch":   "npm run watch --prefix app",
+    "ng":      "npm run ng    --prefix app"
+  }
+}

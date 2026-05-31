@@ -5,6 +5,7 @@ import {
   CustomerMeetingStatus,
   MeetingNote,
   UpdateCustomerMeetingInput,
+  UpdateMeetingNoteInput
 } from '../models/actionos.models';
 
 /**
@@ -25,6 +26,8 @@ export interface CustomerMeetingRepositoryPort {
     noteId: string,
     createdByEmployeeId?: string,
   ): MeetingNote | null;
+  updateNote(meetingId: string, noteId: string, changes: UpdateMeetingNoteInput): MeetingNote | null;
+  removeNote(meetingId: string, noteId: string): boolean;
   linkNoteToTask(meetingId: string, noteId: string, taskId: string): void;
 }
 
@@ -130,6 +133,50 @@ export class InMemoryCustomerMeetingRepository implements CustomerMeetingReposit
     }
     this.save();
     return newNote;
+  }
+
+  updateNote(meetingId: string, noteId: string, changes: UpdateMeetingNoteInput): MeetingNote | null {
+    const target = this.state.customerMeetings.find((m) => m.id === meetingId);
+    if (!target) {
+      return null;
+    }
+    const note = target.notes.find((n) => n.id === noteId);
+    if (!note) {
+      return null;
+    }
+    if (changes.type !== undefined) {
+      note.type = changes.type;
+    }
+    if (changes.content !== undefined) {
+      note.content = changes.content.trim();
+    }
+    if (changes.ownerId !== undefined) {
+      note.ownerId = changes.ownerId || undefined;
+    }
+    if (changes.dueDate !== undefined) {
+      note.dueDate = changes.dueDate || undefined;
+    }
+    target.updatedAt = this.now();
+    if (target.status === 'Planned') {
+      target.status = 'Draft Summary';
+    }
+    this.save();
+    return note;
+  }
+
+  removeNote(meetingId: string, noteId: string): boolean {
+    const target = this.state.customerMeetings.find((m) => m.id === meetingId);
+    if (!target) {
+      return false;
+    }
+    const index = target.notes.findIndex((n) => n.id === noteId);
+    if (index < 0) {
+      return false;
+    }
+    target.notes.splice(index, 1);
+    target.updatedAt = this.now();
+    this.save();
+    return true;
   }
 
   linkNoteToTask(meetingId: string, noteId: string, taskId: string): void {

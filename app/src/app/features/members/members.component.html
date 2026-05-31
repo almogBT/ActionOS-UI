@@ -24,14 +24,11 @@
 
         <label class="field-control">
           {{ 'members.role' | t }}
-          <select name="role" [(ngModel)]="newMember.role">
-            <option [ngValue]="'Owner'">{{ 'members.roles.owner' | t }}</option>
-            <option [ngValue]="'Admin'">{{ 'members.roles.admin' | t }}</option>
-            <option [ngValue]="'Manager'">{{ 'members.roles.manager' | t }}</option>
-            <option [ngValue]="'Member'">{{ 'members.roles.member' | t }}</option>
-            <option [ngValue]="'Viewer'">{{ 'members.roles.viewer' | t }}</option>
-            <option [ngValue]="'Guest'">{{ 'members.roles.guest' | t }}</option>
-          </select>
+          <app-searchable-select
+            name="role"
+            [(ngModel)]="newMember.role"
+            [options]="roleOptions"
+          ></app-searchable-select>
         </label>
 
         <label class="field-control">

@@ -20,16 +20,115 @@
 
     <div class="workspace-body">
       <ng-container [ngSwitch]="activeView()">
-        <app-workspace-home *ngSwitchCase="'home'" (viewChange)="setView($event)" />
+        <app-workspace-home
+          *ngSwitchCase="'home'"
+          (viewChange)="setView($event)"
+          (openCustomer)="openCustomerDetail($event)"
+          (prepareCustomerMeeting)="prepareCustomerMeeting($event)"
+          (newCustomerMeeting)="startCustomerMeeting($event)"
+        />
         <app-inbox *ngSwitchCase="'inbox'" (viewChange)="setView($event)" />
         <app-my-work *ngSwitchCase="'my-work'" (viewChange)="setView($event)" />
         <app-boards *ngSwitchCase="'boards'" (viewChange)="setView($event)" />
-        <app-meetings *ngSwitchCase="'meetings'" (viewChange)="setView($event)" />
-        <app-customers *ngSwitchCase="'customers'" />
-        <app-members *ngSwitchCase="'members'" />
+        <app-meetings *ngSwitchCase="'meetings'" [openNewTick]="meetingNewTick()" (viewChange)="setView($event)" (prepareMeeting)="prepareCustomerMeeting($event)" />
+        <app-customers
+          *ngSwitchCase="'customers'"
+          [initialCustomer]="activeCustomer()"
+          [initialView]="customerEntryView()"
+          (exit)="closeCustomerDetail()"
+        />
       </ng-container>
     </div>
   </section>
 
   <app-task-drawer />
+  <app-meeting-drawer />
+
+  <!-- Mobile bottom navigation bar -->
+  <nav class="bottom-nav" aria-label="Bottom navigation">
+    <button
+      *ngFor="let item of navItems"
+      type="button"
+      class="bottom-nav-item"
+      [class.active]="activeView() === item.id"
+      (click)="setView(item.id)"
+      [attr.aria-label]="item.label"
+    >
+      <app-icon [name]="iconFor(item.id)" [size]="22"></app-icon>
+      <span>{{ item.label }}</span>
+    </button>
+  </nav>
+
+  <!-- ── Bottom action bar: Plan Meeting · Quick Capture · New Meeting ── -->
+  <div class="bottom-action-bar" (click)="closeBarPopovers()">
+
+    <!-- Plan meeting -->
+    <div class="bar-plan-host" (click)="$event.stopPropagation()">
+      <button type="button" class="bar-btn" (click)="togglePlanPicker()">
+        <app-icon name="calendar" [size]="15"></app-icon>
+        <span>{{ 'meetingsOverview.planMeeting' | t }}</span>
+      </button>
+      <div class="bar-plan-popover" *ngIf="showPlanPicker()" (click)="$event.stopPropagation()">
+        <strong class="bar-plan-label">{{ 'meetingsOverview.selectCustomer' | t }}</strong>
+        <app-searchable-select
+          name="barPlanCustomer"
+          [(ngModel)]="planCustomerId"
+          (ngModelChange)="onPlanCustomerSelected($event)"
+          [options]="planCustomerOptions"
+        ></app-searchable-select>
+        <button type="button" class="bar-cancel-btn" (click)="showPlanPicker.set(false); planCustomerId = ''">
+          {{ 'common.cancel' | t }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick capture form -->
+    <form class="bar-capture" (ngSubmit)="submitCapture()" (click)="$event.stopPropagation()">
+      <span class="bar-capture-icon" aria-hidden="true">
+        <app-icon name="sparkles" [size]="15"></app-icon>
+      </span>
+      <div class="bar-type-host">
+        <button
+          type="button"
+          class="cmd-type-chip"
+          [class.open]="captureTypeMenuOpen()"
+          (click)="toggleCaptureTypeMenu(); $event.stopPropagation()"
+        >
+          <app-icon [name]="captureIconFor(captureType)" [size]="12"></app-icon>
+          <span>{{ currentCaptureLabel }}</span>
+          <app-icon name="chevron-down" [size]="11"></app-icon>
+        </button>
+        <div class="capture-type-menu" *ngIf="captureTypeMenuOpen()" (click)="$event.stopPropagation()">
+          <button
+            *ngFor="let type of captureTypes"
+            type="button"
+            class="capture-option"
+            [class.active]="captureType === type"
+            (click)="selectCaptureType(type)"
+          >
+            <app-icon [name]="captureIconFor(type)" [size]="14"></app-icon>
+            <span class="capture-option-label">{{ captureLabelFor(type) }}</span>
+            <span class="capture-option-shortcut">{{ captureShortcutFor(type) }}</span>
+          </button>
+        </div>
+      </div>
+      <input
+        class="cmd-input"
+        name="captureText"
+        type="text"
+        [(ngModel)]="captureText"
+        [placeholder]="capturePlaceholder"
+      />
+      <button type="submit" class="cmd-submit" [disabled]="!captureText.trim()">
+        {{ 'common.capture' | t }}
+      </button>
+    </form>
+
+    <!-- New meeting -->
+    <button type="button" class="bar-btn bar-btn-primary" (click)="startNewMeeting(); $event.stopPropagation()">
+      <app-icon name="calendar" [size]="15"></app-icon>
+      <span>+ {{ 'meetingsOverview.newMeeting' | t }}</span>
+    </button>
+
+  </div>
 </main>

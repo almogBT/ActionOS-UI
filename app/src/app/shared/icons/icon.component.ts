@@ -23,7 +23,11 @@ export type IconName =
   | 'search'
   | 'sparkles'
   | 'logout'
-  | 'trash';
+  | 'trash'
+  | 'zap'
+  | 'check-circle'
+  | 'alert-triangle'
+  | 'file-text';
 
 @Component({
   selector: 'app-icon',

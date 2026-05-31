@@ -1,8 +1,4 @@
-import {
-  MeetingTask,
-  MeetingTaskStatus,
-  NotificationLogEntry,
-} from '../models/actionos.models';
+import { Task, TaskStatus, NotificationLogEntry } from '../models/actionos.models';
 
 /**
  * Outbound notification boundary.
@@ -16,9 +12,9 @@ import {
  * and writes a console.log line; no real email is sent.
  */
 export interface NotificationPort {
-  onTaskAssigned(task: MeetingTask): Promise<void>;
-  onTaskStatusChanged(task: MeetingTask, previousStatus: MeetingTaskStatus): Promise<void>;
-  onTaskDueSoon(task: MeetingTask): Promise<void>;
+  onTaskAssigned(task: Task): Promise<void>;
+  onTaskStatusChanged(task: Task, previousStatus: TaskStatus): Promise<void>;
+  onTaskDueSoon(task: Task): Promise<void>;
 }
 
 export class LocalMockNotificationAdapter implements NotificationPort {
@@ -27,13 +23,13 @@ export class LocalMockNotificationAdapter implements NotificationPort {
     private readonly now: () => string,
   ) {}
 
-  async onTaskAssigned(task: MeetingTask): Promise<void> {
+  async onTaskAssigned(task: Task): Promise<void> {
     this.log(task, 'assigned', [task.openedByEmployeeId, task.assignedToEmployeeId]);
   }
 
   async onTaskStatusChanged(
-    task: MeetingTask,
-    previousStatus: MeetingTaskStatus,
+    task: Task,
+    previousStatus: TaskStatus,
   ): Promise<void> {
     if (task.status === previousStatus) {
       return;
@@ -41,12 +37,12 @@ export class LocalMockNotificationAdapter implements NotificationPort {
     this.log(task, 'status-changed', [task.openedByEmployeeId]);
   }
 
-  async onTaskDueSoon(task: MeetingTask): Promise<void> {
+  async onTaskDueSoon(task: Task): Promise<void> {
     this.log(task, 'due-soon', [task.assignedToEmployeeId]);
   }
 
   private log(
-    task: MeetingTask,
+    task: Task,
     event: NotificationLogEntry['event'],
     recipients: string[],
   ): void {

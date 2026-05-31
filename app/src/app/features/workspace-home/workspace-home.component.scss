@@ -5,6 +5,10 @@
 
 .home-screen {
   display: grid;
+  /* Pin the single column to the container width. Without an explicit track the
+     implicit `auto` column grows to the widest child's max-content (e.g. the
+     customer table's 820px rows), blowing the whole page past the viewport. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 18px;
   min-width: 0;
 }
@@ -13,6 +17,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 18px;
   padding: 22px 26px;
   border: 1px solid var(--border-subtle);
@@ -33,6 +38,8 @@
   display: grid;
   gap: 4px;
   min-width: 0;
+  /* Grow to fill the row; allow actions to wrap beneath when space is tight. */
+  flex: 1 1 260px;
 }
 
 .hero-eyebrow {
@@ -45,7 +52,8 @@
 
 .hero-text h1 {
   margin: 0;
-  font-size: 28px;
+  /* Scale with viewport so the greeting never overflows a narrow shell. */
+  font-size: clamp(20px, 3.5vw, 28px);
   line-height: 1.1;
   color: var(--text-primary);
   letter-spacing: -0.01em;
@@ -71,229 +79,84 @@
   gap: 8px;
 }
 
-.home-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr);
-  gap: 18px;
-  min-width: 0;
-}
-
-.home-calendar {
-  min-width: 0;
-}
-
-.home-today {
-  display: grid;
-  align-content: start;
-  gap: 14px;
-  min-width: 0;
-}
-
-.today-card {
-  display: grid;
-  gap: 10px;
-  padding: 16px 18px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  background: var(--bg-elevated);
-  box-shadow: var(--shadow-sm);
-  min-width: 0;
-}
-
-.today-card.next {
-  background:
-    linear-gradient(135deg, var(--accent-soft) 0%, var(--bg-elevated) 60%);
-  border-color: var(--accent);
-}
-
-.today-card h3 {
-  margin: 0;
-  font-size: 16px;
-  color: var(--text-primary);
-}
-
-.card-eyebrow {
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--accent);
-}
-
-.next-meta {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 0;
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-
-.next-meta .dot {
-  width: 8px;
-  height: 8px;
-  border-radius: var(--radius-pill);
-  background: var(--accent);
-}
-.next-meta .dot.internal { background: var(--warning); }
-.next-meta .dot.customer { background: var(--accent); }
-
-.today-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.today-head strong {
-  font-size: 14px;
-  color: var(--text-primary);
-}
-
-.muted-small {
-  margin: 0;
-  font-size: 12px;
-  color: var(--text-tertiary);
-}
-
-.today-events {
-  display: grid;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.today-events li {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  background: var(--bg-canvas);
-  transition: transform var(--duration-fast) var(--ease-out),
-    border-color var(--duration-fast) var(--ease-out);
-}
-
-.today-events li:hover {
-  transform: translateY(-1px);
-  border-color: var(--accent);
-}
-
-.time-pill {
-  display: inline-grid;
-  place-items: center;
-  min-width: 56px;
-  padding: 4px 8px;
-  border-radius: var(--radius-pill);
-  background: var(--bg-elevated);
-  color: var(--accent);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  border: 1px solid var(--border-subtle);
-}
-
-.event-text {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-}
-
-.event-text strong {
-  font-size: 13px;
-  color: var(--text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.event-text small {
-  font-size: 11px;
-  color: var(--text-tertiary);
-}
-
-.event-kind {
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 3px 8px;
-  border-radius: var(--radius-pill);
-  background: var(--accent-soft);
-  color: var(--accent);
-}
-
-.event-kind.internal {
-  background: var(--warning-soft);
-  color: var(--warning);
-}
-
-.top-three {
-  display: grid;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.top-three-item {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 10px;
+/* Per-section search box for the Home dashboard lists. */
+.home-search {
   width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  background: var(--bg-canvas);
-  color: var(--text-primary);
-  text-align: start;
-  transition: transform var(--duration-fast) var(--ease-out),
-    border-color var(--duration-fast) var(--ease-out);
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  margin-bottom: 12px;
 }
 
-.top-three-item:hover {
-  transform: translateY(-1px);
-  border-color: var(--accent);
+.workload-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
 }
 
-.top-text {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-}
-
-.top-text strong {
-  font-size: 13px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.top-text small {
-  font-size: 11px;
-  color: var(--text-tertiary);
-}
-
-.link-btn {
-  border: 0;
-  background: transparent;
-  color: var(--accent);
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background var(--duration-fast), color var(--duration-fast), border-color var(--duration-fast);
+
+  &:hover {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  &.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+}
+
+/* Home dashboard lists can all grow large with real data — cap each one and
+   scroll inside its panel so no single section stretches the whole page. */
+.workload-list {
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+/* Workload rows are now buttons (clickable) — reset button chrome and preserve
+   the existing workload-row layout from global styles. */
+.workload-row-btn {
+  width: 100%;
+  text-align: start;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
   cursor: pointer;
   padding: 0;
 }
+
+
 
 .home-metrics .metric {
   position: relative;
   overflow: hidden;
   transition: transform var(--duration-fast) var(--ease-out),
     box-shadow var(--duration-fast) var(--ease-out);
+}
+
+/* Metric tiles open a detail popup — signal they're interactive. */
+.home-metrics .metric.clickable { cursor: pointer; }
+.home-metrics .metric.clickable:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .home-metrics .metric::after {
@@ -316,10 +179,51 @@
   opacity: 1;
 }
 
-@media (max-width: 1180px) {
-  .home-grid {
-    grid-template-columns: 1fr;
-  }
+/* Fluid Home grids — reflow continuously with available width instead of
+   snapping at the global breakpoints (which made tiles/panels jump on resize).
+   Scoped under .home-screen so other views keep their own layouts. */
+.home-screen .two-column {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  align-items: stretch;
+}
+
+/* Keep each card in a Home row at equal height (Customers/Workload, Risk/Activity). */
+.home-screen .two-column > .panel {
+  height: 100%;
+}
+
+/* The Customers column is rendered by <app-customer-list>, which already has
+   its own .panel wrapper. Stretch the host so it matches sibling panel height. */
+.home-screen .two-column > app-customer-list {
+  height: 100%;
+}
+
+/* 3 metric tiles on home (Follow-up debt removed). */
+.home-screen .home-metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* Pin shortcut links to the top-right corner; never let them wrap to a second line. */
+.panel-header .inline-actions {
+  align-self: flex-start;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+}
+
+/* Compact text-link buttons for panel header shortcuts (e.g. "Open Inbox"). */
+.panel-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+  line-height: 1;
+  white-space: nowrap;
+  transition: opacity var(--duration-fast);
+
+  &:hover { opacity: 0.7; }
 }
 
 @media (max-width: 900px) {
@@ -327,7 +231,10 @@
     flex-direction: column;
     align-items: stretch;
   }
-  .hero-actions {
-    flex-wrap: wrap;
+
+  /* In column direction the 260px flex-basis becomes a min-height, bloating the
+     hero. Reset it so the text block is only as tall as its content. */
+  .hero-text {
+    flex: none;
   }
 }

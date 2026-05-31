@@ -12,30 +12,30 @@
   </div>
 
   <div class="metric-grid">
-    <article class="metric attention">
+    <article class="metric attention clickable" (click)="scrollToSection('decision-queue')">
       <span>{{ 'inbox.needsTriage' | t }}</span>
-      <strong>{{ workspace.triageQueue.length }}</strong>
+      <strong>{{ workspace.myTriageQueue.length }}</strong>
       <small>{{ 'inbox.triageHint' | t }}</small>
     </article>
-    <article class="metric">
+    <article class="metric clickable" (click)="scrollToSection('decision-queue')">
       <span>{{ 'inbox.inboxTasks' | t }}</span>
-      <strong>{{ workspace.inboxTasks.length }}</strong>
+      <strong>{{ workspace.myInboxTasks.length }}</strong>
       <small>{{ 'inbox.readyToClassify' | t }}</small>
     </article>
-    <article class="metric">
+    <article class="metric clickable" (click)="scrollToSection('meeting-followup')">
       <span>{{ 'inbox.meetingActions' | t }}</span>
-      <strong>{{ workspace.openMeetingActions.length }}</strong>
+      <strong>{{ workspace.myUnconvertedActionItems.length }}</strong>
       <small>{{ 'inbox.waitingForTasks' | t }}</small>
     </article>
-    <article class="metric">
+    <article class="metric clickable" (click)="scrollToSection('blocker-lane')">
       <span>{{ 'inbox.blocked' | t }}</span>
-      <strong>{{ workspace.blockedTasks.length }}</strong>
+      <strong>{{ workspace.myBlockedTasks.length }}</strong>
       <small>{{ 'inbox.needsUnblockOwner' | t }}</small>
     </article>
   </div>
 
   <div class="two-column">
-    <section class="panel">
+    <section class="panel" id="decision-queue">
       <div class="panel-header">
         <div>
           <span class="eyebrow">{{ 'inbox.decisionQueue' | t }}</span>
@@ -43,8 +43,8 @@
         </div>
       </div>
 
-      <div *ngIf="workspace.triageQueue.length; else clearInbox" class="triage-list">
-        <article *ngFor="let task of workspace.triageQueue" class="triage-card">
+      <div *ngIf="workspace.myTriageQueue.length; else clearInbox" class="triage-list">
+        <article *ngFor="let task of workspace.myTriageQueue" class="triage-card">
           <button type="button" class="triage-main" (click)="workspace.openTaskDrawer(task)">
             <span class="status-dot" [ngClass]="workspace.statusClass(task.status)"></span>
             <span>
@@ -78,14 +78,14 @@
         <span>{{ 'inbox.step3' | t }}</span>
         <span>{{ 'inbox.step4' | t }}</span>
       </div>
-      <button type="button" class="primary-action wide-action" (click)="workspace.convertAllOpenActions()" [disabled]="!workspace.openMeetingActions.length">
+      <button type="button" class="primary-action wide-action" (click)="convertAll()" [disabled]="!workspace.myUnconvertedActionItems.length">
         {{ 'inbox.convertAll' | t }}
       </button>
     </aside>
   </div>
 
   <div class="two-column">
-    <section class="panel">
+    <section class="panel" id="meeting-followup">
       <div class="panel-header">
         <div>
           <span class="eyebrow">{{ 'inbox.meetingFollowUp' | t }}</span>
@@ -93,14 +93,14 @@
         </div>
       </div>
 
-      <div *ngIf="workspace.openMeetingActions.length; else noActions" class="note-stack">
-        <article *ngFor="let note of workspace.openMeetingActions" class="note action">
+      <div *ngIf="workspace.myUnconvertedActionItems.length; else noActions" class="note-stack">
+        <article *ngFor="let item of workspace.myUnconvertedActionItems" class="note action">
           <div>
             <span>{{ 'noteType.action' | t }}</span>
-            <p>{{ note.content }}</p>
-            <small *ngIf="note.ownerId">{{ 'common.owner' | t }}: {{ workspace.memberName(note.ownerId) }} - {{ 'common.due' | t }} {{ note.dueDate }}</small>
+            <p>{{ item.note.content }}</p>
+            <small *ngIf="item.note.ownerId">{{ 'common.owner' | t }}: {{ workspace.memberName(item.note.ownerId) }} - {{ 'common.due' | t }} {{ item.note.dueDate }}</small>
           </div>
-          <button type="button" class="convert-action" (click)="convert(note)">{{ 'common.convert' | t }}</button>
+          <button type="button" class="convert-action" (click)="convert(item)">{{ 'common.convert' | t }}</button>
         </article>
       </div>
 
@@ -112,7 +112,7 @@
       </ng-template>
     </section>
 
-    <section class="panel">
+    <section class="panel" id="blocker-lane">
       <div class="panel-header">
         <div>
           <span class="eyebrow">{{ 'inbox.blockerLane' | t }}</span>
@@ -120,13 +120,13 @@
         </div>
       </div>
 
-      <div *ngIf="workspace.blockedTasks.length; else noBlockers" class="task-stack">
-        <article *ngFor="let task of workspace.blockedTasks.slice(0, 5)" class="task-card" (click)="workspace.openTaskDrawer(task)">
+      <div *ngIf="workspace.myBlockedTasks.length; else noBlockers" class="task-stack">
+        <article *ngFor="let task of workspace.myBlockedTasks.slice(0, 5)" class="task-card" (click)="workspace.openTaskDrawer(task)">
           <div class="task-main">
             <span class="status-dot waiting"></span>
             <div>
               <h3>{{ task.title }}</h3>
-              <p>{{ task.blockedBy || 'Waiting for next input' }}</p>
+              <p>{{ task.waitingReason || task.blockedBy || 'Waiting for next input' }}</p>
             </div>
           </div>
           <span class="priority" [ngClass]="workspace.statusClass(task.priority)">{{ ('priority.' + workspace.statusClass(task.priority)) | t }}</span>
