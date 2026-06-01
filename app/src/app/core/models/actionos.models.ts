@@ -1,4 +1,4 @@
-export type ViewId = 'home' | 'inbox' | 'my-work' | 'boards' | 'meetings' | 'customers';
+export type ViewId = 'home' | 'inbox' | 'my-work' | 'tasks' | 'boards' | 'meetings' | 'customers';
 export type TaskStatus =
   | 'Inbox'
   | 'Planned'

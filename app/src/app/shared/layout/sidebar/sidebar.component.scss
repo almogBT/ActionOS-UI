@@ -152,9 +152,7 @@
 }
 
 .actionos-sidebar.collapsed .nav-item {
-  grid-template-columns: 1fr;
-  justify-items: center;
-  padding: 10px 0;
+  padding: 10px 14px; /* centers the 28px icon in the 48px inner width of the 76px collapsed bar */
 }
 
 .nav-item:hover {
@@ -228,6 +226,12 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.actionos-sidebar.collapsed .nav-label {
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* Keyboard shortcut — revealed on hover / active */

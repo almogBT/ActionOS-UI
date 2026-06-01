@@ -29,6 +29,7 @@
         />
         <app-inbox *ngSwitchCase="'inbox'" (viewChange)="setView($event)" />
         <app-my-work *ngSwitchCase="'my-work'" (viewChange)="setView($event)" />
+        <app-tasks *ngSwitchCase="'tasks'" (viewChange)="setView($event)" />
         <app-boards *ngSwitchCase="'boards'" (viewChange)="setView($event)" />
         <app-meetings *ngSwitchCase="'meetings'" [openNewTick]="meetingNewTick()" (viewChange)="setView($event)" (prepareMeeting)="prepareCustomerMeeting($event)" />
         <app-customers
@@ -75,6 +76,7 @@
           [(ngModel)]="planCustomerId"
           (ngModelChange)="onPlanCustomerSelected($event)"
           [options]="planCustomerOptions"
+          [openUp]="true"
         ></app-searchable-select>
         <button type="button" class="bar-cancel-btn" (click)="showPlanPicker.set(false); planCustomerId = ''">
           {{ 'common.cancel' | t }}

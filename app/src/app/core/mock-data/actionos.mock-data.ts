@@ -4,6 +4,7 @@ export const ACTIONOS_NAV_ITEMS: NavItem[] = [
   { id: 'home',     label: 'Home',     shortcut: 'H', section: 'main' },
   { id: 'meetings', label: 'Meetings', shortcut: 'N', section: 'main' },
   { id: 'my-work',  label: 'My Work',  shortcut: 'M', section: 'work' },
+  { id: 'tasks',    label: 'Tasks',    shortcut: 'K', section: 'work' },
   { id: 'boards',   label: 'Boards',   shortcut: 'B', section: 'work' },
   // 'customers' is intentionally omitted: the customer list now lives on Home.
   // The 'customers' view still exists to host the Customer 360 detail flow,

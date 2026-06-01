@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "start":   "npm run start --prefix app",
+    "start:test": "npm run start:test --prefix app",
     "build":   "npm run build --prefix app",
+    "build:test": "npm run build:test --prefix app",
     "test":    "npm run test  --prefix app",
     "watch":   "npm run watch --prefix app",
     "ng":      "npm run ng    --prefix app"

@@ -4,7 +4,7 @@ import {
 } from '@angular/core';
 import { ActionosI18nService } from '../../../core/i18n/actionos-i18n.service';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
-import { ACTIONOS_NAV_ITEMS } from '../../../core/mock-data/actionos.mock-data';
+import { ACTIONOS_NAV_ITEMS } from '../../../core/config/actionos-ui.config';
 import { NavItem, NavSection, ViewId } from '../../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../../core/services/actionos-workspace.service';
 import { IconComponent, IconName } from '../../icons/icon.component';
@@ -56,6 +56,7 @@ export class SidebarComponent {
       home: 'home',
       inbox: 'inbox',
       'my-work': 'check-square',
+      tasks: 'check-circle',
       boards: 'columns',
       meetings: 'calendar',
       customers: 'users'

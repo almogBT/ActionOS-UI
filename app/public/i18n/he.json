@@ -43,6 +43,7 @@
     "home": "בית",
     "inbox": "תיבה",
     "my-work": "העבודה שלי",
+    "tasks": "משימות",
     "boards": "לוחות",
     "meetings": "פגישות",
     "customers": "לקוחות",
@@ -112,6 +113,9 @@
     "inProgress": "עדיין פעילות",
     "in-progress": "עדיין פעילות",
     "closed": "נסגרו",
+    "upcomingHint": "מתוכננות וטרם התקיימו",
+    "inProgressHint": "עברו את התאריך, עדיין פתוחות",
+    "openTasksHint": "פעולות שנולדו מפגישות",
     "openMeetingTasks": "משימות פתוחות",
     "noMeetingsInLane": "אין כלום כאן.",
     "backToList": "כל הפגישות"
@@ -349,6 +353,54 @@
       "emptyText": "אתה מעודכן."
     }
   },
+  "tasks": {
+    "eyebrow": "כל העבודה",
+    "title": "משימות",
+    "subtitle": "כל המשימות הפתוחות של הצוות — מפגישות ומלוחות — במקום אחד.",
+    "openMyWork": "פתח את העבודה שלי",
+    "tiles": {
+      "open": "משימות פתוחות",
+      "openHint": "כל מה שעוד פעיל",
+      "overdue": "באיחור",
+      "overdueHint": "עברו את מועד היעד",
+      "today": "להיום",
+      "todayHint": "על הפרק להיום",
+      "blocked": "תקוע",
+      "blockedHint": "ממתין למישהו"
+    },
+    "audience": {
+      "all": "כל המשימות",
+      "mine": "המשימות שלי",
+      "assignedOthers": "הוקצו לאחרים"
+    },
+    "origin": {
+      "label": "מקור",
+      "all": "כל המקורות",
+      "meeting": "מפגישות",
+      "standalone": "עצמאיות"
+    },
+    "badge": {
+      "meeting": "פגישה",
+      "board": "לוח"
+    },
+    "col": {
+      "origin": "מקור",
+      "assignee": "אחראי"
+    },
+    "list": {
+      "eyebrow": "עבודה פתוחה",
+      "title": "משימות"
+    },
+    "searchPlaceholder": "חיפוש משימות...",
+    "noTasksTitle": "אין כאן משימות כרגע",
+    "noTasksText": "נסה פילטר אחר, או נקה את החיפוש כדי לראות יותר.",
+    "expand": {
+      "checklist": "רשימת תיוג",
+      "noChecklist": "אין פריטי רשימה.",
+      "open": "פתח משימה"
+    }
+
+  },
   "meetings": {
     "openMyWork": "פתח את העבודה שלי",
     "runMode": "פגישה חיה",
@@ -523,7 +575,7 @@
     },
     "wrapUp": "סיכום",
     "publishRecap": "פרסם סיכום מלא",
-    "publishRecapHint": "בונה סיכום מלא מהתוכן, ההחלטות, המשימות, החסמים ותאריך הפגישה הבאה — ומסמן את הפגישה כסגורה.",
+    "publishRecapHint": "בונה סיכום מלא מהתוכן, ההחלטות, המשימות, החסמים ותאריך הפגישה הבאה.",
     "planSection": "תכנון",
     "planSubtitle": "הכן את ההקשר לפני שמנהלים את הפגישה",
     "runSection": "ניהול",
@@ -548,7 +600,7 @@
     "collapseCapture": "כווץ קליטה",
     "expandCapture": "הרחב קליטה",
     "untitledMeeting": "פגישה ללא שם",
-    "captureAndTask": "קליטה + משימה",
+    "captureAndTask": "הוסף וצור משימה",
     "shortcutsHint": "קיצורים: Ctrl+1 הערה · Ctrl+2 פעולה · Ctrl+3 החלטה · Ctrl+4 חסם · Enter קליטה · Ctrl+Enter קליטה + משימה.",
     "runSubtitle": "קלוט בזמן אמת והפוך אירועים למשימות מקושרות.",
     "tasksFromMeeting": "משימות מפגישה זו",
@@ -636,7 +688,16 @@
     "openTasks": "עדיין פתוחות",
     "overdueTasks": "באיחור",
     "waitingForCustomer": "אצל הלקוח",
+    "waitingForInternal": "אצלנו לטיפול",
+    "openBlockers": "חסמים פתוחים",
     "completedSinceLastMeeting": "הישגים מהפעם האחרונה",
+    "lastMet": "פגישה אחרונה",
+    "daysAgo": "ימים שעברו",
+    "noMeetingsYet": "פגישה ראשונה עם הלקוח.",
+    "nextPlanned": "הבאה המתוכננת",
+    "agendaForThisMeeting": "סדר יום לפגישה",
+    "showRecap": "הצג סיכום אחרון",
+    "hideRecap": "הסתר סיכום אחרון",
     "nothing": "אין כלום כאן.",
     "print": "הדפס",
     "startMeetingNow": "התחל פגישה"
@@ -653,6 +714,22 @@
     "required": "חובה",
     "emailDomain": "האימייל חייב להיות בדומיין פריץ או קריטילוג.",
     "inactiveEmployee": "לא ניתן לשייך — העובד אינו פעיל יותר."
+  },
+  "recap": {
+    "title": "סיכום פגישה",
+    "unknownCustomer": "לקוח לא ידוע",
+    "ledBy": "הוביל",
+    "ourSide": "הצד שלנו",
+    "customerSide": "הצד הלקוח",
+    "goal": "מטרה",
+    "whatHappened": "מה קרה",
+    "decisions": "החלטות",
+    "tasksCreated": "משימות שנוצרו",
+    "due": "יעד",
+    "blockers": "חסמים",
+    "notes": "הערות",
+    "nextMeeting": "פגישה הבאה",
+    "notesForNext": "הערות לפגישה הבאה"
   },
   "settings": {
     "mailNotifications": "התראות מייל",

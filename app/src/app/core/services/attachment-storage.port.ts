@@ -7,9 +7,8 @@ import { Attachment, AttachmentEntityType } from '../models/actionos.models';
  * in FritzCustomersApi (api/meeting/* endpoints). HomePage_Server proxies the
  * upload and returns a SharePoint URL.
  *
- * In v3 the mock adapter creates a fake URL ("mock://<id>") — there is no real
- * file storage, so the URL is not openable. The UI surfaces this with a
- * "Attachments (mock)" hint.
+ * This local adapter only stages attachment metadata in-memory. A real binary
+ * storage provider (SharePoint/Blob/S3) should supply a durable storage URL.
  */
 export interface AttachmentStoragePort {
   list(entityType: AttachmentEntityType, entityId: string): Attachment[];
@@ -75,7 +74,7 @@ export class InMemoryAttachmentStorage implements AttachmentStoragePort {
       fileName: file.name,
       mimeType: file.type || 'application/octet-stream',
       sizeBytes: file.size,
-      url: `mock://${id}`,
+      url: `pending://${id}`,
       linkedEntityType: entityType,
       linkedEntityId: entityId,
       uploadedAt: this.now(),

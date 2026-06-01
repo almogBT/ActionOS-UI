@@ -1,206 +1,185 @@
-<section class="screen">
+<section class="screen meetings-screen">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
   <div class="screen-title">
     <div>
-      <span class="eyebrow">{{ workspace.meeting.time }}</span>
-      <h2>{{ workspace.meeting.title }}</h2>
+      <span class="eyebrow">{{ 'meetingsOverview.eyebrow' | t }}</span>
+      <h2>{{ 'meetingsOverview.title' | t }}</h2>
+      <p class="screen-subtitle">{{ 'meetingsOverview.subtitle' | t }}</p>
     </div>
-    <button type="button" class="ghost-action" (click)="openView('my-work')">{{ 'meetings.openMyWork' | t }}</button>
+    <div class="topbar-actions">
+      <ng-container *ngIf="showPrepPicker; else planBtn">
+        <app-searchable-select
+          class="filter-select"
+          [(ngModel)]="prepPickerCustomerId"
+          (ngModelChange)="onPrepCustomerSelected($event)"
+          [options]="prepPickerOptions"
+          [placeholder]="'meetingsOverview.selectCustomer' | t"
+        ></app-searchable-select>
+        <button type="button" class="ghost-action" (click)="showPrepPicker = false; prepPickerCustomerId = ''">
+          {{ 'common.cancel' | t }}
+        </button>
+      </ng-container>
+      <ng-template #planBtn>
+        <button type="button" class="ghost-action" (click)="showPrepPicker = true">
+          {{ 'meetingsOverview.planMeeting' | t }}
+        </button>
+      </ng-template>
+      <button type="button" class="primary-action" (click)="newMeeting()">
+        + {{ 'meetingsOverview.newMeeting' | t }}
+      </button>
+    </div>
   </div>
 
-  <section class="panel meeting-runway">
-    <article>
-      <span class="eyebrow">{{ 'meetings.runMode' | t }}</span>
-      <strong>{{ 'meetings.agenda' | t }}</strong>
-      <small>{{ 'meetings.agendaText' | t }}</small>
+  <!-- ── Expandable calendar (meetings only) ─────────────────────────────── -->
+  <div class="meetings-cal-panel">
+    <app-calendar
+      [events]="meetingCalendarEvents"
+      (eventOpened)="onCalendarEventOpened($event)"
+    ></app-calendar>
+  </div>
+
+  <!-- ── Clickable KPI tiles ──────────────────────────────────────────────── -->
+  <div class="metric-grid meetings-metrics">
+    <article class="metric clickable" role="button" tabindex="0"
+      (click)="openTile('upcoming')" (keydown.enter)="openTile('upcoming')">
+      <span>{{ 'meetingsOverview.upcoming' | t }}</span>
+      <strong>{{ getLane('upcoming').length }}</strong>
+      <small>{{ 'meetingsOverview.upcomingHint' | t }}</small>
     </article>
-    <article>
-      <span class="eyebrow">{{ 'meetings.liveCapture' | t }}</span>
-      <strong>{{ 'meetings.notesBecomeWork' | t }}</strong>
-      <small>{{ 'meetings.notesBecomeWorkText' | t }}</small>
+
+    <article class="metric clickable" role="button" tabindex="0"
+      (click)="openTile('in-progress')" (keydown.enter)="openTile('in-progress')">
+      <span>{{ 'meetingsOverview.inProgress' | t }}</span>
+      <strong>{{ getLane('in-progress').length }}</strong>
+      <small>{{ 'meetingsOverview.inProgressHint' | t }}</small>
     </article>
-    <article>
-      <span class="eyebrow">{{ 'meetings.closeout' | t }}</span>
-      <strong>{{ 'meetings.followUpDebt' | t }}</strong>
-      <small>{{ 'meetings.actionsNeedConversion' | t: { count: workspace.openMeetingActions.length } }}</small>
+
+    <article class="metric clickable" role="button" tabindex="0"
+      (click)="openTile('open-tasks')" (keydown.enter)="openTile('open-tasks')">
+      <span>{{ 'meetingsOverview.openMeetingTasks' | t }}</span>
+      <strong>{{ openMeetingTasksCount }}</strong>
+      <small>{{ 'meetingsOverview.openTasksHint' | t }}</small>
     </article>
-    <div class="inline-actions">
-      <button type="button" class="ghost-action" (click)="publishSummary()">{{ 'meetings.publishSummary' | t }}</button>
-      <button type="button" class="primary-action" [disabled]="!workspace.openMeetingActions.length" (click)="convertAllActions()">{{ 'meetings.convertAllActions' | t }}</button>
+  </div>
+
+  <!-- ── Customer filter + meeting lanes ─────────────────────────────────── -->
+  <section class="panel">
+    <div class="panel-header">
+      <div>
+        <span class="eyebrow">{{ 'meetingsOverview.filters' | t }}</span>
+        <h3>{{ 'meetingsOverview.allMeetings' | t }}</h3>
+      </div>
+      <app-searchable-select
+        [(ngModel)]="customerFilter"
+        [options]="customerFilterOptions"
+        class="filter-select"
+      ></app-searchable-select>
+    </div>
+
+    <div *ngFor="let bucket of buckets" class="lane-section">
+      <div class="lane-header">
+        <span class="lane-label">{{ ('meetingsOverview.' + bucket.lane) | t }}</span>
+        <span class="lane-count">{{ bucket.meetings.length }}</span>
+      </div>
+
+      <div *ngIf="!bucket.meetings.length" class="lane-empty">
+        <p>{{ 'meetingsOverview.noMeetingsInLane' | t }}</p>
+        <button
+          *ngIf="bucket.lane === 'upcoming'"
+          type="button"
+          class="primary-action"
+          (click)="newMeeting()"
+        >+ {{ 'meetingsOverview.newMeeting' | t }}</button>
+      </div>
+
+      <div
+        *ngFor="let m of bucket.meetings"
+        class="meeting-row"
+        (click)="openMeeting(m)"
+      >
+        <div class="meeting-row-main">
+          <strong>{{ m.subject }}</strong>
+          <span class="muted">{{ workspace.customer(m.customerId)?.name }}</span>
+        </div>
+        <div class="meeting-row-meta">
+          <span class="muted">{{ m.meetingDate | slice:0:10 }}</span>
+          <span class="status-chip" [ngClass]="workspace.statusClass(m.status)">
+            {{ ('customerMeeting.statusValues.' + m.status) | t }}
+          </span>
+          <span class="task-count-badge">
+            {{ tasksFromMeeting(m).length }} {{ 'common.task' | t }}
+          </span>
+        </div>
+      </div>
     </div>
   </section>
 
-  <div class="meeting-layout">
-    <section class="panel">
-      <div class="panel-header">
+  <!-- ── Tile popup: meetings list ───────────────────────────────────────── -->
+  <div class="modal-backdrop" *ngIf="openLens" role="presentation" (click)="closeTile()">
+    <aside class="modal-card" role="dialog" (click)="$event.stopPropagation()">
+      <header class="modal-header">
         <div>
-          <span class="eyebrow">{{ 'meetings.agenda' | t }}</span>
-          <h2>{{ 'meetings.runTheSync' | t }}</h2>
+          <span class="eyebrow">{{ 'meetingsOverview.eyebrow' | t }}</span>
+          <h2>{{ lensTitleKey | t }}</h2>
         </div>
-        <span class="status-chip in-progress">{{ 'status.in-progress' | t }}</span>
-      </div>
-
-      <form class="inline-create" (ngSubmit)="addAgendaItem()">
-        <input name="agendaTitle" [(ngModel)]="newAgendaTitle" [placeholder]="'meetings.addAgendaPlaceholder' | t" />
-        <button type="submit" class="ghost-action" [disabled]="!newAgendaTitle.trim()">{{ 'common.add' | t }}</button>
-      </form>
-
-      <ol class="agenda-list">
-        <li *ngFor="let agendaItem of workspace.meeting.agenda">
-          <label class="agenda-check">
-            <input
-              type="checkbox"
-              [ngModel]="agendaItem.completed"
-              [ngModelOptions]="{ standalone: true }"
-              (ngModelChange)="workspace.toggleAgendaItem(agendaItem, $event)"
-            />
-            <span [class.completed]="agendaItem.completed">{{ agendaItem.title }}</span>
-          </label>
-        </li>
-      </ol>
-
-      <form class="meeting-capture" (ngSubmit)="addNote()">
-        <div class="capture-header">
-          <div>
-            <span class="eyebrow">{{ 'meetings.liveCapture' | t }}</span>
-            <h3>{{ 'meetings.addMeetingOutput' | t }}</h3>
-          </div>
-          <button type="submit" class="primary-action" [disabled]="!newNote.content.trim()">{{ 'meetings.addNote' | t }}</button>
-        </div>
-
-        <label class="field-control">
-          {{ 'common.content' | t }}
-          <textarea
-            name="content"
-            [(ngModel)]="newNote.content"
-            rows="3"
-            [placeholder]="'meetings.contentPlaceholder' | t"
-          ></textarea>
-        </label>
-
-        <div class="capture-grid">
-          <label class="field-control">
-            {{ 'common.type' | t }}
-            <select name="type" [(ngModel)]="newNote.type">
-              <option *ngFor="let type of noteTypes" [ngValue]="type">{{ ('noteType.' + type) | t }}</option>
-            </select>
-          </label>
-
-          <label class="field-control">
-            {{ 'common.owner' | t }}
-            <select name="ownerId" [(ngModel)]="newNote.ownerId">
-              <option value="">{{ 'common.unassigned' | t }}</option>
-              <option *ngFor="let member of workspace.members" [ngValue]="member.id">{{ member.name }}</option>
-            </select>
-          </label>
-
-          <label class="field-control">
-            {{ 'common.dueDate' | t }}
-            <input name="dueDate" type="date" [(ngModel)]="newNote.dueDate" />
-          </label>
-        </div>
-      </form>
-
-      <div class="note-filter">
-        <button
-          *ngFor="let filter of noteFilters"
-          type="button"
-          [class.active]="noteFilter === filter"
-          (click)="noteFilter = filter"
-        >
-          {{ ('noteType.' + filter) | t }}
+        <button type="button" class="ghost-action" (click)="closeTile()">
+          {{ 'common.close' | t }}
         </button>
-      </div>
+      </header>
 
-      <div *ngIf="filteredNotes.length; else noMeetingNotes" class="note-stack">
-        <article *ngFor="let note of filteredNotes" class="note" [ngClass]="workspace.statusClass(note.type)">
-          <div>
-            <span>{{ ('noteType.' + note.type) | t }}</span>
-            <p>{{ note.content }}</p>
-            <small *ngIf="note.ownerId">{{ 'common.owner' | t }}: {{ workspace.memberName(note.ownerId) }} - {{ 'common.due' | t }} {{ note.dueDate }}</small>
-            <small *ngIf="note.convertedTaskId">{{ 'common.converted' | t }} {{ note.convertedTaskId }}</small>
+      <!-- Open Tasks popup -->
+      <div *ngIf="openLens === 'open-tasks'" class="modal-list">
+        <button
+          *ngFor="let task of openMeetingTasks"
+          type="button"
+          class="popup-row"
+          (click)="openTask(task); closeTile()"
+        >
+          <span class="popup-row-main">
+            <strong>{{ task.title }}</strong>
+            <small>{{ workspace.customer(task.customerId)?.name }} · {{ 'common.due' | t }} {{ task.dueDate }}</small>
+          </span>
+          <div class="popup-row-badges">
+            <span class="status-chip" [ngClass]="workspace.statusClass(task.status)">
+              {{ ('meetingTask.statusValues.' + task.status) | t }}
+            </span>
+            <span class="priority" [ngClass]="workspace.statusClass(task.priority)">
+              {{ ('priority.' + workspace.statusClass(task.priority)) | t }}
+            </span>
           </div>
-          <button
-            *ngIf="note.type === 'action'"
-            type="button"
-            class="convert-action"
-            [disabled]="!!note.convertedTaskId"
-            (click)="startConversion(note)"
-          >
-            {{ note.convertedTaskId ? ('common.converted' | t) : ('common.convert' | t) }}
-          </button>
-
-          <form *ngIf="convertingNoteId === note.id && !note.convertedTaskId" class="conversion-box" (ngSubmit)="confirmConversion(note)">
-            <label class="field-control">
-              {{ 'meetings.taskTitle' | t }}
-              <input name="conversionTitle" [(ngModel)]="conversionInput.title" />
-            </label>
-            <div class="capture-grid">
-              <label class="field-control">
-                {{ 'common.owner' | t }}
-                <select name="conversionOwner" [(ngModel)]="conversionInput.assigneeId">
-                  <option *ngFor="let member of workspace.members" [ngValue]="member.id">{{ member.name }}</option>
-                </select>
-              </label>
-              <label class="field-control">
-                {{ 'common.priority' | t }}
-                <select name="conversionPriority" [(ngModel)]="conversionInput.priority">
-                  <option *ngFor="let priority of priorities" [ngValue]="priority">{{ ('priority.' + workspace.statusClass(priority)) | t }}</option>
-                </select>
-              </label>
-              <label class="field-control">
-                {{ 'common.dueDate' | t }}
-                <input name="conversionDueDate" type="date" [(ngModel)]="conversionInput.dueDate" />
-              </label>
-            </div>
-            <div class="inline-actions">
-              <button type="submit" class="primary-action" [disabled]="!conversionInput.title.trim()">{{ 'meetings.createTask' | t }}</button>
-              <button type="button" class="ghost-action" (click)="cancelConversion()">{{ 'common.cancel' | t }}</button>
-            </div>
-          </form>
-        </article>
-      </div>
-
-      <ng-template #noMeetingNotes>
-        <div class="empty-state">
-          <strong>{{ 'meetings.noNotesTitle' | t }}</strong>
-          <span>{{ 'meetings.noNotesText' | t }}</span>
+        </button>
+        <div *ngIf="!openMeetingTasks.length" class="empty-state">
+          <strong>{{ 'home.noMatches' | t }}</strong>
         </div>
-      </ng-template>
-    </section>
-
-    <aside class="detail-panel">
-      <span class="eyebrow">{{ 'meetings.followUpPanel' | t }}</span>
-      <h2>{{ 'meetings.meetingOutput' | t }}</h2>
-      <div class="output-stat">
-        <strong>{{ workspace.meeting.notes.length }}</strong>
-        <span>{{ 'meetings.totalNotes' | t }}</span>
-      </div>
-      <div class="output-stat">
-        <strong>{{ workspace.unconvertedActionCount }}</strong>
-        <span>{{ 'meetings.openActions' | t }}</span>
       </div>
 
-      <div class="followup-lane">
-        <div class="panel-header compact">
-          <div>
-            <span class="eyebrow">{{ 'meetings.openActions' | t }}</span>
-            <h3>{{ 'meetings.carryIntoWork' | t }}</h3>
+      <!-- Upcoming / In-progress meetings popup -->
+      <div *ngIf="openLens !== 'open-tasks'" class="modal-list">
+        <button
+          *ngFor="let m of lensMeetings"
+          type="button"
+          class="popup-row"
+          (click)="openMeeting(m); closeTile()"
+        >
+          <span class="popup-row-main">
+            <strong>{{ m.subject }}</strong>
+            <small>{{ workspace.customer(m.customerId)?.name }} · {{ m.meetingDate | slice:0:10 }}</small>
+          </span>
+          <div class="popup-row-badges">
+            <span class="status-chip" [ngClass]="workspace.statusClass(m.status)">
+              {{ ('customerMeeting.statusValues.' + m.status) | t }}
+            </span>
+            <span class="task-count-badge">
+              {{ tasksFromMeeting(m).length }} {{ 'common.task' | t }}
+            </span>
           </div>
+        </button>
+        <div *ngIf="!lensMeetings.length" class="empty-state">
+          <strong>{{ 'home.noMatches' | t }}</strong>
         </div>
-        <div *ngIf="workspace.openMeetingActions.length; else noFollowups" class="mini-stack">
-          <article *ngFor="let note of workspace.openMeetingActions" class="mini-card">
-            <strong>{{ note.content }}</strong>
-            <small *ngIf="note.ownerId">{{ workspace.memberName(note.ownerId) }} - {{ note.dueDate }}</small>
-          </article>
-        </div>
-        <ng-template #noFollowups>
-          <div class="empty-state compact-empty">{{ 'meetings.noOpenDebt' | t }}</div>
-        </ng-template>
-      </div>
-
-      <div class="attendees">
-        <span *ngFor="let attendeeId of workspace.meeting.attendeeIds" class="avatar">{{ workspace.initials(attendeeId) }}</span>
       </div>
     </aside>
   </div>
+
 </section>

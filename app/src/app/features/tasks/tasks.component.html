@@ -1,0 +1,208 @@
+<section class="screen tasks-screen">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <div class="screen-title">
+    <div>
+      <span class="eyebrow">{{ 'tasks.eyebrow' | t }}</span>
+      <h2>{{ 'tasks.title' | t }}</h2>
+      <p class="screen-sub">{{ 'tasks.subtitle' | t }}</p>
+    </div>
+    <button type="button" class="ghost-action" (click)="openView('my-work')">{{ 'tasks.openMyWork' | t }}</button>
+  </div>
+
+  <!-- ── Expandable calendar (tasks only) ────────────────────────────────── -->
+  <div class="tasks-cal-panel">
+    <app-calendar
+      [events]="taskCalendarEvents"
+      (eventOpened)="onCalendarEventOpened($event)"
+    ></app-calendar>
+  </div>
+
+  <!-- ── Stat tiles (clickable → popup list) ─────────────────────────────── -->
+  <div class="metric-grid tasks-metrics">
+    <article class="metric clickable" role="button" tabindex="0"
+      (click)="openTile('open')" (keydown.enter)="openTile('open')">
+      <span>{{ 'tasks.tiles.open' | t }}</span>
+      <strong>{{ openCount }}</strong>
+      <small>{{ 'tasks.tiles.openHint' | t }}</small>
+    </article>
+
+    <article class="metric attention clickable" role="button" tabindex="0"
+      (click)="openTile('overdue')" (keydown.enter)="openTile('overdue')">
+      <span>{{ 'tasks.tiles.overdue' | t }}</span>
+      <strong>{{ overdueCount }}</strong>
+      <small>{{ 'tasks.tiles.overdueHint' | t }}</small>
+    </article>
+
+    <article class="metric clickable" role="button" tabindex="0"
+      (click)="openTile('today')" (keydown.enter)="openTile('today')">
+      <span>{{ 'tasks.tiles.today' | t }}</span>
+      <strong>{{ todayCount }}</strong>
+      <small>{{ 'tasks.tiles.todayHint' | t }}</small>
+    </article>
+
+    <article class="metric clickable" role="button" tabindex="0"
+      (click)="openTile('blocked')" (keydown.enter)="openTile('blocked')">
+      <span>{{ 'tasks.tiles.blocked' | t }}</span>
+      <strong>{{ blockedCount }}</strong>
+      <small>{{ 'tasks.tiles.blockedHint' | t }}</small>
+    </article>
+  </div>
+
+  <!-- ── Controls: audience filter · origin · search ─────────────────────── -->
+  <div class="tasks-controls">
+    <div class="filter-strip">
+      <button
+        *ngFor="let f of audienceOptions"
+        type="button"
+        [class.active]="audience === f.id"
+        (click)="audience = f.id"
+      >{{ f.labelKey | t }}</button>
+    </div>
+
+    <div class="controls-right">
+      <select class="origin-select" [(ngModel)]="origin" [attr.aria-label]="'tasks.origin.label' | t">
+        <option *ngFor="let o of originOptions" [value]="o.id">{{ o.labelKey | t }}</option>
+      </select>
+      <input
+        type="search"
+        class="tasks-search"
+        [(ngModel)]="search"
+        [placeholder]="'tasks.searchPlaceholder' | t"
+      />
+    </div>
+  </div>
+
+  <!-- ── List header ─────────────────────────────────────────────────────── -->
+  <div class="tab-section-header">
+    <div>
+      <span class="eyebrow">{{ 'tasks.list.eyebrow' | t }}</span>
+      <h3>{{ 'tasks.list.title' | t }}</h3>
+    </div>
+    <span class="count-badge">{{ filteredTasks.length }}</span>
+  </div>
+
+  <!-- ── Task table (grouped by due date) ────────────────────────────────── -->
+  <div *ngIf="hasTasks; else noTasks" class="task-groups scroll-box">
+    <div *ngFor="let group of groupedTasks" class="task-group">
+
+      <div class="group-header" [class.group-danger]="group.isDanger">
+        <span>{{ group.labelKey | t }}</span>
+        <span class="group-count" [class.count-danger]="group.isDanger">{{ group.tasks.length }}</span>
+      </div>
+
+      <div class="task-table">
+        <div class="task-table-header">
+          <span>{{ 'common.status' | t }}</span>
+          <span>{{ 'common.task' | t }}</span>
+          <span class="col-hide-sm">{{ 'tasks.col.origin' | t }}</span>
+          <span>{{ 'common.due' | t }}</span>
+          <span class="col-hide-sm">{{ 'tasks.col.assignee' | t }}</span>
+        </div>
+
+        <div *ngFor="let task of group.tasks" class="task-row-wrapper">
+
+          <!-- ── Main row: click to expand ──────────────────────────────── -->
+          <article
+            class="task-row"
+            [ngClass]="[priorityClass(task), isOverdue(task) ? 'task-overdue' : '', workspace.selectedTaskId === task.id ? 'task-selected' : '', expandedTaskId === task.id ? 'task-expanded' : '']"
+            (click)="toggleExpand(task, $event)"
+          >
+            <!-- Status + waiting reason -->
+            <div class="cell cell-status">
+              <span class="status-chip compact-chip" [ngClass]="workspace.statusClass(task.status)">
+                {{ ('meetingTask.statusValues.' + task.status) | t }}
+              </span>
+              <span *ngIf="showWaitingReason(task)" class="waiting-reason" [title]="task.waitingReason">
+                {{ task.waitingReason }}
+              </span>
+            </div>
+
+            <!-- Title + origin badge + checklist bar + notes -->
+            <div class="cell cell-title">
+              <div class="title-main">
+                <span
+                  class="origin-badge"
+                  [class.origin-meeting]="isMeetingTask(task)"
+                  [class.origin-board]="!isMeetingTask(task)"
+                >{{ (isMeetingTask(task) ? 'tasks.badge.meeting' : 'tasks.badge.board') | t }}</span>
+                <span class="task-title-text">{{ task.title }}</span>
+              </div>
+              <ng-container *ngIf="checklistProgress(task) as cl">
+                <div class="checklist-row">
+                  <div class="checklist-bar">
+                    <div class="checklist-fill" [style.width.%]="cl.pct"></div>
+                  </div>
+                  <span class="checklist-fraction">{{ cl.done }}/{{ cl.total }}</span>
+                </div>
+              </ng-container>
+            </div>
+
+            <!-- Origin: customer + meeting name -->
+            <div class="cell cell-text col-hide-sm">
+              <div class="origin-cell">
+                <span class="origin-primary">{{ taskContext(task) || '—' }}</span>
+                <span *ngIf="sourceMeetingName(task) as mtg" class="origin-meeting-name">{{ mtg }}</span>
+              </div>
+            </div>
+
+            <!-- Due: relative label + raw date -->
+            <div class="cell cell-due" [class.overdue-date]="isOverdue(task)">
+              <span *ngIf="relativeDueLabel(task) as label" class="due-label">{{ label }}</span>
+              <span class="due-raw">{{ task.dueDate ? (task.dueDate | slice:0:10) : '—' }}</span>
+            </div>
+
+            <!-- Assignee -->
+            <div class="cell cell-assignee col-hide-sm">
+              <ng-container *ngIf="workspace.employeeName(task.assignedToEmployeeId) as name">
+                <span class="assignee-avatar">{{ getInitials(name) }}</span>
+                <span class="assignee-name">{{ name }}</span>
+              </ng-container>
+              <span *ngIf="!workspace.employeeName(task.assignedToEmployeeId)" class="cell-empty">—</span>
+            </div>
+          </article>
+
+          <!-- ── Expanded panel: checklist + open button ─────────────────── -->
+          <div *ngIf="expandedTaskId === task.id" class="task-expand-panel">
+            <div class="expand-checklist" *ngIf="task.checklist?.length; else noChecklist">
+              <span class="expand-section-label">{{ 'tasks.expand.checklist' | t }}</span>
+              <div class="checklist-items">
+                <div *ngFor="let item of task.checklist" class="checklist-item" [class.item-done]="item.done">
+                  <span class="item-dot" [class.dot-done]="item.done"></span>
+                  <span class="item-label">{{ item.label }}</span>
+                </div>
+              </div>
+            </div>
+            <ng-template #noChecklist>
+              <span class="expand-no-checklist">{{ 'tasks.expand.noChecklist' | t }}</span>
+            </ng-template>
+            <button type="button" class="expand-open-btn" (click)="openTask(task)">
+              {{ 'tasks.expand.open' | t }} →
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <ng-template #noTasks>
+    <div class="empty-state">
+      <strong>{{ 'tasks.noTasksTitle' | t }}</strong>
+      <span>{{ 'tasks.noTasksText' | t }}</span>
+    </div>
+  </ng-template>
+
+  <!-- ── Stat tile popup ─────────────────────────────────────────────────── -->
+  <app-metric-tasks-modal
+    *ngIf="openLens"
+    [title]="lensTitleKey"
+    mode="tasks"
+    [tasks]="lensBoardTasks"
+    [meetingTasks]="lensMeetingTasks"
+    [hideFilters]="true"
+    (close)="closeTile()"
+  ></app-metric-tasks-modal>
+
+</section>

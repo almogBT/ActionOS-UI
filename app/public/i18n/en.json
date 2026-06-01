@@ -43,6 +43,7 @@
     "home": "Home",
     "inbox": "Inbox",
     "my-work": "My Work",
+    "tasks": "Tasks",
     "boards": "Boards",
     "meetings": "Meetings",
     "customers": "Customers",
@@ -112,6 +113,9 @@
     "inProgress": "Still active",
     "in-progress": "Still active",
     "closed": "Wrapped",
+    "upcomingHint": "Scheduled and not yet run",
+    "inProgressHint": "Past their date, still open",
+    "openTasksHint": "Actions born from meetings",
     "openMeetingTasks": "Open tasks",
     "noMeetingsInLane": "Nothing here.",
     "backToList": "All meetings"
@@ -349,6 +353,53 @@
       "emptyText": "You're on top of things."
     }
   },
+  "tasks": {
+    "eyebrow": "All work",
+    "title": "Tasks",
+    "subtitle": "Every open task across the team — from meetings and from boards — in one place.",
+    "openMyWork": "Open My Work",
+    "tiles": {
+      "open": "Open tasks",
+      "openHint": "Everything still in flight",
+      "overdue": "Overdue",
+      "overdueHint": "Past their due date",
+      "today": "Due today",
+      "todayHint": "On the clock for today",
+      "blocked": "Blocked",
+      "blockedHint": "Waiting on someone"
+    },
+    "audience": {
+      "all": "All tasks",
+      "mine": "My tasks",
+      "assignedOthers": "Assigned to others"
+    },
+    "origin": {
+      "label": "Origin",
+      "all": "All origins",
+      "meeting": "From meetings",
+      "standalone": "Standalone"
+    },
+    "badge": {
+      "meeting": "Meeting",
+      "board": "Board"
+    },
+    "col": {
+      "origin": "Origin",
+      "assignee": "Assignee"
+    },
+    "list": {
+      "eyebrow": "Open work",
+      "title": "Tasks"
+    },
+    "searchPlaceholder": "Search tasks...",
+    "noTasksTitle": "Nothing here right now",
+    "noTasksText": "Try another filter, or clear the search to see more.",
+    "expand": {
+      "checklist": "Checklist",
+      "noChecklist": "No checklist items.",
+      "open": "Open task"
+    }
+  },
   "meetings": {
     "openMyWork": "Open My Work",
     "runMode": "Live",
@@ -541,14 +592,14 @@
     },
     "wrapUp": "Wrap-up",
     "publishRecap": "Publish recap",
-    "publishRecapHint": "Builds a complete recap from the summary, decisions, tasks, blockers, and next-meeting date, and marks this meeting as closed.",
+    "publishRecapHint": "Builds a complete recap from the summary, decisions, tasks, blockers, and next-meeting date.",
     "startMeeting": "Start meeting",
     "expandSetup": "Expand setup",
     "collapseSetup": "Collapse setup",
     "collapseCapture": "Collapse capture",
     "expandCapture": "Expand capture",
     "untitledMeeting": "Untitled meeting",
-    "captureAndTask": "Capture + task",
+    "captureAndTask": "Add & create task",
     "shortcutsHint": "Shortcuts: Ctrl+1 Note · Ctrl+2 Action · Ctrl+3 Decision · Ctrl+4 Blocker · Enter capture · Ctrl+Enter capture + task.",
     "runSubtitle": "Capture events quickly and convert them into linked tasks.",
     "tasksFromMeeting": "Tasks from this meeting",
@@ -636,7 +687,16 @@
     "openTasks": "Still open",
     "overdueTasks": "Overdue",
     "waitingForCustomer": "On the customer's plate",
+    "waitingForInternal": "On our plate",
+    "openBlockers": "Open blockers",
     "completedSinceLastMeeting": "Wins since last meeting",
+    "lastMet": "Last met",
+    "daysAgo": "days ago",
+    "noMeetingsYet": "First meeting with this customer.",
+    "nextPlanned": "Next planned",
+    "agendaForThisMeeting": "Agenda for this meeting",
+    "showRecap": "Show last recap",
+    "hideRecap": "Hide last recap",
     "nothing": "Nothing here.",
     "print": "Print",
     "startMeetingNow": "Start meeting"
@@ -653,6 +713,22 @@
     "required": "Required",
     "emailDomain": "Email must be on a Fritz or Critilog domain.",
     "inactiveEmployee": "Can't assign — this person is no longer active."
+  },
+  "recap": {
+    "title": "Meeting recap",
+    "unknownCustomer": "Unknown customer",
+    "ledBy": "Led by",
+    "ourSide": "Our side",
+    "customerSide": "Customer side",
+    "goal": "Goal",
+    "whatHappened": "What happened",
+    "decisions": "Decisions",
+    "tasksCreated": "Tasks created",
+    "due": "due",
+    "blockers": "Blockers",
+    "notes": "Notes",
+    "nextMeeting": "Next meeting",
+    "notesForNext": "Notes for next meeting"
   },
   "settings": {
     "mailNotifications": "Mail notifications",

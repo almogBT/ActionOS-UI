@@ -208,7 +208,7 @@ export class MetricTasksModalComponent {
   @Input() hideFilters = false;
   @Output() close = new EventEmitter<void>();
 
-  readonly peopleFilters: PeopleFilter[] = ['all', 'mine', 'assignedByMe', 'opened', 'assignedToMeByOthers'];
+  readonly peopleFilters: PeopleFilter[] = ['all', 'mine', 'assignedByMe'];
   filter: PeopleFilter = 'all';
 
   constructor(public workspace: ActionosWorkspaceService) {}

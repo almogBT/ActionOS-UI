@@ -3,7 +3,7 @@ import { Component, HostListener, Inject, OnInit, computed, inject, signal } fro
 import { FormsModule } from '@angular/forms';
 import { ActionosI18nService } from './core/i18n/actionos-i18n.service';
 import { Customer, NavItem, QuickCaptureType, Task, ViewId } from './core/models/actionos.models';
-import { ACTIONOS_NAV_ITEMS } from './core/mock-data/actionos.mock-data';
+import { ACTIONOS_NAV_ITEMS } from './core/config/actionos-ui.config';
 import { TranslatePipe } from './core/i18n/translate.pipe';
 import { IconComponent, IconName } from './shared/icons/icon.component';
 import { SearchableSelectComponent, SelectOption } from './shared/searchable-select/searchable-select.component';
@@ -15,6 +15,7 @@ import { CustomersComponent } from './features/customers/customers.component';
 import { InboxComponent } from './features/inbox/inbox.component';
 import { MeetingsComponent } from './features/meetings/meetings.component';
 import { MyWorkComponent } from './features/my-work/my-work.component';
+import { TasksComponent } from './features/tasks/tasks.component';
 import { MeetingDrawerComponent } from './features/meeting-drawer/meeting-drawer.component';
 import { TaskDrawerComponent } from './features/task-drawer/task-drawer.component';
 import { WorkspaceHomeComponent } from './features/workspace-home/workspace-home.component';
@@ -33,6 +34,7 @@ const SIDEBAR_STORAGE_KEY = 'actionos.sidebar.collapsed';
     WorkspaceHomeComponent,
     InboxComponent,
     MyWorkComponent,
+    TasksComponent,
     BoardsComponent,
     MeetingsComponent,
     CustomersComponent,
@@ -106,9 +108,7 @@ export class AppComponent implements OnInit {
 
   /** Board preview popup → open the new-meeting form pre-filled for this customer. */
   startCustomerMeeting(customer: Customer): void {
-    this.customerEntryView.set('meeting-form');
-    this.activeCustomer.set(customer);
-    this.setView('customers');
+    this.workspace.openNewMeetingModal(customer.id);
   }
 
   /** FAB — start a new meeting from anywhere in the app. */
@@ -243,6 +243,7 @@ export class AppComponent implements OnInit {
       home: 'home',
       inbox: 'inbox',
       'my-work': 'check-square',
+      tasks: 'check-circle',
       boards: 'columns',
       meetings: 'calendar',
       customers: 'users',
@@ -252,9 +253,10 @@ export class AppComponent implements OnInit {
 
   private loadCollapsed(): boolean {
     try {
-      return this.doc?.defaultView?.localStorage.getItem(SIDEBAR_STORAGE_KEY) === '1';
+      const stored = this.doc?.defaultView?.localStorage.getItem(SIDEBAR_STORAGE_KEY);
+      return stored === null ? true : stored === '1';
     } catch {
-      return false;
+      return true;
     }
   }
 

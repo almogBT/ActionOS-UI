@@ -60,26 +60,21 @@
   margin-bottom: 14px;
 
   button {
-    padding: 5px 14px;
-    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
     border: 1px solid var(--line);
-    background: transparent;
-    color: var(--muted);
-    font-size: 13px;
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
     cursor: pointer;
-    transition: background 0.12s, color 0.12s, border-color 0.12s;
     white-space: nowrap;
+    transition: background var(--duration-fast), color var(--duration-fast), border-color var(--duration-fast);
 
-    &:hover {
-      background: var(--surface-strong);
-      color: var(--ink);
-    }
-
-    &.active {
-      background: var(--ink);
-      color: var(--bg-elevated);
-      border-color: var(--ink);
-    }
+    &:hover  { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+    &.active { background: var(--accent); border-color: var(--accent); color: #fff; }
   }
 }
 

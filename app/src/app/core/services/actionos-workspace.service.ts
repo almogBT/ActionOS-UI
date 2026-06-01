@@ -1,10 +1,9 @@
 import { inject, Injectable, signal } from '@angular/core';
+import { ActionosI18nService } from '../i18n/actionos-i18n.service';
 import { ActionosAuthService } from './auth.service';
 import {
-  ACTIONOS_ATTACHMENTS, ACTIONOS_BOARD_TEMPLATES, ACTIONOS_CUSTOMER_MEETINGS, ACTIONOS_CUSTOMERS, ACTIONOS_EMPLOYEES, ACTIONOS_EXTERNAL_CUSTOMER_GROUPS, ACTIONOS_MEETING, ACTIONOS_MEETING_TASKS, ACTIONOS_MEMBERS
-} from '../mock-data/actionos.mock-data';
-import {
-  ActivityLog, AgendaItem, Attachment, AttachmentEntityType, BoardTemplate, CalendarEvent, CalendarEventKind, ChecklistItem, Comment, CreateCustomerInput, CreateCustomerMeetingInput, CreateMeetingNoteInput, CreateMeetingTaskInput, CreateMemberInput, CreateTaskInput, Customer, CustomerMeeting, CustomerMeetingStatus, CustomerPreparationSummary, Employee, MailNotificationPrefs, Meeting, MeetingNote, Task, TaskStatus, Member, MyWorkTab, NoteType, QuickCaptureType, UpdateCustomerMeetingInput, UpdateMeetingNoteInput, UpdateMeetingTaskInput, UpdateTaskInput } from '../models/actionos.models';
+  ActivityLog, AgendaItem, Attachment, AttachmentEntityType, BoardTemplate, CalendarEvent, CalendarEventKind, ChecklistItem, Comment, CreateCustomerInput, CreateCustomerMeetingInput, CreateMeetingNoteInput, CreateMeetingTaskInput, CreateMemberInput, CreateTaskInput, Customer, CustomerMeeting, CustomerMeetingStatus, CustomerParticipant, CustomerPreparationSummary, Employee, MailNotificationPrefs, Meeting, MeetingNote, Task, TaskStatus, Member, MyWorkTab, NoteType, QuickCaptureType, UpdateCustomerMeetingInput, UpdateMeetingNoteInput, UpdateMeetingTaskInput, UpdateTaskInput } from '../models/actionos.models';
+import { ACTIONOS_BOARD_TEMPLATES } from '../config/actionos-ui.config';
 import {
   CustomerRepositoryPort,
   InMemoryCustomerRepository
@@ -19,10 +18,6 @@ import {
   hasFritzDomain
 } from './employee-directory.port';
 import {
-  LocalMockNotificationAdapter,
-  NotificationPort
-} from './notification.port';
-import {
   AttachmentStoragePort,
   InMemoryAttachmentStorage
 } from './attachment-storage.port';
@@ -30,35 +25,13 @@ import {
   ActionosApiAttachmentDto,
   ActionosApiCustomerDto,
   ActionosApiCustomerMeetingDto,
+  ActionosApiMeetingNoteDto,
   ActionosApiTaskDto,
   ActionosApiUserDto,
   ActionosBootstrapDto,
   ActionosRepositoryService
 } from './actionos-repository.service';
 import { HostContextService } from './host-context.service';
-
-interface ActionosPersistedState {
-  selectedTaskId: string;
-  tasks: Task[];
-  members: Member[];
-  meeting: Meeting;
-  comments: Comment[];
-  activity: ActivityLog[];
-  // v3 additions:
-  customers?: Customer[];
-  employees?: Employee[];
-  customerMeetings?: CustomerMeeting[];
-  attachments?: Attachment[];
-  nextNoteNumber: number;
-  nextTaskNumber: number;
-  nextMemberNumber: number;
-  nextCommentNumber: number;
-  nextActivityNumber: number;
-  nextAgendaNumber: number;
-  nextCustomerNumber?: number;
-  nextCustomerMeetingNumber?: number;
-  nextAttachmentNumber?: number;
-}
 
 interface TeamWorkload {
   member: Member;
@@ -68,8 +41,6 @@ interface TeamWorkload {
   meetingBlockedCount: number;
 }
 
-const STORAGE_KEY_V2 = 'actionos.local-state.v2';
-const STORAGE_KEY_V3 = 'actionos.local-state.v5';
 const UNIFIED_TASK_STATUSES: TaskStatus[] = [
   'New',
   'Sent To Owner',
@@ -82,26 +53,57 @@ const UNIFIED_TASK_STATUSES: TaskStatus[] = [
 
 @Injectable({ providedIn: 'root' })
 export class ActionosWorkspaceService {
+  private readonly realtimeRefreshIntervalMs = 15000;
+  private readonly minRefreshGapMs = 3000;
   private readonly auth = inject(ActionosAuthService);
+  private readonly i18n = inject(ActionosI18nService);
   private readonly actionosApi = inject(ActionosRepositoryService);
   private readonly hostContext = inject(HostContextService);
   private currentOrgGroupId: string | null = null;
+  private initScheduled = false;
+  private bootstrapInFlight: Promise<void> | null = null;
+  private refreshInFlight: Promise<void> | null = null;
+  private lastBootstrapKey: string | null = null;
+  private lastRefreshStartedAt = 0;
   private refreshScheduled = false;
+  private pendingMutationCount = 0;
+  private mutationRefreshPending = false;
+  private realtimeRefreshTimer: ReturnType<typeof setInterval> | null = null;
+  private realtimeListenersAttached = false;
   private readonly taskChecklistMeta = new Map<string, Array<{ id: number; label: string }>>();
+  private readonly meetingIdAliases = new Map<string, string>();
+  private readonly meetingNoteIdAliases = new Map<string, string>();
+  private readonly pendingMeetingMutations = new Map<string, Array<(meetingIdNumeric: number) => Promise<unknown>>>();
+  private readonly pendingMeetingNoteMutations = new Map<string, Array<(meetingIdNumeric: number, noteIdNumeric: number) => Promise<unknown>>>();
+  private readonly taskIdAliases = new Map<string, string>();
+  private readonly pendingTaskMutations = new Map<string, Array<(taskIdNumeric: number) => Promise<unknown>>>();
 
-  currentUserId = 'u1';
-  currentEmployeeId = 'emp-1';
+  currentUserId = '';
+  currentEmployeeId = '';
   /** Set before navigating to the meetings view to auto-open a specific meeting. Consumed and cleared by MeetingsComponent.ngOnInit. */
   pendingOpenMeetingId: string | null = null;
-  /** ID of the meeting currently open in the meeting drawer. Null means drawer is closed. */
+  /** ID of the meeting currently open in the meeting modal. Null means no existing meeting is open. */
   openMeetingId: string | null = null;
+  /** Customer ID for a new meeting being created in the modal. Null means not creating. */
+  openNewMeetingCustomerId: string | null = null;
+
+  get meetingModalOpen(): boolean {
+    return this.openMeetingId !== null || this.openNewMeetingCustomerId !== undefined && this.openNewMeetingCustomerId !== null;
+  }
 
   openMeetingDrawer(id: string): void {
+    this.openNewMeetingCustomerId = null;
     this.openMeetingId = id;
+  }
+
+  openNewMeetingModal(customerId: string | null = null): void {
+    this.openMeetingId = null;
+    this.openNewMeetingCustomerId = customerId ?? '';
   }
 
   closeMeetingDrawer(): void {
     this.openMeetingId = null;
+    this.openNewMeetingCustomerId = null;
   }
 
   private readonly MAIL_NOTIF_KEY = 'actionos.mail-notif-prefs';
@@ -133,7 +135,7 @@ export class ActionosWorkspaceService {
 
   readonly statuses = UNIFIED_TASK_STATUSES;
   readonly templates = ACTIONOS_BOARD_TEMPLATES;
-  externalCustomerGroups: { id: string; name: string }[] = ACTIONOS_EXTERNAL_CUSTOMER_GROUPS;
+  externalCustomerGroups: { id: string; name: string }[] = [];
   readonly meetingTaskStatuses: TaskStatus[] = UNIFIED_TASK_STATUSES;
   private readonly meetingTaskTransitions: Partial<Record<TaskStatus, TaskStatus[]>> = {
     'New': ['Sent To Owner', 'In Progress', 'Waiting For Customer', 'Waiting For Internal', 'Done', 'Cancelled'],
@@ -145,41 +147,32 @@ export class ActionosWorkspaceService {
     'Cancelled': ['In Progress']
   };
 
-  selectedTaskId = 'mtask-1';
+  selectedTaskId = '';
   drawerOpen = false;
   selectedTaskKind: 'board-task' | 'meeting-task' = 'meeting-task';
 
-  private membersState: Member[] = this.cloneMembers(ACTIONOS_MEMBERS);
-  private tasksState: Task[] = this.cloneTasks(ACTIONOS_MEETING_TASKS);
-  private meetingState: Meeting = this.cloneMeeting(ACTIONOS_MEETING);
+  private membersState: Member[] = [];
+  private tasksState: Task[] = [];
+  private meetingState: Meeting = this.createEmptyMeeting();
   private commentsState: Comment[] = [];
-  private activityState: ActivityLog[] = [
-    {
-      id: 'activity-1',
-      targetType: 'meeting',
-      targetId: 'meet-1',
-      action: 'Prototype created',
-      detail: 'ActionOS local MVP started with workspace, boards, meetings, and My Work.',
-      createdAt: '2026-05-25T10:00:00.000Z'
-    }
-  ];
+  private activityState: ActivityLog[] = [];
 
   // v3 state — wrapped in objects so ports can hold a stable reference
-  private readonly customerStore = { customers: this.cloneCustomers(ACTIONOS_CUSTOMERS) };
-  private readonly employeeStore = { employees: this.cloneEmployees(ACTIONOS_EMPLOYEES) };
+  private readonly customerStore = { customers: [] as Customer[] };
+  private readonly employeeStore = { employees: [] as Employee[] };
   private readonly customerMeetingStore = {
-    customerMeetings: this.cloneCustomerMeetings(ACTIONOS_CUSTOMER_MEETINGS)
+    customerMeetings: [] as CustomerMeeting[]
   };
-  private readonly attachmentStore = { attachments: this.cloneAttachments(ACTIONOS_ATTACHMENTS) };
+  private readonly attachmentStore = { attachments: [] as Attachment[] };
 
-  private nextNoteNumber = ACTIONOS_MEETING.notes.length + 1;
-  private nextTaskNumber = ACTIONOS_MEETING_TASKS.length + 1;
-  private nextMemberNumber = ACTIONOS_MEMBERS.length + 1;
+  private nextNoteNumber = 1;
+  private nextTaskNumber = 1;
+  private nextMemberNumber = 1;
   private nextCommentNumber = 1;
-  private nextActivityNumber = 2;
-  private nextAgendaNumber = ACTIONOS_MEETING.agenda.length + 1;
-  private nextCustomerNumber = ACTIONOS_CUSTOMERS.length + 1;
-  private nextCustomerMeetingNumber = ACTIONOS_CUSTOMER_MEETINGS.length + 1;
+  private nextActivityNumber = 1;
+  private nextAgendaNumber = 1;
+  private nextCustomerNumber = 1;
+  private nextCustomerMeetingNumber = 1;
   private nextCustomerMeetingNoteNumber = 100;
   private nextAttachmentNumber = 1;
 
@@ -187,7 +180,7 @@ export class ActionosWorkspaceService {
   private readonly customerRepo: CustomerRepositoryPort = new InMemoryCustomerRepository(
     this.customerStore,
     () => this.saveToStorage(),
-    () => `cust-${this.nextCustomerNumber++}`,
+    () => `local-${this.nextCustomerNumber++}`,
     () => new Date().toISOString()
   );
   private readonly employeeDirectory: EmployeeDirectoryPort = new InMemoryEmployeeDirectory(
@@ -200,10 +193,6 @@ export class ActionosWorkspaceService {
       () => `cmeet-${this.nextCustomerMeetingNumber++}`,
       () => new Date().toISOString()
     );
-  private readonly notifier: NotificationPort = new LocalMockNotificationAdapter(
-    () => this.saveToStorage(),
-    () => new Date().toISOString()
-  );
   private readonly attachments: AttachmentStoragePort = new InMemoryAttachmentStorage(
     this.attachmentStore,
     () => this.saveToStorage(),
@@ -212,34 +201,103 @@ export class ActionosWorkspaceService {
   );
 
   constructor() {
-    this.dropLegacyStorageKeys();
-    this.currentEmployeeId = this.resolveCurrentEmployeeId();
+    this.startRealtimeSync();
     this.hostContext.selectedOrg$.subscribe(() => {
-      void this.initialize();
+      this.scheduleInitialize();
     });
     this.auth.tokenChanged$.subscribe(() => {
-      void this.initialize();
+      this.scheduleInitialize();
     });
+  }
+
+  private startRealtimeSync(): void {
+    if (typeof window === 'undefined' || this.realtimeListenersAttached) {
+      return;
+    }
+
+    this.realtimeListenersAttached = true;
+
+    const refreshOnForeground = (): void => {
+      this.requestRealtimeRefresh(true);
+    };
+
+    window.addEventListener('focus', refreshOnForeground);
+    window.addEventListener('online', refreshOnForeground);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        refreshOnForeground();
+      }
+    });
+
+    this.realtimeRefreshTimer = window.setInterval(() => {
+      this.requestRealtimeRefresh(false);
+    }, this.realtimeRefreshIntervalMs);
+  }
+
+  private requestRealtimeRefresh(force: boolean): void {
+    if (!this.currentOrgGroupId) {
+      return;
+    }
+
+    const now = Date.now();
+    if (!force && now - this.lastRefreshStartedAt < this.minRefreshGapMs) {
+      return;
+    }
+
+    if (this.bootstrapInFlight || this.refreshInFlight) {
+      return;
+    }
+
+    void this.refreshFromBackend();
+  }
+
+  private scheduleInitialize(): void {
+    if (this.initScheduled) {
+      return;
+    }
+
+    this.initScheduled = true;
+    setTimeout(() => {
+      this.initScheduled = false;
+      void this.initialize();
+    }, 50);
   }
 
   async initialize(): Promise<void> {
     const selectedOrg = this.normalizeOrgGroupId(this.hostContext.snapshot.selectedOrg);
     this.currentOrgGroupId = selectedOrg;
+    const token = this.auth.getToken() ?? '';
 
     if (!selectedOrg) {
       this.clearRuntimeState();
+      this.lastBootstrapKey = null;
       return;
     }
 
-    try {
-      const bootstrap = await this.actionosApi.bootstrap(selectedOrg);
-      this.applyBootstrap(bootstrap);
-      this.runMeetingTaskReminderSweep(2);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[ActionOS] Failed to load ActionOS bootstrap data. Access is fail-closed.', error);
-      this.clearRuntimeState();
+    const bootstrapKey = `${selectedOrg}|${token}`;
+    if (this.lastBootstrapKey === bootstrapKey) {
+      return;
     }
+
+    if (this.bootstrapInFlight) {
+      return this.bootstrapInFlight;
+    }
+
+    this.bootstrapInFlight = (async () => {
+      try {
+        const bootstrap = await this.actionosApi.bootstrap(selectedOrg);
+        this.applyBootstrap(bootstrap);
+        this.lastBootstrapKey = bootstrapKey;
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('[ActionOS] Failed to load ActionOS bootstrap data. Access is fail-closed.', error);
+        this.clearRuntimeState();
+      } finally {
+        this.bootstrapInFlight = null;
+      }
+    })();
+
+    return this.bootstrapInFlight;
   }
 
   get members(): Member[] {
@@ -348,20 +406,24 @@ export class ActionosWorkspaceService {
     const uid = this.currentUserId;
     const riskyTasks = this.openTasks.filter(task =>
       task.assigneeIds.includes(uid) &&
-      (task.status === 'Inbox' || task.status === 'New' || (!!task.dueDate && task.dueDate < this.todayIso))
+      ((task.status === 'Inbox' || task.status === 'New' || task.status === 'Sent To Owner') || (!!task.dueDate && task.dueDate < this.todayIso))
     );
     return this.uniqueTasks(riskyTasks).slice(0, 12);
   }
 
   get myInboxTasks(): Task[] {
     const uid = this.currentUserId;
-    return this.openTasks.filter(task => task.status === 'Inbox' && task.assigneeIds.includes(uid));
+    return this.openTasks.filter(task =>
+      (task.status === 'Inbox' || task.status === 'New' || task.status === 'Sent To Owner')
+      && task.assigneeIds.includes(uid)
+    );
   }
 
   get myBlockedTasks(): Task[] {
     const uid = this.currentUserId;
     return this.openTasks.filter(task =>
-      task.assigneeIds.includes(uid) && (!!task.blockedBy || task.status === 'Waiting')
+      task.assigneeIds.includes(uid)
+      && (!!task.blockedBy || task.status === 'Waiting' || task.status === 'Waiting For Customer' || task.status === 'Waiting For Internal')
     );
   }
 
@@ -390,9 +452,11 @@ export class ActionosWorkspaceService {
 
   /** Convert a CustomerMeeting action note into a MeetingTask. The note is marked as converted. */
   convertMeetingAction(meetingId: string, noteId: string): boolean {
-    const meeting = this.customerMeetingRepo.get(meetingId);
+    const resolvedMeetingId = this.resolveMeetingId(meetingId);
+    const resolvedNoteId = this.resolveMeetingNoteId(noteId);
+    const meeting = this.customerMeetingRepo.get(resolvedMeetingId);
     if (!meeting) return false;
-    const note = meeting.notes.find(n => n.id === noteId);
+    const note = meeting.notes.find(n => n.id === resolvedNoteId);
     if (!note || note.type !== 'action' || note.convertedTaskId) return false;
 
     const assignee = note.createdByEmployeeId && this.employeeDirectory.isAssignable(note.createdByEmployeeId)
@@ -400,15 +464,15 @@ export class ActionosWorkspaceService {
       : this.currentEmployeeId;
 
     const task = this.createTaskFromMeeting(
-      meetingId,
+      resolvedMeetingId,
       {
         title: note.content,
         assignedToEmployeeId: assignee,
         priority: 'Medium',
         dueDate: note.dueDate ?? this.addDays(this.todayIso, 3),
-        sourceMeetingId: meetingId
+        sourceMeetingId: resolvedMeetingId
       },
-      noteId
+      resolvedNoteId
     );
     return !!task;
   }
@@ -426,7 +490,8 @@ export class ActionosWorkspaceService {
   }
 
   get selectedTask(): Task | undefined {
-    return this.tasksState.find(task => task.id === this.selectedTaskId && !task.archivedAt);
+    const resolvedTaskId = this.resolveTaskId(this.selectedTaskId);
+    return this.tasksState.find(task => task.id === resolvedTaskId && !task.archivedAt);
   }
 
   get unconvertedActionCount(): number {
@@ -503,7 +568,8 @@ export class ActionosWorkspaceService {
   }
 
   updateTask(taskId: string, changes: UpdateTaskInput): void {
-    const task = this.tasksState.find(item => item.id === taskId);
+    const resolvedTaskId = this.resolveTaskId(taskId);
+    const task = this.tasksState.find(item => item.id === resolvedTaskId);
 
     if (!task) {
       return;
@@ -534,7 +600,7 @@ export class ActionosWorkspaceService {
       : (nextStatus ? undefined : task.completedAt);
 
     this.tasksState = this.tasksState.map(item => {
-      if (item.id !== taskId) {
+      if (item.id !== resolvedTaskId) {
         return item;
       }
 
@@ -557,14 +623,13 @@ export class ActionosWorkspaceService {
         updatedAt: new Date().toISOString()
       };
     });
-    this.selectedTaskId = taskId;
+    this.selectedTaskId = resolvedTaskId;
     this.selectedTaskKind = 'meeting-task';
-    this.recordActivity('task', taskId, 'Task updated', task.title);
+    this.recordActivity('task', resolvedTaskId, 'Task updated', task.title);
     this.saveToStorage();
 
-    const taskIdNumeric = this.parseNumericId(taskId);
-    if (taskIdNumeric != null) {
-      this.persistAndRefresh(this.actionosApi.updateTask(taskIdNumeric, {
+    this.runTaskMutation(resolvedTaskId, (taskIdNumeric) =>
+      this.actionosApi.updateTask(taskIdNumeric, {
         title: changes.title !== undefined ? changes.title : undefined,
         description: changes.description !== undefined ? changes.description : undefined,
         status: changes.status !== undefined ? nextStatus : undefined,
@@ -578,8 +643,8 @@ export class ActionosWorkspaceService {
         dueDateUtc: changes.dueDate !== undefined
           ? (changes.dueDate ? new Date(`${changes.dueDate}T12:00:00.000Z`).toISOString() : null)
           : undefined
-      }));
-    }
+      })
+    );
   }
 
   addTask(input: CreateTaskInput): Task {
@@ -628,9 +693,11 @@ export class ActionosWorkspaceService {
     this.recordActivity('task', task.id, 'Task created', task.title);
     this.saveToStorage();
 
+    const localTaskId = task.id;
     const orgGroupId = this.getOrgGroupForMutation();
+    const resolvedSourceMeetingId = task.sourceMeetingId ? this.resolveMeetingId(task.sourceMeetingId) : '';
     if (orgGroupId) {
-      this.persistAndRefresh(this.actionosApi.createTask({
+      const createTaskRequest = {
         orgGroupId,
         boardId: null,
         customerId: task.customerId || null,
@@ -639,7 +706,6 @@ export class ActionosWorkspaceService {
         status: 'New',
         priority: task.priority,
         sourceType: task.source,
-        sourceMeetingId: this.parseNumericId(task.sourceMeetingId),
         waitingReason: null,
         treatmentNotes: task.treatmentNotes ?? null,
         assignedUserId: task.assignedToEmployeeId || null,
@@ -649,7 +715,24 @@ export class ActionosWorkspaceService {
           isDone: item.done,
           sortOrder: index
         }))
-      }));
+      };
+      const createAndPromote = (sourceMeetingId: number | null) =>
+        this.actionosApi.createTask({
+          ...createTaskRequest,
+          sourceMeetingId
+        }).then((created) => {
+          this.promoteTaskId(localTaskId, created.id.toString());
+          return created;
+        });
+
+      const sourceMeetingNumeric = this.parseNumericId(resolvedSourceMeetingId);
+      if (resolvedSourceMeetingId && sourceMeetingNumeric == null) {
+        this.runMeetingMutation(resolvedSourceMeetingId, (meetingIdNumeric) =>
+          createAndPromote(meetingIdNumeric)
+        );
+      } else {
+        this.persistAndRefresh(createAndPromote(sourceMeetingNumeric));
+      }
     }
 
     return task;
@@ -682,18 +765,18 @@ export class ActionosWorkspaceService {
   }
 
   archiveTask(task: Task): void {
-    this.tasksState = this.tasksState.map(item => item.id === task.id ? { ...item, archivedAt: new Date().toISOString() } : item);
-    this.recordActivity('task', task.id, 'Task archived', task.title);
-    if (this.selectedTaskId === task.id) {
+    const resolvedTaskId = this.resolveTaskId(task.id);
+    this.tasksState = this.tasksState.map(item => item.id === resolvedTaskId ? { ...item, archivedAt: new Date().toISOString() } : item);
+    this.recordActivity('task', resolvedTaskId, 'Task archived', task.title);
+    if (this.selectedTaskId === resolvedTaskId) {
       this.selectedTaskId = this.tasks[0]?.id ?? '';
       this.drawerOpen = false;
     }
     this.saveToStorage();
 
-    const taskIdNumeric = this.parseNumericId(task.id);
-    if (taskIdNumeric != null) {
-      this.persistAndRefresh(this.actionosApi.deleteTask(taskIdNumeric));
-    }
+    this.runTaskMutation(resolvedTaskId, (taskIdNumeric) =>
+      this.actionosApi.deleteTask(taskIdNumeric)
+    );
   }
 
   applyTemplate(templateId: string): void {
@@ -819,8 +902,9 @@ export class ActionosWorkspaceService {
   }
 
   updateChecklistItem(task: Task, checklistItem: ChecklistItem, done: boolean): void {
+    const resolvedTaskId = this.resolveTaskId(task.id);
     this.tasksState = this.tasksState.map(item => {
-      if (item.id !== task.id) {
+      if (item.id !== resolvedTaskId) {
         return item;
       }
 
@@ -830,11 +914,24 @@ export class ActionosWorkspaceService {
         updatedAt: new Date().toISOString()
       };
     });
-    this.recordActivity('task', task.id, done ? 'Checklist item completed' : 'Checklist item reopened', checklistItem.label);
+    this.recordActivity('task', resolvedTaskId, done ? 'Checklist item completed' : 'Checklist item reopened', checklistItem.label);
     this.saveToStorage();
+
+    const resolvedTask = this.Task(resolvedTaskId) ?? task;
+    const checklistId = this.resolveChecklistItemId(resolvedTask, checklistItem);
+    if (checklistId != null) {
+      this.runTaskMutation(resolvedTaskId, (taskIdNumeric) =>
+        this.actionosApi.updateTaskChecklistItem(taskIdNumeric, checklistId, {
+          label: null,
+          isDone: done,
+          sortOrder: null
+        })
+      );
+    }
   }
 
   addChecklistItem(task: Task, label: string): void {
+    const resolvedTaskId = this.resolveTaskId(task.id);
     const trimmedLabel = label.trim();
 
     if (!trimmedLabel) {
@@ -842,7 +939,7 @@ export class ActionosWorkspaceService {
     }
 
     this.tasksState = this.tasksState.map(item => {
-      if (item.id !== task.id) {
+      if (item.id !== resolvedTaskId) {
         return item;
       }
 
@@ -852,8 +949,12 @@ export class ActionosWorkspaceService {
         updatedAt: new Date().toISOString()
       };
     });
-    this.recordActivity('task', task.id, 'Checklist item added', trimmedLabel);
+    this.recordActivity('task', resolvedTaskId, 'Checklist item added', trimmedLabel);
     this.saveToStorage();
+
+    this.runTaskMutation(resolvedTaskId, (taskIdNumeric) =>
+      this.actionosApi.addTaskChecklistItem(taskIdNumeric, trimmedLabel, false)
+    );
   }
 
   promoteTask(task: Task, status: TaskStatus): void {
@@ -861,10 +962,12 @@ export class ActionosWorkspaceService {
   }
 
   commentsForTask(taskId: string): Comment[] {
-    return this.commentsState.filter(comment => comment.targetType === 'task' && comment.targetId === taskId);
+    const resolvedTaskId = this.resolveTaskId(taskId);
+    return this.commentsState.filter(comment => comment.targetType === 'task' && comment.targetId === resolvedTaskId);
   }
 
   addTaskComment(task: Task, body: string): void {
+    const resolvedTaskId = this.resolveTaskId(task.id);
     const trimmedBody = body.trim();
 
     if (!trimmedBody) {
@@ -874,27 +977,25 @@ export class ActionosWorkspaceService {
     const comment: Comment = {
       id: `comment-${this.nextCommentNumber++}`,
       targetType: 'task',
-      targetId: task.id,
+      targetId: resolvedTaskId,
       body: trimmedBody,
       createdByUserId: this.currentUserId,
       createdAt: new Date().toISOString()
     };
 
     this.commentsState = [comment, ...this.commentsState];
-    this.recordActivity('task', task.id, 'Comment added', task.title);
+    this.recordActivity('task', resolvedTaskId, 'Comment added', task.title);
     this.saveToStorage();
 
-    const taskIdNumeric = this.parseNumericId(task.id);
-    if (taskIdNumeric != null) {
-      this.persistAndRefresh(this.actionosApi.addTaskNote(taskIdNumeric, trimmedBody));
-    }
+    this.runTaskMutation(resolvedTaskId, (taskIdNumeric) =>
+      this.actionosApi.addTaskNote(taskIdNumeric, trimmedBody)
+    );
   }
 
   /**
    * Clears all user-data arrays (customers, meetings, tasks, notes, comments,
-   * activity, attachments) but KEEPS the reference data (employees, members)
-   * so the user can still create new records from scratch. Useful when the
-   * mock seeds get in the way of testing empty-state flows.
+   * activity, attachments) but keeps reference data (employees, members)
+   * so development/testing can start from a clean runtime state.
    */
   clearAllData(): void {
     this.selectedTaskId = '';
@@ -911,43 +1012,18 @@ export class ActionosWorkspaceService {
     this.customerStore.customers = [];
     this.customerMeetingStore.customerMeetings = [];
     this.attachmentStore.attachments = [];
+    this.meetingIdAliases.clear();
+    this.meetingNoteIdAliases.clear();
+    this.pendingMeetingMutations.clear();
+    this.pendingMeetingNoteMutations.clear();
+    this.taskIdAliases.clear();
+    this.pendingTaskMutations.clear();
     this.saveToStorage();
   }
 
   resetDemoData(): void {
-    this.selectedTaskId = ACTIONOS_MEETING_TASKS[0]?.id ?? '';
-    this.drawerOpen = false;
-    this.selectedTaskKind = 'meeting-task';
-    this.membersState = this.cloneMembers(ACTIONOS_MEMBERS);
-    this.tasksState = this.cloneTasks(ACTIONOS_MEETING_TASKS);
-    this.meetingState = this.cloneMeeting(ACTIONOS_MEETING);
-    this.commentsState = [];
-    this.activityState = [
-      {
-        id: 'activity-1',
-        targetType: 'meeting',
-        targetId: 'meet-1',
-        action: 'Prototype reset',
-        detail: 'Demo data was restored.',
-        createdAt: new Date().toISOString()
-      }
-    ];
-    // v3 — restore customer module seed data too
-    this.customerStore.customers = this.cloneCustomers(ACTIONOS_CUSTOMERS);
-    this.employeeStore.employees = this.cloneEmployees(ACTIONOS_EMPLOYEES);
-    this.customerMeetingStore.customerMeetings = this.cloneCustomerMeetings(ACTIONOS_CUSTOMER_MEETINGS);
-    this.attachmentStore.attachments = this.cloneAttachments(ACTIONOS_ATTACHMENTS);
-    this.nextNoteNumber = ACTIONOS_MEETING.notes.length + 1;
-    this.nextTaskNumber = this.computeNextTaskNumber(this.tasksState);
-    this.nextMemberNumber = ACTIONOS_MEMBERS.length + 1;
-    this.nextCommentNumber = 1;
-    this.nextActivityNumber = 2;
-    this.nextAgendaNumber = ACTIONOS_MEETING.agenda.length + 1;
-    this.nextCustomerNumber = ACTIONOS_CUSTOMERS.length + 1;
-    this.nextCustomerMeetingNumber = ACTIONOS_CUSTOMER_MEETINGS.length + 1;
-    this.nextCustomerMeetingNoteNumber = 100;
-    this.nextAttachmentNumber = 1;
-    this.saveToStorage();
+    this.lastBootstrapKey = null;
+    void this.initialize();
   }
 
   memberName(memberId: string): string {
@@ -960,10 +1036,8 @@ export class ActionosWorkspaceService {
   }
 
   employeeIdForMember(memberOrId: Member | string): string | undefined {
-    const members = this.membersState?.length ? this.membersState : ACTIONOS_MEMBERS;
-    const employees = this.employeeStore?.employees?.length
-      ? this.employeeStore.employees
-      : ACTIONOS_EMPLOYEES;
+    const members = this.membersState;
+    const employees = this.employeeStore.employees;
     const member = typeof memberOrId === 'string'
       ? members.find(m => m.id === memberOrId)
       : memberOrId;
@@ -981,10 +1055,8 @@ export class ActionosWorkspaceService {
   }
 
   memberIdForEmployee(employeeId: string): string | undefined {
-    const members = this.membersState?.length ? this.membersState : ACTIONOS_MEMBERS;
-    const employees = this.employeeStore?.employees?.length
-      ? this.employeeStore.employees
-      : ACTIONOS_EMPLOYEES;
+    const members = this.membersState;
+    const employees = this.employeeStore.employees;
     const employee = employees.find(e => e.id === employeeId);
     if (!employee) {
       return undefined;
@@ -1047,6 +1119,8 @@ export class ActionosWorkspaceService {
       if (byId) {
         return byId.id;
       }
+
+      return idCandidates[0];
     }
 
     const nameCandidates = [
@@ -1068,7 +1142,7 @@ export class ActionosWorkspaceService {
       return this.currentEmployeeId;
     }
 
-    return employees[0].id;
+    return this.currentEmployeeId || '';
   }
 
   private resolveCurrentMemberId(): string {
@@ -1082,6 +1156,8 @@ export class ActionosWorkspaceService {
     if (idCandidates.length) {
       const byId = this.membersState.find(m => idCandidates.includes(m.id));
       if (byId) return byId.id;
+
+      return idCandidates[0];
     }
 
     const nameCandidates = [
@@ -1095,7 +1171,7 @@ export class ActionosWorkspaceService {
     }
 
     if (this.membersState.some(m => m.id === this.currentUserId)) return this.currentUserId;
-    return this.membersState[0].id;
+    return this.currentUserId || '';
   }
 
   private readAuthClaims(): Record<string, unknown> {
@@ -1134,15 +1210,6 @@ export class ActionosWorkspaceService {
     this.activityState = [activity, ...this.activityState].slice(0, 50);
   }
 
-  private dropLegacyStorageKeys(): void {
-    try {
-      localStorage.removeItem(STORAGE_KEY_V2);
-      localStorage.removeItem(STORAGE_KEY_V3);
-    } catch {
-      // Ignore storage failures in restricted browser contexts.
-    }
-  }
-
   private normalizeOrgGroupId(value: string | null | undefined): string | null {
     if (typeof value !== 'string') {
       return null;
@@ -1155,6 +1222,7 @@ export class ActionosWorkspaceService {
   private clearRuntimeState(): void {
     this.membersState = [];
     this.tasksState = [];
+    this.meetingState = this.createEmptyMeeting();
     this.commentsState = [];
     this.activityState = [];
     this.customerStore.customers = [];
@@ -1163,8 +1231,16 @@ export class ActionosWorkspaceService {
     this.attachmentStore.attachments = [];
     this.externalCustomerGroups = [];
     this.taskChecklistMeta.clear();
+    this.meetingIdAliases.clear();
+    this.meetingNoteIdAliases.clear();
+    this.pendingMeetingMutations.clear();
+    this.pendingMeetingNoteMutations.clear();
+    this.taskIdAliases.clear();
+    this.pendingTaskMutations.clear();
     this.selectedTaskId = '';
     this.drawerOpen = false;
+    this.currentUserId = '';
+    this.currentEmployeeId = '';
   }
 
   private applyBootstrap(bootstrap: ActionosBootstrapDto): void {
@@ -1176,6 +1252,7 @@ export class ActionosWorkspaceService {
     this.employeeStore.employees = users.map((user) => this.mapEmployeeFromApi(user));
     this.membersState = users.map((user) => this.mapMemberFromApi(user));
     this.customerStore.customers = customers;
+
     this.customerMeetingStore.customerMeetings = (bootstrap.meetings ?? []).map((row) =>
       this.mapCustomerMeetingFromApi(row)
     );
@@ -1183,6 +1260,18 @@ export class ActionosWorkspaceService {
     this.tasksState = this.cloneTasks((bootstrap.tasks ?? []).map((row) =>
       this.mapTaskFromApi(row, customerById)
     ));
+    this.commentsState = (bootstrap.tasks ?? [])
+      .flatMap((taskRow) =>
+        (taskRow.notes ?? []).map((note) => ({
+          id: `task-note-${note.id}`,
+          targetType: 'task' as const,
+          targetId: taskRow.id.toString(),
+          body: note.content ?? '',
+          createdByUserId: note.authorUserId ?? '',
+          createdAt: note.createdAtUtc ?? now
+        }))
+      )
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     this.attachmentStore.attachments = (bootstrap.attachments ?? []).map((row) =>
       this.mapAttachmentFromApi(row)
     );
@@ -1204,7 +1293,7 @@ export class ActionosWorkspaceService {
 
     this.nextTaskNumber = this.computeNextTaskNumber(this.tasksState);
     this.nextMemberNumber = this.membersState.length + 1;
-    this.nextCommentNumber = this.commentsState.length + 1;
+    this.nextCommentNumber = this.computeNextCommentNumber(this.commentsState);
     this.nextActivityNumber = this.activityState.length + 1;
     this.nextCustomerNumber = customers.length + 1;
     this.nextCustomerMeetingNumber = this.customerMeetingStore.customerMeetings.length + 1;
@@ -1427,21 +1516,54 @@ export class ActionosWorkspaceService {
       return;
     }
 
-    try {
-      const bootstrap = await this.actionosApi.bootstrap(this.currentOrgGroupId);
-      this.applyBootstrap(bootstrap);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[ActionOS] Failed to refresh ActionOS data after mutation.', error);
+    if (this.refreshInFlight) {
+      return this.refreshInFlight;
     }
+
+    if (this.bootstrapInFlight) {
+      return this.bootstrapInFlight;
+    }
+
+    const orgGroupId = this.currentOrgGroupId;
+    const token = this.auth.getToken() ?? '';
+    this.lastRefreshStartedAt = Date.now();
+
+    this.refreshInFlight = (async () => {
+      try {
+        const bootstrap = await this.actionosApi.bootstrap(orgGroupId);
+        if (this.currentOrgGroupId !== orgGroupId) {
+          return;
+        }
+        this.applyBootstrap(bootstrap);
+        this.lastBootstrapKey = `${orgGroupId}|${token}`;
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('[ActionOS] Failed to refresh ActionOS data after mutation.', error);
+      } finally {
+        this.refreshInFlight = null;
+      }
+    })();
+
+    return this.refreshInFlight;
   }
 
   private persistAndRefresh(operation: Promise<unknown>): void {
+    this.pendingMutationCount += 1;
     void operation
-      .then(() => this.scheduleBackendRefresh())
+      .then(() => {
+        this.mutationRefreshPending = true;
+      })
       .catch((error) => {
         // eslint-disable-next-line no-console
         console.error('[ActionOS] Backend mutation failed.', error);
+        this.mutationRefreshPending = true;
+      })
+      .finally(() => {
+        this.pendingMutationCount = Math.max(0, this.pendingMutationCount - 1);
+        if (this.pendingMutationCount === 0 && this.mutationRefreshPending) {
+          this.mutationRefreshPending = false;
+          this.scheduleBackendRefresh();
+        }
       });
   }
 
@@ -1452,6 +1574,283 @@ export class ActionosWorkspaceService {
   private getOrgGroupForMutation(): string | null {
     const orgGroupId = this.currentOrgGroupId ?? this.normalizeOrgGroupId(this.hostContext.snapshot.selectedOrg);
     return orgGroupId;
+  }
+
+  private resolveMeetingId(meetingId: string): string {
+    let current = meetingId;
+    const seen = new Set<string>();
+    while (this.meetingIdAliases.has(current) && !seen.has(current)) {
+      seen.add(current);
+      current = this.meetingIdAliases.get(current) as string;
+    }
+    return current;
+  }
+
+  private resolveMeetingNoteId(noteId: string): string {
+    let current = noteId;
+    const seen = new Set<string>();
+    while (this.meetingNoteIdAliases.has(current) && !seen.has(current)) {
+      seen.add(current);
+      current = this.meetingNoteIdAliases.get(current) as string;
+    }
+    return current;
+  }
+
+  private runMeetingMutation(
+    meetingId: string,
+    operation: (meetingIdNumeric: number) => Promise<unknown>
+  ): void {
+    const resolvedMeetingId = this.resolveMeetingId(meetingId);
+    const meetingIdNumeric = this.parseNumericId(resolvedMeetingId);
+    if (meetingIdNumeric != null) {
+      this.persistAndRefresh(operation(meetingIdNumeric));
+      return;
+    }
+
+    const queueKey = resolvedMeetingId.trim();
+    if (!queueKey) {
+      return;
+    }
+    const queued = this.pendingMeetingMutations.get(queueKey) ?? [];
+    queued.push(operation);
+    this.pendingMeetingMutations.set(queueKey, queued);
+  }
+
+  private flushPendingMeetingMutations(canonicalMeetingId: string): void {
+    const meetingIdNumeric = this.parseNumericId(canonicalMeetingId);
+    if (meetingIdNumeric == null || !this.pendingMeetingMutations.size) {
+      return;
+    }
+
+    const operations: Array<(meetingIdNumeric: number) => Promise<unknown>> = [];
+    for (const [key, queue] of this.pendingMeetingMutations.entries()) {
+      if (this.resolveMeetingId(key) !== canonicalMeetingId) {
+        continue;
+      }
+      operations.push(...queue);
+      this.pendingMeetingMutations.delete(key);
+    }
+
+    for (const queuedOperation of operations) {
+      this.persistAndRefresh(queuedOperation(meetingIdNumeric));
+    }
+  }
+
+  private runMeetingNoteMutation(
+    meetingId: string,
+    noteId: string,
+    operation: (meetingIdNumeric: number, noteIdNumeric: number) => Promise<unknown>
+  ): void {
+    const resolvedMeetingId = this.resolveMeetingId(meetingId);
+    const resolvedNoteId = this.resolveMeetingNoteId(noteId);
+    const noteIdNumeric = this.parseNumericId(resolvedNoteId);
+    if (noteIdNumeric != null) {
+      this.runMeetingMutation(resolvedMeetingId, (meetingIdNumeric) =>
+        operation(meetingIdNumeric, noteIdNumeric)
+      );
+      return;
+    }
+
+    const queueKey = resolvedNoteId.trim();
+    if (!queueKey) {
+      return;
+    }
+    const queued = this.pendingMeetingNoteMutations.get(queueKey) ?? [];
+    queued.push(operation);
+    this.pendingMeetingNoteMutations.set(queueKey, queued);
+  }
+
+  private flushPendingMeetingNoteMutations(canonicalMeetingId: string, canonicalNoteId: string): void {
+    const noteIdNumeric = this.parseNumericId(canonicalNoteId);
+    if (noteIdNumeric == null || !this.pendingMeetingNoteMutations.size) {
+      return;
+    }
+
+    const operations: Array<(meetingIdNumeric: number, noteIdNumeric: number) => Promise<unknown>> = [];
+    for (const [key, queue] of this.pendingMeetingNoteMutations.entries()) {
+      if (this.resolveMeetingNoteId(key) !== canonicalNoteId) {
+        continue;
+      }
+      operations.push(...queue);
+      this.pendingMeetingNoteMutations.delete(key);
+    }
+
+    for (const queuedOperation of operations) {
+      this.runMeetingMutation(canonicalMeetingId, (meetingIdNumeric) =>
+        queuedOperation(meetingIdNumeric, noteIdNumeric)
+      );
+    }
+  }
+
+  private resolveTaskId(taskId: string): string {
+    let current = taskId;
+    const seen = new Set<string>();
+    while (this.taskIdAliases.has(current) && !seen.has(current)) {
+      seen.add(current);
+      current = this.taskIdAliases.get(current) as string;
+    }
+    return current;
+  }
+
+  private runTaskMutation(
+    taskId: string,
+    operation: (taskIdNumeric: number) => Promise<unknown>
+  ): void {
+    const resolvedTaskId = this.resolveTaskId(taskId);
+    const taskIdNumeric = this.parseNumericId(resolvedTaskId);
+    if (taskIdNumeric != null) {
+      this.persistAndRefresh(operation(taskIdNumeric));
+      return;
+    }
+
+    const queueKey = resolvedTaskId.trim();
+    if (!queueKey) {
+      return;
+    }
+    const queued = this.pendingTaskMutations.get(queueKey) ?? [];
+    queued.push(operation);
+    this.pendingTaskMutations.set(queueKey, queued);
+  }
+
+  private flushPendingTaskMutations(canonicalTaskId: string): void {
+    const taskIdNumeric = this.parseNumericId(canonicalTaskId);
+    if (taskIdNumeric == null || !this.pendingTaskMutations.size) {
+      return;
+    }
+
+    const operations: Array<(taskIdNumeric: number) => Promise<unknown>> = [];
+    for (const [key, queue] of this.pendingTaskMutations.entries()) {
+      if (this.resolveTaskId(key) !== canonicalTaskId) {
+        continue;
+      }
+      operations.push(...queue);
+      this.pendingTaskMutations.delete(key);
+    }
+
+    for (const queuedOperation of operations) {
+      this.persistAndRefresh(queuedOperation(taskIdNumeric));
+    }
+  }
+
+  private promoteTaskId(localTaskId: string, canonicalTaskId: string): void {
+    const local = localTaskId.trim();
+    const canonical = canonicalTaskId.trim();
+    if (!local || !canonical) {
+      return;
+    }
+
+    this.taskIdAliases.set(local, canonical);
+    this.flushPendingTaskMutations(canonical);
+    if (local === canonical) {
+      return;
+    }
+
+    this.tasksState = this.tasksState.map((task) =>
+      task.id === local
+        ? { ...task, id: canonical }
+        : task
+    );
+
+    this.customerMeetingStore.customerMeetings = this.customerMeetingStore.customerMeetings.map((meeting) => ({
+      ...meeting,
+      notes: meeting.notes.map((note) =>
+        note.convertedTaskId === local
+          ? { ...note, convertedTaskId: canonical }
+          : note
+      )
+    }));
+
+    this.meetingState = {
+      ...this.meetingState,
+      notes: this.meetingState.notes.map((note) =>
+        note.convertedTaskId === local
+          ? { ...note, convertedTaskId: canonical }
+          : note
+      )
+    };
+
+    this.commentsState = this.commentsState.map((comment) =>
+      comment.targetType === 'task' && comment.targetId === local
+        ? { ...comment, targetId: canonical }
+        : comment
+    );
+
+    this.attachmentStore.attachments = this.attachmentStore.attachments.map((attachment) =>
+      attachment.linkedEntityType === 'meeting-task' && attachment.linkedEntityId === local
+        ? { ...attachment, linkedEntityId: canonical }
+        : attachment
+    );
+
+    if (this.selectedTaskId === local) {
+      this.selectedTaskId = canonical;
+    }
+  }
+
+  private promoteMeetingId(localMeetingId: string, canonicalMeetingId: string): void {
+    const local = localMeetingId.trim();
+    const canonical = canonicalMeetingId.trim();
+    if (!local || !canonical) {
+      return;
+    }
+
+    this.meetingIdAliases.set(local, canonical);
+    this.flushPendingMeetingMutations(canonical);
+    if (local === canonical) {
+      return;
+    }
+
+    const meeting = this.customerMeetingStore.customerMeetings.find((item) => item.id === local);
+    if (meeting) {
+      meeting.id = canonical;
+    }
+
+    this.tasksState = this.tasksState.map((task) =>
+      task.sourceMeetingId === local
+        ? { ...task, sourceMeetingId: canonical }
+        : task
+    );
+
+    if (this.pendingOpenMeetingId === local) {
+      this.pendingOpenMeetingId = canonical;
+    }
+    if (this.openMeetingId === local) {
+      this.openMeetingId = canonical;
+    }
+    if (this.meetingState.id === local) {
+      this.meetingState = { ...this.meetingState, id: canonical };
+    }
+  }
+
+  private promoteMeetingNoteId(
+    meetingId: string,
+    localNoteId: string,
+    created: ActionosApiMeetingNoteDto
+  ): void {
+    const canonicalMeetingId = this.resolveMeetingId(meetingId);
+    const canonicalNoteId = created.id.toString();
+    if (!canonicalNoteId || localNoteId === canonicalNoteId) {
+      return;
+    }
+
+    this.meetingNoteIdAliases.set(localNoteId, canonicalNoteId);
+    this.flushPendingMeetingNoteMutations(canonicalMeetingId, canonicalNoteId);
+
+    const meeting = this.customerMeetingRepo.get(canonicalMeetingId);
+    if (!meeting) {
+      return;
+    }
+
+    const note = meeting.notes.find((item) => item.id === localNoteId);
+    if (!note) {
+      return;
+    }
+
+    note.id = canonicalNoteId;
+    this.attachmentStore.attachments = this.attachmentStore.attachments.map((attachment) =>
+      attachment.linkedEntityType === 'meeting-note' && attachment.linkedEntityId === localNoteId
+        ? { ...attachment, linkedEntityId: canonicalNoteId }
+        : attachment
+    );
   }
 
   private parseNumericId(value: string | undefined | null): number | null {
@@ -1552,17 +1951,33 @@ export class ActionosWorkspaceService {
     return members.map(member => ({ ...member }));
   }
 
+  private createEmptyMeeting(): Meeting {
+    const now = new Date().toISOString();
+    return {
+      id: '',
+      title: '',
+      time: '',
+      startsAt: now,
+      durationMinutes: 30,
+      attendeeIds: [],
+      linkedBoard: '',
+      agenda: [],
+      notes: []
+    };
+  }
+
   private cloneMeeting(meeting: Partial<Meeting>): Meeting {
-    const agendaSource = meeting.agenda ?? ACTIONOS_MEETING.agenda;
+    const fallback = this.createEmptyMeeting();
+    const agendaSource = meeting.agenda ?? fallback.agenda;
 
     return {
-      id: meeting.id ?? ACTIONOS_MEETING.id,
-      title: meeting.title ?? ACTIONOS_MEETING.title,
-      time: meeting.time ?? ACTIONOS_MEETING.time,
-      startsAt: meeting.startsAt ?? ACTIONOS_MEETING.startsAt,
-      durationMinutes: meeting.durationMinutes ?? ACTIONOS_MEETING.durationMinutes ?? 30,
-      attendeeIds: [...(meeting.attendeeIds ?? ACTIONOS_MEETING.attendeeIds)],
-      linkedBoard: meeting.linkedBoard ?? ACTIONOS_MEETING.linkedBoard,
+      id: meeting.id ?? fallback.id,
+      title: meeting.title ?? fallback.title,
+      time: meeting.time ?? fallback.time,
+      startsAt: meeting.startsAt ?? fallback.startsAt,
+      durationMinutes: meeting.durationMinutes ?? fallback.durationMinutes,
+      attendeeIds: [...(meeting.attendeeIds ?? fallback.attendeeIds)],
+      linkedBoard: meeting.linkedBoard ?? fallback.linkedBoard,
       agenda: agendaSource.map((item, index) => {
         if (typeof item === 'string') {
           return { id: `agenda-${index + 1}`, title: item, completed: false };
@@ -1570,7 +1985,7 @@ export class ActionosWorkspaceService {
 
         return { ...item };
       }),
-      notes: (meeting.notes ?? ACTIONOS_MEETING.notes).map(note => ({ ...note }))
+      notes: (meeting.notes ?? fallback.notes).map(note => ({ ...note }))
     };
   }
 
@@ -1655,6 +2070,15 @@ export class ActionosWorkspaceService {
     return maxSuffix + 1;
   }
 
+  private computeNextCommentNumber(comments: Comment[]): number {
+    const maxSuffix = comments.reduce((max, comment) => {
+      const match = comment.id.match(/^comment-(\d+)$/);
+      const parsed = match ? Number.parseInt(match[1], 10) : Number.NaN;
+      return Number.isFinite(parsed) ? Math.max(max, parsed) : max;
+    }, 0);
+    return maxSuffix + 1;
+  }
+
   private uniqueTasks(tasks: Task[]): Task[] {
     const seen = new Set<string>();
 
@@ -1686,7 +2110,7 @@ export class ActionosWorkspaceService {
   // ─────────────────────────────────────────────────────────────────────
 
   get customers(): Customer[] {
-    return this.customerRepo.list();
+    return this.customerRepo.list().sort((a, b) => a.name.localeCompare(b.name));
   }
 
   customer(id: string): Customer | undefined {
@@ -1756,11 +2180,11 @@ export class ActionosWorkspaceService {
 
   get employees(): Employee[] {
     // Returns only active fritz/critilog employees (the assignable set)
-    return this.employeeDirectory.list();
+    return this.employeeDirectory.list().sort((a, b) => a.fullName.localeCompare(b.fullName));
   }
 
   get allEmployees(): Employee[] {
-    // Full mock list (for debugging / display of inactive history)
+    // Full directory list (for debugging / display of inactive history)
     return this.employeeStore.employees.slice();
   }
 
@@ -1786,7 +2210,7 @@ export class ActionosWorkspaceService {
   }
 
   customerMeeting(id: string): CustomerMeeting | undefined {
-    return this.customerMeetingRepo.get(id);
+    return this.customerMeetingRepo.get(this.resolveMeetingId(id));
   }
 
   customerMeetingsByCustomer(customerId: string): CustomerMeeting[] {
@@ -1795,6 +2219,7 @@ export class ActionosWorkspaceService {
 
   addCustomerMeeting(input: CreateCustomerMeetingInput): CustomerMeeting {
     const meeting = this.customerMeetingRepo.add(input);
+    const localMeetingId = meeting.id;
     this.recordActivity('meeting', meeting.id, 'Customer meeting created', meeting.subject);
     const meetingDate = new Date(input.meetingDate);
     if (Number.isNaN(meetingDate.getTime())) {
@@ -1834,6 +2259,9 @@ export class ActionosWorkspaceService {
           role: participant.role ?? null
         }))
       ]
+    }).then((created) => {
+      this.promoteMeetingId(localMeetingId, created.id.toString());
+      return created;
     }));
     return meeting;
   }
@@ -1842,48 +2270,49 @@ export class ActionosWorkspaceService {
     meetingId: string,
     changes: UpdateCustomerMeetingInput
   ): CustomerMeeting | null {
-    const updated = this.customerMeetingRepo.update(meetingId, changes);
+    const resolvedMeetingId = this.resolveMeetingId(meetingId);
+    const updated = this.customerMeetingRepo.update(resolvedMeetingId, changes);
     if (updated) {
       this.recordActivity('meeting', updated.id, 'Customer meeting updated', updated.subject);
-      const meetingIdNumeric = this.parseNumericId(meetingId);
-      if (meetingIdNumeric != null) {
-        const participantsChanged = changes.internalParticipantEmployeeIds !== undefined || changes.customerParticipants !== undefined;
-        this.persistAndRefresh(this.actionosApi.updateCustomerMeeting(meetingIdNumeric, {
-          subject: changes.subject !== undefined ? changes.subject : undefined,
-          meetingDateUtc: changes.meetingDate !== undefined
-            ? (changes.meetingDate ? new Date(changes.meetingDate).toISOString() : null)
-            : undefined,
-          meetingLeaderUserId: changes.meetingLeaderEmployeeId !== undefined ? changes.meetingLeaderEmployeeId : undefined,
-          goal: changes.goal !== undefined ? changes.goal : undefined,
-          summary: changes.summary !== undefined ? changes.summary : undefined,
-          publishedRecap: changes.publishedRecap !== undefined ? changes.publishedRecap : undefined,
-          nextMeetingDateUtc: changes.nextMeetingDate !== undefined
-            ? (changes.nextMeetingDate ? new Date(changes.nextMeetingDate).toISOString() : null)
-            : undefined,
-          nextMeetingNotes: changes.nextMeetingNotes !== undefined ? changes.nextMeetingNotes : undefined,
-          status: changes.status !== undefined ? changes.status : undefined,
-          participants: participantsChanged
-            ? [
-                ...((changes.internalParticipantEmployeeIds ?? updated.internalParticipantEmployeeIds).map((employeeId) => ({
-                  isInternal: true,
-                  userId: employeeId,
-                  displayName: this.employeeName(employeeId),
-                  email: this.employee(employeeId)?.email ?? null,
-                  phone: null,
-                  role: 'Participant'
-                }))),
-                ...((changes.customerParticipants ?? updated.customerParticipants).map((participant) => ({
-                  isInternal: false,
-                  userId: null,
-                  displayName: participant.name,
-                  email: participant.email ?? null,
-                  phone: participant.phone ?? null,
-                  role: participant.role ?? null
-                })))
-              ]
-            : undefined
-        }));
-      }
+      const participantsChanged = changes.internalParticipantEmployeeIds !== undefined || changes.customerParticipants !== undefined;
+      const payload = {
+        subject: changes.subject !== undefined ? changes.subject : undefined,
+        meetingDateUtc: changes.meetingDate !== undefined
+          ? (changes.meetingDate ? new Date(changes.meetingDate).toISOString() : null)
+          : undefined,
+        meetingLeaderUserId: changes.meetingLeaderEmployeeId !== undefined ? changes.meetingLeaderEmployeeId : undefined,
+        goal: changes.goal !== undefined ? changes.goal : undefined,
+        summary: changes.summary !== undefined ? changes.summary : undefined,
+        publishedRecap: changes.publishedRecap !== undefined ? changes.publishedRecap : undefined,
+        nextMeetingDateUtc: changes.nextMeetingDate !== undefined
+          ? (changes.nextMeetingDate ? new Date(changes.nextMeetingDate).toISOString() : null)
+          : undefined,
+        nextMeetingNotes: changes.nextMeetingNotes !== undefined ? changes.nextMeetingNotes : undefined,
+        status: changes.status !== undefined ? changes.status : undefined,
+        participants: participantsChanged
+          ? [
+              ...((changes.internalParticipantEmployeeIds ?? updated.internalParticipantEmployeeIds).map((employeeId) => ({
+                isInternal: true,
+                userId: employeeId,
+                displayName: this.employeeName(employeeId),
+                email: this.employee(employeeId)?.email ?? null,
+                phone: null,
+                role: 'Participant'
+              }))),
+              ...((changes.customerParticipants ?? updated.customerParticipants).map((participant) => ({
+                isInternal: false,
+                userId: null,
+                displayName: participant.name,
+                email: participant.email ?? null,
+                phone: participant.phone ?? null,
+                role: participant.role ?? null
+              })))
+            ]
+          : undefined
+      };
+      this.runMeetingMutation(resolvedMeetingId, (meetingIdNumeric) =>
+        this.actionosApi.updateCustomerMeeting(meetingIdNumeric, payload)
+      );
     }
     return updated;
   }
@@ -1892,24 +2321,27 @@ export class ActionosWorkspaceService {
     meetingId: string,
     input: CreateMeetingNoteInput
   ): MeetingNote | null {
+    const resolvedMeetingId = this.resolveMeetingId(meetingId);
     const noteId = `cnote-${this.nextCustomerMeetingNoteNumber++}`;
     const note = this.customerMeetingRepo.addNote(
-      meetingId,
+      resolvedMeetingId,
       input,
       noteId,
       this.currentEmployeeId,
     );
     if (note) {
-      this.recordActivity('meeting', meetingId, 'Meeting note added', note.content);
-      const meetingIdNumeric = this.parseNumericId(meetingId);
-      if (meetingIdNumeric != null) {
-        this.persistAndRefresh(this.actionosApi.createCustomerMeetingNote(meetingIdNumeric, {
+      this.recordActivity('meeting', resolvedMeetingId, 'Meeting note added', note.content);
+      this.runMeetingMutation(resolvedMeetingId, (meetingIdNumeric) =>
+        this.actionosApi.createCustomerMeetingNote(meetingIdNumeric, {
           noteType: input.type,
           content: input.content,
           ownerUserId: input.ownerId ?? null,
           dueDateUtc: input.dueDate ? new Date(`${input.dueDate}T12:00:00.000Z`).toISOString() : null
-        }));
-      }
+        }).then((created) => {
+          this.promoteMeetingNoteId(resolvedMeetingId, noteId, created);
+          return created;
+        })
+      );
     }
     return note;
   }
@@ -1919,32 +2351,32 @@ export class ActionosWorkspaceService {
     noteId: string,
     changes: UpdateMeetingNoteInput
   ): MeetingNote | null {
-    const updated = this.customerMeetingRepo.updateNote(meetingId, noteId, changes);
+    const resolvedMeetingId = this.resolveMeetingId(meetingId);
+    const resolvedNoteId = this.resolveMeetingNoteId(noteId);
+    const updated = this.customerMeetingRepo.updateNote(resolvedMeetingId, resolvedNoteId, changes);
     if (updated) {
-      this.recordActivity('meeting', meetingId, 'Meeting note updated', updated.content);
-      const meetingIdNumeric = this.parseNumericId(meetingId);
-      const noteIdNumeric = this.parseNumericId(noteId);
-      if (meetingIdNumeric != null && noteIdNumeric != null) {
-        this.persistAndRefresh(this.actionosApi.updateCustomerMeetingNote(meetingIdNumeric, noteIdNumeric, {
+      this.recordActivity('meeting', resolvedMeetingId, 'Meeting note updated', updated.content);
+      this.runMeetingNoteMutation(resolvedMeetingId, resolvedNoteId, (meetingIdNumeric, noteIdNumeric) =>
+        this.actionosApi.updateCustomerMeetingNote(meetingIdNumeric, noteIdNumeric, {
           noteType: changes.type ?? null,
           content: changes.content ?? null,
           ownerUserId: changes.ownerId ?? null,
           dueDateUtc: changes.dueDate ? new Date(`${changes.dueDate}T12:00:00.000Z`).toISOString() : null
-        }));
-      }
+        })
+      );
     }
     return updated;
   }
 
   removeCustomerMeetingNote(meetingId: string, noteId: string): boolean {
-    const removed = this.customerMeetingRepo.removeNote(meetingId, noteId);
+    const resolvedMeetingId = this.resolveMeetingId(meetingId);
+    const resolvedNoteId = this.resolveMeetingNoteId(noteId);
+    const removed = this.customerMeetingRepo.removeNote(resolvedMeetingId, resolvedNoteId);
     if (removed) {
-      this.recordActivity('meeting', meetingId, 'Meeting note removed', noteId);
-      const meetingIdNumeric = this.parseNumericId(meetingId);
-      const noteIdNumeric = this.parseNumericId(noteId);
-      if (meetingIdNumeric != null && noteIdNumeric != null) {
-        this.persistAndRefresh(this.actionosApi.deleteCustomerMeetingNote(meetingIdNumeric, noteIdNumeric));
-      }
+      this.recordActivity('meeting', resolvedMeetingId, 'Meeting note removed', noteId);
+      this.runMeetingNoteMutation(resolvedMeetingId, resolvedNoteId, (meetingIdNumeric, noteIdNumeric) =>
+        this.actionosApi.deleteCustomerMeetingNote(meetingIdNumeric, noteIdNumeric)
+      );
     }
     return removed;
   }
@@ -1955,7 +2387,8 @@ export class ActionosWorkspaceService {
    * caller can also surface it (e.g. for a "Copy to clipboard" affordance).
    */
   publishMeetingRecap(meetingId: string): string | null {
-    const meeting = this.customerMeetingRepo.get(meetingId);
+    const resolvedMeetingId = this.resolveMeetingId(meetingId);
+    const meeting = this.customerMeetingRepo.get(resolvedMeetingId);
     if (!meeting) {
       return null;
     }
@@ -1971,44 +2404,44 @@ export class ActionosWorkspaceService {
     const otherNotes = meeting.notes.filter((n) => n.type === 'note');
     const tasksFromMeeting = this.meetingTasksByMeeting(meeting.id);
 
+    const t = (key: string, params?: Record<string, string | number>) => this.i18n.translate(key, params);
+
     const lines: string[] = [];
-    lines.push(`Meeting recap — ${meeting.subject}`);
-    lines.push(
-      `${meeting.meetingDate.slice(0, 10)} · ${customer?.name ?? 'Unknown customer'}`,
-    );
+    lines.push(`${t('recap.title')} — ${meeting.subject}`);
+    lines.push(`${meeting.meetingDate.slice(0, 10)} · ${customer?.name ?? t('recap.unknownCustomer')}`);
     lines.push('');
-    lines.push(`Led by: ${leaderName}`);
+    lines.push(`${t('recap.ledBy')}: ${leaderName}`);
     if (internalNames.length) {
-      lines.push(`Our side: ${internalNames.join(', ')}`);
+      lines.push(`${t('recap.ourSide')}: ${internalNames.join(', ')}`);
     }
     if (customerNames.length) {
-      lines.push(`Customer side: ${customerNames.join(', ')}`);
+      lines.push(`${t('recap.customerSide')}: ${customerNames.join(', ')}`);
     }
     if (meeting.goal?.trim()) {
       lines.push('');
-      lines.push(`Goal: ${meeting.goal.trim()}`);
+      lines.push(`${t('recap.goal')}: ${meeting.goal.trim()}`);
     }
     if (meeting.summary?.trim()) {
       lines.push('');
-      lines.push('What happened:');
+      lines.push(`${t('recap.whatHappened')}:`);
       lines.push(meeting.summary.trim());
     }
     if (decisions.length) {
       lines.push('');
-      lines.push('Decisions:');
+      lines.push(`${t('recap.decisions')}:`);
       for (const d of decisions) {
         lines.push(`• ${d.content}`);
       }
     }
     if (tasksFromMeeting.length) {
       lines.push('');
-      lines.push('Tasks created:');
-      for (const t of tasksFromMeeting) {
-        const owner = this.employeeName(t.assignedToEmployeeId);
-        const due = t.dueDate ? ` · due ${t.dueDate}` : '';
-        lines.push(`• ${t.title} — ${owner}${due} [${t.status}]`);
-        if (t.progressionNotes?.length) {
-          for (const pn of t.progressionNotes) {
+      lines.push(`${t('recap.tasksCreated')}:`);
+      for (const tk of tasksFromMeeting) {
+        const owner = this.employeeName(tk.assignedToEmployeeId);
+        const due = tk.dueDate ? ` · ${t('recap.due')} ${tk.dueDate}` : '';
+        lines.push(`• ${tk.title} — ${owner}${due} [${tk.status}]`);
+        if (tk.progressionNotes?.length) {
+          for (const pn of tk.progressionNotes) {
             const author = this.employeeName(pn.authorEmployeeId);
             lines.push(`  ↳ ${pn.createdAt.slice(0, 10)} (${author}): ${pn.content}`);
           }
@@ -2017,44 +2450,43 @@ export class ActionosWorkspaceService {
     }
     if (blockers.length) {
       lines.push('');
-      lines.push('Blockers:');
+      lines.push(`${t('recap.blockers')}:`);
       for (const b of blockers) {
         lines.push(`• ${b.content}`);
       }
     }
     if (otherNotes.length) {
       lines.push('');
-      lines.push('Notes:');
+      lines.push(`${t('recap.notes')}:`);
       for (const n of otherNotes) {
         lines.push(`• ${n.content}`);
       }
     }
     if (meeting.nextMeetingDate) {
       lines.push('');
-      lines.push(`Next meeting: ${meeting.nextMeetingDate.slice(0, 10)}`);
+      lines.push(`${t('recap.nextMeeting')}: ${meeting.nextMeetingDate.slice(0, 10)}`);
     }
     if (meeting.nextMeetingNotes?.trim()) {
       lines.push('');
-      lines.push('Notes for next meeting:');
+      lines.push(`${t('recap.notesForNext')}:`);
       lines.push(meeting.nextMeetingNotes.trim());
     }
     const recap = lines.join('\n');
 
-    this.customerMeetingRepo.update(meetingId, { publishedRecap: recap });
-    if (this.canCloseMeeting(meetingId)) {
-      this.customerMeetingRepo.setStatus(meetingId, 'Closed');
+    this.customerMeetingRepo.update(resolvedMeetingId, { publishedRecap: recap });
+    if (this.canCloseMeeting(resolvedMeetingId)) {
+      this.customerMeetingRepo.setStatus(resolvedMeetingId, 'Closed');
     } else {
-      const current = this.customerMeetingRepo.get(meetingId);
+      const current = this.customerMeetingRepo.get(resolvedMeetingId);
       if (current && current.status !== 'Tasks Created' && current.status !== 'Closed') {
-        this.customerMeetingRepo.setStatus(meetingId, 'Tasks Created');
+        this.customerMeetingRepo.setStatus(resolvedMeetingId, 'Tasks Created');
       }
     }
-    this.recordActivity('meeting', meetingId, 'Recap published', meeting.subject);
+    this.recordActivity('meeting', resolvedMeetingId, 'Recap published', meeting.subject);
 
-    const meetingIdNumeric = this.parseNumericId(meetingId);
-    if (meetingIdNumeric != null) {
-      const status = this.canCloseMeeting(meetingId) ? 'Closed' : 'Tasks Created';
-      this.persistAndRefresh(this.actionosApi.updateCustomerMeeting(meetingIdNumeric, {
+    const status = this.canCloseMeeting(resolvedMeetingId) ? 'Closed' : 'Tasks Created';
+    this.runMeetingMutation(resolvedMeetingId, (meetingIdNumeric) =>
+      this.actionosApi.updateCustomerMeeting(meetingIdNumeric, {
         subject: null,
         meetingDateUtc: null,
         meetingLeaderUserId: null,
@@ -2065,8 +2497,8 @@ export class ActionosWorkspaceService {
         nextMeetingNotes: meeting.nextMeetingNotes ?? null,
         status,
         participants: null
-      }));
-    }
+      })
+    );
     return recap;
   }
 
@@ -2077,7 +2509,8 @@ export class ActionosWorkspaceService {
   }
 
   Task(id: string): Task | undefined {
-    return this.allTasks.find(task => task.id === id);
+    const resolvedTaskId = this.resolveTaskId(id);
+    return this.allTasks.find(task => task.id === resolvedTaskId);
   }
 
   meetingTasksByCustomer(customerId: string): Task[] {
@@ -2085,7 +2518,8 @@ export class ActionosWorkspaceService {
   }
 
   meetingTasksByMeeting(meetingId: string): Task[] {
-    return this.meetingTasks.filter(task => task.sourceMeetingId === meetingId);
+    const resolvedMeetingId = this.resolveMeetingId(meetingId);
+    return this.meetingTasks.filter(task => task.sourceMeetingId === resolvedMeetingId);
   }
 
   meetingTasksAssignedToMe(): Task[] {
@@ -2106,7 +2540,8 @@ export class ActionosWorkspaceService {
     input: CreateMeetingTaskInput,
     sourceNoteId?: string
   ): Task | null {
-    const meeting = this.customerMeetingRepo.get(meetingId);
+    const resolvedMeetingId = this.resolveMeetingId(meetingId);
+    const meeting = this.customerMeetingRepo.get(resolvedMeetingId);
     if (!meeting) {
       return null;
     }
@@ -2126,7 +2561,7 @@ export class ActionosWorkspaceService {
       description: input.description?.trim() ?? '',
       board: this.customer(meeting.customerId)?.name ?? 'Customer meeting',
       customerId: meeting.customerId,
-      sourceMeetingId: meetingId,
+      sourceMeetingId: resolvedMeetingId,
       openedByEmployeeId: this.currentEmployeeId,
       assignedToEmployeeId: input.assignedToEmployeeId,
       assigneeIds: assigneeMemberId ? [assigneeMemberId] : [],
@@ -2147,58 +2582,61 @@ export class ActionosWorkspaceService {
     };
     this.tasksState = [task, ...this.tasksState];
 
-    if (sourceNoteId) {
-      this.customerMeetingRepo.linkNoteToTask(meetingId, sourceNoteId, task.id);
-      this.cloneNoteAttachmentsToTask(meetingId, sourceNoteId, task.id);
+    const resolvedSourceNoteId = sourceNoteId ? this.resolveMeetingNoteId(sourceNoteId) : undefined;
+    if (resolvedSourceNoteId) {
+      this.customerMeetingRepo.linkNoteToTask(resolvedMeetingId, resolvedSourceNoteId, task.id);
+      this.cloneNoteAttachmentsToTask(resolvedMeetingId, resolvedSourceNoteId, task.id);
     }
 
     if (meeting.status === 'Planned' || meeting.status === 'Draft Summary') {
       this.customerMeetingRepo.setStatus(meeting.id, 'Tasks Created');
     }
 
-    this.notifier.onTaskAssigned(task);
-    if (task.dueDate) {
-      const soon = this.addDays(this.todayIso, 2);
-      if (task.dueDate <= soon) {
-        this.notifier.onTaskDueSoon(task);
-      }
-    }
     this.recordActivity('task', task.id, 'Meeting task created', task.title);
     this.saveToStorage();
 
+    const localTaskId = task.id;
     const orgGroupId = this.getOrgGroupForMutation();
-    const meetingIdNumeric = this.parseNumericId(meetingId);
-    const noteIdNumeric = this.parseNumericId(sourceNoteId);
     if (orgGroupId) {
-      if (meetingIdNumeric != null && noteIdNumeric != null) {
-        this.persistAndRefresh(this.actionosApi.convertMeetingNoteToTask(meetingIdNumeric, noteIdNumeric, {
-          title: input.title,
-          assignedUserId: input.assignedToEmployeeId,
-          priority: input.priority ?? 'Medium',
-          dueDateUtc: (input.dueDate ?? task.dueDate) ? new Date(`${input.dueDate ?? task.dueDate}T12:00:00.000Z`).toISOString() : null,
-          waitingReason: null
-        }));
+      if (resolvedSourceNoteId) {
+        this.runMeetingNoteMutation(resolvedMeetingId, resolvedSourceNoteId, (meetingIdNumeric, noteIdNumeric) =>
+          this.actionosApi.convertMeetingNoteToTask(meetingIdNumeric, noteIdNumeric, {
+            title: input.title,
+            assignedUserId: input.assignedToEmployeeId,
+            priority: input.priority ?? 'Medium',
+            dueDateUtc: (input.dueDate ?? task.dueDate) ? new Date(`${input.dueDate ?? task.dueDate}T12:00:00.000Z`).toISOString() : null,
+            waitingReason: null
+          }).then((created) => {
+            this.promoteTaskId(localTaskId, created.id.toString());
+            return created;
+          })
+        );
       } else {
-        this.persistAndRefresh(this.actionosApi.createTask({
-          orgGroupId,
-          boardId: null,
-          customerId: task.customerId || null,
-          title: task.title,
-          description: task.description,
-          status: task.status,
-          priority: task.priority,
-          sourceType: 'meeting',
-          sourceMeetingId: meetingIdNumeric,
-          waitingReason: null,
-          treatmentNotes: task.treatmentNotes ?? null,
-          assignedUserId: task.assignedToEmployeeId,
-          dueDateUtc: task.dueDate ? new Date(`${task.dueDate}T12:00:00.000Z`).toISOString() : null,
-          checklistItems: task.checklist.map((item, index) => ({
-            label: item.label,
-            isDone: item.done,
-            sortOrder: index
-          }))
-        }));
+        this.runMeetingMutation(resolvedMeetingId, (meetingIdNumeric) =>
+          this.actionosApi.createTask({
+            orgGroupId,
+            boardId: null,
+            customerId: task.customerId || null,
+            title: task.title,
+            description: task.description,
+            status: task.status,
+            priority: task.priority,
+            sourceType: 'meeting',
+            sourceMeetingId: meetingIdNumeric,
+            waitingReason: null,
+            treatmentNotes: task.treatmentNotes ?? null,
+            assignedUserId: task.assignedToEmployeeId,
+            dueDateUtc: task.dueDate ? new Date(`${task.dueDate}T12:00:00.000Z`).toISOString() : null,
+            checklistItems: task.checklist.map((item, index) => ({
+              label: item.label,
+              isDone: item.done,
+              sortOrder: index
+            }))
+          }).then((created) => {
+            this.promoteTaskId(localTaskId, created.id.toString());
+            return created;
+          })
+        );
       }
     }
     return task;
@@ -2229,7 +2667,8 @@ export class ActionosWorkspaceService {
   }
 
   canCloseMeeting(meetingId: string): boolean {
-    const tasks = this.meetingTasksByMeeting(meetingId);
+    const resolvedMeetingId = this.resolveMeetingId(meetingId);
+    const tasks = this.meetingTasksByMeeting(resolvedMeetingId);
     if (!tasks.length) {
       return true;
     }
@@ -2237,24 +2676,26 @@ export class ActionosWorkspaceService {
   }
 
   private tryAutoCloseMeeting(meetingId: string): void {
-    const meeting = this.customerMeetingRepo.get(meetingId);
+    const resolvedMeetingId = this.resolveMeetingId(meetingId);
+    const meeting = this.customerMeetingRepo.get(resolvedMeetingId);
     if (!meeting || meeting.status === 'Closed') {
       return;
     }
-    if (meeting.publishedRecap && this.canCloseMeeting(meetingId)) {
-      this.customerMeetingRepo.setStatus(meetingId, 'Closed');
-      this.recordActivity('meeting', meetingId, 'Meeting closed — all tasks done', meeting.subject);
+    if (meeting.publishedRecap && this.canCloseMeeting(resolvedMeetingId)) {
+      this.customerMeetingRepo.setStatus(resolvedMeetingId, 'Closed');
+      this.recordActivity('meeting', resolvedMeetingId, 'Meeting closed - all tasks done', meeting.subject);
     }
   }
 
-  updateMeetingTask(id: string, changes: UpdateMeetingTaskInput): Task | null {
-    const before = this.Task(id);
+  updateMeetingTask(id: string, changes: UpdateMeetingTaskInput, statusChangeReason?: string): Task | null {
+    const resolvedTaskId = this.resolveTaskId(id);
+    const before = this.Task(resolvedTaskId);
     if (!before) {
       return null;
     }
     const previousStatus = before.status;
-    const previousAssignee = before.assignedToEmployeeId;
     const next: UpdateMeetingTaskInput = { ...changes };
+    const normalizedStatusChangeReason = statusChangeReason?.trim();
 
     if (next.assignedToEmployeeId && !this.employeeDirectory.isAssignable(next.assignedToEmployeeId)) {
       // eslint-disable-next-line no-console
@@ -2267,6 +2708,10 @@ export class ActionosWorkspaceService {
         // eslint-disable-next-line no-console
         console.warn('[ActionOS] Invalid meeting task status transition:', previousStatus, '->', next.status);
         delete next.status;
+      } else if (!normalizedStatusChangeReason) {
+        // eslint-disable-next-line no-console
+        console.warn('[ActionOS] A status change reason is required.');
+        return null;
       } else if (
         (next.status === 'Waiting For Customer' || next.status === 'Waiting For Internal') &&
         !(next.waitingReason?.trim() || before.waitingReason?.trim())
@@ -2287,7 +2732,7 @@ export class ActionosWorkspaceService {
     if (next.treatmentNotes !== undefined) {
       next.treatmentNotes = next.treatmentNotes.trim();
     }
-    const index = this.tasksState.findIndex(task => task.id === id);
+    const index = this.tasksState.findIndex(task => task.id === resolvedTaskId);
     if (index < 0) {
       return null;
     }
@@ -2296,34 +2741,18 @@ export class ActionosWorkspaceService {
       ...next,
       updatedAt: new Date().toISOString()
     };
-    this.tasksState = this.tasksState.map(task => task.id === id ? updated : task);
-
-    if (next.status && next.status !== previousStatus) {
-      this.notifier.onTaskStatusChanged(updated, previousStatus);
-    }
-    if (next.assignedToEmployeeId && next.assignedToEmployeeId !== previousAssignee) {
-      this.notifier.onTaskAssigned(updated);
-    }
-
-    if (
-      next.dueDate &&
-      next.dueDate <= this.addDays(this.todayIso, 2) &&
-      this.isOpenMeetingTaskStatus(updated.status)
-    ) {
-      this.notifier.onTaskDueSoon(updated);
-    }
+    this.tasksState = this.tasksState.map(task => task.id === resolvedTaskId ? updated : task);
 
     this.recordActivity('task', updated.id, 'Meeting task updated', updated.title);
     this.saveToStorage();
 
-    const taskIdNumeric = this.parseNumericId(updated.id);
-    if (taskIdNumeric != null) {
-      this.persistAndRefresh(this.actionosApi.updateTask(taskIdNumeric, {
+    this.runTaskMutation(updated.id, (taskIdNumeric) =>
+      this.actionosApi.updateTask(taskIdNumeric, {
         title: next.title !== undefined ? next.title : undefined,
         description: next.description !== undefined ? next.description : undefined,
         status: next.status !== undefined ? next.status : undefined,
         statusChangeReason: next.status !== undefined && next.status !== previousStatus
-          ? 'Updated in ActionOS UI'
+          ? normalizedStatusChangeReason
           : undefined,
         priority: next.priority !== undefined ? next.priority : undefined,
         waitingReason: next.waitingReason !== undefined ? next.waitingReason : undefined,
@@ -2332,13 +2761,15 @@ export class ActionosWorkspaceService {
         dueDateUtc: next.dueDate !== undefined
           ? (next.dueDate ? new Date(`${next.dueDate}T12:00:00.000Z`).toISOString() : null)
           : undefined
-      }));
+      })
+    );
 
-      if ((next.progressionNotes?.length ?? 0) > (before.progressionNotes?.length ?? 0)) {
-        const latestNote = next.progressionNotes?.[next.progressionNotes.length - 1];
-        if (latestNote?.content?.trim()) {
-          this.persistAndRefresh(this.actionosApi.addTaskActivityNote(taskIdNumeric, 'progress', latestNote.content.trim()));
-        }
+    if ((next.progressionNotes?.length ?? 0) > (before.progressionNotes?.length ?? 0)) {
+      const latestNote = next.progressionNotes?.[next.progressionNotes.length - 1];
+      if (latestNote?.content?.trim()) {
+        this.runTaskMutation(updated.id, (taskIdNumeric) =>
+          this.actionosApi.addTaskActivityNote(taskIdNumeric, 'progress', latestNote.content.trim())
+        );
       }
     }
 
@@ -2364,14 +2795,15 @@ export class ActionosWorkspaceService {
     this.updateMeetingTask(task.id, { checklist: updatedChecklist });
     this.recordActivity('task', task.id, done ? 'Meeting task checklist completed' : 'Meeting task checklist reopened', checklistItem.label);
 
-    const taskIdNumeric = this.parseNumericId(task.id);
     const checklistId = this.resolveChecklistItemId(task, checklistItem);
-    if (taskIdNumeric != null && checklistId != null) {
-      this.persistAndRefresh(this.actionosApi.updateTaskChecklistItem(taskIdNumeric, checklistId, {
+    if (checklistId != null) {
+      this.runTaskMutation(task.id, (taskIdNumeric) =>
+        this.actionosApi.updateTaskChecklistItem(taskIdNumeric, checklistId, {
         label: null,
         isDone: done,
         sortOrder: null
-      }));
+        })
+      );
     }
   }
 
@@ -2385,10 +2817,9 @@ export class ActionosWorkspaceService {
     });
     this.recordActivity('task', task.id, 'Meeting task checklist item added', trimmed);
 
-    const taskIdNumeric = this.parseNumericId(task.id);
-    if (taskIdNumeric != null) {
-      this.persistAndRefresh(this.actionosApi.addTaskChecklistItem(taskIdNumeric, trimmed, false));
-    }
+    this.runTaskMutation(task.id, (taskIdNumeric) =>
+      this.actionosApi.addTaskChecklistItem(taskIdNumeric, trimmed, false)
+    );
   }
 
   toggleMeetingTaskWatcher(task: Task, employeeId: string, checked: boolean): void {
@@ -2400,14 +2831,11 @@ export class ActionosWorkspaceService {
       : task.watcherEmployeeIds.filter(id => id !== employeeId);
     this.updateMeetingTask(task.id, { watcherEmployeeIds });
 
-    const taskIdNumeric = this.parseNumericId(task.id);
-    if (taskIdNumeric != null) {
-      this.persistAndRefresh(
-        checked
-          ? this.actionosApi.addTaskWatcher(taskIdNumeric, employeeId)
-          : this.actionosApi.removeTaskWatcher(taskIdNumeric, employeeId)
-      );
-    }
+    this.runTaskMutation(task.id, (taskIdNumeric) =>
+      checked
+        ? this.actionosApi.addTaskWatcher(taskIdNumeric, employeeId)
+        : this.actionosApi.removeTaskWatcher(taskIdNumeric, employeeId)
+    );
   }
 
   commentsForMeetingTask(taskId: string): Comment[] {
@@ -2437,21 +2865,23 @@ export class ActionosWorkspaceService {
     this.recordActivity('task', task.id, 'Meeting task comment added', task.title);
     this.saveToStorage();
 
-    const taskIdNumeric = this.parseNumericId(task.id);
-    if (taskIdNumeric != null) {
-      this.persistAndRefresh(this.actionosApi.addTaskNote(taskIdNumeric, trimmedBody));
-    }
+    this.runTaskMutation(task.id, (taskIdNumeric) =>
+      this.actionosApi.addTaskNote(taskIdNumeric, trimmedBody)
+    );
   }
 
   nudgeMeetingTaskOwner(task: Task): void {
-    this.notifier.onTaskDueSoon(task);
     this.recordActivity('task', task.id, 'Reminder sent', task.title);
     this.saveToStorage();
 
-    const taskIdNumeric = this.parseNumericId(task.id);
-    if (taskIdNumeric != null) {
-      this.persistAndRefresh(this.actionosApi.addTaskActivityNote(taskIdNumeric, 'reminder', 'Reminder sent to task owner.'));
-    }
+    this.runTaskMutation(task.id, async (taskIdNumeric) => {
+      await this.actionosApi.addTaskActivityNote(taskIdNumeric, 'reminder', 'Reminder sent to task owner.');
+      if (task.dueDate) {
+        await this.actionosApi.updateTask(taskIdNumeric, {
+          dueDateUtc: new Date(`${task.dueDate}T12:00:00.000Z`).toISOString()
+        });
+      }
+    });
   }
 
   runMeetingTaskReminderSweep(daysAhead = 2): number {
@@ -2468,7 +2898,7 @@ export class ActionosWorkspaceService {
       if (alreadySentToday) {
         return;
       }
-      this.notifier.onTaskDueSoon(task);
+      this.nudgeMeetingTaskOwner(task);
       sent++;
     });
     if (sent) {
@@ -2518,14 +2948,14 @@ export class ActionosWorkspaceService {
     };
   }
 
-  // Attachments (mock)
+  // Attachments
 
   attachmentsFor(entityType: AttachmentEntityType, entityId: string): Attachment[] {
     return this.attachments.list(entityType, entityId);
   }
 
   noteAttachments(noteId: string): Attachment[] {
-    return this.attachments.list('meeting-note', noteId);
+    return this.attachments.list('meeting-note', this.resolveMeetingNoteId(noteId));
   }
 
   async uploadAttachment(
@@ -2537,68 +2967,89 @@ export class ActionosWorkspaceService {
     this.recordActivity('task', entityId, 'Attachment uploaded', attachment.fileName);
     const orgGroupId = this.getOrgGroupForMutation();
     if (orgGroupId) {
-      this.persistAndRefresh(this.actionosApi.createAttachment({
-        orgGroupId,
-        entityType,
-        entityId,
-        fileName: attachment.fileName,
-        mimeType: attachment.mimeType,
-        sizeBytes: attachment.sizeBytes,
-        storageUrl: attachment.url
-      }));
+      if (entityType === 'meeting-task') {
+        this.runTaskMutation(entityId, (taskIdNumeric) =>
+          this.actionosApi.createAttachment({
+            orgGroupId,
+            entityType,
+            entityId: taskIdNumeric.toString(),
+            fileName: attachment.fileName,
+            mimeType: attachment.mimeType,
+            sizeBytes: attachment.sizeBytes,
+            storageUrl: attachment.url
+          })
+        );
+      } else {
+        this.persistAndRefresh(this.actionosApi.createAttachment({
+          orgGroupId,
+          entityType,
+          entityId,
+          fileName: attachment.fileName,
+          mimeType: attachment.mimeType,
+          sizeBytes: attachment.sizeBytes,
+          storageUrl: attachment.url
+        }));
+      }
     }
     return attachment;
   }
 
   async uploadNoteAttachment(meetingId: string, noteId: string, file: File): Promise<Attachment | null> {
-    const meeting = this.customerMeetingRepo.get(meetingId);
+    const resolvedMeetingId = this.resolveMeetingId(meetingId);
+    const resolvedNoteId = this.resolveMeetingNoteId(noteId);
+    const meeting = this.customerMeetingRepo.get(resolvedMeetingId);
     if (!meeting) {
       return null;
     }
-    const attachment = await this.attachments.upload(file, 'meeting-note', noteId, this.currentEmployeeId);
-    const note = meeting.notes.find(n => n.id === noteId);
+    const attachment = await this.attachments.upload(file, 'meeting-note', resolvedNoteId, this.currentEmployeeId);
+    const note = meeting.notes.find(n => n.id === resolvedNoteId);
     if (note) {
       const updatedIds = [...(note.attachmentIds ?? []), attachment.id];
-      this.customerMeetingRepo.updateNote(meetingId, noteId, { attachmentIds: updatedIds });
+      this.customerMeetingRepo.updateNote(resolvedMeetingId, resolvedNoteId, { attachmentIds: updatedIds });
     }
     const orgGroupId = this.getOrgGroupForMutation();
     if (orgGroupId) {
-      this.persistAndRefresh(this.actionosApi.createAttachment({
-        orgGroupId,
-        entityType: 'meeting-note',
-        entityId: noteId,
-        fileName: attachment.fileName,
-        mimeType: attachment.mimeType,
-        sizeBytes: attachment.sizeBytes,
-        storageUrl: attachment.url
-      }));
+      this.runMeetingNoteMutation(resolvedMeetingId, resolvedNoteId, (_meetingIdNumeric, noteIdNumeric) =>
+        this.actionosApi.createAttachment({
+          orgGroupId,
+          entityType: 'meeting-note',
+          entityId: noteIdNumeric.toString(),
+          fileName: attachment.fileName,
+          mimeType: attachment.mimeType,
+          sizeBytes: attachment.sizeBytes,
+          storageUrl: attachment.url
+        })
+      );
     }
     return attachment;
   }
 
   cloneNoteAttachmentsToTask(meetingId: string, noteId: string, taskId: string): void {
-    const meeting = this.customerMeetingRepo.get(meetingId);
+    const resolvedMeetingId = this.resolveMeetingId(meetingId);
+    const resolvedNoteId = this.resolveMeetingNoteId(noteId);
+    const resolvedTaskId = this.resolveTaskId(taskId);
+    const meeting = this.customerMeetingRepo.get(resolvedMeetingId);
     if (!meeting) {
       return;
     }
-    const note = meeting.notes.find(n => n.id === noteId);
+    const note = meeting.notes.find(n => n.id === resolvedNoteId);
     if (!note?.attachmentIds?.length) {
       return;
     }
     const newIds: string[] = [];
     for (const attachId of note.attachmentIds) {
-      const copy = this.attachments.clone(attachId, 'meeting-task', taskId);
+      const copy = this.attachments.clone(attachId, 'meeting-task', resolvedTaskId);
       if (copy) {
         newIds.push(copy.id);
       }
     }
     if (newIds.length) {
-      const task = this.Task(taskId);
+      const task = this.Task(resolvedTaskId);
       if (task) {
-        this.updateMeetingTask(taskId, {
+        this.updateMeetingTask(resolvedTaskId, {
           progressionNotes: task.progressionNotes
         });
-        const index = this.tasksState.findIndex(t => t.id === taskId);
+        const index = this.tasksState.findIndex(t => t.id === resolvedTaskId);
         if (index >= 0) {
           this.tasksState[index] = {
             ...this.tasksState[index],

@@ -8,8 +8,8 @@ import { Task, TaskStatus, NotificationLogEntry } from '../models/actionos.model
  * directly from Dana Lerner's Monday note: "send email alert to open user and
  * assigned user".
  *
- * In v3 the local mock implementation only appends entries to task.notifications[]
- * and writes a console.log line; no real email is sent.
+ * This local implementation appends entries to task.notifications[] and writes
+ * a console log line; no real email/Teams provider call is sent from the UI.
  */
 export interface NotificationPort {
   onTaskAssigned(task: Task): Promise<void>;
@@ -58,6 +58,6 @@ export class LocalMockNotificationAdapter implements NotificationPort {
     }
     this.save();
     // eslint-disable-next-line no-console
-    console.info('[ActionOS notification mock]', event, task.id, unique);
+    console.info('[ActionOS notification local]', event, task.id, unique);
   }
 }

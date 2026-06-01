@@ -127,7 +127,7 @@ export class MeetingTaskCreationComponent {
   get assigneeOptions(): SelectOption[] {
     return [
       { value: '', label: this.i18n.translate('meetingTask.selectAssignee') },
-      ...this.workspace.employees.map(e => ({ value: e.id, label: `${e.fullName} (${e.email})` }))
+      ...this.workspace.employees.map(e => ({ value: e.id, label: e.email ? `${e.fullName} (${e.email})` : e.fullName }))
     ];
   }
 

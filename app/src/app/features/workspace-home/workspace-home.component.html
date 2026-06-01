@@ -19,7 +19,7 @@
   </header>
 
   <!-- TEAM CALENDAR -->
-  <section class="panel home-cal-panel">
+  <div class="home-cal-panel">
     <app-calendar
       [events]="homeCalEvents()"
       [hasFilter]="true"
@@ -47,7 +47,7 @@
         </select>
       </div>
     </app-calendar>
-  </section>
+  </div>
 
   <!-- METRICS -->
   <div class="metric-grid home-metrics">
@@ -130,7 +130,7 @@
           <span class="avatar">{{ workspace.initials(workload.member.id) }}</span>
           <div>
             <strong>{{ workload.member.name }}</strong>
-            <small>{{ workload.member.team }} · {{ workload.openCount + workload.meetingOpenCount }} {{ 'common.open' | t }} · {{ workload.blockedCount + workload.meetingBlockedCount }} {{ 'common.blocked' | t }}</small>
+            <small>{{ workload.openCount + workload.meetingOpenCount }} {{ 'common.open' | t }} · {{ workload.blockedCount + workload.meetingBlockedCount }} {{ 'common.blocked' | t }}</small>
           </div>
         </button>
       </div>

@@ -83,6 +83,7 @@ export class HeaderComponent {
   get breadcrumb(): string {
     const map: Partial<Record<ViewId, string>> = {
       'my-work': 'Work',
+      'tasks': 'Work',
       'boards': 'Work',
     };
     return map[this.activeView] ?? '';
@@ -191,16 +192,6 @@ export class HeaderComponent {
     this.navigate.emit(view);
     this.userMenuOpen.set(false);
     this.settingsOpen.set(false);
-  }
-
-  resetDemo(): void {
-    this.workspace.resetDemoData();
-    this.userMenuOpen.set(false);
-  }
-
-  clearAll(): void {
-    this.workspace.clearAllData();
-    this.userMenuOpen.set(false);
   }
 
   @HostListener('document:click', ['$event.target'])

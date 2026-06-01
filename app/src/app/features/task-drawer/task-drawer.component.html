@@ -2,15 +2,17 @@
   *ngIf="workspace.drawerOpen && workspace.selectedTask as task"
   class="drawer-backdrop"
   role="presentation"
-  (click)="workspace.closeTaskDrawer()"
+  (click)="closeDrawer()"
 >
   <aside class="task-drawer" role="dialog" aria-label="Task details" (click)="$event.stopPropagation()">
+    <div class="task-modal-handle"></div>
+
     <header class="drawer-header">
       <div>
         <span class="eyebrow">{{ 'meetingTask.title' | t }}</span>
         <h2>{{ task.title }}</h2>
       </div>
-      <button type="button" class="ghost-action" (click)="workspace.closeTaskDrawer()">{{ 'common.close' | t }}</button>
+      <button type="button" class="ghost-action" (click)="closeDrawer()">{{ 'common.close' | t }}</button>
     </header>
 
     <div class="drawer-status-bar">
@@ -25,139 +27,186 @@
       </span>
     </div>
 
-    <label class="field-control">
-      {{ 'meetingTask.taskTitle' | t }}
-      <input
-        [ngModel]="task.title"
-        (ngModelChange)="updateMeetingTaskField(task, 'title', $event)"
-      />
-    </label>
+    <section class="drawer-section">
+      <div class="panel-header compact">
+        <div>
+          <span class="eyebrow">{{ 'meetingTask.title' | t }}</span>
+          <h3>{{ 'meetingTask.taskTitle' | t }}</h3>
+        </div>
+        <button type="button" class="ghost-action small section-toggle" (click)="toggleSection('details')">
+          {{ isSectionCollapsed('details') ? '+' : '-' }}
+        </button>
+      </div>
 
-    <label class="field-control">
-      {{ 'meetingTask.description' | t }}
-      <textarea
-        rows="3"
-        [ngModel]="task.description"
-        (ngModelChange)="updateMeetingTaskField(task, 'description', $event)"
-      ></textarea>
-    </label>
+      <div *ngIf="!isSectionCollapsed('details')" class="section-body">
+        <label class="field-control">
+          {{ 'meetingTask.taskTitle' | t }}
+          <input
+            [ngModel]="task.title"
+            (ngModelChange)="updateMeetingTaskField(task, 'title', $event)"
+          />
+        </label>
 
-    <div class="detail-grid">
-      <label class="field-control">
-        {{ 'meetingTask.status' | t }}
-        <app-searchable-select
-          [ngModel]="task.status"
-          (ngModelChange)="updateMeetingTaskStatus(task, $event)"
-          [options]="meetingTaskStatusOptions"
-        ></app-searchable-select>
-      </label>
+        <label class="field-control">
+          {{ 'meetingTask.description' | t }}
+          <textarea
+            rows="3"
+            [ngModel]="task.description"
+            (ngModelChange)="updateMeetingTaskField(task, 'description', $event)"
+          ></textarea>
+        </label>
 
-      <label class="field-control">
-        {{ 'meetingTask.priority' | t }}
-        <app-searchable-select
-          [ngModel]="task.priority"
-          (ngModelChange)="updateMeetingTaskField(task, 'priority', $event)"
-          [options]="taskPriorityOptions"
-        ></app-searchable-select>
-      </label>
+        <div class="detail-grid">
+          <label class="field-control">
+            {{ 'meetingTask.status' | t }}
+            <app-searchable-select
+              [ngModel]="task.status"
+              (ngModelChange)="updateMeetingTaskStatus(task, $event)"
+              [options]="meetingTaskStatusOptions"
+            ></app-searchable-select>
+          </label>
 
-      <label class="field-control">
-        {{ 'meetingTask.assignedTo' | t }}
-        <app-searchable-select
-          [ngModel]="task.assignedToEmployeeId"
-          (ngModelChange)="updateMeetingTaskField(task, 'assignedToEmployeeId', $event)"
-          [options]="employeeSelectOptions"
-          [placeholder]="'common.unassigned' | t"
-        ></app-searchable-select>
-      </label>
+          <label class="field-control">
+            {{ 'meetingTask.priority' | t }}
+            <app-searchable-select
+              [ngModel]="task.priority"
+              (ngModelChange)="updateMeetingTaskField(task, 'priority', $event)"
+              [options]="taskPriorityOptions"
+            ></app-searchable-select>
+          </label>
 
-      <label class="field-control">
-        {{ 'meetingTask.openedBy' | t }}
-        <input disabled [value]="workspace.employeeName(task.openedByEmployeeId)" />
-      </label>
+          <label class="field-control">
+            {{ 'meetingTask.assignedTo' | t }}
+            <app-searchable-select
+              [ngModel]="task.assignedToEmployeeId"
+              (ngModelChange)="updateMeetingTaskField(task, 'assignedToEmployeeId', $event)"
+              [options]="employeeSelectOptions"
+              [placeholder]="'common.unassigned' | t"
+            ></app-searchable-select>
+          </label>
 
-      <label class="field-control">
-        {{ 'meetingTask.dueDate' | t }}
-        <input
-          type="date"
-          [ngModel]="task.dueDate"
-          (ngModelChange)="updateMeetingTaskField(task, 'dueDate', $event)"
-        />
-      </label>
+          <label class="field-control">
+            {{ 'meetingTask.openedBy' | t }}
+            <input disabled [value]="workspace.employeeName(task.openedByEmployeeId)" />
+          </label>
 
-      <label class="field-control">
-        {{ 'meetingTask.sourceMeeting' | t }}
-        <input disabled [value]="workspace.customerMeeting(task.sourceMeetingId)?.subject || '-'" />
-      </label>
+          <label class="field-control">
+            {{ 'meetingTask.dueDate' | t }}
+            <input
+              type="date"
+              [ngModel]="task.dueDate"
+              (ngModelChange)="updateMeetingTaskField(task, 'dueDate', $event)"
+            />
+          </label>
 
-      <label class="field-control detail-wide">
-        {{ 'meetingTask.treatmentNotes' | t }}
-        <textarea
-          rows="3"
-          [ngModel]="task.treatmentNotes"
-          (ngModelChange)="updateMeetingTaskField(task, 'treatmentNotes', $event)"
-          [placeholder]="'meetingTask.treatmentNotesPlaceholder' | t"
-        ></textarea>
-      </label>
+          <label class="field-control">
+            {{ 'meetingTask.sourceMeeting' | t }}
+            <input disabled [value]="workspace.customerMeeting(task.sourceMeetingId)?.subject || '-'" />
+          </label>
 
-      <label class="field-control detail-wide">
-        Waiting reason
-        <input
-          [ngModel]="task.waitingReason || ''"
-          (ngModelChange)="updateMeetingTaskField(task, 'waitingReason', $event)"
-          placeholder="Required when status is waiting"
-        />
-      </label>
+          <label class="field-control detail-wide">
+            {{ 'meetingTask.treatmentNotes' | t }}
+            <textarea
+              rows="3"
+              [ngModel]="task.treatmentNotes"
+              (ngModelChange)="updateMeetingTaskField(task, 'treatmentNotes', $event)"
+              [placeholder]="'meetingTask.treatmentNotesPlaceholder' | t"
+            ></textarea>
+          </label>
 
-      <label class="field-control">
-        Completed at
-        <input disabled [value]="task.completedAt ? (task.completedAt | slice:0:16) : '-'" />
-      </label>
-    </div>
+          <label *ngIf="shouldShowStatusReason(task)" class="field-control detail-wide">
+            Status update note
+            <textarea
+              rows="2"
+              [ngModel]="statusChangeReason"
+              (ngModelChange)="statusChangeReason = $event; onStatusReasonChanged()"
+              placeholder="Required when changing status (at least 3 words)."
+            ></textarea>
+            <small class="muted status-reason-hint">Words: {{ statusReasonWordCount }}/3 minimum</small>
+          </label>
 
-    <!-- Attachments — shown directly under task details -->
+          <label *ngIf="showWaitingReason(task)" class="field-control detail-wide">
+            Waiting reason
+            <input
+              [ngModel]="task.waitingReason || ''"
+              (ngModelChange)="updateMeetingTaskField(task, 'waitingReason', $event)"
+              placeholder="Required for waiting statuses"
+            />
+          </label>
+
+          <label *ngIf="isCompletedStatus(task.status)" class="field-control">
+            Completed at
+            <input disabled [value]="task.completedAt ? (task.completedAt | slice:0:16) : '-'" />
+          </label>
+        </div>
+
+        <p *ngIf="statusValidationMessage && shouldShowStatusReason(task)" class="status-validation">{{ statusValidationMessage }}</p>
+      </div>
+    </section>
+
     <section class="drawer-section">
       <div class="panel-header compact">
         <div>
           <span class="eyebrow">{{ 'customerMeeting.attachments' | t }}</span>
           <h3>{{ workspace.attachmentsFor('meeting-task', task.id).length }} {{ 'customerMeeting.files' | t }}</h3>
         </div>
+        <button type="button" class="ghost-action small section-toggle" (click)="toggleSection('attachments')">
+          {{ isSectionCollapsed('attachments') ? '+' : '-' }}
+        </button>
+      </div>
+
+      <div *ngIf="!isSectionCollapsed('attachments')" class="section-body">
         <div class="topbar-actions">
           <button type="button" class="ghost-action small" [disabled]="uploadingAttachment" (click)="triggerFileInput()">
             {{ uploadingAttachment ? ('customerMeeting.uploading' | t) : ('customerMeeting.addFile' | t) }}
           </button>
           <input #drawerFileInput type="file" multiple style="display:none" (change)="onFileSelected($event, task)" />
         </div>
-      </div>
-      <div *ngIf="workspace.attachmentsFor('meeting-task', task.id).length; else noTaskAttachments" class="task-attach-list">
-        <div class="task-attach-row" *ngFor="let att of workspace.attachmentsFor('meeting-task', task.id)">
-          <span class="task-attach-name">{{ att.fileName }}</span>
-          <small class="muted">{{ att.uploadedAt | slice:0:10 }}</small>
-          <button type="button" class="ghost-action small danger" (click)="workspace.removeAttachment(att.id)">✕</button>
+
+        <div *ngIf="workspace.attachmentsFor('meeting-task', task.id).length; else noTaskAttachments" class="task-attach-list">
+          <div class="task-attach-row" *ngFor="let att of workspace.attachmentsFor('meeting-task', task.id)">
+            <span class="task-attach-name">{{ att.fileName }}</span>
+            <small class="muted">{{ att.uploadedAt | slice:0:10 }}</small>
+            <button type="button" class="ghost-action small danger" (click)="workspace.removeAttachment(att.id)">x</button>
+          </div>
         </div>
+        <ng-template #noTaskAttachments>
+          <p class="muted" style="font-size:13px;margin:6px 0 0">{{ 'customerMeeting.noAttachments' | t }}</p>
+        </ng-template>
       </div>
-      <ng-template #noTaskAttachments>
-        <p class="muted" style="font-size:13px;margin:6px 0 0">{{ 'customerMeeting.noAttachments' | t }}</p>
-      </ng-template>
     </section>
 
     <section class="drawer-section">
       <div class="panel-header compact">
         <div>
           <span class="eyebrow">{{ 'meetingTask.notifications' | t }}</span>
-          <h3>{{ task.notifications.length }}</h3>
+          <h3>{{ notificationCount(task) }}</h3>
         </div>
+        <button type="button" class="ghost-action small section-toggle" (click)="toggleSection('alerts')">
+          {{ isSectionCollapsed('alerts') ? '+' : '-' }}
+        </button>
       </div>
-      <div *ngIf="!task.notifications.length" class="empty-state compact-empty">
-        {{ 'meetingTask.noNotifications' | t }}
+
+      <div *ngIf="!isSectionCollapsed('alerts')">
+        <ng-container *ngIf="statusAlertComments(task) as statusAlerts">
+          <div *ngIf="!task.notifications.length && !statusAlerts.length" class="empty-state compact-empty">
+            {{ 'meetingTask.noNotifications' | t }}
+          </div>
+
+          <ul class="notification-log">
+            <li *ngFor="let statusAlert of statusAlerts" class="notification-status-note">
+              <strong>{{ 'meetingTask.notificationEvents.status-changed' | t }}</strong>
+              <span>{{ statusAlert.body }}</span>
+              <small>{{ statusAlert.createdAt | slice:0:16 }}</small>
+            </li>
+            <li *ngFor="let n of task.notifications">
+              <strong>{{ ('meetingTask.notificationEvents.' + n.event) | t }}</strong>
+              -> {{ workspace.employeeName(n.recipientEmployeeId) }}
+              <small>{{ n.sentAt | slice:0:16 }}</small>
+            </li>
+          </ul>
+        </ng-container>
       </div>
-      <ul class="notification-log">
-        <li *ngFor="let n of task.notifications">
-          <strong>{{ ('meetingTask.notificationEvents.' + n.event) | t }}</strong>
-          -> {{ workspace.employeeName(n.recipientEmployeeId) }}
-          <small>{{ n.sentAt | slice:0:16 }}</small>
-        </li>
-      </ul>
     </section>
 
     <section class="drawer-section">
@@ -166,72 +215,30 @@
           <span class="eyebrow">{{ 'common.checklist' | t }}</span>
           <h3>{{ 'myWork.checklistComplete' | t: { progress: workspace.meetingTaskChecklistProgress(task) } }}</h3>
         </div>
-      </div>
-      <div class="progress-track">
-        <span [style.width.%]="workspace.meetingTaskChecklistProgress(task)"></span>
-      </div>
-      <div class="checklist">
-        <label *ngFor="let item of task.checklist">
-          <input
-            type="checkbox"
-            [ngModel]="item.done"
-            (ngModelChange)="workspace.updateMeetingTaskChecklistItem(task, item, $event)"
-          />
-          <span>{{ item.label }}</span>
-        </label>
-      </div>
-      <form class="inline-create" (ngSubmit)="addMeetingChecklistItem(task)">
-        <input name="meetingChecklistText" [(ngModel)]="meetingChecklistText" placeholder="Add checklist item" />
-        <button type="submit" class="ghost-action" [disabled]="!meetingChecklistText.trim()">{{ 'common.add' | t }}</button>
-      </form>
-    </section>
-
-    <!-- Progression Notes -->
-    <section class="drawer-section">
-      <div class="panel-header compact">
-        <div>
-          <span class="eyebrow">Progression Notes</span>
-          <h3>{{ task.progressionNotes?.length ?? 0 }} notes</h3>
-        </div>
+        <button type="button" class="ghost-action small section-toggle" (click)="toggleSection('checklist')">
+          {{ isSectionCollapsed('checklist') ? '+' : '-' }}
+        </button>
       </div>
 
-      <form class="progression-form" (ngSubmit)="saveProgressionNote(task)">
-        <textarea
-          name="progressionNoteText"
-          rows="3"
-          [(ngModel)]="progressionNoteText"
-          [placeholder]="editingProgressionNoteId ? 'Edit your note...' : 'Write a progression note...'"
-        ></textarea>
-        <div class="progression-form-actions">
-          <button type="submit" class="primary-action" [disabled]="!progressionNoteText.trim()">
-            {{ editingProgressionNoteId ? 'Update Note' : 'Save Note' }}
-          </button>
-          <button *ngIf="editingProgressionNoteId" type="button" class="ghost-action" (click)="cancelEditProgressionNote()">
-            Cancel
-          </button>
+      <div *ngIf="!isSectionCollapsed('checklist')" class="section-body">
+        <div class="progress-track">
+          <span [style.width.%]="workspace.meetingTaskChecklistProgress(task)"></span>
         </div>
-      </form>
-
-      <div *ngIf="task.progressionNotes?.length; else noProgressionNotes" class="progression-notes-list">
-        <div
-          *ngFor="let note of task.progressionNotes"
-          class="progression-note"
-          [class.note-editing]="editingProgressionNoteId === note.id"
-        >
-          <div class="progression-note-header">
-            <strong>{{ workspace.employeeName(note.authorEmployeeId) }}</strong>
-            <small class="muted">{{ note.createdAt | slice:0:10 }}</small>
-            <div class="progression-note-actions">
-              <button type="button" class="ghost-action small" (click)="startEditProgressionNote(note)">Edit</button>
-              <button type="button" class="ghost-action small danger" (click)="deleteProgressionNote(task, note.id)">Delete</button>
-            </div>
-          </div>
-          <p class="progression-note-body">{{ note.content }}</p>
+        <div class="checklist">
+          <label *ngFor="let item of task.checklist">
+            <input
+              type="checkbox"
+              [ngModel]="item.done"
+              (ngModelChange)="workspace.updateMeetingTaskChecklistItem(task, item, $event)"
+            />
+            <span>{{ item.label }}</span>
+          </label>
         </div>
+        <form class="inline-create" (ngSubmit)="addMeetingChecklistItem(task)">
+          <input name="meetingChecklistText" [(ngModel)]="meetingChecklistText" placeholder="Add checklist item" />
+          <button type="submit" class="ghost-action" [disabled]="!meetingChecklistText.trim()">{{ 'common.add' | t }}</button>
+        </form>
       </div>
-      <ng-template #noProgressionNotes>
-        <p class="muted" style="font-size:13px;margin:8px 0 0">No progression notes yet.</p>
-      </ng-template>
     </section>
 
     <section class="drawer-section">
@@ -240,46 +247,59 @@
           <span class="eyebrow">{{ 'common.watchers' | t }}</span>
           <h3>{{ task.watcherEmployeeIds.length }} {{ 'common.watchers' | t }}</h3>
         </div>
+        <button type="button" class="ghost-action small section-toggle" (click)="toggleSection('watchers')">
+          {{ isSectionCollapsed('watchers') ? '+' : '-' }}
+        </button>
       </div>
-      <app-searchable-select
-        [options]="watcherCandidateOptions(task)"
-        [ngModel]="watcherSelectModel"
-        (ngModelChange)="onWatcherSelect(task, $event)"
-        placeholder="Add watcher..."
-      ></app-searchable-select>
-      <div *ngIf="task.watcherEmployeeIds.length" class="watcher-chips">
-        <div *ngFor="let empId of task.watcherEmployeeIds" class="watcher-chip">
-          <span>{{ workspace.employeeName(empId) }}</span>
-          <button type="button" class="ghost-action small" (click)="workspace.toggleMeetingTaskWatcher(task, empId, false)">✕</button>
+
+      <div *ngIf="!isSectionCollapsed('watchers')" class="section-body">
+        <app-searchable-select
+          [options]="watcherCandidateOptions(task)"
+          [ngModel]="watcherSelectModel"
+          (ngModelChange)="onWatcherSelect(task, $event)"
+          placeholder="Add watcher..."
+        ></app-searchable-select>
+
+        <div *ngIf="task.watcherEmployeeIds.length" class="watcher-chips">
+          <div *ngFor="let empId of task.watcherEmployeeIds" class="watcher-chip">
+            <span>{{ workspace.employeeName(empId) }}</span>
+            <button type="button" class="ghost-action small" (click)="workspace.toggleMeetingTaskWatcher(task, empId, false)">x</button>
+          </div>
         </div>
+
+        <p *ngIf="!task.watcherEmployeeIds.length" class="muted" style="font-size:13px;margin:8px 0 0">No watchers yet.</p>
       </div>
-      <p *ngIf="!task.watcherEmployeeIds.length" class="muted" style="font-size:13px;margin:8px 0 0">No watchers yet.</p>
     </section>
 
-    <!-- Discussion / Comments -->
     <section class="drawer-section">
       <div class="panel-header compact">
         <div>
           <span class="eyebrow">{{ 'drawer.discussion' | t }}</span>
           <h3>{{ 'common.comments' | t }}</h3>
         </div>
-      </div>
-      <form class="comment-form" (ngSubmit)="addMeetingComment(task)">
-        <textarea name="meetingCommentText" rows="3" [(ngModel)]="meetingCommentText" [placeholder]="'drawer.commentPlaceholder' | t"></textarea>
-        <button type="submit" class="primary-action" [disabled]="!meetingCommentText.trim()">{{ 'common.comment' | t }}</button>
-      </form>
-
-      <div *ngIf="workspace.commentsForMeetingTask(task.id).length; else noMeetingDrawerComments" class="comment-list">
-        <article *ngFor="let comment of workspace.commentsForMeetingTask(task.id)" class="comment">
-          <strong>{{ workspace.memberName(comment.createdByUserId) }}</strong>
-          <p>{{ comment.body }}</p>
-          <small>{{ comment.createdAt }}</small>
-        </article>
+        <button type="button" class="ghost-action small section-toggle" (click)="toggleSection('comments')">
+          {{ isSectionCollapsed('comments') ? '+' : '-' }}
+        </button>
       </div>
 
-      <ng-template #noMeetingDrawerComments>
-        <div class="empty-state compact-empty">{{ 'drawer.noComments' | t }}</div>
-      </ng-template>
+      <div *ngIf="!isSectionCollapsed('comments')" class="section-body">
+        <form class="comment-form" (ngSubmit)="addMeetingComment(task)">
+          <textarea name="meetingCommentText" rows="3" [(ngModel)]="meetingCommentText" [placeholder]="'drawer.commentPlaceholder' | t"></textarea>
+          <button type="submit" class="primary-action" [disabled]="!meetingCommentText.trim()">{{ 'common.comment' | t }}</button>
+        </form>
+
+        <div *ngIf="workspace.commentsForMeetingTask(task.id).length; else noMeetingDrawerComments" class="comment-list">
+          <article *ngFor="let comment of workspace.commentsForMeetingTask(task.id)" class="comment">
+            <strong>{{ workspace.memberName(comment.createdByUserId) }}</strong>
+            <p>{{ comment.body }}</p>
+            <small>{{ comment.createdAt }}</small>
+          </article>
+        </div>
+
+        <ng-template #noMeetingDrawerComments>
+          <div class="empty-state compact-empty">{{ 'drawer.noComments' | t }}</div>
+        </ng-template>
+      </div>
     </section>
 
     <footer class="drawer-footer">

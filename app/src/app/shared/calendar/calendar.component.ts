@@ -69,7 +69,10 @@ export class CalendarComponent {
 
   readonly nextEvent = computed(() => {
     const now = new Date().toISOString();
-    return this.sourceEvents().find(e => e.kind !== 'task' && e.startsAt >= now);
+    const upcoming = this.sourceEvents().filter(e => e.startsAt >= now);
+    // Prefer the next meeting; fall back to the next task so a tasks-only feed
+    // (e.g. the Tasks page) still shows something useful in the compact strip.
+    return upcoming.find(e => e.kind !== 'task') ?? upcoming[0];
   });
 
   readonly periodLabel = computed(() => {

@@ -125,10 +125,17 @@ type SortDir = 'asc' | 'desc';
             type="search"
             class="search-input"
             [(ngModel)]="searchText"
+            (ngModelChange)="custList.scrollTop = 0"
             [placeholder]="'customers.searchPlaceholder' | t"
           />
-          <button type="button" class="primary-action" (click)="openAddModal()">
-            {{ 'customers.addCustomer' | t }}
+          <button
+            type="button"
+            class="add-customer-btn"
+            (click)="openAddModal()"
+            [attr.aria-label]="'customers.addCustomer' | t"
+            [title]="'customers.addCustomer' | t"
+          >
+            +
           </button>
         </div>
       </div>
@@ -144,65 +151,49 @@ type SortDir = 'asc' | 'desc';
         </button>
       </div>
 
-      <div class="table-scroll">
-        <div class="table-row table-head customer-table-row">
-          <button type="button" class="sort-head" (click)="sortBy('name')">
-            {{ 'customers.name' | t }}<span class="sort-arrow">{{ sortArrow('name') }}</span>
-          </button>
-          <button type="button" class="sort-head numeric" (click)="sortBy('openTasks')">
-            {{ 'customers.openTasks' | t }}<span class="sort-arrow">{{ sortArrow('openTasks') }}</span>
-          </button>
-        </div>
-
-        <div
+      <div class="workload-list" #custList>
+        <button
           *ngFor="let c of filteredCustomers"
-          class="table-row customer-row customer-table-row"
+          type="button"
+          class="workload-row workload-row-btn cust-row"
           (click)="viewBoard.emit(c)"
         >
-          <span class="member-cell">
-            <span class="avatar">{{ initials(c.name) }}</span>
+          <span class="avatar">{{ initials(c.name) }}</span>
+          <div>
             <strong>{{ c.name }}</strong>
-          </span>
-          <span class="numeric">{{ openTasksFor(c) }}</span>
-        </div>
-      </div>
+            <small>{{ ('customerType.' + c.type) | t }} · {{ openTasksFor(c) }} {{ 'common.open' | t }}</small>
+          </div>
+        </button>
 
-      <div *ngIf="!filteredCustomers.length" class="empty-state">
-        <h3>{{ 'customers.noCustomersTitle' | t }}</h3>
-        <p>{{ 'customers.noCustomersText' | t }}</p>
+        <div *ngIf="!filteredCustomers.length" class="empty-state">
+          <h3>{{ 'customers.noCustomersTitle' | t }}</h3>
+          <p>{{ 'customers.noCustomersText' | t }}</p>
+        </div>
       </div>
     </section>
   `,
   styles: [`
     :host { display: block; min-width: 0; height: 100%; }
     .panel { display: flex; flex-direction: column; height: 100%; }
-    /* Custom 2-col layout for the customer table; overrides the global .table-row grid. */
-    .customer-table-row {
-      display: grid;
-      grid-template-columns: minmax(180px, 1fr) 80px;
-      align-items: center;
-      gap: 12px;
-      width: 100%;
-      min-width: 0;
-      padding: 10px 12px;
-    }
-    /* Cap the table height so a long customer/member list doesn't stretch the
-       whole page — scroll inside instead, with the header pinned. */
-    .table-scroll {
+    /* Grow to fill remaining panel height, scroll when content overflows. */
+    .workload-list {
+      flex: 1 1 0;
+      min-height: 0;
       overflow-y: auto;
-      overflow-x: hidden;
-      /* Match the Home team-workload card height budget so Customers does not
-         become the row height driver. */
-      max-height: 320px;
-      margin: 0 -12px;
-      padding: 0 12px;
     }
-    .table-scroll .table-head {
-      position: sticky;
-      top: 0;
-      z-index: 1;
-      background: var(--bg-elevated);
+    /* Reset button chrome for workload-style rows. */
+    .workload-row-btn {
+      width: 100%;
+      text-align: start;
+      background: none;
+      border: 0;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+      padding: 0;
     }
+    .cust-row:hover { background: var(--surface-strong); border-radius: 8px; }
+    .cust-row small { display: block; font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
     /* Add-client popup, mirrors the note-detail modal styling. */
     .modal-backdrop {
       position: fixed;
@@ -224,32 +215,6 @@ type SortDir = 'asc' | 'desc';
       overflow-y: auto;
       padding: 20px;
     }
-    /* Sortable header cells render as bare buttons so the table head still
-       aligns to the same grid columns as the data rows. */
-    .sort-head {
-      background: none;
-      border: 0;
-      padding: 0;
-      margin: 0;
-      font: inherit;
-      color: inherit;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      text-align: start;
-    }
-    .sort-head.numeric { justify-content: center; text-align: center; width: 100%; }
-    .sort-head:hover { color: var(--ink); }
-    .sort-arrow { font-size: 10px; min-width: 8px; color: var(--muted); }
-    .customer-row { cursor: pointer; }
-    .customer-row:hover { background: var(--surface-strong); }
-    .customer-row .numeric {
-      display: block;
-      width: 100%;
-      text-align: center;
-      font-variant-numeric: tabular-nums;
-    }
     .search-input {
       background: var(--bg-elevated);
       border: 1px solid var(--line);
@@ -257,6 +222,35 @@ type SortDir = 'asc' | 'desc';
       padding: 0.5rem 0.75rem;
       border-radius: 0.5rem;
       min-width: 240px;
+    }
+    .panel-header .topbar-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .add-customer-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #fff;
+      font-size: 22px;
+      line-height: 1;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      flex: 0 0 auto;
+    }
+    .add-customer-btn:hover {
+      filter: brightness(1.05);
+    }
+    .add-customer-btn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
     }
     .empty-state { padding: 2rem; text-align: center; color: var(--muted); }
     .cust-filters {
@@ -288,18 +282,14 @@ type SortDir = 'asc' | 'desc';
       border-color: var(--accent);
       color: #fff;
     }
-    /* Stack rows on narrow viewports — table-style is unreadable below ~480px. */
     @media (max-width: 480px) {
-      .customer-table-row {
-        grid-template-columns: 1fr;
-        gap: 4px;
-        padding: 12px;
+      .panel-header .topbar-actions {
+        width: 100%;
       }
-      .customer-table-row.table-head { display: none; }
-      .customer-row { border: 1px solid var(--line); border-radius: 8px; margin-bottom: 8px; }
-      .customer-row .numeric { text-align: start; }
-      .search-input { min-width: 100%; }
-      .table-scroll { overflow-x: visible; margin: 0; padding: 0; }
+      .search-input {
+        min-width: 0;
+        flex: 1 1 auto;
+      }
     }
   `]
 })

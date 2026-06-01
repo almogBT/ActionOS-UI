@@ -90,6 +90,31 @@
   margin-bottom: 12px;
 }
 
+/* Calendar filter-strip — projected content from this template into <app-calendar> */
+.filter-strip {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--line);
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background var(--duration-fast), color var(--duration-fast), border-color var(--duration-fast);
+
+    &:hover  { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+    &.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  }
+}
+
 .workload-filters {
   display: flex;
   flex-wrap: wrap;
@@ -187,15 +212,18 @@
   align-items: stretch;
 }
 
-/* Keep each card in a Home row at equal height (Customers/Workload, Risk/Activity). */
+/* Keep each card in a Home row at equal height (Customers/Workload, Risk/Activity).
+   min-height prevents both panels from collapsing when one has few filtered results. */
 .home-screen .two-column > .panel {
   height: 100%;
+  min-height: 400px;
 }
 
 /* The Customers column is rendered by <app-customer-list>, which already has
    its own .panel wrapper. Stretch the host so it matches sibling panel height. */
 .home-screen .two-column > app-customer-list {
   height: 100%;
+  min-height: 400px;
 }
 
 /* 3 metric tiles on home (Follow-up debt removed). */

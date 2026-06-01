@@ -5,11 +5,10 @@ import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { Customer } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
 import { Customer360Component } from './customer-360.component';
-import { CustomerMeetingFormComponent, MeetingFormSavedEvent } from './customer-meeting-form.component';
 import { MeetingPrepComponent } from './meeting-prep.component';
 
 // 'list' is no longer hosted here — the customer list lives on the Home screen.
-export type CustomersSubView = 'detail' | 'meeting-form' | 'prep';
+export type CustomersSubView = 'detail' | 'prep';
 
 /**
  * Customer detail container. Since the customer list moved onto the Home
@@ -26,7 +25,6 @@ export type CustomersSubView = 'detail' | 'meeting-form' | 'prep';
     FormsModule,
     TranslatePipe,
     Customer360Component,
-    CustomerMeetingFormComponent,
     MeetingPrepComponent
   ],
   template: `
@@ -49,13 +47,6 @@ export type CustomersSubView = 'detail' | 'meeting-form' | 'prep';
           [customer]="customer"
           (newMeeting)="newMeetingFor($event)"
           (prepareMeeting)="prepareForCustomer($event)"
-        />
-
-        <app-customer-meeting-form
-          *ngSwitchCase="'meeting-form'"
-          [customer]="customer"
-          (saved)="onMeetingSaved($event)"
-          (cancelled)="returnToDetail()"
         />
 
         <app-meeting-prep
@@ -96,8 +87,6 @@ export class CustomersComponent implements OnChanges {
 
   get pageTitle(): string {
     switch (this.subView) {
-      case 'meeting-form':
-        return 'customerMeeting.title';
       case 'prep':
         return 'meetingPrep.title';
       default:
@@ -106,8 +95,7 @@ export class CustomersComponent implements OnChanges {
   }
 
   newMeetingFor(customer: Customer): void {
-    this.activeCustomer = customer;
-    this.subView = 'meeting-form';
+    this.workspace.openNewMeetingModal(customer.id);
   }
 
   prepareForCustomer(customer: Customer): void {
@@ -124,12 +112,6 @@ export class CustomersComponent implements OnChanges {
       this.subView = 'detail';
     } else {
       this.backToHome();
-    }
-  }
-
-  onMeetingSaved(event: MeetingFormSavedEvent): void {
-    if (event.intent === 'close') {
-      this.returnToDetail();
     }
   }
 }

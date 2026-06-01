@@ -4,10 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { ActionosI18nService } from '../../core/i18n/actionos-i18n.service';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import {
-  Attachment, CreateCustomerMeetingInput, CreateMeetingNoteInput, Customer, CustomerMeeting, CustomerMeetingStatus, CustomerParticipant, CustomerPreparationSummary, Employee, MeetingNote, NoteType, ProgressionNote, Task, UpdateMeetingNoteInput } from '../../core/models/actionos.models';
+  Attachment, CreateCustomerMeetingInput, CreateMeetingNoteInput, Customer, CustomerMeeting, CustomerMeetingStatus, CustomerParticipant, Employee, MeetingNote, NoteType, ProgressionNote, Task, UpdateMeetingNoteInput } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
 import { SearchableSelectComponent, SelectOption } from '../../shared/searchable-select/searchable-select.component';
 import { MeetingTaskCreationComponent } from './meeting-task-creation.component';
+import { MeetingPrepBriefComponent } from './meeting-prep-brief.component';
 import { NoteDetailModalComponent } from './note-detail-modal.component';
 
 export type MeetingFormSaveIntent = 'continue' | 'close';
@@ -21,19 +22,12 @@ interface CustomerParticipantOption extends CustomerParticipant {
   key: string;
 }
 
-interface PrepDecisionRow {
-  id: string;
-  content: string;
-  meetingSubject: string;
-  meetingDate: string;
-}
-
 type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
 
 @Component({
   selector: 'app-customer-meeting-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe, SearchableSelectComponent, MeetingTaskCreationComponent, NoteDetailModalComponent],
+  imports: [CommonModule, FormsModule, TranslatePipe, SearchableSelectComponent, MeetingTaskCreationComponent, MeetingPrepBriefComponent, NoteDetailModalComponent],
   template: `
     <section class="panel" id="plan-section">
       <div class="panel-header">
@@ -64,32 +58,10 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
         </div>
       </div>
 
-      <div class="status-strip">
-        <article
-          *ngFor="let status of meetingStatusFlow; let i = index"
-          class="status-step"
-          [class.done]="i < currentStatusIndex()"
-          [class.current]="i === currentStatusIndex()"
-          (click)="scrollToSection(status)"
-        >
-          <strong>{{ ('customerMeeting.statusValues.' + status) | t }}</strong>
-          <small>{{ statusCriteria(status) }}</small>
-        </article>
-      </div>
 
-      <div class="section-head split">
-        <div>
-          <span class="eyebrow">{{ 'customerMeeting.planSection' | t }}</span>
-          <h4>{{ 'customerMeeting.planSubtitle' | t }}</h4>
-        </div>
-        <div class="topbar-actions">
-          <button type="button" class="ghost-action" [disabled]="!canCollapseSetup()" (click)="toggleSetupCollapsed()">
-            {{ (setupCollapsed ? 'customerMeeting.expandSetup' : 'customerMeeting.collapseSetup') | t }}
-          </button>
-          <button type="button" class="primary-action" [class.start-ready]="canStartMeeting()" [disabled]="!canStartMeeting()" (click)="startMeetingCapture()">
-            {{ 'customerMeeting.startMeeting' | t }}
-          </button>
-        </div>
+<div class="section-head">
+        <span class="eyebrow">{{ 'customerMeeting.planSection' | t }}</span>
+        <h4>{{ 'customerMeeting.planSubtitle' | t }}</h4>
       </div>
 
       <article class="meeting-setup-summary" *ngIf="setupCollapsed">
@@ -354,52 +326,29 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
         </div>
 
         <aside class="prep-sidebar" *ngIf="selectedCustomerForPrep as prepCustomer; else noPrepSidebar">
-          <div class="prev-meeting-notes" *ngIf="previousMeetingNotes as prevNotes">
-            <span class="eyebrow">{{ 'customerMeeting.fromLastMeeting' | t }}</span>
-            <small class="muted">{{ previousMeetingSubject }}</small>
-            <p class="prev-notes-body">{{ prevNotes }}</p>
-          </div>
-
           <h5>{{ 'meetingPrep.summaryFor' | t }} {{ prepCustomer.name }}</h5>
-
-          <ng-container *ngIf="prepSummary as prep">
-            <div class="prep-block" *ngIf="prep.overdueTasks.length">
-              <strong>{{ 'meetingPrep.overdueTasks' | t }} ({{ prep.overdueTasks.length }})</strong>
-              <ul>
-                <li *ngFor="let task of prep.overdueTasks | slice:0:3">
-                  {{ task.title }}
-                </li>
-              </ul>
-            </div>
-
-            <div class="prep-block" *ngIf="prep.waitingForCustomer.length">
-              <strong>{{ 'meetingPrep.waitingForCustomer' | t }} ({{ prep.waitingForCustomer.length }})</strong>
-              <ul>
-                <li *ngFor="let task of prep.waitingForCustomer | slice:0:3">
-                  {{ task.title }}
-                </li>
-              </ul>
-            </div>
-
-            <div class="prep-block">
-              <strong>{{ 'customerMeeting.recentDecisions' | t }}</strong>
-              <ul *ngIf="recentDecisionRows.length; else noPrepDecisions">
-                <li *ngFor="let decision of recentDecisionRows | slice:0:3">
-                  {{ decision.content }}
-                  <small class="muted">{{ decision.meetingSubject }} - {{ decision.meetingDate | slice:0:10 }}</small>
-                </li>
-              </ul>
-              <ng-template #noPrepDecisions>
-                <small class="muted">{{ 'meetingPrep.nothing' | t }}</small>
-              </ng-template>
-            </div>
-          </ng-container>
+          <app-meeting-prep-brief
+            variant="compact"
+            [customerId]="prepCustomer.id"
+            [currentMeetingId]="editingMeeting?.id ?? null"
+          ></app-meeting-prep-brief>
         </aside>
         <ng-template #noPrepSidebar>
           <aside class="prep-sidebar muted">
             {{ 'customerMeeting.pickCustomerForPrep' | t }}
           </aside>
         </ng-template>
+      </div>
+
+      <div class="plan-bottom-action" *ngIf="!setupCollapsed">
+        <button
+          type="button"
+          class="primary-action"
+          [disabled]="!canStartMeeting()"
+          (click)="startOrCollapseSetup()"
+        >
+          {{ editing ? ('customerMeeting.collapseSetup' | t) : ('customerMeeting.startMeeting' | t) }}
+        </button>
       </div>
     </section>
 
@@ -811,24 +760,7 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
     .panel-header h3 { margin: 0; }
     .section-head { margin: 14px 0 10px; }
     .section-head h4 { margin: 0; }
-    .status-strip {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 8px;
-      margin: 10px 0 16px;
-    }
-    .status-step {
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 10px;
-      background: var(--bg-elevated);
-      display: grid;
-      gap: 4px;
-    }
-    .status-step.done { border-color: var(--accent); background: var(--accent-soft); cursor: pointer; }
-    .status-step.current { border-color: var(--accent-strong); box-shadow: inset 0 0 0 1px var(--accent); cursor: pointer; }
-    .status-step strong { font-size: 13px; line-height: 1.2; }
-    .status-step small { color: var(--muted); font-size: 12px; line-height: 1.2; }
+    .plan-bottom-action { padding: 16px 0 4px; display: flex; justify-content: flex-end; }
     .plan-layout {
       display: grid;
       grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.65fr);
@@ -999,7 +931,7 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
       font-size: 13px;
       line-height: 1.3;
     }
-    .section-head.split {
+    .section-head-split-unused {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
@@ -1354,11 +1286,9 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
       .plan-layout { grid-template-columns: 1fr; }
     }
     @media (max-width: 720px) {
-      .status-strip { grid-template-columns: 1fr; }
-      .form-grid { grid-template-columns: 1fr; }
+.form-grid { grid-template-columns: 1fr; }
       .customer-add-row { grid-template-columns: 1fr; }
       .note-row { grid-template-columns: 1fr; }
-      .section-head.split { flex-direction: column; align-items: stretch; }
       .meeting-setup-summary { flex-direction: column; align-items: flex-start; }
       .capture-grid { grid-template-columns: 1fr; }
       .capture-actions-row { justify-content: flex-start; }
@@ -1609,6 +1539,14 @@ export class CustomerMeetingFormComponent implements OnChanges {
     this.focusComposer();
   }
 
+  startOrCollapseSetup(): void {
+    if (!this.editing) {
+      this.startMeetingCapture();
+    } else {
+      this.setupCollapsed = true;
+    }
+  }
+
   currentStatus(): CustomerMeetingStatus {
     return this.editingMeeting?.status ?? 'Planned';
   }
@@ -1631,40 +1569,6 @@ export class CustomerMeetingFormComponent implements OnChanges {
     return this.workspace.customer(this.pickedCustomerId) ?? null;
   }
 
-  get prepSummary(): CustomerPreparationSummary | null {
-    const customer = this.selectedCustomerForPrep;
-    if (!customer) {
-      return null;
-    }
-    return this.workspace.getCustomerPreparationSummary(customer.id);
-  }
-
-  get recentDecisionRows(): PrepDecisionRow[] {
-    const customer = this.selectedCustomerForPrep;
-    if (!customer) {
-      return [];
-    }
-    const currentMeetingId = this.editingMeeting?.id;
-    const rows: PrepDecisionRow[] = [];
-    for (const meeting of this.workspace.customerMeetingsByCustomer(customer.id)) {
-      if (meeting.id === currentMeetingId) {
-        continue;
-      }
-      for (const note of meeting.notes) {
-        if (note.type !== 'decision') {
-          continue;
-        }
-        rows.push({
-          id: note.id,
-          content: note.content,
-          meetingSubject: meeting.subject,
-          meetingDate: meeting.meetingDate
-        });
-      }
-    }
-    return rows.slice(0, 8);
-  }
-
   get filteredInternalEmployees(): Employee[] {
     const term = this.internalParticipantSearch.trim().toLowerCase();
     const all = this.workspace.employees;
@@ -1685,34 +1589,6 @@ export class CustomerMeetingFormComponent implements OnChanges {
       (p.email?.toLowerCase().includes(term) ?? false) ||
       (p.role?.toLowerCase().includes(term) ?? false)
     );
-  }
-
-  // ── Previous-meeting notes ───────────────────────────────────────────────
-
-  get previousMeetingNotes(): string | null {
-    const customer = this.selectedCustomerForPrep;
-    if (!customer || !this.editingMeeting) {
-      return null;
-    }
-    const currentDate = this.editingMeeting.meetingDate;
-    const prev = this.workspace
-      .customerMeetingsByCustomer(customer.id)
-      .filter(m => m.id !== this.editingMeeting!.id && !!m.nextMeetingNotes?.trim() && m.meetingDate < currentDate)
-      .sort((a, b) => b.meetingDate.localeCompare(a.meetingDate))[0];
-    return prev?.nextMeetingNotes ?? null;
-  }
-
-  get previousMeetingSubject(): string {
-    const customer = this.selectedCustomerForPrep;
-    if (!customer || !this.editingMeeting) {
-      return '';
-    }
-    const currentDate = this.editingMeeting.meetingDate;
-    const prev = this.workspace
-      .customerMeetingsByCustomer(customer.id)
-      .filter(m => m.id !== this.editingMeeting!.id && !!m.nextMeetingNotes?.trim() && m.meetingDate < currentDate)
-      .sort((a, b) => b.meetingDate.localeCompare(a.meetingDate))[0];
-    return prev ? `${prev.subject} (${prev.meetingDate.slice(0, 10)})` : '';
   }
 
   onWrapNextMeetingNotesChanged(): void {
@@ -1869,6 +1745,9 @@ export class CustomerMeetingFormComponent implements OnChanges {
 
   setNoteType(type: NoteType): void {
     this.newNote.type = type;
+    if (type === 'action' && !this.newNote.dueDate) {
+      this.newNote.dueDate = new Date().toISOString().slice(0, 10);
+    }
   }
 
   onComposerKeydown(event: KeyboardEvent): void {

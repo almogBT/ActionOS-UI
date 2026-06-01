@@ -17,7 +17,7 @@ export interface SelectOption {
     { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SearchableSelectComponent), multi: true }
   ],
   template: `
-    <div class="ss-root" [class.ss-open]="isOpen">
+    <div class="ss-root" [class.ss-open]="isOpen" [class.ss-up]="openUp">
       <button
         type="button"
         class="ss-trigger"
@@ -108,6 +108,11 @@ export interface SelectOption {
       overflow-y: auto;
     }
 
+    .ss-up .ss-menu {
+      top: auto;
+      bottom: calc(100% + 4px);
+    }
+
     .ss-search {
       width: 100%;
       min-height: 32px;
@@ -173,6 +178,7 @@ export class SearchableSelectComponent implements ControlValueAccessor, AfterVie
   @Input() options: SelectOption[] = [];
   @Input() placeholder = 'Select…';
   @Input() createNewLabel: string | null = null;
+  @Input() openUp = false;
   @Output() createNew = new EventEmitter<void>();
 
   value: any = null;

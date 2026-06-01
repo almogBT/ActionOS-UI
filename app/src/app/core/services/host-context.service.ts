@@ -28,9 +28,33 @@ interface LegacyAuthMessage {
   token?: string | null;
 }
 
+function normalizeOrigin(value: string): string | null {
+  if (typeof value !== 'string') {
+    return null;
+  }
+  const trimmed = value.trim();
+  if (!trimmed.length) {
+    return null;
+  }
+
+  try {
+    return new URL(trimmed).origin.toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
+function buildTrustedOrigins(): Set<string> {
+  const origins = environment.trustedHostOrigins ?? [];
+  const normalized = origins
+    .map(origin => normalizeOrigin(origin))
+    .filter((origin): origin is string => !!origin);
+  return new Set(normalized);
+}
+
 @Injectable({ providedIn: 'root' })
 export class HostContextService {
-  private readonly trustedOrigins = new Set(environment.trustedHostOrigins ?? []);
+  private readonly trustedOrigins = buildTrustedOrigins();
   private readonly contextSubject = new BehaviorSubject<ActionosHostContext>(
     this.readFromStorage()
   );
@@ -113,10 +137,8 @@ export class HostContextService {
   }
 
   private isTrustedOrigin(origin: string): boolean {
-    if (!origin) {
-      return false;
-    }
-    return this.trustedOrigins.has(origin);
+    const normalized = normalizeOrigin(origin);
+    return normalized !== null && this.trustedOrigins.has(normalized);
   }
 
   private readFromStorage(): ActionosHostContext {
@@ -158,4 +180,3 @@ export class HostContextService {
     }
   }
 }
-

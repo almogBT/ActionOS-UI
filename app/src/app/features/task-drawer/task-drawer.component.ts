@@ -3,9 +3,11 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActionosI18nService } from '../../core/i18n/actionos-i18n.service';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
-import { Priority, ProgressionNote, Task, TaskStatus } from '../../core/models/actionos.models';
+import { Comment, Priority, Task, TaskStatus } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
 import { SearchableSelectComponent, SelectOption } from '../../shared/searchable-select/searchable-select.component';
+
+type TaskSectionId = 'details' | 'attachments' | 'alerts' | 'checklist' | 'watchers' | 'comments';
 
 @Component({
   selector: 'app-task-drawer',
@@ -29,20 +31,29 @@ import { SearchableSelectComponent, SelectOption } from '../../shared/searchable
       background: var(--bg-canvas); font-size: 13px; color: var(--text-primary);
     }
     .watcher-chip button { padding: 0 2px; font-size: 11px; line-height: 1; }
-    .progression-form { display: grid; gap: 8px; margin-top: 10px; }
-    .progression-form-actions { display: flex; gap: 8px; }
-    .progression-notes-list { display: grid; gap: 10px; margin-top: 14px; }
-    .progression-note {
-      padding: 10px 12px;
-      border: 1px solid var(--line); border-radius: 10px;
-      background: var(--bg-canvas);
+    .section-toggle { margin-inline-start: auto; min-width: 34px; }
+    .section-body { display: grid; gap: 12px; margin-top: 10px; }
+    .status-reason-hint { font-size: 12px; }
+    .status-validation {
+      margin: 0;
+      color: #b91c1c;
+      font-size: 12px;
+      font-weight: 600;
     }
-    .progression-note.note-editing { border-color: var(--accent); }
-    .progression-note-header {
-      display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+    .notification-status-note {
+      display: grid;
+      gap: 2px;
+      border-inline-start: 3px solid var(--accent);
+      padding-inline-start: 8px;
     }
-    .progression-note-actions { margin-left: auto; display: flex; gap: 4px; }
-    .progression-note-body { margin: 0; font-size: 14px; line-height: 1.5; color: var(--text-primary); white-space: pre-wrap; }
+    .task-modal-handle {
+      width: 42px;
+      height: 4px;
+      border-radius: 999px;
+      background: var(--line);
+      margin: 2px auto 12px;
+      flex-shrink: 0;
+    }
   `]
 })
 export class TaskDrawerComponent {
@@ -51,8 +62,19 @@ export class TaskDrawerComponent {
   meetingChecklistText = '';
   meetingCommentText = '';
   uploadingAttachment = false;
-  progressionNoteText = '';
-  editingProgressionNoteId: string | null = null;
+  statusChangeReason = '';
+  statusValidationMessage = '';
+  pendingStatusChange: TaskStatus | null = null;
+  pendingStatusTaskId: string | null = null;
+  requestedWaitingStatus: TaskStatus | null = null;
+  readonly collapsedSections: Record<TaskSectionId, boolean> = {
+    details: false,
+    attachments: false,
+    alerts: false,
+    checklist: false,
+    watchers: true,
+    comments: false
+  };
 
   @ViewChild('drawerFileInput') drawerFileInput?: ElementRef<HTMLInputElement>;
 
@@ -90,46 +112,99 @@ export class TaskDrawerComponent {
     this.watcherSelectModel = null;
   }
 
-  saveProgressionNote(task: Task): void {
-    const content = this.progressionNoteText.trim();
-    if (!content) return;
+  isSectionCollapsed(section: TaskSectionId): boolean {
+    return this.collapsedSections[section];
+  }
 
-    if (this.editingProgressionNoteId) {
-      const updated = (task.progressionNotes ?? []).map(n =>
-        n.id === this.editingProgressionNoteId ? { ...n, content } : n
+  toggleSection(section: TaskSectionId): void {
+    this.collapsedSections[section] = !this.collapsedSections[section];
+  }
+
+  isWaitingStatus(status: TaskStatus): boolean {
+    return status === 'Waiting For Customer' || status === 'Waiting For Internal';
+  }
+
+  isCompletedStatus(status: TaskStatus): boolean {
+    return status === 'Done';
+  }
+
+  showWaitingReason(task: Task): boolean {
+    return this.isWaitingStatus(task.status) || !!(this.requestedWaitingStatus && this.isWaitingStatus(this.requestedWaitingStatus));
+  }
+
+  onStatusReasonChanged(): void {
+    if (this.statusValidationMessage) {
+      this.statusValidationMessage = '';
+    }
+  }
+
+  closeDrawer(): void {
+    this.resetStatusChangeState();
+    this.workspace.closeTaskDrawer();
+  }
+
+  shouldShowStatusReason(task: Task): boolean {
+    return this.pendingStatusTaskId === task.id
+      && (
+        !!this.pendingStatusChange
+        || !!this.statusValidationMessage
+        || !!this.statusChangeReason.trim()
       );
-      this.workspace.updateMeetingTask(task.id, { progressionNotes: updated });
-      this.editingProgressionNoteId = null;
-    } else {
-      this.workspace.addTaskProgressionNote(task.id, content);
-    }
-    this.progressionNoteText = '';
   }
 
-  startEditProgressionNote(note: ProgressionNote): void {
-    this.editingProgressionNoteId = note.id;
-    this.progressionNoteText = note.content;
+  get statusReasonWordCount(): number {
+    return this.wordCount(this.statusChangeReason);
   }
 
-  cancelEditProgressionNote(): void {
-    this.editingProgressionNoteId = null;
-    this.progressionNoteText = '';
+  notificationCount(task: Task): number {
+    return task.notifications.length + this.statusAlertComments(task).length;
   }
 
-  deleteProgressionNote(task: Task, noteId: string): void {
-    const updated = (task.progressionNotes ?? []).filter(n => n.id !== noteId);
-    this.workspace.updateMeetingTask(task.id, { progressionNotes: updated });
-    if (this.editingProgressionNoteId === noteId) {
-      this.cancelEditProgressionNote();
-    }
+  statusAlertComments(task: Task): Comment[] {
+    return this.workspace
+      .commentsForMeetingTask(task.id)
+      .filter((comment) => this.isStatusChangeComment(comment.body));
+  }
+
+  private isStatusChangeComment(body: string): boolean {
+    return /^status changed from /i.test(body.trim());
   }
 
   updateMeetingTaskField<K extends keyof Task>(task: Task, field: K, value: Task[K]): void {
     this.workspace.updateMeetingTask(task.id, { [field]: value } as Partial<Task>);
+    if (field === 'waitingReason' && this.statusValidationMessage) {
+      this.statusValidationMessage = '';
+    }
   }
 
   updateMeetingTaskStatus(task: Task, status: TaskStatus): void {
-    this.workspace.updateMeetingTask(task.id, { status });
+    if (status === task.status) {
+      if (this.pendingStatusTaskId === task.id) {
+        this.resetStatusChangeState();
+      }
+      return;
+    }
+    this.pendingStatusTaskId = task.id;
+    this.pendingStatusChange = status;
+
+    const reason = this.statusChangeReason.trim();
+    if (this.wordCount(reason) < 3) {
+      this.statusValidationMessage = 'Please add at least 3 words explaining this status change.';
+      return;
+    }
+    if (this.isWaitingStatus(status) && !(task.waitingReason?.trim())) {
+      this.requestedWaitingStatus = status;
+      this.statusValidationMessage = 'Please add a waiting reason before moving this task to a waiting status.';
+      return;
+    }
+
+    const updated = this.workspace.updateMeetingTask(task.id, { status }, reason);
+    if (!updated) {
+      this.statusValidationMessage = 'Unable to change task status right now.';
+      return;
+    }
+
+    this.resetStatusChangeState();
   }
 
   addMeetingChecklistItem(task: Task): void {
@@ -157,5 +232,20 @@ export class TaskDrawerComponent {
     }
     this.uploadingAttachment = false;
     input.value = '';
+  }
+
+  private wordCount(value: string): number {
+    return value
+      .trim()
+      .split(/\s+/)
+      .filter((token) => !!token).length;
+  }
+
+  private resetStatusChangeState(): void {
+    this.pendingStatusChange = null;
+    this.pendingStatusTaskId = null;
+    this.requestedWaitingStatus = null;
+    this.statusChangeReason = '';
+    this.statusValidationMessage = '';
   }
 }
