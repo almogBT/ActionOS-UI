@@ -1073,6 +1073,16 @@ export class ActionosWorkspaceService {
     return value.toLowerCase().replace(/\s+/g, '-');
   }
 
+  /**
+   * Statuses a meeting task may legally move to, including its current status.
+   * Mirrors the transition rules enforced in `updateMeetingTask`, so inline
+   * status pickers only ever offer reachable states.
+   */
+  allowedStatusesFor(task: Task): TaskStatus[] {
+    const next = this.meetingTaskTransitions[task.status] ?? [];
+    return [task.status, ...next];
+  }
+
   dateAfter(days: number): string {
     return this.addDays(this.todayIso, days);
   }

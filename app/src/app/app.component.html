@@ -1,19 +1,15 @@
 <main class="actionos-shell" [ngClass]="shellClass()">
   <app-sidebar
     [activeView]="activeView()"
-    [collapsed]="sidebarCollapsed()"
-    [mobileOpen]="mobileNavOpen()"
+    [open]="navOpen()"
     (viewSelected)="setView($event)"
-    (toggleCollapsed)="toggleSidebar()"
-    (closeMobile)="closeMobileNav()"
+    (close)="navOpen.set(false)"
   ></app-sidebar>
 
   <section class="workspace">
     <app-header
       [activeView]="activeView()"
-      [sidebarCollapsed]="sidebarCollapsed()"
-      (toggleSidebar)="toggleSidebar()"
-      (mobileMenu)="openMobileNav()"
+      (toggleSidebar)="toggleNav()"
       (captured)="onCaptured()"
       (navigate)="setView($event)"
     ></app-header>
@@ -44,21 +40,6 @@
 
   <app-task-drawer />
   <app-meeting-drawer />
-
-  <!-- Mobile bottom navigation bar -->
-  <nav class="bottom-nav" aria-label="Bottom navigation">
-    <button
-      *ngFor="let item of navItems"
-      type="button"
-      class="bottom-nav-item"
-      [class.active]="activeView() === item.id"
-      (click)="setView(item.id)"
-      [attr.aria-label]="item.label"
-    >
-      <app-icon [name]="iconFor(item.id)" [size]="22"></app-icon>
-      <span>{{ item.label }}</span>
-    </button>
-  </nav>
 
   <!-- ── Bottom action bar: Plan Meeting · Quick Capture · New Meeting ── -->
   <div class="bottom-action-bar" (click)="closeBarPopovers()">

@@ -4,17 +4,9 @@
   <div class="header-left">
     <button
       type="button"
-      class="icon-btn desktop-only"
+      class="icon-btn"
       (click)="toggleSidebar.emit()"
-      [attr.aria-label]="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-    >
-      <app-icon name="menu" [size]="18"></app-icon>
-    </button>
-    <button
-      type="button"
-      class="icon-btn mobile-only"
-      (click)="mobileMenu.emit()"
-      aria-label="Open menu"
+      aria-label="Open navigation menu"
     >
       <app-icon name="menu" [size]="18"></app-icon>
     </button>

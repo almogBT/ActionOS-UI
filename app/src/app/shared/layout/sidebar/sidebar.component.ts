@@ -19,11 +19,9 @@ import { IconComponent, IconName } from '../../icons/icon.component';
 })
 export class SidebarComponent {
   @Input() activeView: ViewId = 'home';
-  @Input() collapsed = false;
-  @Input() mobileOpen = false;
+  @Input() open = false;
   @Output() readonly viewSelected = new EventEmitter<ViewId>();
-  @Output() readonly toggleCollapsed = new EventEmitter<void>();
-  @Output() readonly closeMobile = new EventEmitter<void>();
+  @Output() readonly close = new EventEmitter<void>();
 
   readonly i18n = inject(ActionosI18nService);
   readonly workspace = inject(ActionosWorkspaceService);
@@ -32,23 +30,12 @@ export class SidebarComponent {
     { id: 'work', label: 'Work', items: ACTIONOS_NAV_ITEMS.filter(i => i.section === 'work') },
   ];
 
-  @HostBinding('class.collapsed') get isCollapsed(): boolean {
-    return this.collapsed;
-  }
-
-  @HostBinding('class.mobile-open') get isMobileOpen(): boolean {
-    return this.mobileOpen;
+  @HostBinding('class.open') get isOpen(): boolean {
+    return this.open;
   }
 
   @HostBinding('class.rtl') get isRtl(): boolean {
     return this.i18n.direction === 'rtl';
-  }
-
-  /** True when the sidebar should visually appear collapsed (icon-strip mode).
-   *  On mobile, mobileOpen overrides the collapsed input so the full sidebar
-   *  can render as an overlay even when the desktop state is collapsed. */
-  get showCollapsedState(): boolean {
-    return this.collapsed && !this.mobileOpen;
   }
 
   iconFor(id: ViewId): IconName {
@@ -66,5 +53,6 @@ export class SidebarComponent {
 
   selectView(id: ViewId): void {
     this.viewSelected.emit(id);
+    this.close.emit();
   }
 }

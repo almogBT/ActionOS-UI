@@ -18,6 +18,21 @@
     </div>
   </header>
 
+  <!-- NAV TILES -->
+  <nav class="home-nav-tiles" aria-label="Navigate to section">
+    <button
+      *ngFor="let item of navTiles"
+      type="button"
+      class="nav-tile"
+      (click)="openView(item.id)"
+    >
+      <span class="nav-tile-icon">
+        <app-icon [name]="iconFor(item.id)" [size]="22"></app-icon>
+      </span>
+      <span class="nav-tile-label">{{ ('nav.' + item.id) | t }}</span>
+    </button>
+  </nav>
+
   <!-- TEAM CALENDAR -->
   <div class="home-cal-panel">
     <app-calendar

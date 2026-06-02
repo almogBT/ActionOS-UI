@@ -20,9 +20,7 @@ import { IconComponent, IconName } from '../../icons/icon.component';
 })
 export class HeaderComponent {
   @Input() activeView: ViewId = 'home';
-  @Input() sidebarCollapsed = false;
   @Output() readonly toggleSidebar = new EventEmitter<void>();
-  @Output() readonly mobileMenu = new EventEmitter<void>();
   @Output() readonly captured = new EventEmitter<void>();
   @Output() readonly navigate = new EventEmitter<ViewId>();
 

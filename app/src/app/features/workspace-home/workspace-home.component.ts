@@ -8,6 +8,8 @@ import { ActionosWorkspaceService } from '../../core/services/actionos-workspace
 import { IconComponent } from '../../shared/icons/icon.component';
 import { CustomerListComponent } from '../customers/customer-list.component';
 import { CalendarComponent } from '../../shared/calendar/calendar.component';
+import { ACTIONOS_NAV_ITEMS } from '../../core/config/actionos-ui.config';
+import { IconName } from '../../shared/icons/icon.component';
 import { BoardPreviewModalComponent, BoardPreviewType } from './board-preview-modal.component';
 import { MetricModalMode, MetricTasksModalComponent } from './metric-tasks-modal.component';
 
@@ -35,6 +37,21 @@ export class WorkspaceHomeComponent {
 
   readonly workspace = inject(ActionosWorkspaceService);
   readonly i18n = inject(ActionosI18nService);
+
+  readonly navTiles = ACTIONOS_NAV_ITEMS.filter(i => i.id !== 'home');
+
+  iconFor(id: ViewId): IconName {
+    const map: Record<ViewId, IconName> = {
+      home: 'home',
+      inbox: 'inbox',
+      'my-work': 'check-square',
+      tasks: 'check-circle',
+      boards: 'columns',
+      meetings: 'calendar',
+      customers: 'users',
+    };
+    return map[id] ?? 'home';
+  }
 
   workloadSearch = '';
 

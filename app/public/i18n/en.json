@@ -397,7 +397,34 @@
     "expand": {
       "checklist": "Checklist",
       "noChecklist": "No checklist items.",
-      "open": "Open task"
+      "open": "Open task",
+      "addStep": "Add step",
+      "addStepPlaceholder": "Add a step…"
+    },
+    "groupBy": {
+      "label": "Group by",
+      "due": "Due date",
+      "status": "Status",
+      "priority": "Priority"
+    },
+    "status": {
+      "reasonPlaceholder": "Why is the status changing? (at least 3 words)",
+      "waitingPlaceholder": "What are we waiting for?",
+      "reasonTooShort": "Please add at least 3 words explaining this change.",
+      "waitingRequired": "Add a waiting reason before moving to a waiting status.",
+      "changeFailed": "That status change is not allowed right now.",
+      "confirm": "Update"
+    },
+    "bulk": {
+      "selected": "selected",
+      "setStatus": "Set status…",
+      "setPriority": "Set priority…",
+      "clear": "Clear",
+      "selectAll": "Select all in group"
+    },
+    "addTask": {
+      "label": "Add task",
+      "placeholder": "New task title…"
     }
   },
   "meetings": {
@@ -631,7 +658,6 @@
     "uploading": "Uploading...",
     "download": "Download",
     "noAttachments": "No attachments yet.",
-    "completePlanToStart": "Complete the plan section to unlock this area.",
     "noTasksInFilterYet": "No tasks in this filter yet.",
     "reviewOpenTasks": "Open tasks from this meeting",
     "reviewOpenTasksNote": "meeting will close automatically once all tasks are done"

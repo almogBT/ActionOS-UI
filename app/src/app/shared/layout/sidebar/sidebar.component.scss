@@ -2,115 +2,63 @@
   display: contents;
 }
 
-/* ── Backdrop (mobile) ── */
+/* ── Backdrop ── */
 .actionos-sidebar-backdrop {
   display: none;
   position: fixed;
   inset: 0;
   z-index: 18;
-  background: rgba(8, 14, 12, 0.36);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: rgba(8, 14, 12, 0.28);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 
-/* ── Sidebar shell ── */
+:host(.open) .actionos-sidebar-backdrop {
+  display: block;
+}
+
+/* ── Dropdown panel ── */
 .actionos-sidebar {
   position: fixed;
-  top: 0;
+  top: var(--header-height, 64px);
   inset-inline-start: 0;
   z-index: 19;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
   width: 260px;
-  height: 100vh;
-  padding: 18px 14px;
-  border-inline-end: 1px solid var(--sidebar-border);
+  max-height: calc(100vh - var(--header-height, 64px));
+  padding: 14px;
+  border: 1px solid var(--sidebar-border);
+  border-top: none;
+  border-radius: 0 0 var(--radius-md) 0;
   background: var(--sidebar-bg);
-  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.14);
-  transition:
-    width var(--duration-base) var(--ease-out),
-    transform var(--duration-base) var(--ease-out),
-    padding var(--duration-base) var(--ease-out);
+  box-shadow: 4px 8px 32px rgba(0, 0, 0, 0.22);
   overflow-y: auto;
   overflow-x: hidden;
-}
 
-.actionos-sidebar.collapsed {
-  width: 76px;
-  padding: 18px 10px;
-  overflow: visible; /* tooltips must escape the sidebar bounds */
-}
-
-/* ── Brand ── */
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 6px 6px 18px;
-  margin-bottom: 4px;
-  border-bottom: 1px solid var(--sidebar-border);
-}
-
-.actionos-sidebar.collapsed .brand {
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.brand-mark {
-  flex-shrink: 0;
-  display: inline-grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.20);
-  color: #ffffff;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  /* Hidden by default */
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
   transition:
-    box-shadow var(--duration-fast) var(--ease-out),
-    transform var(--duration-fast) var(--ease-spring);
+    opacity var(--duration-base) var(--ease-out),
+    transform var(--duration-base) var(--ease-out);
 }
 
-.brand-mark:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.26);
-  transform: translateY(-1px);
+:host(.open) .actionos-sidebar {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
-.brand-text {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-  overflow: hidden;
-}
-
-.brand-text strong {
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  color: var(--sidebar-text-strong);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.brand-text span {
-  font-size: 11px;
-  color: var(--sidebar-text-muted);
-  line-height: 1.3;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 
 /* ── Navigation ── */
 .nav-list {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 10px 0;
+  padding: 4px 0 10px;
 }
 
 .nav-section-label {
@@ -123,12 +71,6 @@
   letter-spacing: 0.08em;
   user-select: none;
   pointer-events: none;
-}
-
-.nav-section-divider {
-  height: 1px;
-  margin: 8px 6px;
-  background: var(--sidebar-border);
 }
 
 .nav-item {
@@ -149,10 +91,6 @@
     background var(--duration-fast) var(--ease-out),
     color var(--duration-fast) var(--ease-out),
     transform var(--duration-fast) var(--ease-out);
-}
-
-.actionos-sidebar.collapsed .nav-item {
-  padding: 10px 14px; /* centers the 28px icon in the 48px inner width of the 76px collapsed bar */
 }
 
 .nav-item:hover {
@@ -180,10 +118,6 @@
   border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.80);
   animation: indicatorIn var(--duration-base) var(--ease-spring) both;
-}
-
-.actionos-sidebar.collapsed .nav-item.active::before {
-  inset-inline-start: -10px;
 }
 
 @keyframes indicatorIn {
@@ -226,15 +160,9 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: opacity var(--duration-fast) var(--ease-out);
 }
 
-.actionos-sidebar.collapsed .nav-label {
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* Keyboard shortcut — revealed on hover / active */
+/* Keyboard shortcut */
 .nav-shortcut {
   display: inline-grid;
   place-items: center;
@@ -261,57 +189,9 @@
   transform: scale(1);
 }
 
-/* ── Collapsed: CSS-only tooltip ── */
-.actionos-sidebar.collapsed .nav-item {
-  overflow: visible;
-}
-
-.actionos-sidebar.collapsed .nav-item[data-tooltip]::after,
-.actionos-sidebar.collapsed .collapse-toggle[data-tooltip]::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  inset-inline-start: calc(100% + 12px);
-  top: 50%;
-  transform: translateY(-50%) translateX(-6px);
-  white-space: nowrap;
-  padding: 5px 10px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  background: var(--bg-elevated);
-  color: var(--text-primary);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  box-shadow: var(--shadow-md);
-  pointer-events: none;
-  opacity: 0;
-  z-index: 100;
-  transition:
-    opacity var(--duration-fast) var(--ease-out),
-    transform var(--duration-fast) var(--ease-out);
-}
-
-.actionos-sidebar.collapsed .nav-item[data-tooltip]:hover::after,
-.actionos-sidebar.collapsed .collapse-toggle[data-tooltip]:hover::after {
-  opacity: 1;
-  transform: translateY(-50%) translateX(0);
-}
-
-[dir="rtl"] .actionos-sidebar.collapsed .nav-item[data-tooltip]::after,
-[dir="rtl"] .actionos-sidebar.collapsed .collapse-toggle[data-tooltip]::after {
-  inset-inline-start: auto;
-  inset-inline-end: calc(100% + 12px);
-  transform: translateY(-50%) translateX(6px);
-}
-
-[dir="rtl"] .actionos-sidebar.collapsed .nav-item[data-tooltip]:hover::after,
-[dir="rtl"] .actionos-sidebar.collapsed .collapse-toggle[data-tooltip]:hover::after {
-  transform: translateY(-50%) translateX(0);
-}
-
 /* ── Workspace card ── */
 .workspace-card {
-  margin-top: 8px;
+  margin-top: 4px;
   padding: 14px;
   border: 1px solid var(--sidebar-border);
   border-radius: var(--radius-md);
@@ -348,121 +228,3 @@
   color: var(--sidebar-text);
   line-height: 1.45;
 }
-
-/* ── Collapse toggle (lives in .brand row) ── */
-.collapse-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  margin-inline-start: auto;
-  border: 1px solid var(--sidebar-border);
-  border-radius: var(--radius-md);
-  background: transparent;
-  color: var(--sidebar-text-muted);
-  cursor: pointer;
-  transition:
-    color var(--duration-fast) var(--ease-out),
-    border-color var(--duration-fast) var(--ease-out),
-    background var(--duration-fast) var(--ease-out);
-}
-
-.collapse-toggle:hover {
-  color: var(--sidebar-text-strong);
-  border-color: var(--sidebar-text);
-  background: var(--sidebar-item-hover);
-}
-
-/* In collapsed mode the brand stacks vertically — toggle fills the row */
-.actionos-sidebar.collapsed .collapse-toggle {
-  width: 100%;
-  margin-inline-start: 0;
-  overflow: visible;
-}
-
-/* ── Mobile: pinned collapsed strip ── */
-@media (max-width: 1020px) {
-  /* Always-visible 76px icon strip — no overlay, no backdrop in this state */
-  .actionos-sidebar {
-    width: 76px;
-    padding: 18px 10px;
-    overflow: visible;
-    box-shadow: none;
-    /* inset-inline-start: 0 from base positions correctly for both LTR and RTL */
-  }
-
-  .actionos-sidebar .brand {
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .actionos-sidebar .nav-item {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    padding: 10px 0;
-  }
-
-  /* Always hide text-only elements in pinned strip (catches the case where
-     collapsed=false on desktop then viewport is resized to mobile width) */
-  .actionos-sidebar .nav-label,
-  .actionos-sidebar .nav-shortcut,
-  .actionos-sidebar .nav-section-label,
-  .actionos-sidebar .brand-text,
-  .actionos-sidebar .workspace-card {
-    display: none;
-  }
-
-  /* Hide collapse toggle in pinned strip — hamburger in header handles expand */
-  .collapse-toggle {
-    display: none;
-  }
-
-  /* ── Expanded overlay (hamburger button opens this) ── */
-  :host(.mobile-open) .actionos-sidebar {
-    width: 260px;
-    padding: 18px 14px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    box-shadow: var(--shadow-lg);
-    transition:
-      width var(--duration-slow) var(--ease-spring),
-      padding var(--duration-base) var(--ease-out);
-  }
-
-  :host(.mobile-open) .actionos-sidebar .nav-item {
-    grid-template-columns: 28px 1fr auto;
-    justify-items: start;
-    padding: 9px 10px;
-  }
-
-  :host(.mobile-open) .actionos-sidebar .brand {
-    flex-direction: row;
-    gap: 12px;
-  }
-
-  /* Restore visibility of text elements in expanded overlay */
-  :host(.mobile-open) .actionos-sidebar .nav-label { display: block; }
-  :host(.mobile-open) .actionos-sidebar .nav-shortcut { display: inline-grid; }
-  :host(.mobile-open) .actionos-sidebar .nav-section-label { display: block; }
-  :host(.mobile-open) .actionos-sidebar .brand-text { display: grid; }
-  :host(.mobile-open) .actionos-sidebar .workspace-card { display: block; }
-
-  /* Show collapse toggle only when expanded so user can close overlay */
-  :host(.mobile-open) .collapse-toggle {
-    display: inline-flex;
-    width: 28px;
-    margin-inline-start: auto;
-  }
-
-  /* Backdrop only when overlay is expanded — NOT in pinned strip state */
-  :host(.mobile-open) .actionos-sidebar-backdrop {
-    display: block;
-  }
-}
-
-
-

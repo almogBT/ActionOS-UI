@@ -397,9 +397,35 @@
     "expand": {
       "checklist": "רשימת תיוג",
       "noChecklist": "אין פריטי רשימה.",
-      "open": "פתח משימה"
+      "open": "פתח משימה",
+      "addStep": "הוסף שלב",
+      "addStepPlaceholder": "הוסף שלב…"
+    },
+    "groupBy": {
+      "label": "קבץ לפי",
+      "due": "תאריך יעד",
+      "status": "סטטוס",
+      "priority": "עדיפות"
+    },
+    "status": {
+      "reasonPlaceholder": "מדוע הסטטוס משתנה? (לפחות 3 מילים)",
+      "waitingPlaceholder": "למה אנחנו ממתינים?",
+      "reasonTooShort": "יש להוסיף לפחות 3 מילים שמסבירות את השינוי.",
+      "waitingRequired": "יש להוסיף סיבת המתנה לפני מעבר לסטטוס המתנה.",
+      "changeFailed": "מעבר הסטטוס הזה אינו אפשרי כעת.",
+      "confirm": "עדכן"
+    },
+    "bulk": {
+      "selected": "נבחרו",
+      "setStatus": "קבע סטטוס…",
+      "setPriority": "קבע עדיפות…",
+      "clear": "נקה",
+      "selectAll": "בחר הכל בקבוצה"
+    },
+    "addTask": {
+      "label": "הוסף משימה",
+      "placeholder": "כותרת משימה חדשה…"
     }
-
   },
   "meetings": {
     "openMyWork": "פתח את העבודה שלי",
@@ -632,7 +658,6 @@
     "uploading": "מעלה...",
     "download": "הורדה",
     "noAttachments": "אין קבצים מצורפים.",
-    "completePlanToStart": "השלם את חלק התכנון כדי לפתוח אזור זה.",
     "noTasksInFilterYet": "אין משימות בסינון זה.",
     "reviewOpenTasks": "משימות פתוחות מפגישה זו",
     "reviewOpenTasksNote": "הפגישה תיסגר אוטומטית כשכל המשימות יסתיימו"

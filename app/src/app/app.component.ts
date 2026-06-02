@@ -22,7 +22,6 @@ import { WorkspaceHomeComponent } from './features/workspace-home/workspace-home
 import { HeaderComponent } from './shared/layout/header/header.component';
 import { SidebarComponent } from './shared/layout/sidebar/sidebar.component';
 
-const SIDEBAR_STORAGE_KEY = 'actionos.sidebar.collapsed';
 
 @Component({
   selector: 'app-root',
@@ -55,8 +54,7 @@ export class AppComponent implements OnInit {
 
   readonly navItems: NavItem[] = ACTIONOS_NAV_ITEMS;
   readonly activeView = signal<ViewId>('home');
-  readonly sidebarCollapsed = signal<boolean>(this.loadCollapsed());
-  readonly mobileNavOpen = signal<boolean>(false);
+  readonly navOpen = signal<boolean>(false);
   readonly meetingNewTick = signal(0);
 
   // ── Bottom action bar: quick capture ──
@@ -74,8 +72,7 @@ export class AppComponent implements OnInit {
   readonly customerEntryView = signal<CustomersSubView>('detail');
 
   readonly shellClass = computed(() => ({
-    'shell-collapsed': this.sidebarCollapsed(),
-    'shell-mobile-open': this.mobileNavOpen()
+    'nav-open': this.navOpen()
   }));
 
   constructor(@Inject(DOCUMENT) private readonly doc: Document) {
@@ -89,7 +86,7 @@ export class AppComponent implements OnInit {
 
   setView(view: ViewId): void {
     this.activeView.set(view);
-    this.mobileNavOpen.set(false);
+    this.navOpen.set(false);
   }
 
   /** Home list → open a customer's 360 detail. */
@@ -123,22 +120,8 @@ export class AppComponent implements OnInit {
     this.setView('home');
   }
 
-  toggleSidebar(): void {
-    if ((this.doc?.defaultView?.innerWidth ?? Infinity) <= 1020) {
-      // On mobile: toggle the overlay (collapsed strip is always pinned)
-      this.mobileNavOpen.update(v => !v);
-    } else {
-      this.sidebarCollapsed.update(value => !value);
-      this.persistCollapsed();
-    }
-  }
-
-  openMobileNav(): void {
-    this.mobileNavOpen.set(true);
-  }
-
-  closeMobileNav(): void {
-    this.mobileNavOpen.set(false);
+  toggleNav(): void {
+    this.navOpen.update(v => !v);
   }
 
   onCaptured(): void {
@@ -234,7 +217,7 @@ export class AppComponent implements OnInit {
     }
     if (event.key === '[') {
       event.preventDefault();
-      this.toggleSidebar();
+      this.toggleNav();
     }
   }
 
@@ -251,20 +234,5 @@ export class AppComponent implements OnInit {
     return map[id] ?? 'home';
   }
 
-  private loadCollapsed(): boolean {
-    try {
-      const stored = this.doc?.defaultView?.localStorage.getItem(SIDEBAR_STORAGE_KEY);
-      return stored === null ? true : stored === '1';
-    } catch {
-      return true;
-    }
-  }
-
-  private persistCollapsed(): void {
-    try {
-      this.doc?.defaultView?.localStorage.setItem(SIDEBAR_STORAGE_KEY, this.sidebarCollapsed() ? '1' : '0');
-    } catch {
-      /* ignore */
-    }
-  }
 }
+
