@@ -1,144 +1,188 @@
-<section class="screen">
-  <div class="screen-title hero-title">
-    <div>
-      <span class="eyebrow">{{ 'inbox.eyebrow' | t }}</span>
+<section class="screen inbox" [class.is-embedded]="embedded">
+
+  <!-- ── Header (hidden when embedded — the host screen already names it) ── -->
+  <div class="inbox-head" *ngIf="!embedded">
+    <div class="inbox-head-text">
       <h2>{{ 'inbox.title' | t }}</h2>
       <p>{{ 'inbox.subtitle' | t }}</p>
     </div>
-    <div class="inline-actions">
-      <button type="button" class="ghost-action" (click)="openView('meetings')">{{ 'inbox.reviewMeeting' | t }}</button>
-      <button type="button" class="primary-action" (click)="openView('boards')">{{ 'inbox.openBoard' | t }}</button>
+  </div>
+
+  <!-- ── Search ─────────────────────────────────────────────────────────── -->
+  <div class="inbox-search">
+    <span class="inbox-search-icon" aria-hidden="true">🔍</span>
+    <input
+      type="search"
+      [ngModel]="search()"
+      (ngModelChange)="onSearch($event)"
+      [placeholder]="'inbox.searchPlaceholder' | t"
+    />
+    <button type="button" class="inbox-search-clear" *ngIf="search()" (click)="clearSearch()">✕</button>
+  </div>
+
+  <!-- ── Filter pills ───────────────────────────────────────────────────── -->
+  <div class="inbox-filters">
+    <button
+      *ngFor="let f of filters"
+      type="button"
+      class="inbox-pill"
+      [class.active]="filter() === f.id"
+      (click)="setFilter(f.id)"
+    >
+      {{ f.labelKey | t }}
+      <span class="pill-count" *ngIf="countFor(f.id)">{{ countFor(f.id) }}</span>
+    </button>
+
+    <div class="inbox-filters-end">
+      <span class="inbox-unread" *ngIf="workspace.inboxUnreadCount">
+        {{ 'inbox.unread' | t : { n: workspace.inboxUnreadCount } }}
+      </span>
+      <button
+        type="button"
+        class="ghost-action small"
+        [disabled]="!workspace.inboxUnreadCount"
+        (click)="markAllRead()"
+      >{{ 'inbox.markAllRead' | t }}</button>
     </div>
   </div>
 
-  <div class="metric-grid">
-    <article class="metric attention clickable" (click)="scrollToSection('decision-queue')">
-      <span>{{ 'inbox.needsTriage' | t }}</span>
-      <strong>{{ workspace.myTriageQueue.length }}</strong>
-      <small>{{ 'inbox.triageHint' | t }}</small>
-    </article>
-    <article class="metric clickable" (click)="scrollToSection('decision-queue')">
-      <span>{{ 'inbox.inboxTasks' | t }}</span>
-      <strong>{{ workspace.myInboxTasks.length }}</strong>
-      <small>{{ 'inbox.readyToClassify' | t }}</small>
-    </article>
-    <article class="metric clickable" (click)="scrollToSection('meeting-followup')">
-      <span>{{ 'inbox.meetingActions' | t }}</span>
-      <strong>{{ workspace.myUnconvertedActionItems.length }}</strong>
-      <small>{{ 'inbox.waitingForTasks' | t }}</small>
-    </article>
-    <article class="metric clickable" (click)="scrollToSection('blocker-lane')">
-      <span>{{ 'inbox.blocked' | t }}</span>
-      <strong>{{ workspace.myBlockedTasks.length }}</strong>
-      <small>{{ 'inbox.needsUnblockOwner' | t }}</small>
-    </article>
-  </div>
+  <!-- ── Feed (scrollable) ──────────────────────────────────────────────── -->
+  <div *ngIf="groups.length; else noItems" class="inbox-feed scroll-box">
+    <section *ngFor="let group of groups" class="inbox-group">
+      <h3 class="inbox-group-title">{{ group.labelKey | t }}</h3>
 
-  <div class="two-column">
-    <section class="panel" id="decision-queue">
-      <div class="panel-header">
-        <div>
-          <span class="eyebrow">{{ 'inbox.decisionQueue' | t }}</span>
-          <h2>{{ 'inbox.classifyWork' | t }}</h2>
-        </div>
-      </div>
+      <ng-container *ngFor="let row of group.rows">
 
-      <div *ngIf="workspace.myTriageQueue.length; else clearInbox" class="triage-list">
-        <article *ngFor="let task of workspace.myTriageQueue" class="triage-card">
-          <button type="button" class="triage-main" (click)="workspace.openTaskDrawer(task)">
-            <span class="status-dot" [ngClass]="workspace.statusClass(task.status)"></span>
-            <span>
-              <strong>{{ task.title }}</strong>
-              <small>{{ task.board }} - {{ ('priority.' + workspace.statusClass(task.priority)) | t }} - {{ 'common.due' | t }} {{ task.dueDate }}</small>
-            </span>
+        <!-- Single item row -->
+        <article
+          *ngIf="row.type === 'item'"
+          class="inbox-item"
+          [class.unread]="workspace.isInboxUnread(row.item.id)"
+          [attr.data-tone]="row.item.tone"
+          (click)="openItem(row.item)"
+        >
+          <span class="inbox-item-icon" [attr.data-tone]="row.item.tone">{{ row.item.glyph }}</span>
+
+          <div class="inbox-item-body">
+            <div class="inbox-item-topline">
+              <span class="inbox-item-headline">{{ row.item.titleKey | t : row.item.titleParams }}</span>
+              <span class="inbox-item-time">{{ relativeTime(row.item.timestamp) }}</span>
+            </div>
+            <p class="inbox-item-primary">{{ row.item.primaryText }}</p>
+            <small class="inbox-item-context" *ngIf="row.item.contextText">{{ row.item.contextText }}</small>
+          </div>
+
+          <div class="inbox-item-actions" (click)="$event.stopPropagation()">
+            <button
+              *ngFor="let action of row.item.actions"
+              type="button"
+              [class.primary-action]="action.variant === 'primary'"
+              [class.ghost-action]="action.variant === 'ghost'"
+              class="small"
+              (click)="runAction(row.item, action.id, $event)"
+            >{{ action.labelKey | t }}</button>
+
+            <button
+              type="button"
+              class="inbox-dismiss"
+              [title]="'inbox.act.dismiss' | t"
+              (click)="runAction(row.item, 'dismiss', $event)"
+            >✕</button>
+          </div>
+        </article>
+
+        <!-- Meeting group (collapsible) -->
+        <article
+          *ngIf="row.type === 'meeting'"
+          class="inbox-group-card"
+          [class.unread]="groupHasUnread(row)"
+          [class.open]="isExpanded(row.key)"
+        >
+          <button type="button" class="inbox-group-head" (click)="toggleGroup(row.key)">
+            <span class="inbox-item-icon" data-tone="success">📋</span>
+
+            <div class="inbox-item-body">
+              <div class="inbox-item-topline">
+                <span class="inbox-item-headline">{{ 'inbox.fromMeeting' | t }}</span>
+                <span class="inbox-item-time">{{ relativeTime(row.timestamp) }}</span>
+              </div>
+              <p class="inbox-item-primary">{{ row.title }}</p>
+              <small class="inbox-group-counts">
+                <span *ngIf="row.actions">🟩 {{ row.actions }}</span>
+                <span *ngIf="row.decisions">✅ {{ row.decisions }}</span>
+                <span *ngIf="row.notes">📝 {{ row.notes }}</span>
+              </small>
+            </div>
+
+            <div class="inbox-item-actions" (click)="$event.stopPropagation()">
+              <button type="button" class="ghost-action small" (click)="openMeetingGroup(row, $event)">
+                {{ 'inbox.act.viewMeeting' | t }}
+              </button>
+              <button
+                type="button"
+                class="inbox-dismiss"
+                [title]="'inbox.act.dismiss' | t"
+                (click)="dismissGroup(row, $event)"
+              >✕</button>
+              <span class="inbox-chevron" [class.open]="isExpanded(row.key)" aria-hidden="true">⌄</span>
+            </div>
           </button>
-          <div class="triage-actions">
-            <button type="button" class="ghost-action" (click)="promote(task, 'Planned')">{{ 'inbox.plan' | t }}</button>
-            <button type="button" class="ghost-action" (click)="promote(task, 'In Progress')">{{ 'inbox.start' | t }}</button>
-            <button type="button" class="ghost-action" (click)="promote(task, 'Waiting')">{{ 'inbox.wait' | t }}</button>
-            <button type="button" class="primary-action" (click)="promote(task, 'Done')">{{ 'inbox.done' | t }}</button>
-          </div>
-        </article>
-      </div>
 
-      <ng-template #clearInbox>
-        <div class="empty-state">
-          <strong>{{ 'inbox.clearTitle' | t }}</strong>
-          <span>{{ 'inbox.clearText' | t }}</span>
-        </div>
-      </ng-template>
-    </section>
-
-    <aside class="detail-panel">
-      <span class="eyebrow">{{ 'inbox.workflowRule' | t }}</span>
-      <h2>{{ 'inbox.oneTouchTriage' | t }}</h2>
-      <div class="workflow-steps">
-        <span>{{ 'inbox.step1' | t }}</span>
-        <span>{{ 'inbox.step2' | t }}</span>
-        <span>{{ 'inbox.step3' | t }}</span>
-        <span>{{ 'inbox.step4' | t }}</span>
-      </div>
-      <button type="button" class="primary-action wide-action" (click)="convertAll()" [disabled]="!workspace.myUnconvertedActionItems.length">
-        {{ 'inbox.convertAll' | t }}
-      </button>
-    </aside>
-  </div>
-
-  <div class="two-column">
-    <section class="panel" id="meeting-followup">
-      <div class="panel-header">
-        <div>
-          <span class="eyebrow">{{ 'inbox.meetingFollowUp' | t }}</span>
-          <h2>{{ 'inbox.actionsWaiting' | t }}</h2>
-        </div>
-      </div>
-
-      <div *ngIf="workspace.myUnconvertedActionItems.length; else noActions" class="note-stack">
-        <article *ngFor="let item of workspace.myUnconvertedActionItems" class="note action">
-          <div>
-            <span>{{ 'noteType.action' | t }}</span>
-            <p>{{ item.note.content }}</p>
-            <small *ngIf="item.note.ownerId">{{ 'common.owner' | t }}: {{ workspace.memberName(item.note.ownerId) }} - {{ 'common.due' | t }} {{ item.note.dueDate }}</small>
-          </div>
-          <button type="button" class="convert-action" (click)="convert(item)">{{ 'common.convert' | t }}</button>
-        </article>
-      </div>
-
-      <ng-template #noActions>
-        <div class="empty-state">
-          <strong>{{ 'inbox.noActionsTitle' | t }}</strong>
-          <span>{{ 'inbox.noActionsText' | t }}</span>
-        </div>
-      </ng-template>
-    </section>
-
-    <section class="panel" id="blocker-lane">
-      <div class="panel-header">
-        <div>
-          <span class="eyebrow">{{ 'inbox.blockerLane' | t }}</span>
-          <h2>{{ 'inbox.needsRescue' | t }}</h2>
-        </div>
-      </div>
-
-      <div *ngIf="workspace.myBlockedTasks.length; else noBlockers" class="task-stack">
-        <article *ngFor="let task of workspace.myBlockedTasks.slice(0, 5)" class="task-card" (click)="workspace.openTaskDrawer(task)">
-          <div class="task-main">
-            <span class="status-dot waiting"></span>
-            <div>
-              <h3>{{ task.title }}</h3>
-              <p>{{ task.waitingReason || task.blockedBy || 'Waiting for next input' }}</p>
+          <div class="inbox-group-items" *ngIf="isExpanded(row.key)">
+            <div
+              *ngFor="let item of row.items"
+              class="inbox-subitem"
+              [class.unread]="workspace.isInboxUnread(item.id)"
+            >
+              <span class="inbox-subitem-icon" [attr.data-tone]="item.tone">{{ item.glyph }}</span>
+              <div class="inbox-subitem-body">
+                <span class="inbox-item-headline">{{ item.titleKey | t }}</span>
+                <p class="inbox-item-primary">{{ item.primaryText }}</p>
+              </div>
+              <div class="inbox-item-actions">
+                <ng-container *ngFor="let action of item.actions">
+                  <button
+                    *ngIf="action.id !== 'view-meeting'"
+                    type="button"
+                    [class.primary-action]="action.variant === 'primary'"
+                    [class.ghost-action]="action.variant === 'ghost'"
+                    class="small"
+                    (click)="runAction(item, action.id, $event)"
+                  >{{ action.labelKey | t }}</button>
+                </ng-container>
+                <button
+                  type="button"
+                  class="inbox-dismiss"
+                  [title]="'inbox.act.dismiss' | t"
+                  (click)="runAction(item, 'dismiss', $event)"
+                >✕</button>
+              </div>
             </div>
           </div>
-          <span class="priority" [ngClass]="workspace.statusClass(task.priority)">{{ ('priority.' + workspace.statusClass(task.priority)) | t }}</span>
         </article>
-      </div>
 
-      <ng-template #noBlockers>
-        <div class="empty-state">
-          <strong>{{ 'inbox.noBlockersTitle' | t }}</strong>
-          <span>{{ 'inbox.noBlockersText' | t }}</span>
-        </div>
-      </ng-template>
+      </ng-container>
     </section>
   </div>
+
+  <!-- ── Empty / no-results state ───────────────────────────────────────── -->
+  <ng-template #noItems>
+    <div class="inbox-empty" *ngIf="search() || filter() !== 'all'; else allClear">
+      <span class="inbox-empty-glyph">🔍</span>
+      <strong>{{ 'inbox.noResultsTitle' | t }}</strong>
+      <span>{{ 'inbox.noResultsText' | t }}</span>
+    </div>
+
+    <ng-template #allClear>
+      <div class="inbox-empty">
+        <span class="inbox-empty-glyph">✅</span>
+        <strong>{{ 'inbox.clearTitle' | t }}</strong>
+        <span>{{ 'inbox.clearText' | t }}</span>
+        <div class="inbox-empty-actions">
+          <button type="button" class="ghost-action" (click)="openView('meetings')">{{ 'inbox.reviewMeeting' | t }}</button>
+          <button type="button" class="primary-action" (click)="openView('boards')">{{ 'inbox.openBoard' | t }}</button>
+        </div>
+      </div>
+    </ng-template>
+  </ng-template>
 </section>

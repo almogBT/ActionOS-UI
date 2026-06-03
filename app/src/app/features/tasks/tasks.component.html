@@ -19,34 +19,23 @@
   </div>
 
   <!-- ── Stat tiles (clickable → popup list) ─────────────────────────────── -->
-  <div class="metric-grid tasks-metrics">
-    <article class="metric clickable" role="button" tabindex="0"
-      (click)="openTile('open')" (keydown.enter)="openTile('open')">
-      <span>{{ 'tasks.tiles.open' | t }}</span>
-      <strong>{{ openCount }}</strong>
-      <small>{{ 'tasks.tiles.openHint' | t }}</small>
-    </article>
-
-    <article class="metric attention clickable" role="button" tabindex="0"
-      (click)="openTile('overdue')" (keydown.enter)="openTile('overdue')">
-      <span>{{ 'tasks.tiles.overdue' | t }}</span>
-      <strong>{{ overdueCount }}</strong>
-      <small>{{ 'tasks.tiles.overdueHint' | t }}</small>
-    </article>
-
-    <article class="metric clickable" role="button" tabindex="0"
-      (click)="openTile('today')" (keydown.enter)="openTile('today')">
-      <span>{{ 'tasks.tiles.today' | t }}</span>
-      <strong>{{ todayCount }}</strong>
-      <small>{{ 'tasks.tiles.todayHint' | t }}</small>
-    </article>
-
-    <article class="metric clickable" role="button" tabindex="0"
-      (click)="openTile('blocked')" (keydown.enter)="openTile('blocked')">
-      <span>{{ 'tasks.tiles.blocked' | t }}</span>
-      <strong>{{ blockedCount }}</strong>
-      <small>{{ 'tasks.tiles.blockedHint' | t }}</small>
-    </article>
+  <div class="stat-tile-row">
+    <app-stat-tile
+      icon="check-square" [value]="openCount" [label]="'tasks.tiles.open' | t"
+      [zero]="openCount === 0" (tileClick)="openTile('open')"
+    ></app-stat-tile>
+    <app-stat-tile
+      icon="alert-triangle" [value]="overdueCount" [label]="'tasks.tiles.overdue' | t"
+      tone="danger" [zero]="overdueCount === 0" (tileClick)="openTile('overdue')"
+    ></app-stat-tile>
+    <app-stat-tile
+      icon="calendar" [value]="todayCount" [label]="'tasks.tiles.today' | t"
+      [zero]="todayCount === 0" (tileClick)="openTile('today')"
+    ></app-stat-tile>
+    <app-stat-tile
+      icon="bell" [value]="blockedCount" [label]="'tasks.tiles.blocked' | t"
+      [zero]="blockedCount === 0" (tileClick)="openTile('blocked')"
+    ></app-stat-tile>
   </div>
 
   <!-- ── Controls: audience filter · origin · search ─────────────────────── -->
@@ -73,298 +62,12 @@
     </div>
   </div>
 
-  <!-- ── List header + group-by switch ───────────────────────────────────── -->
-  <div class="tab-section-header">
-    <div>
-      <span class="eyebrow">{{ 'tasks.list.eyebrow' | t }}</span>
-      <h3>{{ 'tasks.list.title' | t }}</h3>
-    </div>
-
-    <div class="list-header-right">
-      <div class="group-switch" role="tablist" [attr.aria-label]="'tasks.groupBy.label' | t">
-        <span class="group-switch-label">{{ 'tasks.groupBy.label' | t }}</span>
-        <button
-          *ngFor="let m of groupModes"
-          type="button"
-          role="tab"
-          [class.active]="groupBy === m.id"
-          [attr.aria-selected]="groupBy === m.id"
-          (click)="setGroupBy(m.id)"
-        >{{ m.labelKey | t }}</button>
-      </div>
-      <span class="count-badge">{{ filteredTasks.length }}</span>
-    </div>
-  </div>
-
-  <!-- ── Bulk action bar (shown when rows are selected) ──────────────────── -->
-  <div *ngIf="selectedCount" class="bulk-bar">
-    <span class="bulk-count">{{ selectedCount }} {{ 'tasks.bulk.selected' | t }}</span>
-
-    <div class="bulk-group">
-      <label>{{ 'common.priority' | t }}</label>
-      <app-searchable-select
-        [ngModel]="''"
-        (ngModelChange)="applyBulkPriority($event)"
-        [options]="priorityOptions"
-        [placeholder]="'tasks.bulk.setPriority' | t"
-      ></app-searchable-select>
-    </div>
-
-    <div class="bulk-group bulk-status">
-      <label>{{ 'common.status' | t }}</label>
-      <app-searchable-select
-        [(ngModel)]="bulkStatusPicker"
-        [options]="bulkStatusOptions"
-        [placeholder]="'tasks.bulk.setStatus' | t"
-      ></app-searchable-select>
-      <input
-        *ngIf="bulkStatusPicker"
-        type="text"
-        class="bulk-reason"
-        [(ngModel)]="bulkReason"
-        [placeholder]="'tasks.status.reasonPlaceholder' | t"
-      />
-      <button *ngIf="bulkStatusPicker" type="button" class="bulk-apply" (click)="applyBulkStatus()">
-        {{ 'tasks.status.confirm' | t }}
-      </button>
-      <span *ngIf="bulkError" class="bulk-error">{{ bulkError }}</span>
-    </div>
-
-    <button type="button" class="bulk-clear" (click)="clearSelection()">{{ 'tasks.bulk.clear' | t }}</button>
-  </div>
-
-  <!-- ── Task table (grouped) ────────────────────────────────────────────── -->
-  <div *ngIf="hasTasks; else noTasks" class="task-groups scroll-box">
-    <div *ngFor="let group of groupedTasks" class="task-group" [ngClass]="'tone-' + group.tone">
-
-      <!-- Collapsible, colour-accented group header -->
-      <div class="group-header" [class.group-danger]="group.isDanger">
-        <button type="button" class="group-toggle" (click)="toggleCollapse(group.id)">
-          <span class="group-chevron" [class.collapsed]="isCollapsed(group.id)">▾</span>
-          <span class="group-label">{{ group.label }}</span>
-          <span class="group-count" [class.count-danger]="group.isDanger">{{ group.tasks.length }}</span>
-        </button>
-        <label class="group-select" (click)="$event.stopPropagation()" [title]="'tasks.bulk.selectAll' | t">
-          <input type="checkbox" [checked]="allSelectedInGroup(group)" (change)="toggleSelectGroup(group, $event)" />
-        </label>
-      </div>
-
-      <div class="task-table" *ngIf="!isCollapsed(group.id)">
-        <div class="task-table-header">
-          <span class="th-select"></span>
-          <span>{{ 'common.status' | t }}</span>
-          <span>{{ 'common.task' | t }}</span>
-          <span>{{ 'common.due' | t }}</span>
-          <span class="col-hide-sm">{{ 'common.priority' | t }}</span>
-          <span class="col-hide-sm">{{ 'tasks.col.assignee' | t }}</span>
-        </div>
-
-        <div *ngFor="let task of group.tasks" class="task-row-wrapper">
-
-          <!-- ── Main row ────────────────────────────────────────────────── -->
-          <article
-            class="task-row"
-            [ngClass]="[isOverdue(task) ? 'task-overdue' : '', workspace.selectedTaskId === task.id ? 'task-selected' : '', expandedTaskId === task.id ? 'task-expanded' : '', isSelected(task) ? 'task-checked' : '']"
-            (click)="toggleExpand(task, $event)"
-          >
-            <!-- Select checkbox -->
-            <label class="cell cell-select" (click)="$event.stopPropagation()">
-              <input type="checkbox" [checked]="isSelected(task)" (change)="toggleSelect(task, $event)" />
-            </label>
-
-            <!-- Status — solid colour cell + inline dropdown + reason popover -->
-            <div class="cell cell-status" (click)="$event.stopPropagation()">
-              <div class="status-control">
-                <button
-                  type="button"
-                  class="status-cell"
-                  [ngClass]="workspace.statusClass(task.status)"
-                  (click)="toggleStatusMenu(task, $event)"
-                >
-                  <span class="status-cell-label">{{ statusLabel(task.status) }}</span>
-                  <span class="status-caret">▾</span>
-                </button>
-
-                <!-- Status options -->
-                <div class="status-menu" *ngIf="statusMenuTaskId === task.id" (click)="$event.stopPropagation()">
-                  <button
-                    *ngFor="let s of allowedStatuses(task)"
-                    type="button"
-                    class="status-opt"
-                    [ngClass]="workspace.statusClass(s)"
-                    [class.is-current]="s === task.status"
-                    (click)="pickStatus(task, s, $event)"
-                  >{{ statusLabel(s) }}</button>
-                </div>
-
-                <!-- Reason confirm popover -->
-                <div class="status-reason-pop" *ngIf="statusEditTaskId === task.id" (click)="$event.stopPropagation()">
-                  <div class="srp-head">
-                    <span class="srp-from" [ngClass]="workspace.statusClass(task.status)">{{ statusLabel(task.status) }}</span>
-                    <span class="srp-arrow">→</span>
-                    <span class="srp-to" [ngClass]="workspace.statusClass(pendingStatus || '')">{{ pendingStatusLabel() }}</span>
-                  </div>
-                  <textarea
-                    class="srp-reason"
-                    rows="2"
-                    [(ngModel)]="statusReason"
-                    [placeholder]="'tasks.status.reasonPlaceholder' | t"
-                  ></textarea>
-                  <input
-                    *ngIf="pendingNeedsWaitingReason"
-                    type="text"
-                    class="srp-waiting"
-                    [(ngModel)]="statusWaitingReason"
-                    [placeholder]="'tasks.status.waitingPlaceholder' | t"
-                  />
-                  <p class="srp-error" *ngIf="statusError">{{ statusError }}</p>
-                  <div class="srp-actions">
-                    <button type="button" class="srp-cancel" (click)="cancelStatusChange()">{{ 'common.cancel' | t }}</button>
-                    <button type="button" class="srp-confirm" (click)="confirmStatusChange(task)">{{ 'tasks.status.confirm' | t }}</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Title + origin + checklist progress -->
-            <div class="cell cell-title">
-              <div class="title-main">
-                <span
-                  class="origin-badge"
-                  [class.origin-meeting]="isMeetingTask(task)"
-                  [class.origin-board]="!isMeetingTask(task)"
-                >{{ (isMeetingTask(task) ? 'tasks.badge.meeting' : 'tasks.badge.board') | t }}</span>
-                <span class="task-title-text">{{ task.title }}</span>
-              </div>
-              <div class="title-sub">
-                <span class="sub-context">{{ taskContext(task) || '—' }}</span>
-                <span *ngIf="sourceMeetingName(task) as mtg" class="sub-meeting">· {{ mtg }}</span>
-              </div>
-              <ng-container *ngIf="checklistProgress(task) as cl">
-                <div class="checklist-row">
-                  <div class="checklist-bar">
-                    <div class="checklist-fill" [style.width.%]="cl.pct"></div>
-                  </div>
-                  <span class="checklist-fraction">{{ cl.done }}/{{ cl.total }}</span>
-                </div>
-              </ng-container>
-              <span *ngIf="showWaitingReason(task)" class="waiting-reason" [title]="task.waitingReason">
-                ⏳ {{ task.waitingReason }}
-              </span>
-            </div>
-
-            <!-- Due date — inline editable -->
-            <div class="cell cell-due" [class.overdue-date]="isOverdue(task)" (click)="$event.stopPropagation()">
-              <span *ngIf="relativeDueLabel(task) as label" class="due-label">{{ label }}</span>
-              <input
-                type="date"
-                class="due-input"
-                [ngModel]="task.dueDate | slice:0:10"
-                (ngModelChange)="changeDueDate(task, $event)"
-              />
-            </div>
-
-            <!-- Priority — inline editable pill -->
-            <div class="cell cell-priority col-hide-sm" (click)="$event.stopPropagation()">
-              <app-searchable-select
-                class="priority-select"
-                [ngClass]="workspace.statusClass(task.priority)"
-                [ngModel]="task.priority"
-                (ngModelChange)="changePriority(task, $event)"
-                [options]="priorityOptions"
-              ></app-searchable-select>
-            </div>
-
-            <!-- Assignee — inline editable -->
-            <div class="cell cell-assignee col-hide-sm" (click)="$event.stopPropagation()">
-              <span class="assignee-avatar" [ngClass]="'avatar-' + avatarTone(workspace.employeeName(task.assignedToEmployeeId))">
-                {{ getInitials(workspace.employeeName(task.assignedToEmployeeId)) }}
-              </span>
-              <app-searchable-select
-                class="assignee-select"
-                [ngModel]="task.assignedToEmployeeId"
-                (ngModelChange)="changeAssignee(task, $event)"
-                [options]="assigneeOptions"
-                [placeholder]="'common.unassigned' | t"
-              ></app-searchable-select>
-            </div>
-          </article>
-
-          <!-- ── Expanded panel: interactive checklist + open button ─────── -->
-          <div *ngIf="expandedTaskId === task.id" class="task-expand-panel" (click)="$event.stopPropagation()">
-            <div class="expand-checklist">
-              <span class="expand-section-label">{{ 'tasks.expand.checklist' | t }}</span>
-
-              <div class="checklist-items" *ngIf="task.checklist?.length; else noChecklist">
-                <button
-                  *ngFor="let item of task.checklist"
-                  type="button"
-                  class="checklist-item"
-                  [class.item-done]="item.done"
-                  (click)="toggleStep(task, item, $event)"
-                >
-                  <span class="item-dot" [class.dot-done]="item.done"></span>
-                  <span class="item-label">{{ item.label }}</span>
-                </button>
-              </div>
-              <ng-template #noChecklist>
-                <span class="expand-no-checklist">{{ 'tasks.expand.noChecklist' | t }}</span>
-              </ng-template>
-
-              <!-- Add step -->
-              <div class="add-step-row">
-                <input
-                  type="text"
-                  class="add-step-input"
-                  [(ngModel)]="stepDrafts[task.id]"
-                  [placeholder]="'tasks.expand.addStepPlaceholder' | t"
-                  (keydown.enter)="addStep(task)"
-                />
-                <button type="button" class="add-step-btn" (click)="addStep(task)">+ {{ 'tasks.expand.addStep' | t }}</button>
-              </div>
-            </div>
-
-            <button type="button" class="expand-open-btn" (click)="openTask(task)">
-              {{ 'tasks.expand.open' | t }} →
-            </button>
-          </div>
-
-        </div>
-
-        <!-- ── Inline add-task row ───────────────────────────────────────── -->
-        <div class="add-task-row">
-          <ng-container *ngIf="addingGroupId === group.id; else addTrigger">
-            <input
-              type="text"
-              class="add-task-input"
-              [(ngModel)]="newTaskTitle"
-              [placeholder]="'tasks.addTask.placeholder' | t"
-              (keydown.enter)="confirmAdd(group)"
-              (keydown.escape)="cancelAdd()"
-            />
-            <button type="button" class="add-task-confirm" (click)="confirmAdd(group)">{{ 'common.add' | t }}</button>
-            <button type="button" class="add-task-cancel" (click)="cancelAdd()">{{ 'common.cancel' | t }}</button>
-          </ng-container>
-          <ng-template #addTrigger>
-            <button type="button" class="add-task-trigger" (click)="startAdd(group, $event)">
-              + {{ 'tasks.addTask.label' | t }}
-            </button>
-          </ng-template>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <ng-template #noTasks>
-    <div class="empty-state">
-      <strong>{{ 'tasks.noTasksTitle' | t }}</strong>
-      <span>{{ 'tasks.noTasksText' | t }}</span>
-    </div>
-  </ng-template>
-
-  <!-- Backdrop closes any open status menu / reason popover -->
-  <div *ngIf="statusOverlayOpen" class="status-backdrop" (click)="cancelStatusChange()"></div>
+  <!-- ── The one shared task table ───────────────────────────────────────── -->
+  <app-task-table
+    [tasks]="filteredTasks"
+    groupBy="due"
+    [showGroupSwitch]="true"
+  ></app-task-table>
 
   <!-- ── Stat tile popup ─────────────────────────────────────────────────── -->
   <app-metric-tasks-modal

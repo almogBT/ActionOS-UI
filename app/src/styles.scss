@@ -2031,3 +2031,16 @@ small {
   }
 
 }
+
+/* ── Stat-tile row ──────────────────────────────────────────────────────────
+   Shared layout for <app-stat-tile> groups (Tasks / Meetings / My Work).
+   Always a single non-wrapping row; each tile collapses to its icon (via its
+   own container query) when there isn't room for the text. */
+.stat-tile-row {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 12px;
+  align-items: stretch;
+  margin-bottom: 18px;
+}
+.stat-tile-row > * { flex: 1 1 0; min-width: 0; }

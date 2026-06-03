@@ -310,6 +310,12 @@ export class Customer360Component {
     if (!iso) {
       return '—';
     }
-    return iso.slice(0, 10);
+    const date = new Date(iso);
+    if (Number.isNaN(date.getTime())) {
+      return iso;
+    }
+    const dd = String(date.getDate()).padStart(2, '0');
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    return `${dd}/${mm}/${date.getFullYear()}`;
   }
 }

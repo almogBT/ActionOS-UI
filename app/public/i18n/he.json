@@ -118,7 +118,20 @@
     "openTasksHint": "פעולות שנולדו מפגישות",
     "openMeetingTasks": "משימות פתוחות",
     "noMeetingsInLane": "אין כלום כאן.",
-    "backToList": "כל הפגישות"
+    "backToList": "כל הפגישות",
+    "needsAttention": "דורש את תשומת לבך",
+    "needsAttentionHint": "מעקבים להמיר או פגישות לסגירה",
+    "ledBadge": "הובל",
+    "searchPlaceholder": "חיפוש פגישות...",
+    "filterAll": "הכל",
+    "filterThisWeek": "השבוע",
+    "filterFollowups": "דורש מעקב",
+    "filterLed": "הובלו על ידי",
+    "clearFilters": "נקה סינון",
+    "followups": "מעקבים",
+    "convertBtn": "→ משימה",
+    "scrollPrev": "הקודם",
+    "scrollNext": "הבא"
   },
   "home": {
     "meetingsLead": "מה הבא",
@@ -221,42 +234,53 @@
     "noTasks": "לא נמצאו משימות."
   },
   "inbox": {
-    "eyebrow": "תיעדוף",
-    "title": "תיבה",
-    "subtitle": "תופסים הכל קודם, מחליטים אחר כך. כאן רעיונות הופכים לעבודה אמיתית.",
+    "title": "מה חדש",
+    "subtitle": "כל מה שדורש את תשומת לבך, מהחדש לישן.",
+    "markAllRead": "סמן הכול כנקרא",
+    "unread": "{{n}} שלא נקראו",
     "reviewMeeting": "פתח פגישות",
     "openBoard": "פתח לוח",
-    "needsTriage": "צריך תיעדוף",
-    "triageHint": "חדשות, באיחור או בלי אחראי",
-    "inboxTasks": "פריטים חדשים",
-    "readyToClassify": "מוכן למיון",
-    "meetingActions": "פעולות מפגישה",
-    "waitingForTasks": "ממתינות להפוך למשימות",
-    "blocked": "תקוע",
-    "needsUnblockOwner": "צריך מישהו שישחרר",
-    "decisionQueue": "החלטות לתיעוד",
-    "classifyWork": "מיין כל פריט",
-    "plan": "תכנן",
-    "start": "התחל",
-    "wait": "דחה",
-    "done": "בוצע",
-    "clearTitle": "התיבה ריקה",
-    "clearText": "קליטות חדשות ופעולות מפגישות יופיעו כאן.",
-    "workflowRule": "איך זה עובד",
-    "oneTouchTriage": "תיעדוף בלחיצה",
-    "step1": "1. תפוס את המחשבה",
-    "step2": "2. שייך אחראי ותאריך",
-    "step3": "3. דחוף קדימה",
-    "step4": "4. עקוב מהלוח או מהעבודה שלי",
-    "convertAll": "הפוך את כל הפעולות למשימות",
-    "meetingFollowUp": "מפגישות",
-    "actionsWaiting": "פעולות שממתינות למשימה",
-    "noActionsTitle": "אין פעולות פתוחות מפגישות",
-    "noActionsText": "הוסף פעולה בפגישה כדי שתופיע כאן.",
-    "blockerLane": "תקועים",
-    "needsRescue": "צריך לשחרר",
-    "noBlockersTitle": "אין משימות תקועות כרגע",
-    "noBlockersText": "סמן משימה כממתינה או הוסף חסם כדי לראותה כאן."
+    "filters": {
+      "all": "הכול",
+      "tasks": "משימות",
+      "meetings": "פגישות",
+      "waiting": "ממתין"
+    },
+    "groups": {
+      "today": "היום",
+      "week": "מוקדם יותר השבוע",
+      "earlier": "מוקדם יותר"
+    },
+    "feed": {
+      "taskAssigned": "משימה חדשה הוקצתה לך",
+      "taskOpened": "משימה חדשה שפתחת",
+      "meetingAction": "פעולה מהפגישה שלך",
+      "meetingDecision": "החלטה תועדה",
+      "meetingNote": "הערה מהפגישה שלך",
+      "taskWaiting": "ממתין למישהו אחר",
+      "taskOverdue": "משימה באיחור",
+      "taskDueToday": "משימה לביצוע היום",
+      "taskAssignedBy": "משימה חדשה הוקצתה לך על ידי {{by}}"
+    },
+    "act": {
+      "open": "פתח",
+      "done": "בוצע",
+      "makeTask": "צור משימה",
+      "viewMeeting": "צפה בפגישה",
+      "dismiss": "הסר"
+    },
+    "time": {
+      "now": "ממש עכשיו",
+      "minutes": "לפני {{n}} דק׳",
+      "hours": "לפני {{n}} שע׳",
+      "days": "לפני {{n}} ימים"
+    },
+    "clearTitle": "אין לך פריטים חדשים",
+    "clearText": "משימות חדשות ומעקבים מפגישות יופיעו כאן עם הגעתם.",
+    "searchPlaceholder": "חיפוש בתיבת הנכנסים",
+    "noResultsTitle": "אין תוצאות",
+    "noResultsText": "נסה מונח חיפוש או מסנן אחר.",
+    "fromMeeting": "מהפגישה שלך"
   },
   "boards": {
     "eyebrow": "לוחות",
@@ -264,6 +288,21 @@
     "subtitle": "לוח לכל לקוח ולכל חבר צוות — כל הפגישות והמשימות במקום אחד.",
     "addFromMeeting": "הוסף מפגישה",
     "manageClients": "ניהול לקוחות",
+    "tabs": {
+      "overview": "סקירה",
+      "recap": "סיכום"
+    },
+    "hero": {
+      "owner": "אחראי",
+      "newMeeting": "פגישה חדשה",
+      "allClients": "כל הלקוחות"
+    },
+    "recapEyebrow": "סיכום פגישה",
+    "latestRecap": "סיכום אחרון",
+    "noRecapYet": "טרם פורסם סיכום לפגישה זו.",
+    "openRecap": "פתח סיכום →",
+    "openFullRecap": "פתח סיכום מלא",
+    "earlierMeetings": "פגישות קודמות",
     "boardType": "סוג לוח",
     "clientBoard": "לוח לקוח",
     "memberBoard": "לוח חבר צוות",
@@ -298,6 +337,12 @@
       "tasks": "משימות",
       "meetings": "פגישות",
       "week": "השבוע שלי"
+    },
+    "summary": {
+      "overdue": "באיחור",
+      "today": "להיום",
+      "followups": "ללא משימה",
+      "meetingsToday": "פגישות היום"
     },
     "groups": {
       "overdue": "באיחור",
@@ -413,7 +458,9 @@
       "reasonTooShort": "יש להוסיף לפחות 3 מילים שמסבירות את השינוי.",
       "waitingRequired": "יש להוסיף סיבת המתנה לפני מעבר לסטטוס המתנה.",
       "changeFailed": "מעבר הסטטוס הזה אינו אפשרי כעת.",
-      "confirm": "עדכן"
+      "confirm": "עדכן",
+      "addStatus": "הוסף סטטוס",
+      "addStatusPlaceholder": "שם סטטוס חדש…"
     },
     "bulk": {
       "selected": "נבחרו",
@@ -449,7 +496,7 @@
     "createTask": "צור משימה",
     "noNotesTitle": "אין תוצאות",
     "noNotesText": "שנה את הסינון או תפוס משהו חדש.",
-    "followUpPanel": "מעקבים",
+    "followUpPanel": "ללא משימה",
     "meetingOutput": "מהפגישה הזו",
     "totalNotes": "סה\"כ הערות",
     "openActions": "פעולות פתוחות",

@@ -8,6 +8,31 @@
   color: var(--muted);
 }
 
+/* Single-row header: title + subtitle on the RTL-start (right) corner, action
+   buttons pushed to the opposite (RTL-end / left) top corner on the same row.
+   This reclaims the vertical space the previous stacked layout wasted.
+
+   flex-direction:row is set explicitly so the global max-width:900px breakpoint
+   (which stacks .screen-title into a column) doesn't drop the buttons below the
+   title — the encapsulated component selector outranks that global rule.
+   align-items:flex-start keeps the buttons pinned to the TOP of the row,
+   aligned with the title rather than its taller subtitle block. */
+/* Explicit 2-column grid instead of flex. Column 1 (the title block) takes all
+   remaining space; column 2 (the buttons) is sized to its content. Because the
+   container is RTL, column 1 renders on the RIGHT and column 2 on the LEFT — so
+   the buttons land in the top-left corner. Grid avoids the flex-shrink trap
+   that was collapsing the title to one-word-per-line.
+   display:grid + width:100% override the base flex rule and the 900px
+   breakpoint's column stacking (encapsulated selector wins on specificity). */
+.screen-title {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 18px;
+  width: 100%;
+  margin-bottom: 18px;
+}
+
 .topbar-actions {
   display: flex;
   align-items: center;
@@ -15,90 +40,215 @@
   flex-wrap: wrap;
 }
 
-/* ── KPI / stat tiles ──────────────────────────────────────────────────── */
-.meetings-metrics {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 18px;
-}
-
-.metric {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 14px 16px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: var(--bg-elevated);
-
-  span {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--muted);
-  }
-
-  strong {
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--ink);
-    line-height: 1.1;
-  }
-
-  small {
-    font-size: 11px;
-    color: var(--muted);
-  }
-
-  &.clickable {
-    cursor: pointer;
-    transition: border-color 0.15s, box-shadow 0.15s, transform 0.05s;
-
-    &:hover {
-      border-color: var(--muted);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    }
-
-    &:active { transform: translateY(1px); }
-
-    &:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
-    }
-  }
-}
-
 /* ── Calendar panel ────────────────────────────────────────────────────── */
 .meetings-cal-panel {
   margin-bottom: 18px;
 }
 
-/* ── Filter select ─────────────────────────────────────────────────────── */
+/* ── Needs-attention rail ──────────────────────────────────────────────── */
+.attention-rail {
+  /* Grid items default to min-width:auto, which would let the wide carousel
+     push the whole .screen grid past the viewport. Pin it to 0 so the track
+     is constrained to the column and can scroll horizontally instead. */
+  min-width: 0;
+  padding: 14px 16px 12px;
+  /* Stronger framing so the rail reads as a real "needs attention" zone:
+     full danger border, a thick start-edge accent stripe, a deeper tint and a
+     soft shadow lifting it off the page instead of the previous flat panel. */
+  border: 1px solid var(--danger);
+  border-inline-start: 4px solid var(--danger);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, var(--danger-soft), var(--bg-elevated) 72%);
+  box-shadow: var(--shadow-md);
+}
+
+.rail-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: var(--danger);
+
+  .rail-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+}
+
+.rail-count {
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--danger);
+  color: #fff;
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+
+.rail-hint {
+  margin-inline-start: auto;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.rail-nav {
+  display: inline-flex;
+  gap: 4px;
+  margin-inline-start: 8px;
+}
+
+.rail-arrow {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--danger-soft);
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  color: var(--danger);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--duration-fast);
+
+  &:hover { background: var(--danger-soft); }
+}
+
+/* Horizontal scroll-snap carousel for the attention rail. */
+.carousel-track {
+  display: flex;
+  align-items: stretch;      /* equal-height tiles across the rail */
+  gap: 10px;
+  min-width: 0;              /* allow the flex container to shrink & scroll */
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: x proximity;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--danger-soft) transparent;
+
+  &::-webkit-scrollbar { height: 8px; }
+  &::-webkit-scrollbar-thumb { background: var(--danger-soft); border-radius: 4px; }
+
+  /* Compact carousel cards — much smaller than the lane tiles. Dates are
+     hidden here: they were the only variable-height element left, so dropping
+     them lets every tile size identically. */
+  > .meeting-card {
+    flex: 0 0 158px;
+    scroll-snap-align: start;
+    padding: 10px;
+    gap: 6px;
+
+    .card-goal { display: none; }
+    .card-date { display: none; }      /* remove top date — uneven heights */
+    .next-pill { display: none; }      /* remove next-meeting date pill too */
+    .card-subject { -webkit-line-clamp: 1; }
+    .card-actions { display: none; }   /* keep the rail tiles tiny */
+  }
+}
+
+/* ── Controls: search + customer select + quick filters on ONE row ───────── */
+.meetings-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;          /* stays one row when wide; wraps gracefully when not */
+  gap: 10px;
+}
+
 .filter-select {
-  min-width: 200px;
+  flex: 0 1 190px;          /* fixed-ish; shrinks before the search does */
+  min-width: 150px;
+}
+
+.meetings-search {
+  flex: 1 1 160px;          /* takes the leftover width on the row */
+  height: 34px;
+  min-width: 140px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg-elevated);
+  color: var(--ink);
+  font-size: 13px;
+  padding: 0 12px;
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-color: var(--accent);
+  }
+}
+
+.filter-strip {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex: 0 0 auto;           /* keep pills at content width on the shared row */
+  margin: 0;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--line);
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background var(--duration-fast), color var(--duration-fast), border-color var(--duration-fast);
+
+    &:hover  { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+    &.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  }
 }
 
 /* ── Meeting lanes ─────────────────────────────────────────────────────── */
 .lane-section {
   margin-top: 18px;
 
-  &:first-child { margin-top: 8px; }
+  &:first-of-type { margin-top: 8px; }
 }
 
+/* Header is now a full-width toggle button — reset native button chrome and
+   keep the original label styling. */
 .lane-header {
   display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
   padding: 6px 0 8px;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line);
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--muted);
-  border-bottom: 1px solid var(--line);
-  margin-bottom: 2px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  text-align: inherit;
+  transition: color var(--duration-fast);
+
+  &:hover { color: var(--ink); }
+}
+
+/* Chevron points down when expanded, rotates closed when collapsed. */
+.lane-chevron {
+  flex-shrink: 0;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.lane-section.collapsed {
+  .lane-header { margin-bottom: 0; }
+  .lane-chevron { transform: rotate(-90deg); }
 }
 
 .lane-count {
@@ -120,50 +270,205 @@
   border: 1px dashed var(--line);
   border-radius: var(--radius-lg);
   background: var(--bg-canvas);
-  margin-top: 8px;
 
   p { margin: 0; font-size: 13px; color: var(--muted); }
 }
 
-/* ── Meeting row ───────────────────────────────────────────────────────── */
-.meeting-row {
+/* ── Card grid ─────────────────────────────────────────────────────────── */
+.card-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, auto);
-  align-items: center;
-  gap: 14px;
-  padding: 12px;
-  border-top: 1px solid var(--line);
-  cursor: pointer;
-  transition: background 0.1s;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  align-items: start;
+  gap: 10px;
 
-  &:first-of-type { border-top: none; }
+  /* Cap the lane height so a long lane scrolls inside itself instead of
+     pushing the rest of the page down. ~2.5 rows of tiles are visible; the
+     padding keeps card hover shadow/lift from being clipped at the edges. */
+  max-height: min(560px, 70vh);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
 
-  &:hover { background: var(--bg-hover); }
+  &::-webkit-scrollbar { width: 8px; }
+  &::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
 }
 
-.meeting-row-main {
+/* Uniform tiles: every grid card is the same fixed height. The body flexes to
+   absorb any slack so shorter cards keep their content top-aligned and the
+   footer pinned to the bottom; overflow:hidden is a backstop. The inline
+   follow-up list is capped to one row in the template, which bounds the tallest
+   card so this height never clips real content. */
+.card-grid .meeting-card {
+  height: 212px;
+  overflow: hidden;
+
+  .card-body { flex: 1 1 auto; min-height: 0; }
+}
+
+/* "+N" hint shown when extra follow-ups are hidden by the one-row cap. */
+.action-more {
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--danger);
+  background: var(--danger-soft);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+
+/* ── Meeting card ──────────────────────────────────────────────────────── */
+.meeting-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Left accent stripe when the current rep led the meeting. */
+  &.card-led {
+    border-inline-start: 3px solid var(--accent);
+  }
+
+  /* Stronger cue for cards inside the attention rail. */
+  &.card-attention {
+    border-color: var(--danger-soft);
+    &.card-led { border-inline-start-color: var(--danger); }
+  }
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-height: 22px;
+}
+
+.led-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+.card-date {
+  margin-inline-start: auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.card-body {
   display: flex;
   flex-direction: column;
   gap: 3px;
   min-width: 0;
-
-  strong {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 14px;
-  }
 }
 
-.meeting-row-meta {
+.card-customer {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-subject {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.card-goal {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: var(--muted);
+  font-style: italic;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+.card-footer {
   display: flex;
-  gap: 10px;
   align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.card-people {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 800;
+  border: 1px solid var(--accent-soft);
+}
+
+.people-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.card-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   flex-wrap: wrap;
   justify-content: flex-end;
 }
 
-.muted { color: var(--muted); font-size: 13px; }
+.next-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
 
 .task-count-badge {
   font-size: 12px;
@@ -175,105 +480,87 @@
   white-space: nowrap;
 }
 
-/* ── Tile popup (inline modal) ─────────────────────────────────────────── */
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(20, 30, 50, 0.45);
-  display: grid;
-  place-items: center;
-  z-index: 50;
-  padding: 1rem;
-}
-
-.modal-card {
-  background: var(--bg-elevated);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  box-shadow: var(--shadow);
-  max-width: 640px;
-  width: 100%;
-  max-height: 85vh;
+/* ── Inline card follow-ups ────────────────────────────────────────────── */
+.card-actions {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 20px;
+  gap: 4px;
 }
 
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 14px;
-
-  .eyebrow {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--muted);
-    font-weight: 800;
-  }
-
-  h2 { margin: 4px 0 0; font-size: 20px; }
-}
-
-.modal-list {
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-height: 0;
-}
-
-.popup-row {
+.card-actions-label {
   display: flex;
   align-items: center;
-  gap: 12px;
-  width: 100%;
-  text-align: start;
-  background: var(--surface-strong);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 10px 12px;
-  cursor: pointer;
-  color: inherit;
-  transition: background 0.1s;
-
-  &:hover { background: var(--bg-elevated); box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-}
-
-.popup-row-main {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-  flex: 1;
-
-  strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
-  small { color: var(--muted); font-size: 12px; }
-}
-
-.popup-row-badges {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
-.empty-state {
-  padding: 1.5rem;
-  text-align: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: var(--muted);
+  margin-bottom: 2px;
 }
+
+.action-count-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--danger);
+  background: var(--danger-soft);
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+
+.card-action-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--line);
+
+  &:last-child { border-bottom: none; }
+}
+
+.action-row-text {
+  font-size: 13px;
+  flex: 1;
+  min-width: 0;
+  color: var(--ink);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.convert-btn {
+  flex-shrink: 0;
+  font-size: 12px !important;
+  padding: 4px 10px !important;
+  white-space: nowrap;
+}
+
+.muted { color: var(--muted); font-size: 13px; }
 
 /* ── Responsive ────────────────────────────────────────────────────────── */
-@media (max-width: 720px) {
-  .meetings-metrics { grid-template-columns: 1fr 1fr; }
-  .meeting-row { grid-template-columns: 1fr; }
-  .meeting-row-meta { justify-content: flex-start; }
+@media (max-width: 520px) {
+  /* Only when genuinely too cramped for one row: search + select share the top
+     line, the filter pills drop to a full-width second line that scrolls
+     horizontally. Above this width they all stay on a single row (wrapping
+     naturally only if they truly don't fit). */
+  .meetings-search,
+  .filter-select { flex: 1 1 0; min-width: 0; }
+  .filter-strip {
+    flex-basis: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+  }
 }
 
 @media (max-width: 480px) {
-  .meetings-metrics { grid-template-columns: 1fr; }
+  .card-grid { grid-template-columns: repeat(2, 1fr); }
+  .carousel-track > .meeting-card { flex-basis: 200px; }
+  .rail-hint { display: none; }
 }

@@ -1,22 +1,17 @@
-<section class="screen">
+<section class="screen boards-screen">
 
-  <!-- Header -->
+  <!-- ── Header ───────────────────────────────────────────────────────────── -->
   <div class="screen-title">
     <div>
       <span class="eyebrow">{{ 'boards.eyebrow' | t }}</span>
       <h2>{{ 'boards.title' | t }}</h2>
       <p class="screen-subtitle">{{ 'boards.subtitle' | t }}</p>
     </div>
-    <div class="inline-actions">
-      <button type="button" class="ghost-action" (click)="openView('customers')">{{ 'boards.manageClients' | t }}</button>
-      <button type="button" class="primary-action" (click)="openView('meetings')">{{ 'boards.addFromMeeting' | t }}</button>
-    </div>
   </div>
 
-  <!-- Board selector row -->
+  <!-- ── Board selector row ───────────────────────────────────────────────── -->
   <section class="panel board-selector">
     <div class="selector-row">
-
       <label class="field-control">
         {{ 'boards.boardType' | t }}
         <app-searchable-select
@@ -44,287 +39,377 @@
         ></app-searchable-select>
       </label>
 
-      <label *ngIf="entityType === 'member'" class="field-control">
-        {{ 'common.status' | t }}
-        <app-searchable-select
-          [(ngModel)]="memberStatusFilter"
-          [options]="memberStatusFilterOptions"
-        ></app-searchable-select>
-      </label>
-
       <label class="field-control selector-search">
         {{ 'common.search' | t }}
         <input type="search" [(ngModel)]="boardSearch" [placeholder]="'boards.searchPlaceholder' | t" />
       </label>
-
     </div>
   </section>
 
-  <!-- ════════════════════ CLIENT BOARD ════════════════════ -->
+  <!-- ════════════════════════ CLIENT BOARD ════════════════════════════════ -->
   <ng-container *ngIf="entityType === 'client'">
+    <ng-container *ngIf="selectedClient as client; else noClientSelected">
 
-    <ng-container *ngIf="selectedClientId; else noClientSelected">
-
-      <!-- HUD -->
-      <section class="board-hud">
-        <article [class.active]="hudPopup === 'meetings'" (click)="toggleHudPopup('meetings')">
-          <span>{{ 'boards.meetings' | t }}</span>
-          <strong>{{ clientMeetingCount }}</strong>
-        </article>
-        <article [class.active]="hudPopup === 'total-tasks'" (click)="toggleHudPopup('total-tasks')">
-          <span>{{ 'boards.totalTasks' | t }}</span>
-          <strong>{{ clientTotalTaskCount }}</strong>
-        </article>
-        <article [class.active]="hudPopup === 'open-tasks'" (click)="toggleHudPopup('open-tasks')">
-          <span>{{ 'boards.openTasks' | t }}</span>
-          <strong>{{ clientOpenTaskCount }}</strong>
-        </article>
+      <!-- Entity hero -->
+      <section class="panel entity-hero">
+        <div class="hero-identity">
+          <span class="hero-avatar client">{{ client.name.charAt(0) }}</span>
+          <div class="hero-text">
+            <div class="hero-name-row">
+              <h3>{{ client.name }}</h3>
+              <span class="status-chip" [ngClass]="'customer-' + workspace.statusClass(client.status)">{{ client.status }}</span>
+              <span class="hero-pill">{{ client.type }}</span>
+            </div>
+            <p class="hero-meta">
+              <span *ngIf="client.accountOwnerEmployeeId">{{ 'boards.hero.owner' | t }}: {{ workspace.employeeName(client.accountOwnerEmployeeId) }}</span>
+              <span *ngIf="client.primaryContactName" class="sep">·</span>
+              <span *ngIf="client.primaryContactName">{{ client.primaryContactName }}</span>
+              <span *ngIf="client.primaryContactEmail" class="sep">·</span>
+              <span *ngIf="client.primaryContactEmail">{{ client.primaryContactEmail }}</span>
+            </p>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <button type="button" class="primary-action" (click)="openView('meetings')">
+            <app-icon name="plus" [size]="14"></app-icon>
+            <span>{{ 'boards.hero.newMeeting' | t }}</span>
+          </button>
+          <button type="button" class="ghost-action" (click)="openView('customers')">{{ 'boards.hero.allClients' | t }}</button>
+        </div>
       </section>
 
-      <!-- Two-column panels -->
-      <div class="client-board-grid">
+      <!-- Stat tiles -->
+      <div class="stat-tile-row">
+        <app-stat-tile
+          icon="check-square" [value]="clientOpenCount" [label]="'boards.openTasks' | t"
+          [zero]="clientOpenCount === 0" (tileClick)="openLens('tasks', 'open')"
+        ></app-stat-tile>
+        <app-stat-tile
+          icon="alert-triangle" [value]="clientOverdueCount" [label]="'tasks.tiles.overdue' | t"
+          tone="danger" [zero]="clientOverdueCount === 0" (tileClick)="openLens('tasks', 'overdue')"
+        ></app-stat-tile>
+        <app-stat-tile
+          icon="bell" [value]="clientBlockedCount" [label]="'boards.blocked' | t"
+          [zero]="clientBlockedCount === 0" (tileClick)="openLens('tasks', 'blocked')"
+        ></app-stat-tile>
+        <app-stat-tile
+          icon="calendar" [value]="clientMeetingCount" [label]="'boards.meetings' | t"
+          [zero]="clientMeetingCount === 0" (tileClick)="selectTab('meetings')"
+        ></app-stat-tile>
+      </div>
 
-        <!-- Meetings panel -->
-        <section class="panel">
-          <div class="board-panel-head">
-            <span class="eyebrow">{{ 'boards.meetings' | t }}</span>
-            <h3>{{ 'boards.clientMeetingsTitle' | t }}</h3>
-          </div>
-          <div class="entity-list" *ngIf="clientMeetings.length; else noMeetings">
-            <div *ngFor="let meeting of clientMeetings" class="entity-row clickable" (click)="workspace.openMeetingDrawer(meeting.id)">
-              <div class="entity-main">
-                <strong>{{ meeting.subject }}</strong>
-                <small>{{ meeting.meetingDate | slice:0:10 }} · {{ workspace.employeeName(meeting.meetingLeaderEmployeeId) }}</small>
+      <!-- Tab strip -->
+      <div class="board-tabs" role="tablist">
+        <button *ngFor="let tab of clientTabs" type="button" role="tab"
+          [attr.aria-selected]="activeTab === tab.id" [class.active]="activeTab === tab.id"
+          (click)="selectTab(tab.id)">
+          <app-icon [name]="tab.icon" [size]="15"></app-icon>
+          <span>{{ tab.labelKey | t }}</span>
+          <span *ngIf="tab.count" class="board-tab-count" [class.is-danger]="tab.danger">{{ tab.count }}</span>
+        </button>
+      </div>
+
+      <!-- ── Overview tab ─────────────────────────────────────────────────── -->
+      <ng-container *ngIf="activeTab === 'overview'">
+        <app-calendar [events]="clientCalendarEvents" (eventOpened)="onCalEventOpened($event)"></app-calendar>
+
+        <div class="overview-grid">
+          <!-- Latest recap (compact) -->
+          <section class="panel">
+            <div class="board-panel-head">
+              <span class="eyebrow">{{ 'boards.recapEyebrow' | t }}</span>
+              <h3>{{ 'boards.latestRecap' | t }}</h3>
+            </div>
+            <ng-container *ngIf="latestMeeting as m; else noRecap">
+              <article class="recap-mini clickable" (click)="openMeeting(m.id)">
+                <div class="recap-mini-head">
+                  <strong>{{ m.subject }}</strong>
+                  <span class="status-chip" [ngClass]="workspace.statusClass(m.status)">{{ m.status }}</span>
+                </div>
+                <small class="recap-date">{{ m.meetingDate | appDate }} · {{ workspace.employeeName(m.meetingLeaderEmployeeId) }}</small>
+                <p class="recap-excerpt" *ngIf="recapText(m); else noRecapText">{{ recapText(m) }}</p>
+                <ng-template #noRecapText>
+                  <p class="recap-excerpt muted">{{ 'boards.noRecapYet' | t }}</p>
+                </ng-template>
+                <div class="note-chips">
+                  <span class="note-chip decision">{{ notesOfType(m, 'decision').length }} {{ 'recap.decisions' | t }}</span>
+                  <span class="note-chip action">{{ notesOfType(m, 'action').length }} {{ 'noteType.action' | t }}</span>
+                  <span class="note-chip blocker">{{ notesOfType(m, 'blocker').length }} {{ 'boards.blocked' | t }}</span>
+                </div>
+              </article>
+              <button type="button" class="ghost-action small recap-open" (click)="selectTab('recap')">{{ 'boards.openRecap' | t }}</button>
+            </ng-container>
+            <ng-template #noRecap>
+              <div class="empty-state"><strong>{{ 'boards.noMeetings' | t }}</strong></div>
+            </ng-template>
+          </section>
+
+          <!-- Recent meetings -->
+          <section class="panel">
+            <div class="board-panel-head">
+              <span class="eyebrow">{{ 'boards.meetings' | t }}</span>
+              <h3>{{ 'boards.clientMeetingsTitle' | t }}</h3>
+            </div>
+            <div class="entity-list" *ngIf="clientMeetingsSorted.length; else noMeetingsMini">
+              <div *ngFor="let meeting of clientMeetingsSorted | slice:0:5" class="entity-row clickable" (click)="openMeeting(meeting.id)">
+                <div class="entity-main">
+                  <strong>{{ meeting.subject }}</strong>
+                  <small>{{ meeting.meetingDate | appDate }} · {{ workspace.employeeName(meeting.meetingLeaderEmployeeId) }}</small>
+                </div>
+                <span class="count-badge">{{ meetingTaskCountFor(meeting.id) }} {{ 'boards.tasksLabel' | t }}</span>
+                <span class="status-chip" [ngClass]="workspace.statusClass(meeting.status)">{{ meeting.status }}</span>
               </div>
-              <span class="count-badge">{{ meetingTaskCountFor(meeting.id) }} {{ 'boards.tasksLabel' | t }}</span>
-              <span class="status-chip" [ngClass]="workspace.statusClass(meeting.status)">{{ meeting.status }}</span>
             </div>
-          </div>
-          <ng-template #noMeetings>
-            <div class="empty-state">
-              <strong>{{ 'boards.noMeetings' | t }}</strong>
-            </div>
-          </ng-template>
-        </section>
+            <ng-template #noMeetingsMini>
+              <div class="empty-state"><strong>{{ 'boards.noMeetings' | t }}</strong></div>
+            </ng-template>
+          </section>
+        </div>
 
-        <!-- Meeting tasks panel -->
+        <!-- Open tasks snapshot -->
         <section class="panel">
           <div class="board-panel-head">
             <span class="eyebrow">{{ 'boards.tasks' | t }}</span>
-            <h3>{{ 'boards.clientTasksTitle' | t }}</h3>
+            <h3>{{ 'boards.openTasks' | t }}</h3>
           </div>
-          <div class="entity-list" *ngIf="clientAllTasks.length; else noClientTasks">
-            <div *ngFor="let task of clientAllTasks" class="entity-row clickable" (click)="openHudTask(task)">
-              <span class="status-dot" [ngClass]="workspace.statusClass(task.status)"></span>
-              <div class="entity-main">
-                <strong>{{ task.title }}</strong>
-                <small *ngIf="task.source === 'meeting'">{{ workspace.employeeName(task.assignedToEmployeeId) }} · {{ task.dueDate ? task.dueDate : '—' }}</small>
-                <small *ngIf="task.source !== 'meeting'">{{ task.board }} · {{ task.dueDate ? task.dueDate : '—' }}</small>
+          <app-task-table
+            [tasks]="clientOpenTasks"
+            groupBy="due"
+            density="compact"
+            [selectable]="false"
+            [allowAddTask]="false"
+            [emptyText]="'boards.noTasks' | t"
+          ></app-task-table>
+        </section>
+      </ng-container>
+
+      <!-- ── Recap tab ────────────────────────────────────────────────────── -->
+      <ng-container *ngIf="activeTab === 'recap'">
+        <ng-container *ngIf="latestMeeting as m; else noRecapTab">
+          <section class="panel recap-card">
+            <div class="recap-head">
+              <div>
+                <span class="eyebrow">{{ 'boards.recapEyebrow' | t }}</span>
+                <h3>{{ m.subject }}</h3>
+                <small class="recap-date">{{ m.meetingDate | appDate }} · {{ 'recap.ledBy' | t }} {{ workspace.employeeName(m.meetingLeaderEmployeeId) }}</small>
               </div>
-              <span class="priority-chip" [ngClass]="workspace.statusClass(task.priority)">
-                {{ ('priority.' + workspace.statusClass(task.priority)) | t }}
-              </span>
-              <span class="status-chip" [ngClass]="workspace.statusClass(task.status)">{{ task.status }}</span>
+              <span class="status-chip" [ngClass]="workspace.statusClass(m.status)">{{ m.status }}</span>
             </div>
+
+            <p class="recap-goal" *ngIf="m.goal"><strong>{{ 'recap.goal' | t }}:</strong> {{ m.goal }}</p>
+
+            <div class="recap-body" *ngIf="recapText(m); else recapEmpty">{{ recapText(m) }}</div>
+            <ng-template #recapEmpty>
+              <div class="recap-body muted">{{ 'boards.noRecapYet' | t }}</div>
+            </ng-template>
+
+            <!-- Decisions -->
+            <div class="note-block" *ngIf="notesOfType(m, 'decision').length">
+              <span class="note-block-label">◆ {{ 'recap.decisions' | t }}</span>
+              <div *ngFor="let n of notesOfType(m, 'decision')" class="note-line decision">{{ n.content }}</div>
+            </div>
+
+            <!-- Pending actions (convertible) -->
+            <div class="note-block" *ngIf="pendingActions(m).length">
+              <span class="note-block-label">⚡ {{ 'myWork.followups.title' | t }} <span class="note-count">{{ pendingActions(m).length }}</span></span>
+              <div *ngFor="let n of pendingActions(m)" class="note-line action convertible">
+                <span class="note-line-text">{{ n.content }}</span>
+                <button type="button" class="ghost-action small" (click)="convertAction(m.id, n.id)">{{ 'myWork.followups.convertBtn' | t }}</button>
+              </div>
+            </div>
+
+            <!-- Blockers -->
+            <div class="note-block" *ngIf="notesOfType(m, 'blocker').length">
+              <span class="note-block-label">⛔ {{ 'recap.blockers' | t }}</span>
+              <div *ngFor="let n of notesOfType(m, 'blocker')" class="note-line blocker">{{ n.content }}</div>
+            </div>
+
+            <!-- Next meeting -->
+            <div class="next-meeting" *ngIf="m.nextMeetingDate">
+              <span class="note-block-label">{{ 'recap.nextMeeting' | t }}: {{ m.nextMeetingDate | appDate }}</span>
+              <p *ngIf="m.nextMeetingNotes" class="note-line">{{ m.nextMeetingNotes }}</p>
+            </div>
+
+            <div class="recap-footer">
+              <button type="button" class="primary-action small" (click)="openMeeting(m.id)">{{ 'boards.openFullRecap' | t }}</button>
+            </div>
+          </section>
+
+          <!-- Earlier meetings -->
+          <section class="panel" *ngIf="clientMeetingsSorted.length > 1">
+            <div class="board-panel-head">
+              <span class="eyebrow">{{ 'boards.meetings' | t }}</span>
+              <h3>{{ 'boards.earlierMeetings' | t }}</h3>
+            </div>
+            <div class="entity-list">
+              <div *ngFor="let meeting of clientMeetingsSorted | slice:1" class="entity-row clickable" (click)="openMeeting(meeting.id)">
+                <div class="entity-main">
+                  <strong>{{ meeting.subject }}</strong>
+                  <small>{{ meeting.meetingDate | appDate }} · {{ workspace.employeeName(meeting.meetingLeaderEmployeeId) }}</small>
+                </div>
+                <span class="status-chip" [ngClass]="workspace.statusClass(meeting.status)">{{ meeting.status }}</span>
+              </div>
+            </div>
+          </section>
+        </ng-container>
+        <ng-template #noRecapTab>
+          <section class="panel"><div class="empty-state"><strong>{{ 'boards.noMeetings' | t }}</strong></div></section>
+        </ng-template>
+      </ng-container>
+
+      <!-- ── Meetings tab ─────────────────────────────────────────────────── -->
+      <ng-container *ngIf="activeTab === 'meetings'">
+        <section class="panel">
+          <div class="meeting-rail" *ngIf="clientMeetings.length; else noMeetingsFull">
+            <article *ngFor="let m of clientMeetings" class="meeting-tile" (click)="openMeeting(m.id)">
+              <div class="tile-top">
+                <span class="status-chip" [ngClass]="workspace.statusClass(m.status)">{{ m.status }}</span>
+                <span class="tile-task-count" *ngIf="meetingTaskCountFor(m.id)">{{ meetingTaskCountFor(m.id) }} {{ 'boards.tasksLabel' | t }}</span>
+              </div>
+              <div class="tile-body">
+                <strong class="tile-subject-strong">{{ m.subject }}</strong>
+                <p class="tile-recap" *ngIf="recapText(m)">{{ recapText(m) }}</p>
+              </div>
+              <div class="tile-footer">
+                <span class="tile-date">{{ m.meetingDate | appDate }}</span>
+                <span>{{ workspace.employeeName(m.meetingLeaderEmployeeId) }}</span>
+              </div>
+
+              <div *ngIf="pendingActions(m).length" class="tile-actions" (click)="$event.stopPropagation()">
+                <div class="tile-actions-label">
+                  <span>{{ 'myWork.followups.title' | t }}</span>
+                  <span class="action-count-badge">{{ pendingActions(m).length }}</span>
+                </div>
+                <div *ngFor="let n of pendingActions(m)" class="tile-action-row">
+                  <span class="action-row-text">{{ n.content }}</span>
+                  <button type="button" class="convert-btn ghost-action" (click)="convertAction(m.id, n.id)">{{ 'myWork.followups.convertBtn' | t }}</button>
+                </div>
+              </div>
+            </article>
           </div>
-          <ng-template #noClientTasks>
-            <div class="empty-state">
-              <strong>{{ 'boards.noTasks' | t }}</strong>
-            </div>
+          <ng-template #noMeetingsFull>
+            <div class="empty-state"><strong>{{ 'boards.noMeetings' | t }}</strong></div>
           </ng-template>
         </section>
+      </ng-container>
 
-      </div>
+      <!-- ── Tasks tab ────────────────────────────────────────────────────── -->
+      <ng-container *ngIf="activeTab === 'tasks'">
+        <div class="board-toolbar">
+          <div class="filter-strip">
+            <button *ngFor="let f of taskLensOptions" type="button"
+              [class.active]="taskLens === f.id" (click)="taskLens = f.id">{{ f.labelKey | t }}</button>
+          </div>
+          <span class="count-badge" [class.badge-danger]="taskLens === 'overdue' && clientTasksForTab.length">{{ clientTasksForTab.length }}</span>
+        </div>
+        <app-task-table
+          [tasks]="clientTasksForTab"
+          groupBy="due"
+          [emptyText]="'boards.noTasks' | t"
+          [newTaskDefaults]="{ customerId: selectedClientId }"
+        ></app-task-table>
+      </ng-container>
+
     </ng-container>
 
     <ng-template #noClientSelected>
-      <section class="panel">
-        <div class="empty-state">
-          <strong>{{ 'boards.selectClientPrompt' | t }}</strong>
-        </div>
-      </section>
+      <section class="panel"><div class="empty-state"><strong>{{ 'boards.selectClientPrompt' | t }}</strong></div></section>
     </ng-template>
-
   </ng-container>
 
-  <!-- ════════════════════ MEMBER BOARD ════════════════════ -->
+  <!-- ════════════════════════ MEMBER BOARD ════════════════════════════════ -->
   <ng-container *ngIf="entityType === 'member'">
+    <ng-container *ngIf="selectedMember as member; else noMemberSelected">
 
-    <ng-container *ngIf="selectedMemberId; else noMemberSelected">
-
-      <!-- HUD -->
-      <section class="board-hud">
-        <article [class.active]="hudPopup === 'total-tasks'" (click)="toggleHudPopup('total-tasks')">
-          <span>{{ 'boards.totalTasks' | t }}</span>
-          <strong>{{ memberTotalCount }}</strong>
-        </article>
-        <article [class.active]="hudPopup === 'open-tasks'" (click)="toggleHudPopup('open-tasks')">
-          <span>{{ 'boards.openTasks' | t }}</span>
-          <strong>{{ memberOpenCount }}</strong>
-        </article>
-        <article [class.active]="hudPopup === 'blocked'" (click)="toggleHudPopup('blocked')">
-          <span>{{ 'boards.blocked' | t }}</span>
-          <strong>{{ memberBlockedCount }}</strong>
-        </article>
-      </section>
-
-      <!-- Task table -->
-      <section class="panel board-table">
-        <div class="table-row table-head">
-          <span>{{ 'boards.item' | t }}</span>
-          <span>{{ 'common.status' | t }}</span>
-          <span>{{ 'common.priority' | t }}</span>
-          <span>{{ 'common.due' | t }}</span>
-          <span>{{ 'common.actions' | t }}</span>
-        </div>
-
-        <div *ngIf="memberTasks.length; else noMemberTasks">
-          <div
-            *ngFor="let task of memberTasks"
-            class="table-row editable-row"
-            [class.selected]="workspace.selectedTaskId === task.id"
-          >
-            <span>
-              <button type="button" class="board-title-button" (click)="workspace.openTaskDrawer(task)">
-                <strong>{{ task.title }}</strong>
-                <small>{{ task.board }}</small>
-              </button>
-            </span>
-            <span>
-              <app-searchable-select
-                [ngModel]="task.status"
-                (ngModelChange)="workspace.updateStatus(task, $event)"
-                [options]="taskStatusOptions"
-              ></app-searchable-select>
-            </span>
-            <span>
-              <app-searchable-select
-                [ngModel]="task.priority"
-                (ngModelChange)="workspace.updateTask(task.id, { priority: $event })"
-                [options]="priorityOptions"
-              ></app-searchable-select>
-            </span>
-            <span>
-              <input type="date" [ngModel]="task.dueDate" (click)="$event.stopPropagation()" (ngModelChange)="workspace.updateTask(task.id, { dueDate: $event })" />
-            </span>
-            <span class="row-actions">
-              <button type="button" class="ghost-action small" (click)="workspace.openTaskDrawer(task)">{{ 'common.open' | t }}</button>
-              <button type="button" class="danger-action small" (click)="$event.stopPropagation(); workspace.archiveTask(task)">{{ 'common.archive' | t }}</button>
-            </span>
+      <!-- Entity hero -->
+      <section class="panel entity-hero">
+        <div class="hero-identity">
+          <span class="hero-avatar">{{ workspace.initials(member.id) }}</span>
+          <div class="hero-text">
+            <div class="hero-name-row">
+              <h3>{{ member.name }}</h3>
+              <span class="hero-pill">{{ member.availability }}</span>
+            </div>
+            <p class="hero-meta">
+              <span>{{ member.role }}</span>
+              <span class="sep">·</span>
+              <span>{{ member.team }}</span>
+            </p>
           </div>
         </div>
-
-        <ng-template #noMemberTasks>
-          <div class="empty-state">
-            <strong>{{ 'boards.noItemsTitle' | t }}</strong>
-            <span>{{ 'boards.noItemsText' | t }}</span>
-          </div>
-        </ng-template>
       </section>
 
-      <section class="panel board-table">
-        <div class="table-row table-head">
-          <span>{{ 'boards.tasks' | t }} ({{ 'common.meeting' | t }})</span>
-          <span>{{ 'common.status' | t }}</span>
-          <span>{{ 'common.priority' | t }}</span>
-          <span>{{ 'common.due' | t }}</span>
-          <span>{{ 'common.actions' | t }}</span>
-        </div>
+      <!-- Stat tiles -->
+      <div class="stat-tile-row">
+        <app-stat-tile
+          icon="check-square" [value]="memberOpenCount" [label]="'boards.openTasks' | t"
+          [zero]="memberOpenCount === 0" (tileClick)="openLens('tasks', 'open')"
+        ></app-stat-tile>
+        <app-stat-tile
+          icon="alert-triangle" [value]="memberOverdueCount" [label]="'tasks.tiles.overdue' | t"
+          tone="danger" [zero]="memberOverdueCount === 0" (tileClick)="openLens('tasks', 'overdue')"
+        ></app-stat-tile>
+        <app-stat-tile
+          icon="bell" [value]="memberBlockedCount" [label]="'boards.blocked' | t"
+          [zero]="memberBlockedCount === 0" (tileClick)="openLens('tasks', 'blocked')"
+        ></app-stat-tile>
+        <app-stat-tile
+          icon="file-text" [value]="memberTotalCount" [label]="'boards.totalTasks' | t"
+          [zero]="memberTotalCount === 0" (tileClick)="openLens('tasks', 'all')"
+        ></app-stat-tile>
+      </div>
 
-        <div *ngIf="memberMeetingTasks.length; else noMemberMeetingTasks">
-          <button
-            *ngFor="let task of memberMeetingTasks"
-            type="button"
-            class="table-row editable-row"
-            [class.selected]="workspace.selectedTaskKind === 'meeting-task' && workspace.selectedTaskId === task.id"
-            (click)="openMeetingTask(task)"
-          >
-            <span>
-              <strong>{{ task.title }}</strong>
-              <small>{{ workspace.customer(task.customerId)?.name }} · {{ workspace.customerMeeting(task.sourceMeetingId)?.subject }}</small>
-            </span>
-            <span class="status-chip" [ngClass]="workspace.statusClass(task.status)">
-              {{ ('Task.statusValues.' + task.status) | t }}
-            </span>
-            <span class="priority-chip" [ngClass]="workspace.statusClass(task.priority)">
-              {{ ('priority.' + workspace.statusClass(task.priority)) | t }}
-            </span>
-            <span>{{ task.dueDate || '—' }}</span>
-            <span class="row-actions">
-              <span class="ghost-action small">{{ 'common.open' | t }}</span>
-            </span>
-          </button>
-        </div>
+      <!-- Tab strip -->
+      <div class="board-tabs" role="tablist">
+        <button *ngFor="let tab of memberTabs" type="button" role="tab"
+          [attr.aria-selected]="activeTab === tab.id" [class.active]="activeTab === tab.id"
+          (click)="selectTab(tab.id)">
+          <app-icon [name]="tab.icon" [size]="15"></app-icon>
+          <span>{{ tab.labelKey | t }}</span>
+          <span *ngIf="tab.count" class="board-tab-count" [class.is-danger]="tab.danger">{{ tab.count }}</span>
+        </button>
+      </div>
 
-        <ng-template #noMemberMeetingTasks>
-          <div class="empty-state">
-            <strong>No meeting tasks for this member.</strong>
+      <!-- Overview tab -->
+      <ng-container *ngIf="activeTab === 'overview'">
+        <section class="panel">
+          <div class="board-panel-head">
+            <span class="eyebrow">{{ 'boards.tasks' | t }}</span>
+            <h3>{{ 'boards.openTasks' | t }}</h3>
           </div>
-        </ng-template>
-      </section>
+          <app-task-table
+            [tasks]="memberOpenTasks"
+            groupBy="due"
+            density="compact"
+            [selectable]="false"
+            [allowAddTask]="false"
+            [emptyText]="'boards.noItemsTitle' | t"
+          ></app-task-table>
+        </section>
+      </ng-container>
+
+      <!-- Tasks tab -->
+      <ng-container *ngIf="activeTab === 'tasks'">
+        <div class="board-toolbar">
+          <div class="filter-strip">
+            <button *ngFor="let f of taskLensOptions" type="button"
+              [class.active]="taskLens === f.id" (click)="taskLens = f.id">{{ f.labelKey | t }}</button>
+          </div>
+          <span class="count-badge" [class.badge-danger]="taskLens === 'overdue' && memberTasksForTab.length">{{ memberTasksForTab.length }}</span>
+        </div>
+        <app-task-table
+          [tasks]="memberTasksForTab"
+          groupBy="due"
+          [emptyText]="'boards.noItemsTitle' | t"
+          [newTaskDefaults]="{ assignedToEmployeeId: selectedMemberEmployeeId }"
+        ></app-task-table>
+      </ng-container>
 
     </ng-container>
 
     <ng-template #noMemberSelected>
-      <section class="panel">
-        <div class="empty-state">
-          <strong>{{ 'boards.selectMemberPrompt' | t }}</strong>
-        </div>
-      </section>
+      <section class="panel"><div class="empty-state"><strong>{{ 'boards.selectMemberPrompt' | t }}</strong></div></section>
     </ng-template>
-
-  </ng-container>
-
-  <!-- HUD Detail Popup -->
-  <ng-container *ngIf="hudPopup">
-    <div class="hud-popup-backdrop" (click)="hudPopup = null"></div>
-    <section class="hud-popup panel">
-      <div class="hud-popup-header">
-        <strong>{{ hudPopupLabel }}</strong>
-        <button type="button" class="ghost-action small" (click)="hudPopup = null">✕</button>
-      </div>
-
-      <!-- Meetings list -->
-      <ng-container *ngIf="hudPopup === 'meetings'">
-        <div class="entity-list">
-          <div *ngFor="let meeting of hudPopupMeetings" class="entity-row clickable"
-               (click)="workspace.openMeetingDrawer(meeting.id); hudPopup = null">
-            <div class="entity-main">
-              <strong>{{ meeting.subject }}</strong>
-              <small>{{ meeting.meetingDate | slice:0:10 }} · {{ workspace.employeeName(meeting.meetingLeaderEmployeeId) }}</small>
-            </div>
-            <span class="count-badge">{{ meetingTaskCountFor(meeting.id) }} {{ 'boards.tasksLabel' | t }}</span>
-            <span class="status-chip" [ngClass]="workspace.statusClass(meeting.status)">{{ meeting.status }}</span>
-          </div>
-          <div class="empty-state" *ngIf="!hudPopupMeetings.length">
-            <strong>{{ 'boards.noMeetings' | t }}</strong>
-          </div>
-        </div>
-      </ng-container>
-
-      <!-- Tasks list -->
-      <ng-container *ngIf="hudPopup !== 'meetings'">
-        <div class="entity-list">
-          <div *ngFor="let task of hudPopupTasks" class="entity-row clickable" (click)="openHudTask(task)">
-            <span class="status-dot" [ngClass]="workspace.statusClass(task.status)"></span>
-            <div class="entity-main">
-              <strong>{{ task.title }}</strong>
-              <small *ngIf="task.source === 'meeting'">
-                {{ workspace.customer(task.customerId)?.name }} · {{ workspace.customerMeeting(task.sourceMeetingId)?.subject }}
-              </small>
-              <small *ngIf="task.source !== 'meeting'">{{ task.board }}</small>
-            </div>
-            <span class="priority-chip" [ngClass]="workspace.statusClass(task.priority)">
-              {{ ('priority.' + workspace.statusClass(task.priority)) | t }}
-            </span>
-            <span class="status-chip" [ngClass]="workspace.statusClass(task.status)">{{ task.status }}</span>
-          </div>
-          <div class="empty-state" *ngIf="!hudPopupTasks.length">
-            <strong>{{ 'boards.noTasks' | t }}</strong>
-          </div>
-        </div>
-      </ng-container>
-    </section>
   </ng-container>
 
 </section>

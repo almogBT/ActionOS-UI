@@ -368,3 +368,68 @@ export interface MailNotificationPrefs {
   dueTodayTasks: boolean;
   meetingSummaries: boolean;
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// v4: Inbox notification feed
+// A single, time-ordered stream of "things that need me", assembled from the
+// existing task/meeting data in ActionosWorkspaceService. Each item carries a
+// stable `id` so read/dismissed state can be tracked per item.
+// ─────────────────────────────────────────────────────────────────────────
+
+/** What produced a feed item. Drives the icon glyph and headline copy. */
+export type InboxItemKind =
+  | 'task-assigned'   // a new task assigned to me
+  | 'task-opened'     // a new task I opened (status New)
+  | 'meeting-action'  // an unconverted action item from a meeting I attended
+  | 'meeting-decision'// a decision logged in a meeting I attended
+  | 'meeting-note'    // a plain note from a meeting I attended
+  | 'task-waiting'    // one of my tasks is blocked / waiting
+  | 'task-due';       // one of my tasks is due today or overdue
+
+/** Colour family for the item's icon chip / accent. */
+export type InboxItemTone = 'info' | 'success' | 'warning' | 'danger' | 'neutral';
+
+/** The filter pill an item belongs to. */
+export type InboxCategory = 'tasks' | 'meetings' | 'waiting';
+
+/** Actions a feed item can offer. Handled by InboxComponent.runAction. */
+export type InboxActionId = 'open-task' | 'make-task' | 'view-meeting' | 'done' | 'dismiss';
+
+export interface InboxItemAction {
+  id: InboxActionId;
+  labelKey: string;
+  variant: 'primary' | 'ghost';
+}
+
+export interface InboxFeedItem {
+  /** Stable, deterministic id (e.g. `task-new:42`). Drives read/dismiss tracking. */
+  id: string;
+  kind: InboxItemKind;
+  category: InboxCategory;
+  tone: InboxItemTone;
+  /** Emoji shown in the icon chip — friendly, language-neutral. */
+  glyph: string;
+  /** i18n key for the one-line headline ("New task assigned to you"). */
+  titleKey: string;
+  /** Interpolation params for `titleKey` (e.g. `{ by: "Dana Lerner" }`). */
+  titleParams?: Record<string, string | number>;
+  /** The task title or note content — the thing the user reads. */
+  primaryText: string;
+  /** Secondary context line, pre-built ("Acme · High · due 2026-06-05"). */
+  contextText?: string;
+  /** For meeting items: the meeting label ("Acme · Quarterly review") used as
+   *  the shared header when several items from the same meeting are grouped. */
+  groupLabel?: string;
+  /** ISO timestamp used for sorting and the relative-time label. */
+  timestamp: string;
+  taskId?: string;
+  meetingId?: string;
+  noteId?: string;
+  actions: InboxItemAction[];
+}
+
+/** Persisted per-user read/dismissed state for the inbox feed. */
+export interface InboxState {
+  read: string[];
+  dismissed: string[];
+}

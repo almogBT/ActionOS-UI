@@ -39,7 +39,11 @@ export class CalendarComponent {
 
   /** When provided, replaces workspace.calendarEvents as the event source. */
   @Input() set events(val: CalendarEvent[] | null | undefined) {
-    this._overrideEvents.set(val ?? null);
+    const next = val ?? null;
+    if (this.haveSameEvents(this._overrideEvents(), next)) {
+      return;
+    }
+    this._overrideEvents.set(next);
   }
 
   /** Set to true to show the filter toggle button in the header. */
@@ -285,5 +289,27 @@ export class CalendarComponent {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  private haveSameEvents(left: CalendarEvent[] | null, right: CalendarEvent[] | null): boolean {
+    if (left === right) {
+      return true;
+    }
+    if (!left || !right || left.length !== right.length) {
+      return false;
+    }
+
+    return left.every((event, index) => {
+      const other = right[index];
+      return event.id === other.id
+        && event.title === other.title
+        && event.startsAt === other.startsAt
+        && event.durationMinutes === other.durationMinutes
+        && event.kind === other.kind
+        && event.customerName === other.customerName
+        && event.linkedBoard === other.linkedBoard
+        && event.attendeeCount === other.attendeeCount
+        && event.sourceId === other.sourceId;
+    });
   }
 }

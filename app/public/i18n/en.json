@@ -118,7 +118,20 @@
     "openTasksHint": "Actions born from meetings",
     "openMeetingTasks": "Open tasks",
     "noMeetingsInLane": "Nothing here.",
-    "backToList": "All meetings"
+    "backToList": "All meetings",
+    "needsAttention": "Needs your attention",
+    "needsAttentionHint": "Follow-ups to convert or meetings to wrap up",
+    "ledBadge": "Led",
+    "searchPlaceholder": "Search meetings...",
+    "filterAll": "All",
+    "filterThisWeek": "This week",
+    "filterFollowups": "Needs follow-up",
+    "filterLed": "Led by me",
+    "clearFilters": "Clear filters",
+    "followups": "Follow-ups",
+    "convertBtn": "→ Task",
+    "scrollPrev": "Previous",
+    "scrollNext": "Next"
   },
   "home": {
     "meetingsLead": "What's next",
@@ -221,42 +234,53 @@
     "noTasks": "No tasks found."
   },
   "inbox": {
-    "eyebrow": "Triage",
     "title": "Inbox",
-    "subtitle": "Catch everything first, decide later. This is where loose items become real work.",
+    "subtitle": "Everything that needs you, newest first.",
+    "markAllRead": "Mark all read",
+    "unread": "{{n}} unread",
     "reviewMeeting": "Open meetings",
     "openBoard": "Open board",
-    "needsTriage": "Needs triage",
-    "triageHint": "New, overdue, or unassigned",
-    "inboxTasks": "New items",
-    "readyToClassify": "Ready to sort",
-    "meetingActions": "Action items",
-    "waitingForTasks": "Waiting to become tasks",
-    "blocked": "Blocked",
-    "needsUnblockOwner": "Needs someone to unblock",
-    "decisionQueue": "Decisions to log",
-    "classifyWork": "Sort each item",
-    "plan": "Plan",
-    "start": "Start",
-    "wait": "Park",
-    "done": "Done",
-    "clearTitle": "All clear",
-    "clearText": "New captures and meeting action items will show up here.",
-    "workflowRule": "How this works",
-    "oneTouchTriage": "One-touch triage",
-    "step1": "1. Capture the thought",
-    "step2": "2. Set an owner and a date",
-    "step3": "3. Move it forward",
-    "step4": "4. Track it on a board or in My Work",
-    "convertAll": "Turn all action items into tasks",
-    "meetingFollowUp": "From meetings",
-    "actionsWaiting": "Action items waiting on a task",
-    "noActionsTitle": "Nothing waiting from meetings",
-    "noActionsText": "Add an action item in Meetings to populate this lane.",
-    "blockerLane": "Blocked",
-    "needsRescue": "Needs unsticking",
-    "noBlockersTitle": "Nothing blocked right now",
-    "noBlockersText": "Mark a task Waiting or set a blocker to see it here."
+    "filters": {
+      "all": "All",
+      "tasks": "Tasks",
+      "meetings": "Meetings",
+      "waiting": "Waiting"
+    },
+    "groups": {
+      "today": "Today",
+      "week": "Earlier this week",
+      "earlier": "Earlier"
+    },
+    "feed": {
+      "taskAssigned": "New task assigned to you",
+      "taskOpened": "New task you opened",
+      "meetingAction": "Action from your meeting",
+      "meetingDecision": "Decision logged",
+      "meetingNote": "Note from your meeting",
+      "taskWaiting": "Waiting on someone else",
+      "taskOverdue": "Task overdue",
+      "taskDueToday": "Task due today",
+      "taskAssignedBy": "New task assigned to you by {{by}}"
+    },
+    "act": {
+      "open": "Open",
+      "done": "Done",
+      "makeTask": "Make a task",
+      "viewMeeting": "View meeting",
+      "dismiss": "Dismiss"
+    },
+    "time": {
+      "now": "just now",
+      "minutes": "{{n}}m ago",
+      "hours": "{{n}}h ago",
+      "days": "{{n}}d ago"
+    },
+    "clearTitle": "You are all caught up",
+    "clearText": "New tasks and meeting follow-ups will show up here as they arrive.",
+    "searchPlaceholder": "Search your inbox",
+    "noResultsTitle": "No matches",
+    "noResultsText": "Try a different search term or filter.",
+    "fromMeeting": "From your meeting"
   },
   "boards": {
     "eyebrow": "Boards",
@@ -264,6 +288,21 @@
     "subtitle": "Per-client and per-member boards — see every meeting and task in one place.",
     "addFromMeeting": "Add from a meeting",
     "manageClients": "Manage clients",
+    "tabs": {
+      "overview": "Overview",
+      "recap": "Recap"
+    },
+    "hero": {
+      "owner": "Owner",
+      "newMeeting": "New meeting",
+      "allClients": "All clients"
+    },
+    "recapEyebrow": "Meeting recap",
+    "latestRecap": "Latest recap",
+    "noRecapYet": "No recap published for this meeting yet.",
+    "openRecap": "Open recap →",
+    "openFullRecap": "Open full recap",
+    "earlierMeetings": "Earlier meetings",
     "boardType": "Board type",
     "clientBoard": "Client board",
     "memberBoard": "Member board",
@@ -298,6 +337,12 @@
       "tasks": "Tasks",
       "meetings": "Meetings",
       "week": "My Week"
+    },
+    "summary": {
+      "overdue": "Overdue",
+      "today": "Due today",
+      "followups": "Follow-ups",
+      "meetingsToday": "Meetings today"
     },
     "groups": {
       "overdue": "Overdue",
@@ -413,7 +458,9 @@
       "reasonTooShort": "Please add at least 3 words explaining this change.",
       "waitingRequired": "Add a waiting reason before moving to a waiting status.",
       "changeFailed": "That status change is not allowed right now.",
-      "confirm": "Update"
+      "confirm": "Update",
+      "addStatus": "Add status",
+      "addStatusPlaceholder": "New status name…"
     },
     "bulk": {
       "selected": "selected",

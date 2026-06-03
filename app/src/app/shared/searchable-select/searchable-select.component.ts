@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import {
-  AfterViewInit, Component, ElementRef, EventEmitter, Input, OnDestroy, Output, forwardRef
+  Component, ElementRef, EventEmitter, Input, OnDestroy, Output, forwardRef
 } from '@angular/core';
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
 
@@ -174,7 +174,7 @@ export interface SelectOption {
     }
   `]
 })
-export class SearchableSelectComponent implements ControlValueAccessor, AfterViewInit, OnDestroy {
+export class SearchableSelectComponent implements ControlValueAccessor, OnDestroy {
   @Input() options: SelectOption[] = [];
   @Input() placeholder = 'Select…';
   @Input() createNewLabel: string | null = null;
@@ -188,6 +188,7 @@ export class SearchableSelectComponent implements ControlValueAccessor, AfterVie
 
   private onChange: (v: any) => void = () => {};
   private onTouched: () => void = () => {};
+  private outsideClickListenerAttached = false;
 
   private readonly outsideClickListener = (event: MouseEvent): void => {
     if (!this.el.nativeElement.contains(event.target as Node)) {
@@ -197,12 +198,8 @@ export class SearchableSelectComponent implements ControlValueAccessor, AfterVie
 
   constructor(private readonly el: ElementRef) {}
 
-  ngAfterViewInit(): void {
-    document.addEventListener('click', this.outsideClickListener, true);
-  }
-
   ngOnDestroy(): void {
-    document.removeEventListener('click', this.outsideClickListener, true);
+    this.detachOutsideClickListener();
   }
 
   writeValue(v: any): void { this.value = v; }
@@ -230,8 +227,12 @@ export class SearchableSelectComponent implements ControlValueAccessor, AfterVie
   toggle(event: MouseEvent): void {
     event.stopPropagation();
     if (this.isDisabled) return;
-    this.isOpen = !this.isOpen;
-    if (!this.isOpen) this.searchText = '';
+    if (this.isOpen) {
+      this.close();
+    } else {
+      this.isOpen = true;
+      this.attachOutsideClickListener();
+    }
     this.onTouched();
   }
 
@@ -249,5 +250,22 @@ export class SearchableSelectComponent implements ControlValueAccessor, AfterVie
   private close(): void {
     this.isOpen = false;
     this.searchText = '';
+    this.detachOutsideClickListener();
+  }
+
+  private attachOutsideClickListener(): void {
+    if (this.outsideClickListenerAttached) {
+      return;
+    }
+    document.addEventListener('click', this.outsideClickListener, true);
+    this.outsideClickListenerAttached = true;
+  }
+
+  private detachOutsideClickListener(): void {
+    if (!this.outsideClickListenerAttached) {
+      return;
+    }
+    document.removeEventListener('click', this.outsideClickListener, true);
+    this.outsideClickListenerAttached = false;
   }
 }

@@ -5,6 +5,7 @@ import { ActionosI18nService } from '../../core/i18n/actionos-i18n.service';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { Comment, Priority, Task, TaskStatus } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
+import { AppDatePipe } from '../../shared/pipes/app-date.pipe';
 import { SearchableSelectComponent, SelectOption } from '../../shared/searchable-select/searchable-select.component';
 
 type TaskSectionId = 'details' | 'attachments' | 'alerts' | 'checklist' | 'watchers' | 'comments';
@@ -12,7 +13,7 @@ type TaskSectionId = 'details' | 'attachments' | 'alerts' | 'checklist' | 'watch
 @Component({
   selector: 'app-task-drawer',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe, SearchableSelectComponent],
+  imports: [CommonModule, FormsModule, TranslatePipe, AppDatePipe, SearchableSelectComponent],
   templateUrl: './task-drawer.component.html',
   styles: [`
     .task-attach-list { display: grid; gap: 6px; margin-top: 8px; }
@@ -34,6 +35,29 @@ type TaskSectionId = 'details' | 'attachments' | 'alerts' | 'checklist' | 'watch
     .section-toggle { margin-inline-start: auto; min-width: 34px; }
     .section-body { display: grid; gap: 12px; margin-top: 10px; }
     .status-reason-hint { font-size: 12px; }
+    .add-status-link {
+      align-self: flex-start;
+      margin-top: 4px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .add-status-row { display: flex; gap: 6px; margin-top: 6px; }
+    .add-status-row input {
+      flex: 1; min-width: 0; height: 30px;
+      border: 1px solid var(--accent); border-radius: 8px;
+      background: var(--bg-elevated); color: var(--ink);
+      font-size: 13px; padding: 0 10px;
+    }
+    .add-status-row button {
+      height: 30px; padding: 0 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    .add-status-row .add-confirm { border: none; background: var(--accent); color: #fff; }
+    .add-status-row .add-cancel { border: 1px solid var(--line); background: var(--bg-elevated); color: var(--text-secondary); }
     .status-validation {
       margin: 0;
       color: #b91c1c;
@@ -61,6 +85,8 @@ export class TaskDrawerComponent {
 
   meetingChecklistText = '';
   meetingCommentText = '';
+  addingStatus = false;
+  newStatusDraft = '';
   uploadingAttachment = false;
   statusChangeReason = '';
   statusValidationMessage = '';
@@ -90,7 +116,7 @@ export class TaskDrawerComponent {
   get meetingTaskStatusOptions(): SelectOption[] {
     return this.workspace.meetingTaskStatuses.map(s => ({
       value: s,
-      label: this.i18n.translate('meetingTask.statusValues.' + s)
+      label: this.workspace.isCustomStatus(s) ? s : this.i18n.translate('meetingTask.statusValues.' + s)
     }));
   }
 
@@ -174,6 +200,26 @@ export class TaskDrawerComponent {
     this.workspace.updateMeetingTask(task.id, { [field]: value } as Partial<Task>);
     if (field === 'waitingReason' && this.statusValidationMessage) {
       this.statusValidationMessage = '';
+    }
+  }
+
+  startAddStatus(): void {
+    this.addingStatus = true;
+    this.newStatusDraft = '';
+  }
+
+  cancelAddStatus(): void {
+    this.addingStatus = false;
+    this.newStatusDraft = '';
+  }
+
+  /** Create a custom status (if new) and apply it through the normal status flow. */
+  confirmAddStatus(task: Task): void {
+    const label = this.workspace.addCustomStatus(this.newStatusDraft);
+    this.addingStatus = false;
+    this.newStatusDraft = '';
+    if (label) {
+      this.updateMeetingTaskStatus(task, label as TaskStatus);
     }
   }
 

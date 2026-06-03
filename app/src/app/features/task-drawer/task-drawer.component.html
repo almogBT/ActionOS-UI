@@ -64,6 +64,20 @@
               (ngModelChange)="updateMeetingTaskStatus(task, $event)"
               [options]="meetingTaskStatusOptions"
             ></app-searchable-select>
+            <button type="button" class="add-status-link" *ngIf="!addingStatus" (click)="startAddStatus()">
+              + {{ 'tasks.status.addStatus' | t }}
+            </button>
+            <div class="add-status-row" *ngIf="addingStatus">
+              <input
+                type="text"
+                [(ngModel)]="newStatusDraft"
+                [placeholder]="'tasks.status.addStatusPlaceholder' | t"
+                (keydown.enter)="confirmAddStatus(task)"
+                (keydown.escape)="cancelAddStatus()"
+              />
+              <button type="button" class="add-confirm" (click)="confirmAddStatus(task)">{{ 'common.add' | t }}</button>
+              <button type="button" class="add-cancel" (click)="cancelAddStatus()">{{ 'common.cancel' | t }}</button>
+            </div>
           </label>
 
           <label class="field-control">
@@ -136,7 +150,7 @@
 
           <label *ngIf="isCompletedStatus(task.status)" class="field-control">
             Completed at
-            <input disabled [value]="task.completedAt ? (task.completedAt | slice:0:16) : '-'" />
+            <input disabled [value]="task.completedAt | appDate:'datetime':'-'" />
           </label>
         </div>
 
@@ -166,7 +180,7 @@
         <div *ngIf="workspace.attachmentsFor('meeting-task', task.id).length; else noTaskAttachments" class="task-attach-list">
           <div class="task-attach-row" *ngFor="let att of workspace.attachmentsFor('meeting-task', task.id)">
             <span class="task-attach-name">{{ att.fileName }}</span>
-            <small class="muted">{{ att.uploadedAt | slice:0:10 }}</small>
+            <small class="muted">{{ att.uploadedAt | appDate }}</small>
             <button type="button" class="ghost-action small danger" (click)="workspace.removeAttachment(att.id)">x</button>
           </div>
         </div>
@@ -197,12 +211,12 @@
             <li *ngFor="let statusAlert of statusAlerts" class="notification-status-note">
               <strong>{{ 'meetingTask.notificationEvents.status-changed' | t }}</strong>
               <span>{{ statusAlert.body }}</span>
-              <small>{{ statusAlert.createdAt | slice:0:16 }}</small>
+              <small>{{ statusAlert.createdAt | appDate:'datetime' }}</small>
             </li>
             <li *ngFor="let n of task.notifications">
               <strong>{{ ('meetingTask.notificationEvents.' + n.event) | t }}</strong>
               -> {{ workspace.employeeName(n.recipientEmployeeId) }}
-              <small>{{ n.sentAt | slice:0:16 }}</small>
+              <small>{{ n.sentAt | appDate:'datetime' }}</small>
             </li>
           </ul>
         </ng-container>
@@ -292,7 +306,7 @@
           <article *ngFor="let comment of workspace.commentsForMeetingTask(task.id)" class="comment">
             <strong>{{ workspace.memberName(comment.createdByUserId) }}</strong>
             <p>{{ comment.body }}</p>
-            <small>{{ comment.createdAt }}</small>
+            <small>{{ comment.createdAt | appDate:'datetime' }}</small>
           </article>
         </div>
 

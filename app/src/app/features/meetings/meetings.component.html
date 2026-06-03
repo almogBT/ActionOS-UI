@@ -40,146 +40,184 @@
   </div>
 
   <!-- ── Clickable KPI tiles ──────────────────────────────────────────────── -->
-  <div class="metric-grid meetings-metrics">
-    <article class="metric clickable" role="button" tabindex="0"
-      (click)="openTile('upcoming')" (keydown.enter)="openTile('upcoming')">
-      <span>{{ 'meetingsOverview.upcoming' | t }}</span>
-      <strong>{{ getLane('upcoming').length }}</strong>
-      <small>{{ 'meetingsOverview.upcomingHint' | t }}</small>
-    </article>
-
-    <article class="metric clickable" role="button" tabindex="0"
-      (click)="openTile('in-progress')" (keydown.enter)="openTile('in-progress')">
-      <span>{{ 'meetingsOverview.inProgress' | t }}</span>
-      <strong>{{ getLane('in-progress').length }}</strong>
-      <small>{{ 'meetingsOverview.inProgressHint' | t }}</small>
-    </article>
-
-    <article class="metric clickable" role="button" tabindex="0"
-      (click)="openTile('open-tasks')" (keydown.enter)="openTile('open-tasks')">
-      <span>{{ 'meetingsOverview.openMeetingTasks' | t }}</span>
-      <strong>{{ openMeetingTasksCount }}</strong>
-      <small>{{ 'meetingsOverview.openTasksHint' | t }}</small>
-    </article>
+  <div class="stat-tile-row">
+    <app-stat-tile
+      icon="calendar" [value]="getLane('upcoming').length" [label]="'meetingsOverview.upcoming' | t"
+      [zero]="getLane('upcoming').length === 0" (tileClick)="openTile('upcoming')"
+    ></app-stat-tile>
+    <app-stat-tile
+      icon="check-circle" [value]="getLane('in-progress').length" [label]="'meetingsOverview.inProgress' | t"
+      [zero]="getLane('in-progress').length === 0" (tileClick)="openTile('in-progress')"
+    ></app-stat-tile>
+    <app-stat-tile
+      icon="check-square" [value]="openMeetingTasksCount" [label]="'meetingsOverview.openMeetingTasks' | t"
+      [zero]="openMeetingTasksCount === 0" (tileClick)="openTile('open-tasks')"
+    ></app-stat-tile>
   </div>
 
-  <!-- ── Customer filter + meeting lanes ─────────────────────────────────── -->
-  <section class="panel">
-    <div class="panel-header">
-      <div>
-        <span class="eyebrow">{{ 'meetingsOverview.filters' | t }}</span>
-        <h3>{{ 'meetingsOverview.allMeetings' | t }}</h3>
+  <!-- ── Needs-your-attention carousel ───────────────────────────────────── -->
+  <section *ngIf="attentionMeetings.length" class="attention-rail">
+    <div class="rail-header">
+      <app-icon name="alert-triangle" [size]="15"></app-icon>
+      <span class="rail-title">{{ 'meetingsOverview.needsAttention' | t }}</span>
+      <span class="rail-count">{{ attentionMeetings.length }}</span>
+      <span class="rail-hint">{{ 'meetingsOverview.needsAttentionHint' | t }}</span>
+      <div class="rail-nav" *ngIf="attentionMeetings.length > 1">
+        <button type="button" class="rail-arrow" (click)="scrollRail(railTrack, -1)"
+          [attr.aria-label]="'meetingsOverview.scrollPrev' | t">‹</button>
+        <button type="button" class="rail-arrow" (click)="scrollRail(railTrack, 1)"
+          [attr.aria-label]="'meetingsOverview.scrollNext' | t">›</button>
       </div>
+    </div>
+    <div class="carousel-track" #railTrack (wheel)="onRailWheel($event, railTrack)">
+      <ng-container *ngFor="let m of attentionMeetings">
+        <ng-container *ngTemplateOutlet="meetingCard; context: { $implicit: m, attention: true }"></ng-container>
+      </ng-container>
+    </div>
+  </section>
+
+  <!-- ── Filter + search controls (single row) ────────────────────────────── -->
+  <section class="panel">
+    <div class="meetings-controls">
+      <input
+        type="search"
+        class="meetings-search"
+        [(ngModel)]="search"
+        [placeholder]="'meetingsOverview.searchPlaceholder' | t"
+      />
       <app-searchable-select
         [(ngModel)]="customerFilter"
         [options]="customerFilterOptions"
         class="filter-select"
       ></app-searchable-select>
+      <div class="filter-strip">
+        <button
+          *ngFor="let f of quickFilterOptions"
+          type="button"
+          [class.active]="quickFilter === f.id"
+          (click)="quickFilter = f.id"
+        >{{ f.labelKey | t }}</button>
+      </div>
     </div>
 
-    <div *ngFor="let bucket of buckets" class="lane-section">
-      <div class="lane-header">
+    <!-- ── Meeting lanes (card grids) ─────────────────────────────────────── -->
+    <div *ngFor="let bucket of buckets" class="lane-section" [class.collapsed]="isLaneCollapsed(bucket.lane)">
+      <button
+        type="button"
+        class="lane-header"
+        (click)="toggleLane(bucket.lane)"
+        [attr.aria-expanded]="!isLaneCollapsed(bucket.lane)"
+      >
+        <app-icon class="lane-chevron" name="chevron-down" [size]="14"></app-icon>
         <span class="lane-label">{{ ('meetingsOverview.' + bucket.lane) | t }}</span>
         <span class="lane-count">{{ bucket.meetings.length }}</span>
-      </div>
+      </button>
 
-      <div *ngIf="!bucket.meetings.length" class="lane-empty">
-        <p>{{ 'meetingsOverview.noMeetingsInLane' | t }}</p>
-        <button
-          *ngIf="bucket.lane === 'upcoming'"
-          type="button"
-          class="primary-action"
-          (click)="newMeeting()"
-        >+ {{ 'meetingsOverview.newMeeting' | t }}</button>
-      </div>
-
-      <div
-        *ngFor="let m of bucket.meetings"
-        class="meeting-row"
-        (click)="openMeeting(m)"
-      >
-        <div class="meeting-row-main">
-          <strong>{{ m.subject }}</strong>
-          <span class="muted">{{ workspace.customer(m.customerId)?.name }}</span>
+      <!-- Body is only rendered when expanded — collapsed lanes cost nothing. -->
+      <div *ngIf="!isLaneCollapsed(bucket.lane)" class="lane-body">
+        <div *ngIf="!bucket.meetings.length" class="lane-empty">
+          <p>{{ 'meetingsOverview.noMeetingsInLane' | t }}</p>
+          <button
+            *ngIf="hasActiveFilters"
+            type="button"
+            class="ghost-action"
+            (click)="clearFilters()"
+          >{{ 'meetingsOverview.clearFilters' | t }}</button>
         </div>
-        <div class="meeting-row-meta">
-          <span class="muted">{{ m.meetingDate | slice:0:10 }}</span>
-          <span class="status-chip" [ngClass]="workspace.statusClass(m.status)">
-            {{ ('customerMeeting.statusValues.' + m.status) | t }}
-          </span>
-          <span class="task-count-badge">
-            {{ tasksFromMeeting(m).length }} {{ 'common.task' | t }}
-          </span>
+
+        <div *ngIf="bucket.meetings.length" class="card-grid">
+          <ng-container *ngFor="let m of bucket.meetings">
+            <ng-container *ngTemplateOutlet="meetingCard; context: { $implicit: m, attention: false }"></ng-container>
+          </ng-container>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ── Tile popup: meetings list ───────────────────────────────────────── -->
-  <div class="modal-backdrop" *ngIf="openLens" role="presentation" (click)="closeTile()">
-    <aside class="modal-card" role="dialog" (click)="$event.stopPropagation()">
-      <header class="modal-header">
-        <div>
-          <span class="eyebrow">{{ 'meetingsOverview.eyebrow' | t }}</span>
-          <h2>{{ lensTitleKey | t }}</h2>
-        </div>
-        <button type="button" class="ghost-action" (click)="closeTile()">
-          {{ 'common.close' | t }}
-        </button>
-      </header>
+  <!-- ── Reusable meeting card ───────────────────────────────────────────── -->
+  <ng-template #meetingCard let-m let-attention="attention">
+    <article
+      class="meeting-card"
+      [class.card-led]="isMeetingLed(m)"
+      [class.card-attention]="attention"
+      (click)="openMeeting(m)"
+    >
+      <div class="card-top">
+        <span class="status-chip" [ngClass]="workspace.statusClass(m.status)">
+          {{ ('customerMeeting.statusValues.' + m.status) | t }}
+        </span>
+        <span *ngIf="isMeetingLed(m)" class="led-badge">{{ 'meetingsOverview.ledBadge' | t }}</span>
+        <span class="card-date">{{ m.meetingDate | appDate }}</span>
+      </div>
 
-      <!-- Open Tasks popup -->
-      <div *ngIf="openLens === 'open-tasks'" class="modal-list">
-        <button
-          *ngFor="let task of openMeetingTasks"
-          type="button"
-          class="popup-row"
-          (click)="openTask(task); closeTile()"
-        >
-          <span class="popup-row-main">
-            <strong>{{ task.title }}</strong>
-            <small>{{ workspace.customer(task.customerId)?.name }} · {{ 'common.due' | t }} {{ task.dueDate }}</small>
+      <div class="card-body">
+        <strong class="card-customer">{{ workspace.customer(m.customerId)?.name }}</strong>
+        <p class="card-subject">{{ m.subject }}</p>
+        <p *ngIf="m.goal" class="card-goal">{{ m.goal }}</p>
+      </div>
+
+      <div class="card-footer">
+        <div class="card-people" [title]="meetingLeaderName(m)">
+          <span class="avatar">{{ leaderInitials(m) }}</span>
+          <span *ngIf="participantCount(m)" class="people-count">+{{ participantCount(m) }}</span>
+        </div>
+        <div class="card-meta">
+          <span *ngIf="m.nextMeetingDate" class="next-pill">
+            <app-icon name="calendar" [size]="11"></app-icon>
+            {{ m.nextMeetingDate | appDate }}
           </span>
-          <div class="popup-row-badges">
-            <span class="status-chip" [ngClass]="workspace.statusClass(task.status)">
-              {{ ('meetingTask.statusValues.' + task.status) | t }}
-            </span>
-            <span class="priority" [ngClass]="workspace.statusClass(task.priority)">
-              {{ ('priority.' + workspace.statusClass(task.priority)) | t }}
-            </span>
-          </div>
-        </button>
-        <div *ngIf="!openMeetingTasks.length" class="empty-state">
-          <strong>{{ 'home.noMatches' | t }}</strong>
+          <span *ngIf="tasksFromMeeting(m).length" class="task-count-badge">
+            {{ tasksFromMeeting(m).length }} {{ 'common.task' | t }}
+          </span>
         </div>
       </div>
 
-      <!-- Upcoming / In-progress meetings popup -->
-      <div *ngIf="openLens !== 'open-tasks'" class="modal-list">
-        <button
-          *ngFor="let m of lensMeetings"
-          type="button"
-          class="popup-row"
-          (click)="openMeeting(m); closeTile()"
-        >
-          <span class="popup-row-main">
-            <strong>{{ m.subject }}</strong>
-            <small>{{ workspace.customer(m.customerId)?.name }} · {{ m.meetingDate | slice:0:10 }}</small>
-          </span>
-          <div class="popup-row-badges">
-            <span class="status-chip" [ngClass]="workspace.statusClass(m.status)">
-              {{ ('customerMeeting.statusValues.' + m.status) | t }}
-            </span>
-            <span class="task-count-badge">
-              {{ tasksFromMeeting(m).length }} {{ 'common.task' | t }}
-            </span>
-          </div>
-        </button>
-        <div *ngIf="!lensMeetings.length" class="empty-state">
-          <strong>{{ 'home.noMatches' | t }}</strong>
+      <!-- Inline follow-ups — convert to a task without opening the drawer -->
+      <div *ngIf="meetingActionItems(m).length" class="card-actions" (click)="$event.stopPropagation()">
+        <div class="card-actions-label">
+          <span>{{ 'meetingsOverview.followups' | t }}</span>
+          <span class="action-count-badge">{{ meetingActionItems(m).length }}</span>
         </div>
+        <!-- Cap the inline list to one row so every card stays the same height;
+             the total count is already shown in the .action-count-badge above. -->
+        <div *ngFor="let item of meetingActionItems(m) | slice:0:1" class="card-action-row">
+          <span class="action-row-text">{{ item.content }}</span>
+          <button
+            type="button"
+            class="convert-btn ghost-action"
+            (click)="convertAction(m, item.id, $event)"
+          >{{ 'meetingsOverview.convertBtn' | t }}</button>
+        </div>
+        <span *ngIf="meetingActionItems(m).length > 1" class="action-more">
+          +{{ meetingActionItems(m).length - 1 }}
+        </span>
       </div>
-    </aside>
-  </div>
+    </article>
+  </ng-template>
+
+  <!-- ── Tile popup: shared stat-modal shell ─────────────────────────────── -->
+  <app-stat-modal
+    *ngIf="openLens"
+    [eyebrow]="'meetingsOverview.eyebrow' | t"
+    [title]="lensTitleKey | t"
+    [closeLabel]="'common.close' | t"
+    (close)="closeTile()"
+  >
+    <!-- Open Tasks lens -->
+    <app-stat-tasks-view
+      *ngIf="openLens === 'open-tasks'"
+      [tasks]="openMeetingTasks"
+      [emptyText]="'home.noMatches' | t"
+      (rowOpened)="closeTile()"
+    ></app-stat-tasks-view>
+
+    <!-- Upcoming / In-progress meetings lens -->
+    <app-stat-meetings-view
+      *ngIf="openLens !== 'open-tasks'"
+      [meetings]="lensMeetings"
+      [emptyText]="'home.noMatches' | t"
+      (meetingOpened)="openMeeting($event); closeTile()"
+    ></app-stat-meetings-view>
+  </app-stat-modal>
 
 </section>

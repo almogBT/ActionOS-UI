@@ -1,157 +1,125 @@
 <section class="screen">
 
-  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <!-- ── Header (friendly greeting) ─────────────────────────────────────── -->
   <div class="screen-title">
     <div>
-      <span class="eyebrow">{{ 'myWork.eyebrow' | t }}</span>
-      <h2>{{ 'myWork.title' | t }}</h2>
+      <span class="eyebrow">{{ todayLabel }}</span>
+      <h2>{{ greetingKey | t }}, {{ firstName }}</h2>
     </div>
   </div>
 
-  <!-- ── Tab strip ──────────────────────────────────────────────────────── -->
-  <div class="tab-strip">
-    <button type="button" [class.active]="activeTab() === 'inbox'" (click)="activeTab.set('inbox')">
-      {{ 'myWork.tabs.inbox' | t }}
+  <!-- ── Calendar / "Next up" strip ─────────────────────────────────────── -->
+  <app-calendar
+    [events]="myCalEvents"
+    (eventOpened)="onCalEventOpened($event)"
+  ></app-calendar>
+
+  <!-- ── Summary strip ──────────────────────────────────────────────────── -->
+  <div class="stat-tile-row">
+    <app-stat-tile
+      icon="alert-triangle" [value]="summaryOverdue" [label]="'myWork.summary.overdue' | t"
+      [tone]="summaryOverdue > 0 ? 'danger' : 'normal'" [zero]="summaryOverdue === 0"
+      (tileClick)="openStat('overdue')"
+    ></app-stat-tile>
+    <app-stat-tile
+      icon="check-square" [value]="summaryToday" [label]="'myWork.summary.today' | t"
+      [zero]="summaryToday === 0" (tileClick)="openStat('today')"
+    ></app-stat-tile>
+    <app-stat-tile
+      icon="zap" [value]="summaryFollowups" [label]="'myWork.summary.followups' | t"
+      [tone]="summaryFollowups > 0 ? 'danger' : 'normal'" [zero]="summaryFollowups === 0"
+      (tileClick)="openStat('followups')"
+    ></app-stat-tile>
+    <app-stat-tile
+      icon="calendar" [value]="summaryMeetingsToday" [label]="'myWork.summary.meetingsToday' | t"
+      [zero]="summaryMeetingsToday === 0" (tileClick)="openStat('meetings')"
+    ></app-stat-tile>
+  </div>
+
+  <!-- ── Tab strip (icon + label + live count) ──────────────────────────── -->
+  <div class="mw-tabs" role="tablist">
+    <button type="button" role="tab" [attr.aria-selected]="activeTab() === 'inbox'"
+      [class.active]="activeTab() === 'inbox'" (click)="activeTab.set('inbox')">
+      <app-icon name="inbox" [size]="15"></app-icon>
+      <span>{{ 'myWork.tabs.inbox' | t }}</span>
+      <span *ngIf="workspace.inboxUnreadCount" class="mw-tab-count">{{ workspace.inboxUnreadCount }}</span>
     </button>
-    <button type="button" [class.active]="activeTab() === 'tasks'" (click)="activeTab.set('tasks')">
-      {{ 'myWork.tabs.tasks' | t }}
-      <span *ngIf="myFilteredTasks.length" class="tab-count"
-        [class.tab-count-danger]="myGroupedTasks.at(0)?.isDanger">
-        {{ myFilteredTasks.length }}
+    <button type="button" role="tab" [attr.aria-selected]="activeTab() === 'tasks'"
+      [class.active]="activeTab() === 'tasks'" (click)="activeTab.set('tasks')">
+      <app-icon name="check-square" [size]="15"></app-icon>
+      <span>{{ 'myWork.tabs.tasks' | t }}</span>
+      <span *ngIf="tasksTabCount" class="mw-tab-count" [class.is-danger]="hasOverdueTasks">
+        {{ tasksTabCount }}
       </span>
     </button>
-    <button type="button" [class.active]="activeTab() === 'meetings'" (click)="activeTab.set('meetings')">
-      {{ 'myWork.tabs.meetings' | t }}
-      <span *ngIf="workspace.myUnconvertedActionItems.length" class="tab-count tab-count-danger">
-        {{ workspace.myUnconvertedActionItems.length }}
-      </span>
+    <button type="button" role="tab" [attr.aria-selected]="activeTab() === 'meetings'"
+      [class.active]="activeTab() === 'meetings'" (click)="activeTab.set('meetings')">
+      <app-icon name="calendar" [size]="15"></app-icon>
+      <span>{{ 'myWork.tabs.meetings' | t }}</span>
+      <span *ngIf="summaryFollowups" class="mw-tab-count is-danger">{{ summaryFollowups }}</span>
     </button>
   </div>
 
   <!-- ── Inbox Tab ──────────────────────────────────────────────────────── -->
   <ng-container *ngIf="activeTab() === 'inbox'">
-    <app-inbox (viewChange)="openView($event)"></app-inbox>
+    <app-inbox class="mw-flex-fill" [embedded]="true" (viewChange)="openView($event)"></app-inbox>
   </ng-container>
 
   <!-- ── Tasks Tab ──────────────────────────────────────────────────────── -->
   <ng-container *ngIf="activeTab() === 'tasks'">
 
-    <div class="tab-section-header">
-      <div>
-        <span class="eyebrow">{{ 'myWork.tasks.eyebrow' | t }}</span>
-        <h3>{{ 'myWork.tasks.title' | t }}</h3>
+    <div class="mw-toolbar">
+      <div class="filter-strip">
+        <button
+          *ngFor="let f of taskFilterOptions"
+          type="button"
+          [class.active]="taskFilter === f.id"
+          (click)="taskFilter = f.id"
+        >{{ f.labelKey | t }}</button>
       </div>
-      <span class="count-badge" [class.badge-danger]="myGroupedTasks.at(0)?.isDanger">
+      <span class="count-badge" [class.badge-danger]="hasOverdueTasks">
         {{ myFilteredTasks.length }}
       </span>
     </div>
 
-    <div class="filter-strip">
-      <button
-        *ngFor="let f of taskFilterOptions"
-        type="button"
-        [class.active]="taskFilter === f.id"
-        (click)="taskFilter = f.id"
-      >{{ f.labelKey | t }}</button>
-    </div>
+    <div class="mw-tab-scroll">
+      <app-task-table
+        *ngIf="myFilteredTasks.length; else tasksEmpty"
+        [tasks]="myFilteredTasks"
+        groupBy="due"
+        [emptyText]="'myWork.noTasksTitle' | t"
+      ></app-task-table>
 
-    <div *ngIf="hasMyTasks; else noTasks" class="task-groups scroll-box">
-      <div *ngFor="let group of myGroupedTasks" class="task-group">
-
-        <div class="group-header" [class.group-danger]="group.isDanger">
-          <span>{{ group.labelKey | t }}</span>
-          <span class="group-count" [class.count-danger]="group.isDanger">{{ group.tasks.length }}</span>
+      <ng-template #tasksEmpty>
+        <div class="mw-empty">
+          <span class="mw-empty-glyph">✅</span>
+          <strong>{{ 'myWork.noTasksTitle' | t }}</strong>
+          <span>{{ 'myWork.noTasksText' | t }}</span>
         </div>
-
-        <div class="task-table">
-          <div class="task-table-header">
-            <span>Status</span>
-            <span>Task</span>
-            <span class="col-hide-sm">Customer</span>
-            <span>Priority</span>
-            <span>Due</span>
-            <span class="col-hide-sm">Assignee</span>
-          </div>
-
-          <article
-            *ngFor="let task of group.tasks"
-            class="task-row"
-            [class.task-overdue]="isOverdue(task)"
-            [class.task-selected]="workspace.selectedTaskId === task.id"
-            (click)="task.source === 'meeting' ? openMeetingTask(task) : workspace.selectBoardTask(task)"
-          >
-            <div class="cell cell-status">
-              <span class="status-chip compact-chip" [ngClass]="workspace.statusClass(task.status)">
-                {{ ('meetingTask.statusValues.' + task.status) | t }}
-              </span>
-            </div>
-
-            <div class="cell cell-title">
-              <span class="task-title-text">{{ task.title }}</span>
-              <span *ngIf="task.progressionNotes?.length" class="pnote-badge" title="Progression notes">
-                {{ task.progressionNotes!.length }}
-              </span>
-            </div>
-
-            <div class="cell cell-text col-hide-sm">
-              {{ taskContext(task) || '—' }}
-            </div>
-
-            <div class="cell cell-priority">
-              <span class="priority compact-chip" [ngClass]="workspace.statusClass(task.priority)">
-                {{ ('priority.' + workspace.statusClass(task.priority)) | t }}
-              </span>
-            </div>
-
-            <div class="cell cell-due" [class.overdue-date]="isOverdue(task)">
-              {{ task.dueDate ? (task.dueDate | slice:0:10) : '—' }}
-            </div>
-
-            <div class="cell cell-assignee col-hide-sm">
-              <ng-container *ngIf="workspace.employeeName(task.assignedToEmployeeId) as name">
-                <span class="assignee-avatar">{{ getInitials(name) }}</span>
-                <span class="assignee-name">{{ name }}</span>
-              </ng-container>
-              <span *ngIf="!workspace.employeeName(task.assignedToEmployeeId)" class="cell-empty">—</span>
-            </div>
-          </article>
-        </div>
-
-      </div>
+      </ng-template>
     </div>
-
-    <ng-template #noTasks>
-      <div class="empty-state">
-        <strong>{{ 'myWork.noTasksTitle' | t }}</strong>
-        <span>{{ 'myWork.noTasksText' | t }}</span>
-      </div>
-    </ng-template>
 
   </ng-container>
 
   <!-- ── Meetings Tab ───────────────────────────────────────────────────── -->
   <ng-container *ngIf="activeTab() === 'meetings'">
 
-    <div class="tab-section-header">
-      <div>
-        <span class="eyebrow">{{ 'myWork.meetings.eyebrow' | t }}</span>
-        <h3>{{ 'myWork.meetings.title' | t }}</h3>
+    <div class="mw-toolbar">
+      <div class="filter-strip">
+        <button
+          *ngFor="let f of meetingFilterOptions"
+          type="button"
+          [class.active]="meetingFilter === f.id"
+          (click)="meetingFilter = f.id"
+        >{{ f.labelKey | t }}</button>
       </div>
       <span class="count-badge" [class.badge-danger]="workspace.myUnconvertedActionItems.length > 0">
         {{ myMeetings.length }}
       </span>
     </div>
 
-    <div class="filter-strip">
-      <button
-        *ngFor="let f of meetingFilterOptions"
-        type="button"
-        [class.active]="meetingFilter === f.id"
-        (click)="meetingFilter = f.id"
-      >{{ f.labelKey | t }}</button>
-    </div>
-
-    <div *ngIf="myMeetings.length; else noMeetings" class="meeting-rail scroll-box">
+    <div class="mw-tab-scroll">
+    <div *ngIf="myMeetings.length; else noMeetings" class="meeting-rail">
       <article
         *ngFor="let m of myMeetings"
         class="meeting-tile"
@@ -169,7 +137,7 @@
           <p class="tile-subject">{{ m.subject }}</p>
         </div>
         <div class="tile-footer">
-          <span class="tile-date">{{ m.meetingDate | slice:0:10 }}</span>
+          <span class="tile-date">{{ m.meetingDate | appDate }}</span>
           <span *ngIf="meetingTaskCount(m)" class="tile-task-count">
             {{ 'myWork.meetings.taskCount' | t : { n: meetingTaskCount(m) } }}
           </span>
@@ -198,7 +166,65 @@
         <strong>{{ 'myWork.meetings.noMeetings' | t }}</strong>
       </div>
     </ng-template>
+    </div>
 
   </ng-container>
+
+  <!-- ── Summary-tile popups (shared stat-modal shell) ──────────────────── -->
+
+  <!-- Tasks: Overdue / Due today -->
+  <app-stat-modal
+    *ngIf="statModal() === 'overdue' || statModal() === 'today'"
+    [eyebrow]="'myWork.eyebrow' | t"
+    [title]="statTitleKey | t"
+    [closeLabel]="'common.close' | t"
+    (close)="closeStat()"
+  >
+    <app-stat-tasks-view
+      [tasks]="statModal() === 'overdue' ? overdueTasksList : todayTasksList"
+      [showFilters]="false"
+      [emptyText]="'myWork.noTasksTitle' | t"
+      (rowOpened)="closeStat()"
+    ></app-stat-tasks-view>
+  </app-stat-modal>
+
+  <!-- Meetings today -->
+  <app-stat-modal
+    *ngIf="statModal() === 'meetings'"
+    [eyebrow]="'myWork.eyebrow' | t"
+    [title]="statTitleKey | t"
+    [closeLabel]="'common.close' | t"
+    (close)="closeStat()"
+  >
+    <app-stat-meetings-view
+      [meetings]="meetingsTodayList"
+      [emptyText]="'myWork.meetings.noMeetings' | t"
+      (meetingOpened)="openMeetingFromStat($event)"
+    ></app-stat-meetings-view>
+  </app-stat-modal>
+
+  <!-- Follow-ups (unconverted meeting action items) -->
+  <app-stat-modal
+    *ngIf="statModal() === 'followups'"
+    [eyebrow]="'myWork.eyebrow' | t"
+    [title]="statTitleKey | t"
+    [closeLabel]="'common.close' | t"
+    (close)="closeStat()"
+  >
+    <article *ngFor="let item of followupItems" class="mw-followup">
+      <div class="mw-followup-body">
+        <span class="mw-followup-meeting">{{ workspace.customer(item.meeting.customerId)?.name }} · {{ item.meeting.subject }}</span>
+        <p class="mw-followup-text">{{ item.note.content }}</p>
+      </div>
+      <button type="button" class="ghost-action small" (click)="convertFollowup(item)">
+        {{ 'myWork.followups.convertBtn' | t }}
+      </button>
+    </article>
+
+    <div *ngIf="!followupItems.length" class="empty-state">
+      <strong>{{ 'myWork.followups.allClear' | t }}</strong>
+      <span>{{ 'myWork.followups.allClearText' | t }}</span>
+    </div>
+  </app-stat-modal>
 
 </section>

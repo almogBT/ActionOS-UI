@@ -1,55 +1,216 @@
 :host {
-  display: block;
-  min-width: 0;
-}
-
-/* ── Tab count badge (inside tab button) ──────────────────────────────── */
-.tab-count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  margin-left: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  border-radius: 999px;
-  background: var(--surface-strong);
-  color: var(--muted);
-  border: 1px solid var(--line);
-  vertical-align: middle;
-
-  &.tab-count-danger {
-    background: var(--danger-soft);
-    color: var(--danger);
-    border-color: var(--danger-soft);
-  }
-}
-
-/* ── Section header (tasks & meetings tabs) ───────────────────────────── */
-.tab-section-header {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 14px;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  /* Fill the space between the fixed header and the bottom action bar so the
+     page itself never scrolls — only the active tab's list does. (header 64 +
+     body padding 24 + bottom bar 60 + body bottom padding 24 = 172) */
+  height: calc(100vh - var(--header-height, 64px) - 108px);
+  /* Container so the summary tiles can respond to the page width (not the
+     viewport), collapsing to icon+number when the sidebar leaves no room. */
+  container-type: inline-size;
+}
 
-  .eyebrow {
-    display: block;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--muted);
-    margin-bottom: 2px;
+/* My Work lays out as a fixed column: header / calendar / tiles / tabs stay
+   put and the active tab's content flexes to fill and scrolls on its own. */
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  flex: 1;
+  min-height: 0;
+}
+
+.screen-title,
+app-calendar,
+.stat-tile-row,
+.mw-summary,
+.mw-tabs,
+.mw-toolbar { flex-shrink: 0; }
+
+/* The scrolling region for the Tasks / Meetings tabs; the Inbox fills the same
+   space and manages its own internal feed scroll. */
+.mw-tab-scroll,
+.mw-flex-fill {
+  flex: 1;
+  min-height: 0;
+}
+
+.mw-tab-scroll {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+}
+
+/* ── Summary strip — always a single row ──────────────────────────────── */
+.mw-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.mw-stat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 15px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    box-shadow: var(--shadow-md);
   }
 
-  h3 {
-    margin: 0;
-    font-size: 17px;
-    font-weight: 600;
+  &.is-zero {
+    opacity: 0.6;
+    &:hover { opacity: 1; }
+  }
+
+  &.is-danger {
+    .mw-stat-icon { background: var(--danger-soft); color: var(--danger); }
+    .mw-stat-text strong { color: var(--danger); }
+  }
+}
+
+.mw-stat-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.mw-stat-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  strong {
+    font-size: 22px;
+    line-height: 1.05;
+    font-weight: 800;
     color: var(--ink);
   }
+
+  small {
+    margin-top: 2px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* When the page is too narrow for four labelled tiles, drop the labels and
+   keep just the icon + number — the tiles stay in one row at any width. */
+@container (max-width: 640px) {
+  .mw-summary { gap: 8px; }
+
+  .mw-stat {
+    justify-content: center;
+    gap: 9px;
+    padding: 11px 8px;
+  }
+
+  .mw-stat-text small { display: none; }
+}
+
+@container (max-width: 420px) {
+  .mw-stat { gap: 7px; padding: 10px 4px; }
+  .mw-stat-icon { width: 34px; height: 34px; }
+  .mw-stat-text strong { font-size: 19px; }
+}
+
+/* ── Tab strip (segmented control: icon + label + count) ──────────────── */
+.mw-tabs {
+  display: inline-flex;
+  gap: 4px;
+  width: fit-content;
+  max-width: 100%;
+  align-self: center;     /* centre the navigator within the page column */
+  padding: 5px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  background: var(--glass-soft);
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 0 16px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    transition:
+      background var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out),
+      box-shadow var(--duration-fast) var(--ease-out);
+
+    &:hover:not(.active) {
+      color: var(--ink);
+      background: var(--bg-elevated);
+    }
+
+    &.active {
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent-strong), var(--accent));
+      box-shadow: 0 8px 18px rgba(0, 120, 120, 0.20);
+    }
+  }
+}
+
+.mw-tab-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 800;
+  background: var(--bg-sunken);
+  color: var(--text-secondary);
+
+  &.is-danger { background: var(--danger-soft); color: var(--danger); }
+}
+
+.mw-tabs button.active .mw-tab-count {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+/* ── Tab toolbar (filters + count, one row) ───────────────────────────── */
+.mw-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  .filter-strip { margin-bottom: 0; }
 }
 
 /* ── Filter Strip ─────────────────────────────────────────────────────── */
@@ -95,6 +256,61 @@
     background: var(--danger-soft);
   }
 }
+
+/* ── Tasks empty state (matches the Inbox "all caught up" card) ───────── */
+.mw-empty {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 48px 24px;
+  text-align: center;
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-xl);
+  background: var(--glass-soft);
+
+  strong { color: var(--ink); font-size: 17px; }
+  span   { max-width: 360px; color: var(--muted); line-height: 1.45; }
+}
+
+.mw-empty-glyph { font-size: 40px; line-height: 1; }
+
+/* ── Follow-ups popup rows ────────────────────────────────────────────── */
+.mw-followup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-strong);
+}
+
+.mw-followup-body { flex: 1; min-width: 0; }
+
+.mw-followup-meeting {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mw-followup-text {
+  margin: 3px 0 0;
+  font-size: 13px;
+  color: var(--ink);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mw-followup .ghost-action.small { flex-shrink: 0; }
 
 /* ── Scrollable container ─────────────────────────────────────────────── */
 .scroll-box {
@@ -529,6 +745,16 @@ $col: 126px minmax(0, 1fr) 110px 86px 88px 138px;
 }
 
 /* ── Responsive ───────────────────────────────────────────────────────── */
+/* Summary tiles stay a single row at every width (see the @container rules
+   above, which only drop the labels) — only the tab strip goes full-width. */
+@media (max-width: 900px) {
+  .mw-tabs {
+    display: flex;
+    width: 100%;
+    button { flex: 1; justify-content: center; }
+  }
+}
+
 @media (max-width: 720px) {
   .filter-strip {
     flex-wrap: nowrap;

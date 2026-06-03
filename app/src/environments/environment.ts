@@ -1,4 +1,6 @@
-export const environment = {
+import { buildActionosEnvironment } from './runtime-config';
+
+export const environment = buildActionosEnvironment({
   homePageServerUrl: 'https://localhost:52268',
   actionosApiUrl: 'https://localhost:7052',
   trustedHostOrigins: [
@@ -7,4 +9,4 @@ export const environment = {
     'https://servitzhome.fritz.co.il',
     'https://servitzhome-test.fritz.co.il'
   ]
-};
+});

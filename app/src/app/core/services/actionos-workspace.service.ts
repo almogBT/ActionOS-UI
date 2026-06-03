@@ -2,7 +2,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { ActionosI18nService } from '../i18n/actionos-i18n.service';
 import { ActionosAuthService } from './auth.service';
 import {
-  ActivityLog, AgendaItem, Attachment, AttachmentEntityType, BoardTemplate, CalendarEvent, CalendarEventKind, ChecklistItem, Comment, CreateCustomerInput, CreateCustomerMeetingInput, CreateMeetingNoteInput, CreateMeetingTaskInput, CreateMemberInput, CreateTaskInput, Customer, CustomerMeeting, CustomerMeetingStatus, CustomerParticipant, CustomerPreparationSummary, Employee, MailNotificationPrefs, Meeting, MeetingNote, Task, TaskStatus, Member, MyWorkTab, NoteType, QuickCaptureType, UpdateCustomerMeetingInput, UpdateMeetingNoteInput, UpdateMeetingTaskInput, UpdateTaskInput } from '../models/actionos.models';
+  ActivityLog, AgendaItem, Attachment, AttachmentEntityType, BoardTemplate, CalendarEvent, CalendarEventKind, ChecklistItem, Comment, CreateCustomerInput, CreateCustomerMeetingInput, CreateMeetingNoteInput, CreateMeetingTaskInput, CreateMemberInput, CreateTaskInput, Customer, CustomerMeeting, CustomerMeetingStatus, CustomerParticipant, CustomerPreparationSummary, Employee, InboxFeedItem, InboxState, MailNotificationPrefs, Meeting, MeetingNote, Task, TaskStatus, Member, MyWorkTab, NoteType, QuickCaptureType, UpdateCustomerMeetingInput, UpdateMeetingNoteInput, UpdateMeetingTaskInput, UpdateTaskInput } from '../models/actionos.models';
 import { ACTIONOS_BOARD_TEMPLATES } from '../config/actionos-ui.config';
 import {
   CustomerRepositoryPort,
@@ -133,10 +133,116 @@ export class ActionosWorkspaceService {
     });
   }
 
-  readonly statuses = UNIFIED_TASK_STATUSES;
+  // ── Inbox feed read/dismiss state ───────────────────────────────────────
+  // Notifications are *derived* from live task/meeting data (see `inboxFeed`),
+  // so there is no notification table to persist. We only persist which item
+  // ids the user has read or dismissed, in localStorage (same pattern as the
+  // mail-notification prefs above). Ids are capped so storage cannot grow
+  // unbounded as items churn.
+  private readonly INBOX_STATE_KEY = 'actionos.inbox-state';
+  private readonly inboxStateSig = signal<InboxState>(this.loadInboxState());
+
+  private loadInboxState(): InboxState {
+    try {
+      const raw = localStorage.getItem(this.INBOX_STATE_KEY);
+      const parsed = raw ? JSON.parse(raw) : null;
+      return {
+        read: Array.isArray(parsed?.read) ? parsed.read : [],
+        dismissed: Array.isArray(parsed?.dismissed) ? parsed.dismissed : []
+      };
+    } catch {
+      return { read: [], dismissed: [] };
+    }
+  }
+
+  private persistInboxState(next: InboxState): void {
+    const cap = (ids: string[]) => (ids.length > 500 ? ids.slice(-500) : ids);
+    const trimmed: InboxState = { read: cap(next.read), dismissed: cap(next.dismissed) };
+    this.inboxStateSig.set(trimmed);
+    try {
+      localStorage.setItem(this.INBOX_STATE_KEY, JSON.stringify(trimmed));
+    } catch {
+      /* storage full / unavailable — keep the in-memory signal */
+    }
+  }
+
+  isInboxUnread(id: string): boolean {
+    return !this.inboxStateSig().read.includes(id);
+  }
+
+  markInboxRead(id: string): void {
+    const state = this.inboxStateSig();
+    if (state.read.includes(id)) {
+      return;
+    }
+    this.persistInboxState({ ...state, read: [...state.read, id] });
+  }
+
+  markAllInboxRead(): void {
+    const ids = this.inboxFeed.map(item => item.id);
+    const state = this.inboxStateSig();
+    this.persistInboxState({ ...state, read: Array.from(new Set([...state.read, ...ids])) });
+  }
+
+  /** Hide an item from the feed permanently (also marks it read). */
+  dismissInboxItem(id: string): void {
+    const state = this.inboxStateSig();
+    const dismissed = state.dismissed.includes(id) ? state.dismissed : [...state.dismissed, id];
+    const read = state.read.includes(id) ? state.read : [...state.read, id];
+    this.persistInboxState({ read, dismissed });
+  }
+
+  get inboxUnreadCount(): number {
+    return this.inboxFeed.filter(item => this.isInboxUnread(item.id)).length;
+  }
+
+  // ── Statuses (built-in + user-added custom) ──────────────────────────────
+  // Custom statuses are free-form labels the user adds from the task drawer or
+  // table. They persist in localStorage and can be assigned to any task without
+  // transition rules (built-in statuses keep their state-machine).
+  private readonly CUSTOM_STATUS_KEY = 'actionos.custom-statuses';
+  private customStatusesState: string[] = this.loadCustomStatuses();
+
+  /** Built-in statuses followed by any user-added custom ones. */
+  get statuses(): TaskStatus[] {
+    return [...UNIFIED_TASK_STATUSES, ...this.customStatusesState] as TaskStatus[];
+  }
+  get meetingTaskStatuses(): TaskStatus[] { return this.statuses; }
+  get customStatuses(): string[] { return this.customStatusesState; }
+
+  isCustomStatus(status: string): boolean {
+    return !(UNIFIED_TASK_STATUSES as string[]).includes(status);
+  }
+
+  /** Add a reusable custom status; returns the stored label (existing or new). */
+  addCustomStatus(label: string): string | null {
+    const trimmed = label.trim();
+    if (!trimmed) return null;
+    const existing = this.statuses.find(s => s.toLowerCase() === trimmed.toLowerCase());
+    if (existing) return existing;                 // already a built-in or custom status
+    this.customStatusesState = [...this.customStatusesState, trimmed];
+    this.persistCustomStatuses();
+    return trimmed;
+  }
+
+  private loadCustomStatuses(): string[] {
+    try {
+      const raw = localStorage.getItem(this.CUSTOM_STATUS_KEY);
+      const parsed = raw ? JSON.parse(raw) : null;
+      return Array.isArray(parsed) ? parsed.filter((s: unknown): s is string => typeof s === 'string') : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private persistCustomStatuses(): void {
+    try {
+      localStorage.setItem(this.CUSTOM_STATUS_KEY, JSON.stringify(this.customStatusesState));
+    } catch { /* storage unavailable — ignore */ }
+  }
+
   readonly templates = ACTIONOS_BOARD_TEMPLATES;
   externalCustomerGroups: { id: string; name: string }[] = [];
-  readonly meetingTaskStatuses: TaskStatus[] = UNIFIED_TASK_STATUSES;
   private readonly meetingTaskTransitions: Partial<Record<TaskStatus, TaskStatus[]>> = {
     'New': ['Sent To Owner', 'In Progress', 'Waiting For Customer', 'Waiting For Internal', 'Done', 'Cancelled'],
     'Sent To Owner': ['In Progress', 'Waiting For Customer', 'Waiting For Internal', 'Done', 'Cancelled'],
@@ -160,6 +266,8 @@ export class ActionosWorkspaceService {
   // v3 state — wrapped in objects so ports can hold a stable reference
   private readonly customerStore = { customers: [] as Customer[] };
   private readonly employeeStore = { employees: [] as Employee[] };
+  private sortedEmployeeSource: Employee[] | null = null;
+  private sortedEmployees: Employee[] = [];
   private readonly customerMeetingStore = {
     customerMeetings: [] as CustomerMeeting[]
   };
@@ -450,6 +558,218 @@ export class ActionosWorkspaceService {
       );
   }
 
+  // ── Inbox feed assembly ─────────────────────────────────────────────────
+  /**
+   * The unified Inbox stream: every "thing that needs me", newest first.
+   * Assembled from live data (no notification table), then dismissed items are
+   * filtered out. Read/unread is layered on top via `isInboxUnread`.
+   *
+   * Sources:
+   *  1. New tasks assigned to me OR opened by me (status New / Inbox / Sent To Owner)
+   *  2. Unconverted action items from meetings I attended
+   *  3. Decisions and notes from meetings I attended
+   *  4. My blocked / waiting tasks
+   *  5. My tasks due today or overdue (that aren't already in 1 or 4)
+   */
+  get inboxFeed(): InboxFeedItem[] {
+    const uid = this.currentUserId;
+    const empId = this.currentEmployeeId;
+    const today = this.todayIso;
+    const dismissed = new Set(this.inboxStateSig().dismissed);
+    const fallbackTs = `${today}T00:00:00`;
+    const newStatuses: TaskStatus[] = ['Inbox', 'New', 'Sent To Owner'];
+    const items: InboxFeedItem[] = [];
+
+    const mineTask = (task: Task): boolean =>
+      task.assigneeIds.includes(uid) || task.assignedToEmployeeId === empId;
+    const openedByMe = (task: Task): boolean =>
+      task.createdByUserId === uid || task.openedByEmployeeId === empId;
+
+    // 1. New tasks assigned to me, or that I opened, still in a "new" status.
+    for (const task of this.openTasks) {
+      if (!newStatuses.includes(task.status)) {
+        continue;
+      }
+      const assigned = mineTask(task);
+      if (!assigned && !openedByMe(task)) {
+        continue;
+      }
+      // Show "assigned to you by <name>" only when someone *else* assigned it.
+      const assignerName = assigned && !openedByMe(task) ? this.inboxAssignerName(task) : '';
+      const useAssignedBy = !!assignerName;
+      items.push({
+        id: `task-new:${task.id}`,
+        kind: assigned ? 'task-assigned' : 'task-opened',
+        category: 'tasks',
+        tone: 'info',
+        glyph: '🟦',
+        titleKey: !assigned
+          ? 'inbox.feed.taskOpened'
+          : useAssignedBy
+            ? 'inbox.feed.taskAssignedBy'
+            : 'inbox.feed.taskAssigned',
+        titleParams: useAssignedBy ? { by: assignerName } : undefined,
+        primaryText: task.title,
+        contextText: this.inboxTaskContext(task),
+        timestamp: task.updatedAt || task.createdAt || fallbackTs,
+        taskId: task.id,
+        actions: [
+          { id: 'open-task', labelKey: 'inbox.act.open', variant: 'ghost' },
+          { id: 'done', labelKey: 'inbox.act.done', variant: 'primary' }
+        ]
+      });
+    }
+
+    // 2. Unconverted action items from meetings I attended.
+    for (const { note, meeting } of this.myUnconvertedActionItems) {
+      items.push({
+        id: `mtg-action:${meeting.id}:${note.id}`,
+        kind: 'meeting-action',
+        category: 'meetings',
+        tone: 'success',
+        glyph: '🟩',
+        titleKey: 'inbox.feed.meetingAction',
+        primaryText: note.content,
+        contextText: this.inboxMeetingContext(meeting, note),
+        groupLabel: this.inboxMeetingContext(meeting),
+        timestamp: note.createdAt || meeting.meetingDate || fallbackTs,
+        meetingId: meeting.id,
+        noteId: note.id,
+        actions: [
+          { id: 'make-task', labelKey: 'inbox.act.makeTask', variant: 'primary' },
+          { id: 'view-meeting', labelKey: 'inbox.act.viewMeeting', variant: 'ghost' }
+        ]
+      });
+    }
+
+    // 3. Decisions and notes from meetings I attended.
+    const myMeetings = this.customerMeetings.filter(
+      m => m.meetingLeaderEmployeeId === empId || m.internalParticipantEmployeeIds.includes(empId)
+    );
+    for (const meeting of myMeetings) {
+      for (const note of meeting.notes) {
+        if (note.type !== 'decision' && note.type !== 'note') {
+          continue;
+        }
+        const isDecision = note.type === 'decision';
+        items.push({
+          id: `mtg-${note.type}:${meeting.id}:${note.id}`,
+          kind: isDecision ? 'meeting-decision' : 'meeting-note',
+          category: 'meetings',
+          tone: isDecision ? 'info' : 'neutral',
+          glyph: isDecision ? '✅' : '📝',
+          titleKey: isDecision ? 'inbox.feed.meetingDecision' : 'inbox.feed.meetingNote',
+          primaryText: note.content,
+          contextText: this.inboxMeetingContext(meeting),
+          groupLabel: this.inboxMeetingContext(meeting),
+          timestamp: note.createdAt || meeting.meetingDate || fallbackTs,
+          meetingId: meeting.id,
+          noteId: note.id,
+          actions: [{ id: 'view-meeting', labelKey: 'inbox.act.viewMeeting', variant: 'ghost' }]
+        });
+      }
+    }
+
+    // 4. My blocked / waiting tasks.
+    const blockedIds = new Set<string>();
+    for (const task of this.myBlockedTasks) {
+      blockedIds.add(task.id);
+      items.push({
+        id: `task-wait:${task.id}`,
+        kind: 'task-waiting',
+        category: 'waiting',
+        tone: 'warning',
+        glyph: '⏳',
+        titleKey: 'inbox.feed.taskWaiting',
+        primaryText: task.title,
+        contextText: task.waitingReason || task.blockedBy || this.inboxTaskContext(task),
+        timestamp: task.updatedAt || task.createdAt || fallbackTs,
+        taskId: task.id,
+        actions: [{ id: 'open-task', labelKey: 'inbox.act.open', variant: 'ghost' }]
+      });
+    }
+
+    // 5. My tasks due today / overdue, that aren't already surfaced in 1 or 4.
+    for (const task of this.openTasks) {
+      if (!mineTask(task) || !task.dueDate || task.dueDate > today) {
+        continue;
+      }
+      if (newStatuses.includes(task.status) || blockedIds.has(task.id)) {
+        continue;
+      }
+      const overdue = task.dueDate < today;
+      items.push({
+        id: `task-due:${task.id}`,
+        kind: 'task-due',
+        category: 'tasks',
+        tone: overdue ? 'danger' : 'warning',
+        glyph: overdue ? '🔴' : '🟠',
+        titleKey: overdue ? 'inbox.feed.taskOverdue' : 'inbox.feed.taskDueToday',
+        primaryText: task.title,
+        contextText: this.inboxTaskContext(task),
+        timestamp: `${task.dueDate.slice(0, 10)}T09:00:00`,
+        taskId: task.id,
+        actions: [
+          { id: 'open-task', labelKey: 'inbox.act.open', variant: 'ghost' },
+          { id: 'done', labelKey: 'inbox.act.done', variant: 'primary' }
+        ]
+      });
+    }
+
+    return items
+      .filter(item => !dismissed.has(item.id))
+      .sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+  }
+
+  /**
+   * Name of whoever opened/assigned a task — for the "assigned by …" headline.
+   * Returns '' when no real name is known, so the caller falls back to the
+   * plain "assigned to you" headline rather than showing a placeholder.
+   */
+  private inboxAssignerName(task: Task): string {
+    const byEmployee = task.openedByEmployeeId ? this.employeeName(task.openedByEmployeeId) : '';
+    if (byEmployee && byEmployee !== '—') {
+      return byEmployee;
+    }
+    const byMember = task.createdByUserId ? this.memberName(task.createdByUserId) : '';
+    if (byMember && byMember !== 'Unknown') {
+      return byMember;
+    }
+    return '';
+  }
+
+  /** Secondary line for a task feed item: "Board · High · due 2026-06-05". */
+  private inboxTaskContext(task: Task): string {
+    const parts: string[] = [];
+    const place = task.source === 'meeting' ? this.customer(task.customerId)?.name : task.board;
+    if (place) {
+      parts.push(place);
+    }
+    if (task.priority) {
+      parts.push(this.i18n.translate('priority.' + this.statusClass(task.priority)));
+    }
+    if (task.dueDate) {
+      parts.push(`${this.i18n.translate('common.due')} ${task.dueDate.slice(0, 10)}`);
+    }
+    return parts.join(' · ');
+  }
+
+  /** Secondary line for a meeting feed item: "Acme · Quarterly review". */
+  private inboxMeetingContext(meeting: CustomerMeeting, note?: MeetingNote): string {
+    const parts: string[] = [];
+    const customerName = this.customer(meeting.customerId)?.name;
+    if (customerName) {
+      parts.push(customerName);
+    }
+    if (meeting.subject) {
+      parts.push(meeting.subject);
+    }
+    if (note?.dueDate) {
+      parts.push(`${this.i18n.translate('common.due')} ${note.dueDate.slice(0, 10)}`);
+    }
+    return parts.join(' · ');
+  }
+
   /** Convert a CustomerMeeting action note into a MeetingTask. The note is marked as converted. */
   convertMeetingAction(meetingId: string, noteId: string): boolean {
     const resolvedMeetingId = this.resolveMeetingId(meetingId);
@@ -681,10 +1001,7 @@ export class ActionosWorkspaceService {
       createdByUserId: this.currentUserId,
       createdAt: now,
       updatedAt: now,
-      checklist: [
-        { label: 'Clarify next step', done: false },
-        { label: 'Move into plan', done: false }
-      ]
+      checklist: []
     };
 
     this.tasksState = [task, ...this.tasksState];
@@ -1075,12 +1392,14 @@ export class ActionosWorkspaceService {
 
   /**
    * Statuses a meeting task may legally move to, including its current status.
-   * Mirrors the transition rules enforced in `updateMeetingTask`, so inline
-   * status pickers only ever offer reachable states.
+   * Mirrors the transition rules enforced in `updateMeetingTask` for built-in
+   * statuses, then appends all custom statuses (which have no transition rules
+   * and can be assigned freely).
    */
   allowedStatusesFor(task: Task): TaskStatus[] {
     const next = this.meetingTaskTransitions[task.status] ?? [];
-    return [task.status, ...next];
+    const custom = this.customStatusesState.filter(s => s !== task.status) as TaskStatus[];
+    return [task.status, ...next, ...custom];
   }
 
   dateAfter(days: number): string {
@@ -2190,7 +2509,11 @@ export class ActionosWorkspaceService {
 
   get employees(): Employee[] {
     // Returns only active fritz/critilog employees (the assignable set)
-    return this.employeeDirectory.list().sort((a, b) => a.fullName.localeCompare(b.fullName));
+    if (this.sortedEmployeeSource !== this.employeeStore.employees) {
+      this.sortedEmployeeSource = this.employeeStore.employees;
+      this.sortedEmployees = this.employeeDirectory.list().sort((a, b) => a.fullName.localeCompare(b.fullName));
+    }
+    return this.sortedEmployees;
   }
 
   get allEmployees(): Employee[] {
@@ -2714,7 +3037,13 @@ export class ActionosWorkspaceService {
     }
 
     if (next.status && next.status !== previousStatus) {
-      if (!this.canTransitionMeetingTask(previousStatus, next.status)) {
+      // Custom statuses (and moves away from a custom status) have no transition
+      // rules — they can be set freely. Only built-in→built-in moves are gated.
+      const transitionAllowed =
+        this.isCustomStatus(next.status) ||
+        this.isCustomStatus(previousStatus) ||
+        this.canTransitionMeetingTask(previousStatus, next.status);
+      if (!transitionAllowed) {
         // eslint-disable-next-line no-console
         console.warn('[ActionOS] Invalid meeting task status transition:', previousStatus, '->', next.status);
         delete next.status;
@@ -3251,16 +3580,22 @@ export class ActionosWorkspaceService {
     const empId = this.currentEmployeeId;
     const uid   = this.currentUserId;
 
-    const internal: CalendarEvent = {
-      id: `internal-${this.meetingState.id}`,
-      title: this.meetingState.title,
-      startsAt: this.meetingState.startsAt,
-      durationMinutes: this.meetingState.durationMinutes || 30,
-      kind: 'internal',
-      linkedBoard: this.meetingState.linkedBoard,
-      attendeeCount: this.meetingState.attendeeIds.length,
-      sourceId: this.meetingState.id
-    };
+    // Only surface the internal meeting on "My Work" when the current user is
+    // actually one of its attendees (attendeeIds hold member ids, e.g. "u1").
+    // It must NOT leak in unconditionally the way it does for the home page.
+    const internal: CalendarEvent[] =
+      this.meetingState.id && this.meetingState.attendeeIds.includes(uid)
+        ? [{
+            id: `internal-${this.meetingState.id}`,
+            title: this.meetingState.title,
+            startsAt: this.meetingState.startsAt,
+            durationMinutes: this.meetingState.durationMinutes || 30,
+            kind: 'internal',
+            linkedBoard: this.meetingState.linkedBoard,
+            attendeeCount: this.meetingState.attendeeIds.length,
+            sourceId: this.meetingState.id
+          }]
+        : [];
 
     const myMeetings = this.customerMeetings.filter(
       m => m.meetingLeaderEmployeeId === empId || m.internalParticipantEmployeeIds.includes(empId)
@@ -3304,7 +3639,7 @@ export class ActionosWorkspaceService {
         sourceId: t.id
       }));
 
-    return [internal, ...customers, ...followUps, ...tasks].sort((a, b) =>
+    return [...internal, ...customers, ...followUps, ...tasks].sort((a, b) =>
       a.startsAt.localeCompare(b.startsAt)
     );
   }
