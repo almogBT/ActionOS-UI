@@ -1,0 +1,48 @@
+:host { display: block; min-width: 0; }
+
+/* Default (calendar expanded): calendar and tiles read as separate blocks,
+   spaced like they were before this component existed. */
+.cal-stats-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+
+  .stat-tile-row { margin-bottom: 0; }
+}
+
+/* Calendar collapsed → fuse calendar (header) + tiles (footer) into one card. */
+.cal-stats-card.attached {
+  gap: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+
+  /* Calendar drops its own frame and becomes the card header, with a divider
+     down to the tiles. ::ng-deep reaches into the calendar / stat-tile child
+     components; the .attached prefix keeps these overrides scoped to this card
+     so they can't leak into those components elsewhere in the app. */
+  ::ng-deep .calendar {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    border-bottom: 1px solid var(--line);
+  }
+
+  /* Tiles become flush segments instead of separate cards. */
+  .stat-tile-row { gap: 0; }
+
+  ::ng-deep .stat-tile {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+  ::ng-deep app-stat-tile + app-stat-tile .stat-tile {
+    border-inline-start: 1px solid var(--line);   /* dividers between segments */
+  }
+  ::ng-deep .stat-tile:hover {
+    box-shadow: none;
+    background: var(--surface-strong);
+  }
+}

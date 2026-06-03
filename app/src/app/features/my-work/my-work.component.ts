@@ -4,7 +4,8 @@ import { ActionosI18nService } from '../../core/i18n/actionos-i18n.service';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { CalendarEvent, CustomerMeeting, MeetingNote, Task, ViewId } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
-import { CalendarComponent } from '../../shared/calendar/calendar.component';
+import { CalendarStatsComponent } from '../../shared/calendar-stats/calendar-stats.component';
+import { MeetingCardComponent } from '../../shared/meeting-card/meeting-card.component';
 import { IconComponent } from '../../shared/icons/icon.component';
 import { AppDatePipe } from '../../shared/pipes/app-date.pipe';
 import { StatMeetingsViewComponent } from '../../shared/stat-modal/stat-meetings-view.component';
@@ -25,8 +26,8 @@ export type StatModalKey = 'overdue' | 'today' | 'followups' | 'meetings';
   standalone: true,
   imports: [
     CommonModule, TranslatePipe, AppDatePipe, InboxComponent, TaskTableComponent, IconComponent,
-    CalendarComponent, StatModalComponent, StatTasksViewComponent, StatMeetingsViewComponent,
-    StatTileComponent
+    CalendarStatsComponent, MeetingCardComponent, StatModalComponent, StatTasksViewComponent,
+    StatMeetingsViewComponent, StatTileComponent
   ],
   templateUrl: './my-work.component.html',
   styleUrl: './my-work.component.scss'
@@ -209,12 +210,6 @@ export class MyWorkComponent {
     }
   }
 
-  /** Open the meeting drawer from a meetings-popup row. */
-  openMeetingFromStat(m: CustomerMeeting): void {
-    this.closeStat();
-    this.workspace.openMeetingDrawer(m.id);
-  }
-
   /** Convert a follow-up action item to a task from inside the popup. */
   convertFollowup(item: { note: MeetingNote; meeting: CustomerMeeting }): void {
     this.workspace.convertMeetingAction(item.meeting.id, item.note.id);
@@ -224,9 +219,5 @@ export class MyWorkComponent {
 
   openView(view: ViewId): void {
     this.viewChange.emit(view);
-  }
-
-  openMeetingInView(m: CustomerMeeting): void {
-    this.workspace.openMeetingDrawer(m.id);
   }
 }

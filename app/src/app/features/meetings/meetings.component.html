@@ -3,8 +3,8 @@
   <!-- ── Header ──────────────────────────────────────────────────────────── -->
   <div class="screen-title">
     <div>
-      <span class="eyebrow">{{ 'meetingsOverview.eyebrow' | t }}</span>
-      <h2>{{ 'meetingsOverview.title' | t }}</h2>
+      <!-- Page title lives in the top navbar already; only the descriptive
+           subtitle remains here to avoid three stacked "פגישות" headings. -->
       <p class="screen-subtitle">{{ 'meetingsOverview.subtitle' | t }}</p>
     </div>
     <div class="topbar-actions">
@@ -31,16 +31,11 @@
     </div>
   </div>
 
-  <!-- ── Expandable calendar (meetings only) ─────────────────────────────── -->
-  <div class="meetings-cal-panel">
-    <app-calendar
-      [events]="meetingCalendarEvents"
-      (eventOpened)="onCalendarEventOpened($event)"
-    ></app-calendar>
-  </div>
-
-  <!-- ── Clickable KPI tiles ──────────────────────────────────────────────── -->
-  <div class="stat-tile-row">
+  <!-- ── Calendar + KPI tiles (shared seamless card) ──────────────────────── -->
+  <app-calendar-stats
+    [events]="meetingCalendarEvents"
+    (eventOpened)="onCalendarEventOpened($event)"
+  >
     <app-stat-tile
       icon="calendar" [value]="getLane('upcoming').length" [label]="'meetingsOverview.upcoming' | t"
       [zero]="getLane('upcoming').length === 0" (tileClick)="openTile('upcoming')"
@@ -53,7 +48,7 @@
       icon="check-square" [value]="openMeetingTasksCount" [label]="'meetingsOverview.openMeetingTasks' | t"
       [zero]="openMeetingTasksCount === 0" (tileClick)="openTile('open-tasks')"
     ></app-stat-tile>
-  </div>
+  </app-calendar-stats>
 
   <!-- ── Needs-your-attention carousel ───────────────────────────────────── -->
   <section *ngIf="attentionMeetings.length" class="attention-rail">
@@ -70,9 +65,7 @@
       </div>
     </div>
     <div class="carousel-track" #railTrack (wheel)="onRailWheel($event, railTrack)">
-      <ng-container *ngFor="let m of attentionMeetings">
-        <ng-container *ngTemplateOutlet="meetingCard; context: { $implicit: m, attention: true }"></ng-container>
-      </ng-container>
+      <app-meeting-card *ngFor="let m of attentionMeetings" [meeting]="m" variant="rail"></app-meeting-card>
     </div>
   </section>
 
@@ -126,74 +119,11 @@
         </div>
 
         <div *ngIf="bucket.meetings.length" class="card-grid">
-          <ng-container *ngFor="let m of bucket.meetings">
-            <ng-container *ngTemplateOutlet="meetingCard; context: { $implicit: m, attention: false }"></ng-container>
-          </ng-container>
+          <app-meeting-card *ngFor="let m of bucket.meetings" [meeting]="m"></app-meeting-card>
         </div>
       </div>
     </div>
   </section>
-
-  <!-- ── Reusable meeting card ───────────────────────────────────────────── -->
-  <ng-template #meetingCard let-m let-attention="attention">
-    <article
-      class="meeting-card"
-      [class.card-led]="isMeetingLed(m)"
-      [class.card-attention]="attention"
-      (click)="openMeeting(m)"
-    >
-      <div class="card-top">
-        <span class="status-chip" [ngClass]="workspace.statusClass(m.status)">
-          {{ ('customerMeeting.statusValues.' + m.status) | t }}
-        </span>
-        <span *ngIf="isMeetingLed(m)" class="led-badge">{{ 'meetingsOverview.ledBadge' | t }}</span>
-        <span class="card-date">{{ m.meetingDate | appDate }}</span>
-      </div>
-
-      <div class="card-body">
-        <strong class="card-customer">{{ workspace.customer(m.customerId)?.name }}</strong>
-        <p class="card-subject">{{ m.subject }}</p>
-        <p *ngIf="m.goal" class="card-goal">{{ m.goal }}</p>
-      </div>
-
-      <div class="card-footer">
-        <div class="card-people" [title]="meetingLeaderName(m)">
-          <span class="avatar">{{ leaderInitials(m) }}</span>
-          <span *ngIf="participantCount(m)" class="people-count">+{{ participantCount(m) }}</span>
-        </div>
-        <div class="card-meta">
-          <span *ngIf="m.nextMeetingDate" class="next-pill">
-            <app-icon name="calendar" [size]="11"></app-icon>
-            {{ m.nextMeetingDate | appDate }}
-          </span>
-          <span *ngIf="tasksFromMeeting(m).length" class="task-count-badge">
-            {{ tasksFromMeeting(m).length }} {{ 'common.task' | t }}
-          </span>
-        </div>
-      </div>
-
-      <!-- Inline follow-ups — convert to a task without opening the drawer -->
-      <div *ngIf="meetingActionItems(m).length" class="card-actions" (click)="$event.stopPropagation()">
-        <div class="card-actions-label">
-          <span>{{ 'meetingsOverview.followups' | t }}</span>
-          <span class="action-count-badge">{{ meetingActionItems(m).length }}</span>
-        </div>
-        <!-- Cap the inline list to one row so every card stays the same height;
-             the total count is already shown in the .action-count-badge above. -->
-        <div *ngFor="let item of meetingActionItems(m) | slice:0:1" class="card-action-row">
-          <span class="action-row-text">{{ item.content }}</span>
-          <button
-            type="button"
-            class="convert-btn ghost-action"
-            (click)="convertAction(m, item.id, $event)"
-          >{{ 'meetingsOverview.convertBtn' | t }}</button>
-        </div>
-        <span *ngIf="meetingActionItems(m).length > 1" class="action-more">
-          +{{ meetingActionItems(m).length - 1 }}
-        </span>
-      </div>
-    </article>
-  </ng-template>
 
   <!-- ── Tile popup: shared stat-modal shell ─────────────────────────────── -->
   <app-stat-modal
@@ -216,7 +146,7 @@
       *ngIf="openLens !== 'open-tasks'"
       [meetings]="lensMeetings"
       [emptyText]="'home.noMatches' | t"
-      (meetingOpened)="openMeeting($event); closeTile()"
+      (meetingOpened)="closeTile()"
     ></app-stat-meetings-view>
   </app-stat-modal>
 

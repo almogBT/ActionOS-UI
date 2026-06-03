@@ -223,7 +223,9 @@ export class CalendarComponent {
       this._cursor.set(this.startOfMonth(day.date));
     }
     this.daySelected.emit(d);
+    const wasExpanded = this.isExpanded();
     this.isExpanded.set(true);
+    if (!wasExpanded) { this.expandedChange.emit(true); }
     this.calendarMode.set('day');
   }
 

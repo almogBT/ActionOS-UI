@@ -13,12 +13,12 @@
   min-width: 0;
 }
 
-/* ── Nav tiles ── */
+/* ── Nav tiles (attached footer segments of the hero card) ── */
 .home-nav-tiles {
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: 1fr;
-  gap: 10px;
+  gap: 0;                       /* flush segments, divided by tile borders */
 }
 
 .nav-tile {
@@ -28,9 +28,10 @@
   justify-content: center;
   gap: 8px;
   padding: 16px 12px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  background: var(--bg-elevated);
+  /* Segment, not a standalone card: no outer frame, just a divider between. */
+  border: 0;
+  border-inline-start: 1px solid var(--border-subtle);
+  background: transparent;
   color: var(--text-secondary);
   font-size: 12px;
   font-weight: 700;
@@ -38,22 +39,14 @@
   cursor: pointer;
   transition:
     background var(--duration-fast) var(--ease-out),
-    color var(--duration-fast) var(--ease-out),
-    border-color var(--duration-fast) var(--ease-out),
-    transform var(--duration-fast) var(--ease-spring),
-    box-shadow var(--duration-fast) var(--ease-out);
+    color var(--duration-fast) var(--ease-out);
+
+  &:first-child { border-inline-start: 0; }
 }
 
 .nav-tile:hover {
   background: var(--accent-soft);
   color: var(--accent);
-  border-color: var(--accent);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.nav-tile:active {
-  transform: translateY(0);
 }
 
 .nav-tile-icon {
@@ -77,21 +70,38 @@
     grid-template-columns: repeat(2, 1fr);
     grid-auto-columns: unset;
   }
+  /* 2×2 grid: divider between the two columns and between the two rows. */
+  .nav-tile:nth-child(odd)  { border-inline-start: 0; }
+  .nav-tile:nth-child(even) { border-inline-start: 1px solid var(--border-subtle); }
+  .nav-tile:nth-child(n+3)  { border-block-start: 1px solid var(--border-subtle); }
+}
+
+/* Hero ("mood" tile) + nav tiles fused into one card: hero is the header, the
+   nav tiles are attached footer segments below it. */
+.home-hero-card {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  background: var(--bg-elevated);
 }
 
 .home-hero {
   display: flex;
-  align-items: center;
+  /* Buttons pinned to the TOP corner (not vertically centred), greeting on the
+     opposite corner; nowrap + a flexible text block + fixed actions keep the
+     buttons in the corner instead of wrapping below. */
+  align-items: flex-start;
   justify-content: space-between;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 18px;
   padding: 22px 26px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xl);
+  /* Header of the card: no own frame, just a divider down to the nav tiles.
+     Keeps its gradient so the hero still reads as the "mood" zone. */
+  border-bottom: 1px solid var(--border-subtle);
   background:
     radial-gradient(circle at top right, var(--accent-soft), transparent 55%),
     linear-gradient(135deg, var(--bg-elevated), var(--bg-sunken));
-  box-shadow: var(--shadow-md);
   animation: heroIn 320ms var(--ease-out);
 }
 
@@ -103,9 +113,10 @@
 .hero-text {
   display: grid;
   gap: 4px;
+  /* Grow to fill the row and shrink (summary wraps internally) so the actions
+     hold their top corner instead of being pushed to a new line. */
+  flex: 1 1 auto;
   min-width: 0;
-  /* Grow to fill the row; allow actions to wrap beneath when space is tight. */
-  flex: 1 1 260px;
 }
 
 .hero-eyebrow {
@@ -135,7 +146,8 @@
 .hero-actions {
   display: flex;
   gap: 10px;
-  flex-shrink: 0;
+  flex: 0 0 auto;          /* never shrink — hold the top corner */
+  align-self: flex-start;
 }
 
 .hero-actions .primary-action,
@@ -320,14 +332,13 @@
   &:hover { opacity: 0.7; }
 }
 
-@media (max-width: 900px) {
+/* Only stack the hero (buttons below the greeting) when genuinely too narrow
+   for the corner layout; above this the buttons stay in the top corner. */
+@media (max-width: 640px) {
   .home-hero {
     flex-direction: column;
     align-items: stretch;
   }
-
-  /* In column direction the 260px flex-basis becomes a min-height, bloating the
-     hero. Reset it so the text block is only as tall as its content. */
   .hero-text {
     flex: none;
   }

@@ -131,7 +131,12 @@
     "followups": "Follow-ups",
     "convertBtn": "→ Task",
     "scrollPrev": "Previous",
-    "scrollNext": "Next"
+    "scrollNext": "Next",
+    "recap": "Recap",
+    "openTasksMetric": "Open tasks",
+    "openActionsMetric": "Open follow-ups",
+    "blockersMetric": "Blockers",
+    "noSummary": "No summary yet."
   },
   "home": {
     "meetingsLead": "What's next",
@@ -578,7 +583,10 @@
     "prospectContactNamePlaceholder": "Primary contact name (optional)",
     "prospectContactEmailPlaceholder": "Primary contact email (optional)",
     "prospectContactPhonePlaceholder": "Primary contact phone (optional)",
-    "addAndSelect": "Add & select"
+    "addAndSelect": "Add & select",
+    "addAnyway": "Add anyway",
+    "possibleDuplicateTitle": "Possible duplicate",
+    "possibleDuplicateText": "A similar customer may already exist. Pick one below to use it, or add anyway."
   },
   "customerType": {
     "Existing": "Customer",

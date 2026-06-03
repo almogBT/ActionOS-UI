@@ -1,0 +1,101 @@
+<article class="meeting-card" (click)="onOpen()">
+  <div class="card-top">
+    <span class="status-chip" [ngClass]="workspace.statusClass(meeting.status)">
+      {{ ('customerMeeting.statusValues.' + meeting.status) | t }}
+    </span>
+    <span *ngIf="isLed" class="led-badge">{{ 'meetingsOverview.ledBadge' | t }}</span>
+    <span class="card-date">{{ meeting.meetingDate | appDate }}</span>
+  </div>
+
+  <div class="card-body">
+    <strong class="card-customer">{{ customerName }}</strong>
+    <p class="card-subject">{{ meeting.subject }}</p>
+    <p class="card-summary" *ngIf="summaryText; else noSummaryTpl">{{ summaryText }}</p>
+    <ng-template #noSummaryTpl>
+      <p class="card-summary card-summary-empty">{{ 'meetingsOverview.noSummary' | t }}</p>
+    </ng-template>
+  </div>
+
+  <!-- Outcome counts: open tasks · unresolved follow-ups · blockers -->
+  <div class="card-metrics">
+    <span class="metric" [class.metric-zero]="openTaskCount === 0"
+      [title]="'meetingsOverview.openTasksMetric' | t">
+      <app-icon name="check-square" [size]="13"></app-icon>{{ openTaskCount }}
+    </span>
+    <span class="metric" [class.metric-zero]="unresolvedActionCount === 0"
+      [title]="'meetingsOverview.openActionsMetric' | t">
+      <app-icon name="zap" [size]="13"></app-icon>{{ unresolvedActionCount }}
+    </span>
+    <span class="metric metric-danger" [class.metric-zero]="blockerCount === 0"
+      [title]="'meetingsOverview.blockersMetric' | t">
+      <app-icon name="alert-triangle" [size]="13"></app-icon>{{ blockerCount }}
+    </span>
+  </div>
+
+  <div class="card-footer">
+    <div class="card-people" [title]="leaderName">
+      <span class="avatar">{{ leaderInitials }}</span>
+      <span *ngIf="participantCount" class="people-count">+{{ participantCount }}</span>
+    </div>
+    <button type="button" class="recap-btn" (click)="openRecap($event)">
+      <app-icon name="file-text" [size]="13"></app-icon>
+      <span>{{ 'meetingsOverview.recap' | t }}</span>
+    </button>
+  </div>
+</article>
+
+<!-- ── Read-only recap popup ─────────────────────────────────────────────── -->
+<app-stat-modal
+  *ngIf="recapOpen"
+  [eyebrow]="'recap.title' | t"
+  [title]="meeting.subject"
+  [closeLabel]="'common.close' | t"
+  (close)="closeRecap()"
+>
+  <div class="recap-view" (click)="$event.stopPropagation()">
+    <p class="recap-meta">
+      {{ customerName }}
+      · {{ meeting.meetingDate | appDate }}
+      · {{ ('customerMeeting.statusValues.' + meeting.status) | t }}
+      · {{ 'recap.ledBy' | t }} {{ leaderName }}
+    </p>
+
+    <section class="recap-section">
+      <h4>{{ 'recap.whatHappened' | t }}</h4>
+      <p class="recap-text" [class.recap-muted]="!summaryText">
+        {{ summaryText || ('meetingsOverview.noSummary' | t) }}
+      </p>
+    </section>
+
+    <section class="recap-section" *ngIf="notesOfType('decision').length">
+      <h4>{{ 'recap.decisions' | t }}</h4>
+      <ul>
+        <li *ngFor="let d of notesOfType('decision')">{{ d.content }}</li>
+      </ul>
+    </section>
+
+    <section class="recap-section" *ngIf="blockerCount">
+      <h4>{{ 'recap.blockers' | t }} <span class="recap-count danger">{{ blockerCount }}</span></h4>
+      <ul>
+        <li *ngFor="let b of notesOfType('blocker')" class="recap-blocker">{{ b.content }}</li>
+      </ul>
+    </section>
+
+    <section class="recap-section" *ngIf="meetingActionItems().length">
+      <h4>{{ 'meetingsOverview.followups' | t }} <span class="recap-count">{{ meetingActionItems().length }}</span></h4>
+      <div *ngFor="let a of meetingActionItems()" class="recap-action">
+        <span>{{ a.content }}</span>
+        <button type="button" class="convert-btn ghost-action" (click)="convertAction(a.id, $event)">
+          {{ 'meetingsOverview.convertBtn' | t }}
+        </button>
+      </div>
+    </section>
+
+    <section class="recap-section" *ngIf="tasksFromMeeting().length">
+      <h4>{{ 'recap.tasksCreated' | t }} <span class="recap-count">{{ tasksFromMeeting().length }}</span></h4>
+      <ul>
+        <li *ngFor="let t of tasksFromMeeting()" [class.recap-done]="isTaskDone(t)">{{ t.title }}</li>
+      </ul>
+    </section>
+  </div>
+</app-stat-modal>

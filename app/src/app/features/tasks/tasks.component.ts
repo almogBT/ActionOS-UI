@@ -5,7 +5,7 @@ import { ActionosI18nService } from '../../core/i18n/actionos-i18n.service';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { CalendarEvent, Task, ViewId } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
-import { CalendarComponent } from '../../shared/calendar/calendar.component';
+import { CalendarStatsComponent } from '../../shared/calendar-stats/calendar-stats.component';
 import { StatTileComponent } from '../../shared/stat-tile/stat-tile.component';
 import { TaskTableComponent } from '../../shared/task-table/task-table.component';
 import { MetricTasksModalComponent } from '../workspace-home/metric-tasks-modal.component';
@@ -25,7 +25,7 @@ export type TaskLens     = 'open' | 'overdue' | 'today' | 'blocked';
     CommonModule,
     FormsModule,
     TranslatePipe,
-    CalendarComponent,
+    CalendarStatsComponent,
     StatTileComponent,
     TaskTableComponent,
     MetricTasksModalComponent,

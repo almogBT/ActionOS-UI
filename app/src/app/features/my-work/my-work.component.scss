@@ -22,12 +22,45 @@
   min-height: 0;
 }
 
-.screen-title,
-app-calendar,
-.stat-tile-row,
+.mw-hero-card,
+app-calendar-stats,
 .mw-summary,
-.mw-tabs,
 .mw-toolbar { flex-shrink: 0; }
+
+/* ── Mood tile (greeting) + tab navigation fused into one card ─────────── */
+.mw-hero-card {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  background: var(--bg-elevated);
+}
+
+.mw-hero {
+  padding: 22px 26px;
+  /* Header of the card: keeps a gradient "mood" wash, divider down to tabs. */
+  border-bottom: 1px solid var(--border-subtle);
+  background:
+    radial-gradient(circle at top right, var(--accent-soft), transparent 55%),
+    linear-gradient(135deg, var(--bg-elevated), var(--bg-sunken));
+
+  .eyebrow {
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  h2 {
+    margin: 4px 0 0;
+    font-size: clamp(20px, 3.5vw, 28px);
+    line-height: 1.1;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+  }
+}
 
 /* The scrolling region for the Tasks / Meetings tabs; the Inbox fills the same
    space and manages its own internal feed scroll. */
@@ -139,45 +172,47 @@ app-calendar,
   .mw-stat-text strong { font-size: 19px; }
 }
 
-/* ── Tab strip (segmented control: icon + label + count) ──────────────── */
+/* ── Tab strip — attached footer of the mood card: full-width flush segments
+      (like the home nav tiles) with an active-tab underline. ─────────────── */
 .mw-tabs {
-  display: inline-flex;
-  gap: 4px;
-  width: fit-content;
-  max-width: 100%;
-  align-self: center;     /* centre the navigator within the page column */
-  padding: 5px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-pill);
-  background: var(--glass-soft);
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;        /* equal-width segments */
+  gap: 0;
+  background: var(--bg-elevated);
 
   button {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    min-height: 38px;
-    padding: 0 16px;
-    border: 1px solid transparent;
-    border-radius: var(--radius-pill);
+    min-height: 48px;
+    padding: 0 12px;
+    border: 0;
+    border-inline-start: 1px solid var(--border-subtle);   /* segment divider */
+    border-bottom: 2px solid transparent;                  /* active underline slot */
     background: transparent;
     color: var(--text-secondary);
     font-size: 13px;
     font-weight: 700;
     white-space: nowrap;
+    cursor: pointer;
     transition:
       background var(--duration-fast) var(--ease-out),
       color var(--duration-fast) var(--ease-out),
-      box-shadow var(--duration-fast) var(--ease-out);
+      border-color var(--duration-fast) var(--ease-out);
+
+    &:first-child { border-inline-start: 0; }
 
     &:hover:not(.active) {
       color: var(--ink);
-      background: var(--bg-elevated);
+      background: var(--accent-soft);
     }
 
     &.active {
-      color: #fff;
-      background: linear-gradient(135deg, var(--accent-strong), var(--accent));
-      box-shadow: 0 8px 18px rgba(0, 120, 120, 0.20);
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-bottom-color: var(--accent);
     }
   }
 }
@@ -198,7 +233,7 @@ app-calendar,
 }
 
 .mw-tabs button.active .mw-tab-count {
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--accent);
   color: #fff;
 }
 
@@ -430,155 +465,12 @@ app-calendar,
 .sep { opacity: 0.4; }
 .overdue-date { color: var(--danger); font-weight: 500; }
 
-/* ── Meeting Rail ─────────────────────────────────────────────────────── */
-.meeting-rail {
-  display: flex;
-  flex-direction: column;
+/* ── Meetings tab grid (uses the shared <app-meeting-card>) ────────────── */
+.mw-meeting-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  align-items: start;
   gap: 10px;
-}
-
-/* ── Meeting Tile ─────────────────────────────────────────────────────── */
-.meeting-tile {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 14px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: var(--bg-elevated);
-  cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s;
-
-  &:hover {
-    border-color: var(--muted);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  }
-
-  &.tile-led {
-    border-left: 3px solid var(--accent);
-  }
-}
-
-.tile-top {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  min-height: 22px;
-}
-
-.led-badge {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--accent);
-  background: var(--accent-soft);
-  padding: 2px 7px;
-  border-radius: 999px;
-}
-
-.tile-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-}
-
-.tile-customer {
-  font-size: 14px;
-  font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  display: block;
-}
-
-.tile-subject {
-  font-size: 12px;
-  color: var(--muted);
-  margin: 0;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
-
-.tile-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 8px;
-  border-top: 1px solid var(--line);
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.tile-date { white-space: nowrap; }
-
-.tile-task-count {
-  font-size: 12px;
-  color: var(--muted);
-  white-space: nowrap;
-}
-
-/* ── Inline meeting follow-ups ────────────────────────────────────────── */
-.tile-actions {
-  border-top: 1px solid var(--line);
-  padding-top: 10px;
-  margin-top: 2px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.tile-actions-label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--muted);
-  margin-bottom: 4px;
-}
-
-.action-count-badge {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--danger);
-  background: var(--danger-soft);
-  border-radius: 999px;
-  padding: 1px 7px;
-}
-
-.tile-action-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 5px 0;
-  border-bottom: 1px solid var(--line);
-
-  &:last-child { border-bottom: none; }
-}
-
-.action-row-text {
-  font-size: 13px;
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  color: var(--ink);
-}
-
-.convert-btn {
-  flex-shrink: 0;
-  font-size: 12px !important;
-  padding: 4px 10px !important;
-  white-space: nowrap;
 }
 
 /* ── Task Table (Monday-style) ────────────────────────────────────────── */

@@ -3,6 +3,7 @@ import {
   Component, ElementRef, EventEmitter, Input, OnDestroy, Output, forwardRef
 } from '@angular/core';
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { customerNameMatchesSearch } from '../../core/utils/customer-name-match';
 
 export interface SelectOption {
   value: any;
@@ -179,6 +180,12 @@ export class SearchableSelectComponent implements ControlValueAccessor, OnDestro
   @Input() placeholder = 'Select…';
   @Input() createNewLabel: string | null = null;
   @Input() openUp = false;
+  /**
+   * When true, option labels are matched with the language-aware customer
+   * matcher so a Hebrew-stored name surfaces for an English query (and vice-versa).
+   * Opt-in so non-customer selects keep plain substring matching.
+   */
+  @Input() crossLanguageMatch = false;
   @Output() createNew = new EventEmitter<void>();
 
   value: any = null;
@@ -219,6 +226,11 @@ export class SearchableSelectComponent implements ControlValueAccessor, OnDestro
   get filteredOptions(): SelectOption[] {
     if (!this.searchText) return this.options;
     const q = this.searchText.toLowerCase();
+    if (this.crossLanguageMatch) {
+      return this.options.filter(o =>
+        o.label.toLowerCase().includes(q) || customerNameMatchesSearch(o.label, this.searchText)
+      );
+    }
     return this.options.filter(o => o.label.toLowerCase().includes(q));
   }
 

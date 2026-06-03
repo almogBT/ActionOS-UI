@@ -8,8 +8,9 @@ import {
   Task, TaskStatus, ViewId
 } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
-import { CalendarComponent } from '../../shared/calendar/calendar.component';
+import { CalendarStatsComponent } from '../../shared/calendar-stats/calendar-stats.component';
 import { IconComponent } from '../../shared/icons/icon.component';
+import { MeetingCardComponent } from '../../shared/meeting-card/meeting-card.component';
 import { AppDatePipe } from '../../shared/pipes/app-date.pipe';
 import { SearchableSelectComponent, SelectOption } from '../../shared/searchable-select/searchable-select.component';
 import { StatTileComponent } from '../../shared/stat-tile/stat-tile.component';
@@ -34,7 +35,8 @@ export type TaskLens = 'all' | 'open' | 'overdue' | 'blocked';
   standalone: true,
   imports: [
     CommonModule, FormsModule, TranslatePipe, AppDatePipe, IconComponent,
-    SearchableSelectComponent, StatTileComponent, CalendarComponent, TaskTableComponent
+    SearchableSelectComponent, StatTileComponent, CalendarStatsComponent, TaskTableComponent,
+    MeetingCardComponent
   ],
   templateUrl: './boards.component.html',
   styleUrl: './boards.component.scss'

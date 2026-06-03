@@ -78,8 +78,11 @@
         </div>
       </section>
 
-      <!-- Stat tiles -->
-      <div class="stat-tile-row">
+      <!-- Calendar + stat tiles (shared seamless card) -->
+      <app-calendar-stats
+        [events]="clientCalendarEvents"
+        (eventOpened)="onCalEventOpened($event)"
+      >
         <app-stat-tile
           icon="check-square" [value]="clientOpenCount" [label]="'boards.openTasks' | t"
           [zero]="clientOpenCount === 0" (tileClick)="openLens('tasks', 'open')"
@@ -96,7 +99,7 @@
           icon="calendar" [value]="clientMeetingCount" [label]="'boards.meetings' | t"
           [zero]="clientMeetingCount === 0" (tileClick)="selectTab('meetings')"
         ></app-stat-tile>
-      </div>
+      </app-calendar-stats>
 
       <!-- Tab strip -->
       <div class="board-tabs" role="tablist">
@@ -110,9 +113,8 @@
       </div>
 
       <!-- ── Overview tab ─────────────────────────────────────────────────── -->
+      <!-- Calendar moved up into the shared calendar+stats card above. -->
       <ng-container *ngIf="activeTab === 'overview'">
-        <app-calendar [events]="clientCalendarEvents" (eventOpened)="onCalEventOpened($event)"></app-calendar>
-
         <div class="overview-grid">
           <!-- Latest recap (compact) -->
           <section class="panel">
@@ -150,15 +152,11 @@
               <span class="eyebrow">{{ 'boards.meetings' | t }}</span>
               <h3>{{ 'boards.clientMeetingsTitle' | t }}</h3>
             </div>
-            <div class="entity-list" *ngIf="clientMeetingsSorted.length; else noMeetingsMini">
-              <div *ngFor="let meeting of clientMeetingsSorted | slice:0:5" class="entity-row clickable" (click)="openMeeting(meeting.id)">
-                <div class="entity-main">
-                  <strong>{{ meeting.subject }}</strong>
-                  <small>{{ meeting.meetingDate | appDate }} · {{ workspace.employeeName(meeting.meetingLeaderEmployeeId) }}</small>
-                </div>
-                <span class="count-badge">{{ meetingTaskCountFor(meeting.id) }} {{ 'boards.tasksLabel' | t }}</span>
-                <span class="status-chip" [ngClass]="workspace.statusClass(meeting.status)">{{ meeting.status }}</span>
-              </div>
+            <div class="board-meeting-grid" *ngIf="clientMeetingsSorted.length; else noMeetingsMini">
+              <app-meeting-card
+                *ngFor="let meeting of clientMeetingsSorted | slice:0:4"
+                [meeting]="meeting"
+              ></app-meeting-card>
             </div>
             <ng-template #noMeetingsMini>
               <div class="empty-state"><strong>{{ 'boards.noMeetings' | t }}</strong></div>
@@ -241,14 +239,11 @@
               <span class="eyebrow">{{ 'boards.meetings' | t }}</span>
               <h3>{{ 'boards.earlierMeetings' | t }}</h3>
             </div>
-            <div class="entity-list">
-              <div *ngFor="let meeting of clientMeetingsSorted | slice:1" class="entity-row clickable" (click)="openMeeting(meeting.id)">
-                <div class="entity-main">
-                  <strong>{{ meeting.subject }}</strong>
-                  <small>{{ meeting.meetingDate | appDate }} · {{ workspace.employeeName(meeting.meetingLeaderEmployeeId) }}</small>
-                </div>
-                <span class="status-chip" [ngClass]="workspace.statusClass(meeting.status)">{{ meeting.status }}</span>
-              </div>
+            <div class="board-meeting-grid">
+              <app-meeting-card
+                *ngFor="let meeting of clientMeetingsSorted | slice:1"
+                [meeting]="meeting"
+              ></app-meeting-card>
             </div>
           </section>
         </ng-container>
@@ -260,32 +255,8 @@
       <!-- ── Meetings tab ─────────────────────────────────────────────────── -->
       <ng-container *ngIf="activeTab === 'meetings'">
         <section class="panel">
-          <div class="meeting-rail" *ngIf="clientMeetings.length; else noMeetingsFull">
-            <article *ngFor="let m of clientMeetings" class="meeting-tile" (click)="openMeeting(m.id)">
-              <div class="tile-top">
-                <span class="status-chip" [ngClass]="workspace.statusClass(m.status)">{{ m.status }}</span>
-                <span class="tile-task-count" *ngIf="meetingTaskCountFor(m.id)">{{ meetingTaskCountFor(m.id) }} {{ 'boards.tasksLabel' | t }}</span>
-              </div>
-              <div class="tile-body">
-                <strong class="tile-subject-strong">{{ m.subject }}</strong>
-                <p class="tile-recap" *ngIf="recapText(m)">{{ recapText(m) }}</p>
-              </div>
-              <div class="tile-footer">
-                <span class="tile-date">{{ m.meetingDate | appDate }}</span>
-                <span>{{ workspace.employeeName(m.meetingLeaderEmployeeId) }}</span>
-              </div>
-
-              <div *ngIf="pendingActions(m).length" class="tile-actions" (click)="$event.stopPropagation()">
-                <div class="tile-actions-label">
-                  <span>{{ 'myWork.followups.title' | t }}</span>
-                  <span class="action-count-badge">{{ pendingActions(m).length }}</span>
-                </div>
-                <div *ngFor="let n of pendingActions(m)" class="tile-action-row">
-                  <span class="action-row-text">{{ n.content }}</span>
-                  <button type="button" class="convert-btn ghost-action" (click)="convertAction(m.id, n.id)">{{ 'myWork.followups.convertBtn' | t }}</button>
-                </div>
-              </div>
-            </article>
+          <div class="board-meeting-grid" *ngIf="clientMeetings.length; else noMeetingsFull">
+            <app-meeting-card *ngFor="let m of clientMeetings" [meeting]="m"></app-meeting-card>
           </div>
           <ng-template #noMeetingsFull>
             <div class="empty-state"><strong>{{ 'boards.noMeetings' | t }}</strong></div>

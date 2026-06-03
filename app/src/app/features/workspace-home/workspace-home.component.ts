@@ -7,7 +7,8 @@ import { CalendarEvent, Customer, MeetingNote, Task, ViewId } from '../../core/m
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
 import { IconComponent } from '../../shared/icons/icon.component';
 import { CustomerListComponent } from '../customers/customer-list.component';
-import { CalendarComponent } from '../../shared/calendar/calendar.component';
+import { CalendarStatsComponent } from '../../shared/calendar-stats/calendar-stats.component';
+import { StatTileComponent } from '../../shared/stat-tile/stat-tile.component';
 import { ACTIONOS_NAV_ITEMS } from '../../core/config/actionos-ui.config';
 import { IconName } from '../../shared/icons/icon.component';
 import { BoardPreviewModalComponent, BoardPreviewType } from './board-preview-modal.component';
@@ -21,7 +22,7 @@ export type HomeCalFilter = 'all' | 'my-work' | 'i-opened' | 'opened-for-me' | '
 @Component({
   selector: 'app-workspace-home',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe, IconComponent, CustomerListComponent, MetricTasksModalComponent, BoardPreviewModalComponent, CalendarComponent],
+  imports: [CommonModule, FormsModule, TranslatePipe, IconComponent, CustomerListComponent, MetricTasksModalComponent, BoardPreviewModalComponent, CalendarStatsComponent, StatTileComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './workspace-home.component.html',
   styleUrl: './workspace-home.component.scss'

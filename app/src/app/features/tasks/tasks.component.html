@@ -10,16 +10,11 @@
     <button type="button" class="ghost-action" (click)="openView('my-work')">{{ 'tasks.openMyWork' | t }}</button>
   </div>
 
-  <!-- ── Expandable calendar (tasks only) ────────────────────────────────── -->
-  <div class="tasks-cal-panel">
-    <app-calendar
-      [events]="taskCalendarEvents"
-      (eventOpened)="onCalendarEventOpened($event)"
-    ></app-calendar>
-  </div>
-
-  <!-- ── Stat tiles (clickable → popup list) ─────────────────────────────── -->
-  <div class="stat-tile-row">
+  <!-- ── Calendar + stat tiles (shared seamless card) ────────────────────── -->
+  <app-calendar-stats
+    [events]="taskCalendarEvents"
+    (eventOpened)="onCalendarEventOpened($event)"
+  >
     <app-stat-tile
       icon="check-square" [value]="openCount" [label]="'tasks.tiles.open' | t"
       [zero]="openCount === 0" (tileClick)="openTile('open')"
@@ -36,7 +31,7 @@
       icon="bell" [value]="blockedCount" [label]="'tasks.tiles.blocked' | t"
       [zero]="blockedCount === 0" (tileClick)="openTile('blocked')"
     ></app-stat-tile>
-  </div>
+  </app-calendar-stats>
 
   <!-- ── Controls: audience filter · origin · search ─────────────────────── -->
   <div class="tasks-controls">

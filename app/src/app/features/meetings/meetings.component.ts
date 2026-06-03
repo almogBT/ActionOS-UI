@@ -7,9 +7,9 @@ import {
   CalendarEvent, Customer, CustomerMeeting, CustomerMeetingStatus, MeetingNote, Task, ViewId
 } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
-import { CalendarComponent } from '../../shared/calendar/calendar.component';
+import { CalendarStatsComponent } from '../../shared/calendar-stats/calendar-stats.component';
 import { IconComponent } from '../../shared/icons/icon.component';
-import { AppDatePipe } from '../../shared/pipes/app-date.pipe';
+import { MeetingCardComponent } from '../../shared/meeting-card/meeting-card.component';
 import { SearchableSelectComponent, SelectOption } from '../../shared/searchable-select/searchable-select.component';
 import { StatMeetingsViewComponent } from '../../shared/stat-modal/stat-meetings-view.component';
 import { StatModalComponent } from '../../shared/stat-modal/stat-modal.component';
@@ -29,7 +29,7 @@ interface LaneBucket {
 @Component({
   selector: 'app-meetings',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe, AppDatePipe, SearchableSelectComponent, CalendarComponent, IconComponent, StatModalComponent, StatMeetingsViewComponent, StatTasksViewComponent, StatTileComponent],
+  imports: [CommonModule, FormsModule, TranslatePipe, MeetingCardComponent, SearchableSelectComponent, CalendarStatsComponent, IconComponent, StatModalComponent, StatMeetingsViewComponent, StatTasksViewComponent, StatTileComponent],
   templateUrl: './meetings.component.html',
   styleUrl: './meetings.component.scss'
 })
@@ -173,11 +173,9 @@ export class MeetingsComponent implements OnInit, OnChanges {
     }
   }
 
-  // ── Per-meeting helpers (cards) ─────────────────────────────────────────────
-
-  tasksFromMeeting(m: CustomerMeeting): Task[] {
-    return this.workspace.meetingTasksByMeeting(m.id);
-  }
+  // ── Per-meeting helpers used by filtering / attention rail ──────────────────
+  // Card display + recap moved into the shared <app-meeting-card>; only the
+  // helpers the lane/attention filters depend on remain here.
 
   isMeetingLed(m: CustomerMeeting): boolean {
     return m.meetingLeaderEmployeeId === this.workspace.currentEmployeeId;
@@ -185,28 +183,6 @@ export class MeetingsComponent implements OnInit, OnChanges {
 
   meetingActionItems(m: CustomerMeeting): MeetingNote[] {
     return m.notes.filter(n => n.type === 'action' && !n.convertedTaskId);
-  }
-
-  meetingLeaderName(m: CustomerMeeting): string {
-    return this.workspace.employeeName(m.meetingLeaderEmployeeId);
-  }
-
-  leaderInitials(m: CustomerMeeting): string {
-    return this.initials(this.meetingLeaderName(m));
-  }
-
-  /** Extra attendees beyond the leader (internal teammates + customer side). */
-  participantCount(m: CustomerMeeting): number {
-    return m.internalParticipantEmployeeIds.length + m.customerParticipants.length;
-  }
-
-  private initials(name: string): string {
-    return (name || '?')
-      .trim()
-      .split(/\s+/)
-      .slice(0, 2)
-      .map(part => part[0]?.toUpperCase() ?? '')
-      .join('') || '?';
   }
 
   private isThisWeek(m: CustomerMeeting): boolean {
@@ -280,12 +256,6 @@ export class MeetingsComponent implements OnInit, OnChanges {
 
   openTask(task: Task): void {
     this.workspace.selectMeetingTask(task);
-  }
-
-  /** Turn a meeting follow-up note into a task without leaving the page. */
-  convertAction(m: CustomerMeeting, noteId: string, evt: Event): void {
-    evt.stopPropagation();
-    this.workspace.convertMeetingAction(m.id, noteId);
   }
 
   /** Scroll the attention carousel by ~one viewport. dir: -1 prev, +1 next. */

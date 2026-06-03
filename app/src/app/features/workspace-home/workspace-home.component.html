@@ -1,90 +1,86 @@
 <section class="home-screen">
-  <!-- HERO -->
-  <header class="home-hero">
-    <div class="hero-text">
-      <span class="hero-eyebrow">{{ todayLabel() }}</span>
-      <h1>{{ greeting() }}, {{ firstName() }}.</h1>
-      <p>{{ summaryLine() }}</p>
-    </div>
-    <div class="hero-actions">
-      <button type="button" class="primary-action" (click)="openView('my-work')">
-        <app-icon name="check-square" [size]="14"></app-icon>
-        <span>{{ 'home.planMyDay' | t }}</span>
-      </button>
-      <button type="button" class="ghost-action" (click)="openView('inbox')">
-        <app-icon name="inbox" [size]="14"></app-icon>
-        <span>{{ 'home.triageInbox' | t }}</span>
-      </button>
-    </div>
-  </header>
-
-  <!-- NAV TILES -->
-  <nav class="home-nav-tiles" aria-label="Navigate to section">
-    <button
-      *ngFor="let item of navTiles"
-      type="button"
-      class="nav-tile"
-      (click)="openView(item.id)"
-    >
-      <span class="nav-tile-icon">
-        <app-icon [name]="iconFor(item.id)" [size]="22"></app-icon>
-      </span>
-      <span class="nav-tile-label">{{ ('nav.' + item.id) | t }}</span>
-    </button>
-  </nav>
-
-  <!-- TEAM CALENDAR -->
-  <div class="home-cal-panel">
-    <app-calendar
-      [events]="homeCalEvents()"
-      [hasFilter]="true"
-      (eventOpened)="onHomeCalEventOpened($event)"
-    >
-      <div calendarFilters class="filter-strip">
-        <button type="button" [class.active]="homeCalFilter() === 'all'"
-          (click)="homeCalFilter.set('all')">{{ 'home.calendar.filterAll' | t }}</button>
-        <button type="button" [class.active]="homeCalFilter() === 'my-work'"
-          (click)="homeCalFilter.set('my-work')">{{ 'home.calendar.filterMyWork' | t }}</button>
-        <button type="button" [class.active]="homeCalFilter() === 'i-opened'"
-          (click)="homeCalFilter.set('i-opened')">{{ 'home.calendar.filterIOpened' | t }}</button>
-        <button type="button" [class.active]="homeCalFilter() === 'opened-for-me'"
-          (click)="homeCalFilter.set('opened-for-me')">{{ 'home.calendar.filterOpenedForMe' | t }}</button>
-        <button type="button" [class.active]="homeCalFilter() === 'by-employee'"
-          (click)="homeCalFilter.set('by-employee')">{{ 'home.calendar.filterByEmployee' | t }}</button>
-        <select
-          *ngIf="homeCalFilter() === 'by-employee'"
-          class="filter-select"
-          [ngModel]="homeCalEmpId()"
-          (ngModelChange)="homeCalEmpId.set($event)"
-        >
-          <option value="">{{ 'home.calendar.selectEmployee' | t }}</option>
-          <option *ngFor="let e of workspace.employees" [value]="e.id">{{ e.fullName }}</option>
-        </select>
+  <!-- HERO + NAV TILES (one connected card) -->
+  <div class="home-hero-card">
+    <!-- HERO ("mood" tile) — header of the card -->
+    <header class="home-hero">
+      <div class="hero-text">
+        <span class="hero-eyebrow">{{ todayLabel() }}</span>
+        <h1>{{ greeting() }}, {{ firstName() }}.</h1>
+        <p>{{ summaryLine() }}</p>
       </div>
-    </app-calendar>
+      <div class="hero-actions">
+        <button type="button" class="primary-action" (click)="openView('my-work')">
+          <app-icon name="check-square" [size]="14"></app-icon>
+          <span>{{ 'home.planMyDay' | t }}</span>
+        </button>
+        <button type="button" class="ghost-action" (click)="openView('inbox')">
+          <app-icon name="inbox" [size]="14"></app-icon>
+          <span>{{ 'home.triageInbox' | t }}</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- NAV TILES — attached footer segments of the card -->
+    <nav class="home-nav-tiles" aria-label="Navigate to section">
+      <button
+        *ngFor="let item of navTiles"
+        type="button"
+        class="nav-tile"
+        (click)="openView(item.id)"
+      >
+        <span class="nav-tile-icon">
+          <app-icon [name]="iconFor(item.id)" [size]="22"></app-icon>
+        </span>
+        <span class="nav-tile-label">{{ ('nav.' + item.id) | t }}</span>
+      </button>
+    </nav>
   </div>
 
-  <!-- METRICS -->
-  <div class="metric-grid home-metrics">
-    <article class="metric clickable" role="button" tabindex="0"
-      (click)="openMetricModal('open')" (keydown.enter)="openMetricModal('open')">
-      <span>{{ 'home.openWork' | t }}</span>
-      <strong>{{ workspace.openOperationalTaskCount }}</strong>
-      <small>Across meetings and boards</small>
-    </article>
-    <article class="metric attention clickable" role="button" tabindex="0"
-      (click)="openMetricModal('overdue')" (keydown.enter)="openMetricModal('overdue')">
-      <span>{{ 'home.overdue' | t }}</span>
-      <strong>{{ workspace.overdueOperationalTaskCount }}</strong>
-      <small>{{ 'home.needsReview' | t }}</small>
-    </article>
-    <article class="metric clickable" role="button" tabindex="0"
-      (click)="openMetricModal('blocked')" (keydown.enter)="openMetricModal('blocked')">
-      <span>{{ 'home.blocked' | t }}</span>
-      <strong>{{ workspace.blockedOperationalTaskCount }}</strong>
-      <small>{{ 'home.needsAttention' | t }}</small>
-    </article>
-  </div>
+  <!-- TEAM CALENDAR + METRICS (shared seamless card) -->
+  <!-- Metrics are now standard stat tiles for a consistent look app-wide; the
+       click targets (openMetricModal) and the team-calendar people filter are
+       unchanged. The filter strip is forwarded into the calendar header. -->
+  <app-calendar-stats
+    [events]="homeCalEvents()"
+    [hasFilter]="true"
+    (eventOpened)="onHomeCalEventOpened($event)"
+  >
+    <div calendarFilters class="filter-strip">
+      <button type="button" [class.active]="homeCalFilter() === 'all'"
+        (click)="homeCalFilter.set('all')">{{ 'home.calendar.filterAll' | t }}</button>
+      <button type="button" [class.active]="homeCalFilter() === 'my-work'"
+        (click)="homeCalFilter.set('my-work')">{{ 'home.calendar.filterMyWork' | t }}</button>
+      <button type="button" [class.active]="homeCalFilter() === 'i-opened'"
+        (click)="homeCalFilter.set('i-opened')">{{ 'home.calendar.filterIOpened' | t }}</button>
+      <button type="button" [class.active]="homeCalFilter() === 'opened-for-me'"
+        (click)="homeCalFilter.set('opened-for-me')">{{ 'home.calendar.filterOpenedForMe' | t }}</button>
+      <button type="button" [class.active]="homeCalFilter() === 'by-employee'"
+        (click)="homeCalFilter.set('by-employee')">{{ 'home.calendar.filterByEmployee' | t }}</button>
+      <select
+        *ngIf="homeCalFilter() === 'by-employee'"
+        class="filter-select"
+        [ngModel]="homeCalEmpId()"
+        (ngModelChange)="homeCalEmpId.set($event)"
+      >
+        <option value="">{{ 'home.calendar.selectEmployee' | t }}</option>
+        <option *ngFor="let e of workspace.employees" [value]="e.id">{{ e.fullName }}</option>
+      </select>
+    </div>
+
+    <app-stat-tile
+      icon="check-square" [value]="workspace.openOperationalTaskCount" [label]="'home.openWork' | t"
+      [zero]="workspace.openOperationalTaskCount === 0" (tileClick)="openMetricModal('open')"
+    ></app-stat-tile>
+    <app-stat-tile
+      icon="alert-triangle" [value]="workspace.overdueOperationalTaskCount" [label]="'home.overdue' | t"
+      [tone]="workspace.overdueOperationalTaskCount > 0 ? 'danger' : 'normal'"
+      [zero]="workspace.overdueOperationalTaskCount === 0" (tileClick)="openMetricModal('overdue')"
+    ></app-stat-tile>
+    <app-stat-tile
+      icon="bell" [value]="workspace.blockedOperationalTaskCount" [label]="'home.blocked' | t"
+      [zero]="workspace.blockedOperationalTaskCount === 0" (tileClick)="openMetricModal('blocked')"
+    ></app-stat-tile>
+  </app-calendar-stats>
 
   <!-- BOARD PREVIEW POPUP -->
   <app-board-preview-modal

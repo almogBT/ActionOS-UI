@@ -7,6 +7,7 @@ import {
   Attachment, CreateCustomerMeetingInput, CreateMeetingNoteInput, Customer, CustomerMeeting, CustomerMeetingStatus, CustomerParticipant, Employee, MeetingNote, NoteType, ProgressionNote, Task, UpdateMeetingNoteInput } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
 import { SearchableSelectComponent, SelectOption } from '../../shared/searchable-select/searchable-select.component';
+import { findSimilarCustomers, SimilarCustomerMatch } from '../../core/utils/customer-name-match';
 import { MeetingTaskCreationComponent } from './meeting-task-creation.component';
 import { MeetingPrepBriefComponent } from './meeting-prep-brief.component';
 import { NoteDetailModalComponent } from './note-detail-modal.component';
@@ -89,6 +90,7 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
                 [(ngModel)]="pickedCustomerId"
                 (ngModelChange)="onProspectOrCustomerPicked()"
                 [options]="customerSelectOptions"
+                [crossLanguageMatch]="true"
                 [createNewLabel]="'+ ' + ('customers.addNewProspect' | t)"
                 (createNew)="showProspectForm = true"
               ></app-searchable-select>
@@ -102,6 +104,19 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
                   [placeholder]="'customers.prospectNamePlaceholder' | t"
                   (click)="$event.stopPropagation()"
                 />
+
+                <div class="dup-warning" *ngIf="prospectDuplicateMatches.length">
+                  <strong class="dup-warning-title">⚠ {{ 'customers.possibleDuplicateTitle' | t }}</strong>
+                  <p class="dup-warning-text">{{ 'customers.possibleDuplicateText' | t }}</p>
+                  <ul class="dup-warning-list">
+                    <li *ngFor="let match of prospectDuplicateMatches">
+                      <button type="button" class="dup-match" (click)="useExistingCustomer(match.customer)">
+                        <span class="dup-match-name">{{ match.customer.name }}</span>
+                        <small>{{ ('customerType.' + match.customer.type) | t }}</small>
+                      </button>
+                    </li>
+                  </ul>
+                </div>
                 <input
                   type="text"
                   name="prospectContactName"
@@ -124,8 +139,14 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
                   (click)="$event.stopPropagation()"
                 />
                 <div class="prospect-form-actions">
-                  <button type="button" class="primary-action" [disabled]="!canAddProspect()" (click)="addProspect()">
-                    {{ 'customers.addAndSelect' | t }}
+                  <button
+                    type="button"
+                    class="primary-action"
+                    [class.warn-action]="prospectDuplicateMatches.length"
+                    [disabled]="!canAddProspect()"
+                    (click)="addProspect()"
+                  >
+                    {{ (prospectDuplicateMatches.length ? 'customers.addAnyway' : 'customers.addAndSelect') | t }}
                   </button>
                   <button type="button" class="ghost-action" (click)="cancelProspectForm()">
                     {{ 'common.cancel' | t }}
@@ -849,6 +870,33 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
       background: var(--bg-canvas);
       margin-top: 8px;
     }
+    .dup-warning {
+      border: 1px solid #d9a400;
+      background: rgba(217, 164, 0, 0.10);
+      border-radius: 10px;
+      padding: 8px 10px;
+    }
+    .dup-warning-title { color: #8a6d00; font-size: 12px; }
+    .dup-warning-text { margin: 4px 0 6px; font-size: 11px; color: var(--text-secondary); }
+    .dup-warning-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+    .dup-match {
+      width: 100%;
+      text-align: start;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      color: inherit;
+      font: inherit;
+    }
+    .dup-match:hover { border-color: var(--accent); }
+    .dup-match-name { font-weight: 600; }
+    .dup-match small { color: var(--text-secondary); font-size: 11px; }
+    .warn-action { background: #d9a400; border-color: #d9a400; }
     .prospect-form-title {
       font-size: 12px;
       text-transform: uppercase;
@@ -1654,6 +1702,18 @@ export class CustomerMeetingFormComponent implements OnChanges {
 
   canAddProspect(): boolean {
     return !!this.newProspect.name.trim();
+  }
+
+  /** Existing customers that look like the prospect name being typed (incl. cross-language). */
+  get prospectDuplicateMatches(): SimilarCustomerMatch<Customer>[] {
+    return findSimilarCustomers(this.newProspect.name, this.workspace.customers);
+  }
+
+  /** Selects an existing customer instead of creating a duplicate prospect. */
+  useExistingCustomer(customer: Customer): void {
+    this.pickedCustomerId = customer.id;
+    this.cancelProspectForm();
+    this.onProspectOrCustomerPicked();
   }
 
   addProspect(): void {

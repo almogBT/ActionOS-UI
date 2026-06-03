@@ -131,7 +131,12 @@
     "followups": "מעקבים",
     "convertBtn": "→ משימה",
     "scrollPrev": "הקודם",
-    "scrollNext": "הבא"
+    "scrollNext": "הבא",
+    "recap": "סיכום",
+    "openTasksMetric": "משימות פתוחות",
+    "openActionsMetric": "מעקבים פתוחים",
+    "blockersMetric": "חסמים",
+    "noSummary": "אין סיכום עדיין."
   },
   "home": {
     "meetingsLead": "מה הבא",
@@ -578,7 +583,10 @@
     "prospectContactNamePlaceholder": "שם איש קשר ראשי (אופציונלי)",
     "prospectContactEmailPlaceholder": "אימייל איש קשר ראשי (אופציונלי)",
     "prospectContactPhonePlaceholder": "טלפון איש קשר ראשי (אופציונלי)",
-    "addAndSelect": "הוסף ובחר"
+    "addAndSelect": "הוסף ובחר",
+    "addAnyway": "הוסף בכל זאת",
+    "possibleDuplicateTitle": "ייתכן שכבר קיים",
+    "possibleDuplicateText": "ייתכן שכבר קיים לקוח דומה. בחר אחד מהרשימה כדי להשתמש בו, או הוסף בכל זאת."
   },
   "customerType": {
     "Existing": "לקוח",

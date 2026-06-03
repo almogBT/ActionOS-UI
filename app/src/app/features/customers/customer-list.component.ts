@@ -7,6 +7,11 @@ import {
   CreateCustomerInput, Customer, CustomerStatus, CustomerType } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
 import { SearchableSelectComponent, SelectOption } from '../../shared/searchable-select/searchable-select.component';
+import {
+  customerNameMatchesSearch,
+  findSimilarCustomers,
+  SimilarCustomerMatch
+} from '../../core/utils/customer-name-match';
 
 type CustomerFilter = 'all' | CustomerType | CustomerStatus;
 type SortColumn = 'name' | 'openTasks';
@@ -46,9 +51,10 @@ type SortDir = 'asc' | 'desc';
             <button
               type="submit"
               class="primary-action"
+              [class.warn-action]="duplicateMatches.length"
               [disabled]="!newCustomer.name.trim()"
             >
-              {{ 'customers.save' | t }}
+              {{ (duplicateMatches.length ? 'customers.addAnyway' : 'customers.save') | t }}
             </button>
             <button type="button" class="ghost-action" (click)="closeAddModal()">
               {{ 'common.close' | t }}
@@ -63,9 +69,27 @@ type SortDir = 'asc' | 'desc';
               name="custName"
               type="text"
               [(ngModel)]="newCustomer.name"
+              (ngModelChange)="onNewNameChanged()"
               [placeholder]="'customers.namePlaceholder' | t"
             />
           </label>
+
+          <div
+            class="dup-warning"
+            *ngIf="duplicateMatches.length"
+            (click)="$event.stopPropagation()"
+          >
+            <strong class="dup-warning-title">⚠ {{ 'customers.possibleDuplicateTitle' | t }}</strong>
+            <p class="dup-warning-text">{{ 'customers.possibleDuplicateText' | t }}</p>
+            <ul class="dup-warning-list">
+              <li *ngFor="let match of duplicateMatches">
+                <button type="button" class="dup-match" (click)="openExisting(match.customer)">
+                  <span class="dup-match-name">{{ match.customer.name }}</span>
+                  <small>{{ ('customerType.' + match.customer.type) | t }}</small>
+                </button>
+              </li>
+            </ul>
+          </div>
 
           <label class="field-control" (click)="$event.stopPropagation()">
             {{ 'customers.type' | t }}
@@ -252,6 +276,36 @@ type SortDir = 'asc' | 'desc';
       outline: 2px solid var(--accent);
       outline-offset: 2px;
     }
+    /* Duplicate-client warning shown inside the add modal. */
+    .dup-warning {
+      grid-column: 1 / -1;
+      border: 1px solid #d9a400;
+      background: rgba(217, 164, 0, 0.10);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-top: -4px;
+    }
+    .dup-warning-title { color: #8a6d00; font-size: 13px; }
+    .dup-warning-text { margin: 4px 0 8px; font-size: 12px; color: var(--text-secondary); }
+    .dup-warning-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+    .dup-match {
+      width: 100%;
+      text-align: start;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      color: inherit;
+      font: inherit;
+    }
+    .dup-match:hover { border-color: var(--accent); background: var(--accent-soft); }
+    .dup-match-name { font-weight: 600; }
+    .dup-match small { color: var(--text-secondary); font-size: 11px; }
+    .warn-action { background: #d9a400; border-color: #d9a400; }
     .empty-state { padding: 2rem; text-align: center; color: var(--muted); }
     .cust-filters {
       display: flex;
@@ -331,18 +385,39 @@ export class CustomerListComponent {
   }
 
   get filteredCustomers(): Customer[] {
-    const term = this.searchText.trim().toLowerCase();
+    const rawTerm = this.searchText.trim();
+    const term = rawTerm.toLowerCase();
     let rows = this.workspace.customersByStatus(this.filter);
-    if (term) {
+    if (rawTerm) {
       rows = rows.filter((c) => {
         return (
-          c.name.toLowerCase().includes(term) ||
+          // Name search is language-aware: matches across Hebrew/English too.
+          customerNameMatchesSearch(c.name, rawTerm) ||
           c.primaryContactName?.toLowerCase().includes(term) ||
           c.primaryContactEmail?.toLowerCase().includes(term)
         );
       });
     }
     return this.sortCustomers(rows);
+  }
+
+  /**
+   * Customers whose name looks like the one being entered — including the same
+   * name written in the other language. Drives the duplicate warning in the modal.
+   */
+  get duplicateMatches(): SimilarCustomerMatch<Customer>[] {
+    return findSimilarCustomers(this.newCustomer.name, this.workspace.customers);
+  }
+
+  /** Re-evaluates duplicate matches as the user types (the getter handles the work). */
+  onNewNameChanged(): void {
+    // No-op body: bound for change detection; `duplicateMatches` recomputes reactively.
+  }
+
+  /** Lets the user jump to an existing match instead of creating a duplicate. */
+  openExisting(customer: Customer): void {
+    this.closeAddModal();
+    this.viewBoard.emit(customer);
   }
 
   /** Toggles direction when re-clicking the active column, else sorts that column ascending. */

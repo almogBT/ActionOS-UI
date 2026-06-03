@@ -1,0 +1,286 @@
+:host { display: block; min-width: 0; }
+
+/* Grid variant: every tile is the same fixed height so lanes/grids stay tidy. */
+:host(.mc-grid) { height: 224px; }
+
+/* Rail variant: compact fixed-width tile for the horizontal carousel. */
+:host(.mc-rail) {
+  flex: 0 0 168px;
+  scroll-snap-align: start;
+}
+
+/* ── Card shell ────────────────────────────────────────────────────────── */
+.meeting-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+/* Left accent stripe when the current rep led the meeting. */
+:host(.card-led) .meeting-card {
+  border-inline-start: 3px solid var(--accent);
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-height: 22px;
+}
+
+.led-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+.card-date {
+  margin-inline-start: auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1 1 auto;          /* absorb slack so footer/metrics pin to the bottom */
+}
+
+.card-customer {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-subject {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* Meeting summary ("what happened") — two-line clamp keeps tiles uniform. */
+.card-summary {
+  margin: 2px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--muted);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.card-summary-empty {
+  font-style: italic;
+  opacity: 0.7;
+}
+
+/* ── Outcome metrics row (open tasks · follow-ups · blockers) ───────────── */
+.card-metrics {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  .metric {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    background: var(--surface-strong);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 2px 9px;
+    white-space: nowrap;
+
+    app-icon { color: var(--muted); }
+
+    &.metric-danger {
+      color: var(--danger);
+      background: var(--danger-soft);
+      border-color: var(--danger-soft);
+      app-icon { color: var(--danger); }
+    }
+
+    &.metric-zero {
+      opacity: 0.45;
+      &.metric-danger { background: var(--surface-strong); border-color: var(--line); color: var(--muted); }
+      &.metric-danger app-icon { color: var(--muted); }
+    }
+  }
+}
+
+/* ── Footer: people + recap button ─────────────────────────────────────── */
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.card-people {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 800;
+  border: 1px solid var(--accent-soft);
+}
+
+.people-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.recap-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  padding: 5px 12px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-pill);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--duration-fast), color var(--duration-fast);
+
+  &:hover { background: var(--accent); color: #fff; }
+}
+
+/* ── Rail variant: trim to the essentials so tiles stay tiny ───────────── */
+:host(.mc-rail) {
+  .meeting-card { padding: 10px; gap: 6px; }
+  .card-date,
+  .card-summary,
+  .recap-btn { display: none; }
+  .card-subject { -webkit-line-clamp: 1; }
+}
+
+/* ── Recap popup (read-only recap sections) ────────────────────────────── */
+.recap-view {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.recap-meta {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.recap-section {
+  h4 {
+    margin: 0 0 6px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  ul { margin: 0; padding-inline-start: 18px; }
+  li { font-size: 14px; color: var(--ink); margin: 3px 0; }
+
+  .recap-blocker { color: var(--danger); }
+  .recap-done { color: var(--muted); text-decoration: line-through; }
+}
+
+.recap-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink);
+  white-space: pre-wrap;
+
+  &.recap-muted { color: var(--muted); font-style: italic; }
+}
+
+.recap-count {
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--surface-strong);
+  border-radius: 999px;
+  padding: 1px 7px;
+  color: var(--muted);
+
+  &.danger { background: var(--danger-soft); color: var(--danger); }
+}
+
+.recap-action {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+  color: var(--ink);
+
+  &:last-child { border-bottom: none; }
+}
+
+.convert-btn {
+  flex-shrink: 0;
+  font-size: 12px !important;
+  padding: 4px 10px !important;
+  white-space: nowrap;
+}
+
+/* Slightly wider rail tiles on very small screens. */
+@media (max-width: 480px) {
+  :host(.mc-rail) { flex-basis: 200px; }
+}

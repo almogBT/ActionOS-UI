@@ -432,123 +432,12 @@
 
 .recap-footer { padding-top: 4px; }
 
-/* ── Meeting rail / tiles (mirrors My Work) ────────────────── */
-.meeting-rail { display: flex; flex-direction: column; gap: 10px; }
-
-.meeting-tile {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 14px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: var(--bg-elevated);
-  cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s;
-
-  &:hover { border-color: var(--muted); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); }
-}
-
-.tile-top {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.tile-task-count { font-size: 12px; color: var(--muted); white-space: nowrap; }
-
-.tile-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-
-.tile-subject-strong {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.tile-recap {
-  margin: 0;
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.4;
-  white-space: pre-line;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.tile-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 8px;
-  border-top: 1px solid var(--line);
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.tile-date { white-space: nowrap; }
-
-.tile-actions {
-  border-top: 1px solid var(--line);
-  padding-top: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.tile-actions-label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--muted);
-  margin-bottom: 4px;
-}
-
-.action-count-badge {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--danger);
-  background: var(--danger-soft);
-  border-radius: 999px;
-  padding: 1px 7px;
-}
-
-.tile-action-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+/* ── Meeting grids (use the shared <app-meeting-card>) ─────── */
+.board-meeting-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  align-items: start;
   gap: 10px;
-  padding: 5px 0;
-  border-bottom: 1px solid var(--line);
-
-  &:last-child { border-bottom: none; }
-}
-
-.action-row-text {
-  font-size: 13px;
-  flex: 1;
-  min-width: 0;
-  color: var(--ink);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.convert-btn {
-  flex-shrink: 0;
-  font-size: 12px !important;
-  padding: 4px 10px !important;
-  white-space: nowrap;
 }
 
 /* ── Responsive ────────────────────────────────────────────── */
