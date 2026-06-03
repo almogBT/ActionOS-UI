@@ -70,7 +70,7 @@ export class ActionosI18nService {
 
   private async loadDictionary(language: ActionosLanguage): Promise<TranslationDictionary> {
     try {
-      const response = await fetch(`i18n/${language}.json`, { cache: 'no-cache' });
+      const response = await fetch(`/i18n/${language}.json`, { cache: 'no-cache' });
 
       if (!response.ok) {
         throw new Error(`Missing translation file for ${language}`);
