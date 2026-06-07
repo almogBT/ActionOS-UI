@@ -139,7 +139,16 @@
       <div class="wv-body">
         <div *ngFor="let hour of hours" class="wv-row">
           <span class="wv-time">{{ formatHour(hour) }}</span>
-          <div *ngFor="let day of weekDays()" class="wv-cell">
+          <div
+            *ngFor="let day of weekDays()"
+            class="wv-cell"
+            role="button"
+            tabindex="0"
+            [title]="'Add at ' + formatHour(hour)"
+            (click)="selectSlot(day, hour)"
+            (keydown.enter)="selectSlot(day, hour)"
+            (keydown.space)="$event.preventDefault(); selectSlot(day, hour)"
+          >
             <button
               *ngFor="let evt of eventsForDayHour(day, hour); trackBy: trackEvent"
               type="button"
@@ -148,7 +157,7 @@
               [class.internal]="evt.kind === 'internal'"
               [class.task]="evt.kind === 'task'"
               [title]="evt.title"
-              (click)="openEvent(evt)"
+              (click)="$event.stopPropagation(); openEvent(evt)"
             >{{ evt.title }}</button>
           </div>
         </div>
@@ -159,7 +168,15 @@
     <div class="day-view" *ngIf="calendarMode() === 'day'">
       <div *ngFor="let hour of hours" class="dv-row">
         <span class="wv-time">{{ formatHour(hour) }}</span>
-        <div class="dv-cell">
+        <div
+          class="dv-cell"
+          role="button"
+          tabindex="0"
+          [title]="'Add at ' + formatHour(hour)"
+          (click)="selectSlot(selected(), hour)"
+          (keydown.enter)="selectSlot(selected(), hour)"
+          (keydown.space)="$event.preventDefault(); selectSlot(selected(), hour)"
+        >
           <button
             *ngFor="let evt of eventsForDayHour(selected(), hour); trackBy: trackEvent"
             type="button"
@@ -167,7 +184,7 @@
             [class.customer]="evt.kind === 'customer'"
             [class.internal]="evt.kind === 'internal'"
             [class.task]="evt.kind === 'task'"
-            (click)="openEvent(evt)"
+            (click)="$event.stopPropagation(); openEvent(evt)"
           >
             <strong>{{ evt.title }}</strong>
             <span *ngIf="evt.customerName" class="dv-evt-sub">{{ evt.customerName }}</span>

@@ -8,6 +8,7 @@ import { ActionosWorkspaceService } from '../../core/services/actionos-workspace
 import { IconComponent } from '../../shared/icons/icon.component';
 import { CustomerListComponent } from '../customers/customer-list.component';
 import { CalendarStatsComponent } from '../../shared/calendar-stats/calendar-stats.component';
+import { CalendarCreatePickerComponent } from '../../shared/calendar-create-picker/calendar-create-picker.component';
 import { StatTileComponent } from '../../shared/stat-tile/stat-tile.component';
 import { ACTIONOS_NAV_ITEMS } from '../../core/config/actionos-ui.config';
 import { IconName } from '../../shared/icons/icon.component';
@@ -22,7 +23,7 @@ export type HomeCalFilter = 'all' | 'my-work' | 'i-opened' | 'opened-for-me' | '
 @Component({
   selector: 'app-workspace-home',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe, IconComponent, CustomerListComponent, MetricTasksModalComponent, BoardPreviewModalComponent, CalendarStatsComponent, StatTileComponent],
+  imports: [CommonModule, FormsModule, TranslatePipe, IconComponent, CustomerListComponent, MetricTasksModalComponent, BoardPreviewModalComponent, CalendarStatsComponent, CalendarCreatePickerComponent, StatTileComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './workspace-home.component.html',
   styleUrl: './workspace-home.component.scss'
@@ -84,6 +85,25 @@ export class WorkspaceHomeComponent {
     } else {
       this.workspace.openMeetingDrawer(evt.sourceId);
     }
+  }
+
+  // ── Calendar slot → create meeting or task ──────────────────────────────────
+  // Home shows all work, so clicking an empty slot asks meeting-or-task via the
+  // shared chooser before opening the matching creator.
+  readonly createSlot = signal<Date | null>(null);
+
+  onHomeCalSlotSelected(date: Date): void {
+    this.createSlot.set(date);
+  }
+
+  createMeetingAt(date: Date): void {
+    this.createSlot.set(null);
+    this.workspace.openNewMeetingModal(null, date);
+  }
+
+  createTaskAt(date: Date): void {
+    this.createSlot.set(null);
+    this.workspace.startNewTaskAt(date, this.i18n.translate('calendar.newTaskTitle'));
   }
 
   // Which metric tile popup is open. Signal so the OnPush view repaints on change.

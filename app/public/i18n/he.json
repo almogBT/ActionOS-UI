@@ -1,4 +1,8 @@
 {
+  "calendar": {
+    "createPrompt": "מה תרצה ליצור?",
+    "newTaskTitle": "משימה חדשה"
+  },
   "common": {
     "action": "פעולה",
     "actions": "פעולות",

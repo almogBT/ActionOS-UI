@@ -1,4 +1,8 @@
 {
+  "calendar": {
+    "createPrompt": "What would you like to create?",
+    "newTaskTitle": "New task"
+  },
   "common": {
     "action": "Action",
     "actions": "Actions",

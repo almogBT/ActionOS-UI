@@ -14,6 +14,7 @@
   <app-calendar-stats
     [events]="taskCalendarEvents"
     (eventOpened)="onCalendarEventOpened($event)"
+    (slotSelected)="onCalendarSlotSelected($event)"
   >
     <app-stat-tile
       icon="check-square" [value]="openCount" [label]="'tasks.tiles.open' | t"

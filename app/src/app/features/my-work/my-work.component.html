@@ -35,6 +35,7 @@
   <app-calendar-stats
     [events]="myCalEvents"
     (eventOpened)="onCalEventOpened($event)"
+    (slotSelected)="onCalSlotSelected($event)"
   >
     <app-stat-tile
       icon="alert-triangle" [value]="summaryOverdue" [label]="'myWork.summary.overdue' | t"
@@ -55,6 +56,14 @@
       [zero]="summaryMeetingsToday === 0" (tileClick)="openStat('meetings')"
     ></app-stat-tile>
   </app-calendar-stats>
+
+  <!-- Calendar time-box → choose meeting or task -->
+  <app-calendar-create-picker
+    [slot]="createSlot()"
+    (chooseMeeting)="createMeetingAt($event)"
+    (chooseTask)="createTaskAt($event)"
+    (cancel)="createSlot.set(null)"
+  ></app-calendar-create-picker>
 
   <!-- ── Inbox Tab ──────────────────────────────────────────────────────── -->
   <ng-container *ngIf="activeTab() === 'inbox'">

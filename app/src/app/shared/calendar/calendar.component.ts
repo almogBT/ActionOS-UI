@@ -52,6 +52,8 @@ export class CalendarComponent {
   @Output() readonly daySelected = new EventEmitter<Date>();
   @Output() readonly eventOpened = new EventEmitter<CalendarEvent>();
   @Output() readonly expandedChange = new EventEmitter<boolean>();
+  /** Emitted when an empty hour cell is clicked in week/day view (date carries the clicked hour). */
+  @Output() readonly slotSelected = new EventEmitter<Date>();
 
   private readonly _cursor = signal<Date>(this.startOfMonth(new Date()));
   private readonly _selected = signal<Date>(this.startOfDay(new Date()));
@@ -165,6 +167,13 @@ export class CalendarComponent {
 
   openEvent(evt: CalendarEvent): void {
     this.eventOpened.emit(evt);
+  }
+
+  /** A blank hour cell was clicked — emit the precise date + hour so the host
+   *  page can open the right creator (meeting/task) at that time. */
+  selectSlot(day: Date, hour: number): void {
+    const d = new Date(day.getFullYear(), day.getMonth(), day.getDate(), hour, 0, 0, 0);
+    this.slotSelected.emit(d);
   }
 
   setMode(mode: CalendarMode): void {

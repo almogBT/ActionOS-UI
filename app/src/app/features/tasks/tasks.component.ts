@@ -116,6 +116,11 @@ export class TasksComponent {
     else                          this.workspace.selectBoardTask(task);
   }
 
+  /** Clicking an empty calendar slot starts a new task due on that day. */
+  onCalendarSlotSelected(date: Date): void {
+    this.workspace.startNewTaskAt(date, this.i18n.translate('calendar.newTaskTitle'));
+  }
+
   // ── Stat tile popup ───────────────────────────────────────────────────────
 
   openTile(lens: TaskLens): void  { this.openLens = lens; }

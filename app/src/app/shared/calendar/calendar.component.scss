@@ -409,6 +409,14 @@
   display: grid;
   gap: 2px;
   align-content: start;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.wv-cell:hover,
+.wv-cell:focus-visible {
+  background: var(--accent-soft);
+  outline: none;
 }
 
 .wv-event {
@@ -465,6 +473,14 @@
   display: grid;
   gap: 4px;
   align-content: start;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.dv-cell:hover,
+.dv-cell:focus-visible {
+  background: var(--accent-soft);
+  outline: none;
 }
 
 .dv-event {

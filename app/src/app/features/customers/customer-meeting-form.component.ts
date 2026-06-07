@@ -2109,8 +2109,16 @@ export class CustomerMeetingFormComponent implements OnChanges {
 
     if (this.existingMeetingId) {
       this.loadExistingMeeting(this.existingMeetingId);
-    } else if (this.customer) {
-      this.form.customerId = this.customer.id;
+    } else {
+      // New meeting: honor a slot the user clicked in the calendar, then clear it
+      // so the next "New meeting" opened normally falls back to "now".
+      if (this.workspace.pendingNewMeetingDate) {
+        this.meetingDateLocal = this.toLocalInput(new Date(this.workspace.pendingNewMeetingDate));
+        this.workspace.pendingNewMeetingDate = null;
+      }
+      if (this.customer) {
+        this.form.customerId = this.customer.id;
+      }
     }
   }
 

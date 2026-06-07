@@ -44,6 +44,7 @@
     [events]="homeCalEvents()"
     [hasFilter]="true"
     (eventOpened)="onHomeCalEventOpened($event)"
+    (slotSelected)="onHomeCalSlotSelected($event)"
   >
     <div calendarFilters class="filter-strip">
       <button type="button" [class.active]="homeCalFilter() === 'all'"
@@ -81,6 +82,14 @@
       [zero]="workspace.blockedOperationalTaskCount === 0" (tileClick)="openMetricModal('blocked')"
     ></app-stat-tile>
   </app-calendar-stats>
+
+  <!-- Calendar time-box → choose meeting or task -->
+  <app-calendar-create-picker
+    [slot]="createSlot()"
+    (chooseMeeting)="createMeetingAt($event)"
+    (chooseTask)="createTaskAt($event)"
+    (cancel)="createSlot.set(null)"
+  ></app-calendar-create-picker>
 
   <!-- BOARD PREVIEW POPUP -->
   <app-board-preview-modal

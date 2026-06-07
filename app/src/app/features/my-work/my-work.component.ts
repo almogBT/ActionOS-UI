@@ -5,6 +5,7 @@ import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { CalendarEvent, CustomerMeeting, MeetingNote, Task, ViewId } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
 import { CalendarStatsComponent } from '../../shared/calendar-stats/calendar-stats.component';
+import { CalendarCreatePickerComponent } from '../../shared/calendar-create-picker/calendar-create-picker.component';
 import { MeetingCardComponent } from '../../shared/meeting-card/meeting-card.component';
 import { IconComponent } from '../../shared/icons/icon.component';
 import { AppDatePipe } from '../../shared/pipes/app-date.pipe';
@@ -26,8 +27,8 @@ export type StatModalKey = 'overdue' | 'today' | 'followups' | 'meetings';
   standalone: true,
   imports: [
     CommonModule, TranslatePipe, AppDatePipe, InboxComponent, TaskTableComponent, IconComponent,
-    CalendarStatsComponent, MeetingCardComponent, StatModalComponent, StatTasksViewComponent,
-    StatMeetingsViewComponent, StatTileComponent
+    CalendarStatsComponent, CalendarCreatePickerComponent, MeetingCardComponent, StatModalComponent,
+    StatTasksViewComponent, StatMeetingsViewComponent, StatTileComponent
   ],
   templateUrl: './my-work.component.html',
   styleUrl: './my-work.component.scss'
@@ -146,6 +147,26 @@ export class MyWorkComponent {
     } else {
       this.workspace.openMeetingDrawer(evt.sourceId);
     }
+  }
+
+  // ── Calendar slot → create meeting or task ──────────────────────────────────
+  // My Work hosts both meetings and tasks, so clicking an empty slot asks which
+  // to create via the shared chooser dialog before opening the matching creator.
+
+  readonly createSlot = signal<Date | null>(null);
+
+  onCalSlotSelected(date: Date): void {
+    this.createSlot.set(date);
+  }
+
+  createMeetingAt(date: Date): void {
+    this.createSlot.set(null);
+    this.workspace.openNewMeetingModal(null, date);
+  }
+
+  createTaskAt(date: Date): void {
+    this.createSlot.set(null);
+    this.workspace.startNewTaskAt(date, this.i18n.translate('calendar.newTaskTitle'));
   }
 
   // ── Summary strip ─────────────────────────────────────────────────────────

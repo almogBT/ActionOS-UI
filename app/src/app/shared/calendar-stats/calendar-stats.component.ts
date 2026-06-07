@@ -31,6 +31,7 @@ import { CalendarComponent } from '../calendar/calendar.component';
         [hasFilter]="hasFilter"
         (eventOpened)="eventOpened.emit($event)"
         (daySelected)="daySelected.emit($event)"
+        (slotSelected)="slotSelected.emit($event)"
         (expandedChange)="onExpandedChange($event)"
       >
         <ng-content select="[calendarFilters]"></ng-content>
@@ -52,6 +53,8 @@ export class CalendarStatsComponent {
 
   @Output() eventOpened = new EventEmitter<CalendarEvent>();
   @Output() daySelected = new EventEmitter<Date>();
+  /** An empty hour cell was clicked in the embedded calendar (week/day view). */
+  @Output() slotSelected = new EventEmitter<Date>();
   /** Mirrors the calendar's collapse state for callers that care. */
   @Output() expandedChange = new EventEmitter<boolean>();
 

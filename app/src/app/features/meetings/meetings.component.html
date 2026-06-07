@@ -35,6 +35,7 @@
   <app-calendar-stats
     [events]="meetingCalendarEvents"
     (eventOpened)="onCalendarEventOpened($event)"
+    (slotSelected)="onCalendarSlotSelected($event)"
   >
     <app-stat-tile
       icon="calendar" [value]="getLane('upcoming').length" [label]="'meetingsOverview.upcoming' | t"

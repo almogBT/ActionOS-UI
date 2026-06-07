@@ -86,6 +86,8 @@ export class ActionosWorkspaceService {
   openMeetingId: string | null = null;
   /** Customer ID for a new meeting being created in the modal. Null means not creating. */
   openNewMeetingCustomerId: string | null = null;
+  /** ISO date to prefill into the new-meeting form (set when creating from a calendar slot). Consumed and cleared by the meeting form. */
+  pendingNewMeetingDate: string | null = null;
 
   get meetingModalOpen(): boolean {
     return this.openMeetingId !== null || this.openNewMeetingCustomerId !== undefined && this.openNewMeetingCustomerId !== null;
@@ -96,14 +98,16 @@ export class ActionosWorkspaceService {
     this.openMeetingId = id;
   }
 
-  openNewMeetingModal(customerId: string | null = null): void {
+  openNewMeetingModal(customerId: string | null = null, date: Date | null = null): void {
     this.openMeetingId = null;
     this.openNewMeetingCustomerId = customerId ?? '';
+    this.pendingNewMeetingDate = date ? date.toISOString() : null;
   }
 
   closeMeetingDrawer(): void {
     this.openMeetingId = null;
     this.openNewMeetingCustomerId = null;
+    this.pendingNewMeetingDate = null;
   }
 
   private readonly MAIL_NOTIF_KEY = 'actionos.mail-notif-prefs';
@@ -877,6 +881,31 @@ export class ActionosWorkspaceService {
     }
 
     this.drawerOpen = !!this.selectedTask;
+  }
+
+  /**
+   * Create a task due on the given day (tasks have no time-of-day) and open it
+   * in the task drawer for editing — used when a calendar time box is clicked.
+   */
+  startNewTaskAt(date: Date, title: string): Task {
+    const task = this.addTask({
+      title,
+      description: '',
+      board: 'Fritz Meetings',
+      priority: 'Medium',
+      dueDate: this.toLocalIsoDate(date),
+      assigneeId: this.currentUserId,
+    });
+    this.selectTask(task, true);
+    return task;
+  }
+
+  /** Local YYYY-MM-DD for a Date (avoids the UTC shift of toISOString). */
+  private toLocalIsoDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   closeTaskDrawer(): void {

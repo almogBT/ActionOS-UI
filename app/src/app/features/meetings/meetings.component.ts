@@ -211,6 +211,11 @@ export class MeetingsComponent implements OnInit, OnChanges {
     this.workspace.openMeetingDrawer(evt.sourceId);
   }
 
+  /** Clicking an empty calendar slot starts a new meeting at that date + time. */
+  onCalendarSlotSelected(date: Date): void {
+    this.workspace.openNewMeetingModal(null, date);
+  }
+
   // ── Tile popup ────────────────────────────────────────────────────────────
 
   openTile(lens: MeetingTileLens): void {
