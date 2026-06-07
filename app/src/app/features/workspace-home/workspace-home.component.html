@@ -121,9 +121,12 @@
       (openCustomer)="openCustomer.emit($event)"
     ></app-customer-list>
 
-    <section class="panel">
+    <section class="panel team-load">
       <div class="panel-header">
-        <h2>{{ 'home.ownersAndBlockers' | t }}</h2>
+        <div>
+          <span class="section-eyebrow">{{ 'home.teamLoadEyebrow' | t }}</span>
+          <h2>{{ 'home.ownersAndBlockers' | t }}</h2>
+        </div>
       </div>
 
       <input
@@ -134,23 +137,37 @@
       />
 
       <div class="workload-filters">
-        <button type="button" class="filter-chip" [class.active]="workloadFilter === 'all'" (click)="workloadFilter = 'all'">All</button>
-        <button type="button" class="filter-chip" [class.active]="workloadFilter === 'assigned-by-me'" (click)="workloadFilter = 'assigned-by-me'">Tasks I opened</button>
-        <button type="button" class="filter-chip" [class.active]="workloadFilter === 'assigned-me'" (click)="workloadFilter = 'assigned-me'">Assigned me</button>
-        <button type="button" class="filter-chip" [class.active]="workloadFilter === 'met-with-me'" (click)="workloadFilter = 'met-with-me'">Met with me</button>
+        <button type="button" class="filter-chip" [class.active]="workloadFilter === 'all'" (click)="workloadFilter = 'all'">{{ 'home.metricFilters.all' | t }}</button>
+        <button type="button" class="filter-chip" [class.active]="workloadFilter === 'assigned-by-me'" (click)="workloadFilter = 'assigned-by-me'">{{ 'home.metricFilters.opened' | t }}</button>
+        <button type="button" class="filter-chip" [class.active]="workloadFilter === 'assigned-me'" (click)="workloadFilter = 'assigned-me'">{{ 'home.metricFilters.assignedToMeByOthers' | t }}</button>
+        <button type="button" class="filter-chip" [class.active]="workloadFilter === 'met-with-me'" (click)="workloadFilter = 'met-with-me'">{{ 'home.metWithMe' | t }}</button>
       </div>
 
-      <div class="workload-list" *ngIf="filteredWorkload.length; else noWorkload">
+      <div class="load-list" *ngIf="filteredWorkload.length; else noWorkload">
         <button
           *ngFor="let workload of filteredWorkload"
           type="button"
-          class="workload-row workload-row-btn"
+          class="load-row"
           (click)="openMemberBoard(workload.member.id, workload.member.name)"
         >
-          <span class="avatar">{{ workspace.initials(workload.member.id) }}</span>
-          <div>
-            <strong>{{ workload.member.name }}</strong>
-            <small>{{ workload.openCount + workload.meetingOpenCount }} {{ 'common.open' | t }} · {{ workload.blockedCount + workload.meetingBlockedCount }} {{ 'common.blocked' | t }}</small>
+          <span class="avatar" [style.--tint-h]="avatarHue(workload.member.name)">
+            {{ workspace.initials(workload.member.id) }}
+          </span>
+          <div class="load-body">
+            <div class="load-head">
+              <strong>{{ workload.member.name }}</strong>
+              <span class="load-counts">
+                {{ openTotal(workload) }} {{ 'home.openShort' | t }}
+                <em *ngIf="blockedTotal(workload)" class="blocked">· {{ blockedTotal(workload) }} {{ 'home.blockedShort' | t }}</em>
+              </span>
+            </div>
+            <div class="load-bar" *ngIf="loadTotal(workload); else noLoadBar">
+              <span class="seg open"    [style.width.%]="openTotal(workload) / maxLoad * 100"></span>
+              <span class="seg blocked" [style.width.%]="blockedTotal(workload) / maxLoad * 100"></span>
+            </div>
+            <ng-template #noLoadBar>
+              <span class="load-empty">{{ 'home.noLoad' | t }}</span>
+            </ng-template>
           </div>
         </button>
       </div>

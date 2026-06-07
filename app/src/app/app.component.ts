@@ -18,6 +18,7 @@ import { MyWorkComponent } from './features/my-work/my-work.component';
 import { TasksComponent } from './features/tasks/tasks.component';
 import { MeetingDrawerComponent } from './features/meeting-drawer/meeting-drawer.component';
 import { TaskDrawerComponent } from './features/task-drawer/task-drawer.component';
+import { CatchUpDrawerComponent } from './features/catch-up-drawer/catch-up-drawer.component';
 import { WorkspaceHomeComponent } from './features/workspace-home/workspace-home.component';
 import { HeaderComponent } from './shared/layout/header/header.component';
 import { SidebarComponent } from './shared/layout/sidebar/sidebar.component';
@@ -39,6 +40,7 @@ import { SidebarComponent } from './shared/layout/sidebar/sidebar.component';
     CustomersComponent,
     TaskDrawerComponent,
     MeetingDrawerComponent,
+    CatchUpDrawerComponent,
     HeaderComponent,
     SidebarComponent,
     IconComponent,
@@ -98,9 +100,7 @@ export class AppComponent implements OnInit {
 
   /** Home list → jump straight into meeting prep for a customer. */
   prepareCustomerMeeting(customer: Customer): void {
-    this.customerEntryView.set('prep');
-    this.activeCustomer.set(customer);
-    this.setView('customers');
+    this.workspace.openCatchUpDrawer(customer.id);
   }
 
   /** Board preview popup → open the new-meeting form pre-filled for this customer. */

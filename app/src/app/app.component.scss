@@ -17,10 +17,53 @@
   padding: 24px 28px calc(60px + 24px); /* 60px = bottom action bar height */
 }
 
+.save-error-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 16px 28px 0;
+  padding: 10px 12px;
+  border: 1px solid #f4a59a;
+  border-radius: var(--radius-sm);
+  background: #fff4f2;
+  color: #7a271a;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.save-error-copy {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.save-error-copy strong,
+.save-error-copy span {
+  overflow-wrap: anywhere;
+}
+
+.save-error-banner button {
+  flex: 0 0 auto;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid rgba(122, 39, 26, 0.22);
+  border-radius: var(--radius-sm);
+  background: #ffffff;
+  color: #7a271a;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 @media (max-width: 720px) {
   .workspace-body {
     padding: 14px;
     padding-bottom: calc(60px + 20px);
+  }
+  .save-error-banner {
+    margin: 12px 14px 0;
   }
   .bottom-action-bar .bar-btn span,
   .bottom-action-bar .bar-btn-primary span {

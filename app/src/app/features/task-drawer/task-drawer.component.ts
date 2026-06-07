@@ -7,13 +7,14 @@ import { Comment, Priority, Task, TaskStatus } from '../../core/models/actionos.
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
 import { AppDatePipe } from '../../shared/pipes/app-date.pipe';
 import { SearchableSelectComponent, SelectOption } from '../../shared/searchable-select/searchable-select.component';
+import { DrawerShellComponent } from '../shared/drawer-shell/drawer-shell.component';
 
 type TaskSectionId = 'details' | 'attachments' | 'alerts' | 'checklist' | 'watchers' | 'comments';
 
 @Component({
   selector: 'app-task-drawer',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe, AppDatePipe, SearchableSelectComponent],
+  imports: [CommonModule, FormsModule, TranslatePipe, AppDatePipe, SearchableSelectComponent, DrawerShellComponent],
   templateUrl: './task-drawer.component.html',
   styles: [`
     .task-attach-list { display: grid; gap: 6px; margin-top: 8px; }

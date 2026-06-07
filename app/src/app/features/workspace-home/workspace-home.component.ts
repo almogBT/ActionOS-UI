@@ -234,6 +234,32 @@ export class WorkspaceHomeComponent {
     );
   }
 
+  // ── Team-load bars ──────────────────────────────────────────────────────
+  /** Deterministic accent hue (0–360) derived from a name, for avatar tints. */
+  avatarHue(name: string): number {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) % 360;
+    return hash;
+  }
+
+  /** Total open + blocked across boards and meetings for one teammate. */
+  loadTotal(w: ActionosWorkspaceService['teamWorkload'][number]): number {
+    return w.openCount + w.meetingOpenCount + w.blockedCount + w.meetingBlockedCount;
+  }
+
+  blockedTotal(w: ActionosWorkspaceService['teamWorkload'][number]): number {
+    return w.blockedCount + w.meetingBlockedCount;
+  }
+
+  openTotal(w: ActionosWorkspaceService['teamWorkload'][number]): number {
+    return w.openCount + w.meetingOpenCount;
+  }
+
+  /** Highest single load in the current filtered list — used to scale the bars. */
+  get maxLoad(): number {
+    return this.filteredWorkload.reduce((max, w) => Math.max(max, this.loadTotal(w)), 0) || 1;
+  }
+
   openView(view: ViewId): void {
     this.viewChange.emit(view);
   }

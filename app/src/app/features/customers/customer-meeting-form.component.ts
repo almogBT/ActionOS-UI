@@ -30,33 +30,32 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
   standalone: true,
   imports: [CommonModule, FormsModule, TranslatePipe, SearchableSelectComponent, MeetingTaskCreationComponent, MeetingPrepBriefComponent, NoteDetailModalComponent],
   template: `
+    <nav class="phase-stepper" aria-label="Meeting progress">
+      <button type="button" class="phase-step active" (click)="scrollToId('plan-section')">
+        <span class="phase-dot">1</span>
+        <span class="phase-label">{{ 'customerMeeting.stepSettings' | t }}</span>
+      </button>
+      <span class="phase-line" [class.filled]="editing"></span>
+      <button type="button" class="phase-step" [class.active]="editing" [disabled]="!editing" (click)="scrollToId('capture-section')">
+        <span class="phase-dot">2</span>
+        <span class="phase-label">{{ 'customerMeeting.stepCapture' | t }}</span>
+      </button>
+      <span class="phase-line" [class.filled]="meetingTasksForCurrentMeeting.length > 0"></span>
+      <button type="button" class="phase-step" [class.active]="meetingTasksForCurrentMeeting.length > 0" [disabled]="!editing" (click)="scrollToId('tasks-section')">
+        <span class="phase-dot">3</span>
+        <span class="phase-label">{{ 'customerMeeting.stepTasks' | t }}</span>
+      </button>
+    </nav>
+
     <section class="panel" id="plan-section">
       <div class="panel-header">
         <div>
           <span class="eyebrow">{{ customer ? customer.name : ('customerMeeting.customer' | t) }}</span>
           <h3>{{ 'customerMeeting.title' | t }}</h3>
         </div>
-        <div class="topbar-actions">
-          <button type="button" class="ghost-action" (click)="cancelled.emit()">
-            {{ 'common.cancel' | t }}
-          </button>
-          <button
-            type="button"
-            class="ghost-action"
-            [disabled]="!canSave()"
-            (click)="save('continue')"
-          >
-            {{ 'customerMeeting.saveAndContinue' | t }}
-          </button>
-          <button
-            type="button"
-            class="primary-action"
-            [disabled]="!canSave()"
-            (click)="save('close')"
-          >
-            {{ 'customerMeeting.saveAndClose' | t }}
-          </button>
-        </div>
+        <span class="status-chip" [ngClass]="workspace.statusClass(currentStatus())">
+          {{ ('customerMeeting.statusValues.' + currentStatus()) | t }}
+        </span>
       </div>
 
 
@@ -373,22 +372,41 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
       </div>
     </section>
 
-    <section class="panel run-panel" id="run-section">
-      <div class="panel-header">
+    <section class="panel work-panel" id="capture-section">
+      <div class="panel-header work-header">
         <div>
-          <span class="eyebrow">{{ 'customerMeeting.runSection' | t }}</span>
+          <span class="eyebrow">{{ 'customerMeeting.captureSection' | t }}</span>
           <h3>{{ 'meetings.addMeetingOutput' | t }}</h3>
-          <small class="muted">{{ 'customerMeeting.runSubtitle' | t }}</small>
+          <small class="muted">
+            {{ (captureTab === 'notes' ? 'customerMeeting.notesTabHint' : 'customerMeeting.summaryTabHint') | t }}
+          </small>
         </div>
-        <div class="topbar-actions" *ngIf="editing && editingMeeting">
-          <button type="button" class="ghost-action small" (click)="captureCollapsed = !captureCollapsed">
-            {{ captureCollapsed ? ('customerMeeting.expandCapture' | t) : ('customerMeeting.collapseCapture' | t) }}
+        <div class="tab-toggle" *ngIf="editing && editingMeeting" role="tablist">
+          <button
+            type="button"
+            class="tab-btn"
+            role="tab"
+            [class.active]="captureTab === 'notes'"
+            (click)="captureTab = 'notes'"
+          >
+            {{ 'customerMeeting.tabNotes' | t }}
+            <span class="tab-count" *ngIf="capturedNotes.length">{{ capturedNotes.length }}</span>
+          </button>
+          <button
+            type="button"
+            class="tab-btn"
+            role="tab"
+            [class.active]="captureTab === 'summary'"
+            (click)="captureTab = 'summary'"
+          >
+            {{ 'customerMeeting.tabSummary' | t }}
           </button>
         </div>
       </div>
 
       <ng-container *ngIf="editing && editingMeeting; else runLocked">
-        <form class="capture-shell" *ngIf="!captureCollapsed" (ngSubmit)="captureNote()" (click)="$event.stopPropagation()">
+        <div class="capture-tab" *ngIf="captureTab === 'notes'">
+        <form class="capture-shell" (ngSubmit)="captureNote()" (click)="$event.stopPropagation()">
           <div class="capture-type-row">
             <button
               type="button"
@@ -450,15 +468,6 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
             {{ 'customerMeeting.actionNeedsOwnerDue' | t }}
           </p>
         </form>
-
-        <app-meeting-task-creation
-          *ngIf="creatingTaskForNote && editingMeeting && editingMeeting.customerId"
-          [meetingId]="editingMeeting.id"
-          [customerId]="editingMeeting.customerId"
-          [sourceNote]="creatingTaskForNote"
-          (created)="onTaskCreated()"
-          (cancelled)="creatingTaskForNote = null"
-        />
 
         <div class="notes-list" id="notes-list" *ngIf="capturedNotes.length; else noNotesYet">
           <div *ngFor="let n of capturedNotes" class="note-row">
@@ -592,94 +601,77 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
         </div>
         <ng-template #noNotesYet>
           <div class="empty-state compact-empty">
-            <strong>{{ 'meetingPrep.nothing' | t }}</strong>
+            <strong>{{ 'customerMeeting.noNotesYet' | t }}</strong>
           </div>
         </ng-template>
+        </div>
 
-        <section class="linked-tasks-panel">
-          <div class="panel-header">
-            <div>
-              <span class="eyebrow">{{ 'customerMeeting.tasksFromMeeting' | t }}</span>
-              <h4>{{ meetingTasksForCurrentMeeting.length }} {{ 'customerMeeting.tasksLabel' | t }}</h4>
-            </div>
-            <div class="task-filter-row">
-              <button type="button" class="ghost-action" [class.active]="taskFilter === 'open'" (click)="taskFilter = 'open'">
-                {{ 'customerMeeting.taskFilterOpen' | t }} ({{ countTasksByFilter('open') }})
-              </button>
-              <button type="button" class="ghost-action" [class.active]="taskFilter === 'blocked'" (click)="taskFilter = 'blocked'">
-                {{ 'customerMeeting.taskFilterBlocked' | t }} ({{ countTasksByFilter('blocked') }})
-              </button>
-              <button type="button" class="ghost-action" [class.active]="taskFilter === 'done'" (click)="taskFilter = 'done'">
-                {{ 'customerMeeting.taskFilterDone' | t }} ({{ countTasksByFilter('done') }})
-              </button>
-              <button type="button" class="ghost-action" [class.active]="taskFilter === 'all'" (click)="taskFilter = 'all'">
-                {{ 'customerMeeting.taskFilterAll' | t }}
-              </button>
-            </div>
+        <div class="capture-tab summary-tab" *ngIf="captureTab === 'summary'">
+          <div class="form-grid">
+            <label class="field-control wide">
+              {{ 'customerMeeting.summary' | t }}
+              <textarea
+                name="summary"
+                rows="5"
+                [(ngModel)]="summaryText"
+                (ngModelChange)="onWrapUpChanged()"
+                [placeholder]="'customerMeeting.summaryPlaceholder' | t"
+              ></textarea>
+            </label>
+
+            <label class="field-control">
+              {{ 'customerMeeting.nextMeetingDate' | t }}
+              <input
+                type="datetime-local"
+                name="nextMeetingDate"
+                [(ngModel)]="nextMeetingDateLocal"
+                (ngModelChange)="onWrapUpChanged()"
+              />
+            </label>
+
+            <label class="field-control wide">
+              {{ 'customerMeeting.nextMeetingNotes' | t }}
+              <textarea
+                name="nextMeetingNotes"
+                rows="3"
+                [(ngModel)]="nextMeetingNotesText"
+                (ngModelChange)="onWrapNextMeetingNotesChanged()"
+                [placeholder]="'customerMeeting.nextMeetingNotesPlaceholder' | t"
+              ></textarea>
+              <small class="muted">{{ 'customerMeeting.nextMeetingNotesHint' | t }}</small>
+            </label>
           </div>
 
-          <div class="linked-task-list" *ngIf="filteredMeetingTasks.length; else noLinkedTasks">
-            <div class="linked-task-card" *ngFor="let task of filteredMeetingTasks">
-              <div class="linked-task-row">
-                <button type="button" class="linked-task-title-btn" (click)="openMeetingTask(task)">
-                  <strong>{{ task.title }}</strong>
-                  <small class="muted">
-                    {{ 'common.owner' | t }}: {{ workspace.employeeName(task.assignedToEmployeeId) }} · {{ 'common.due' | t }} {{ task.dueDate || '-' }}
-                  </small>
-                </button>
-                <div class="linked-task-meta">
-                  <span class="status-chip" [ngClass]="workspace.statusClass(task.status)">
-                    {{ ('meetingTask.statusValues.' + task.status) | t }}
-                  </span>
-                  <button
-                    type="button"
-                    class="ghost-action small progress-toggle"
-                    [class.active]="expandedTaskId === task.id"
-                    (click)="toggleTaskExpanded(task.id)"
-                  >
-                    {{ (task.progressionNotes?.length || 0) }} {{ 'customerMeeting.updates' | t }}
-                    {{ expandedTaskId === task.id ? '▲' : '▼' }}
-                  </button>
-                </div>
-              </div>
+          <section class="meeting-review-checklist">
+            <strong>{{ 'customerMeeting.beforePublishing' | t }}</strong>
+            <ul>
+              <li [class.warn]="actionsWithoutTaskCount > 0" [class.checklist-link]="actionsWithoutTaskCount > 0" (click)="actionsWithoutTaskCount > 0 && goToNotes()">
+                {{ 'customerMeeting.reviewActionsWithoutTask' | t }}: {{ actionsWithoutTaskCount }}
+                <span *ngIf="actionsWithoutTaskCount > 0" class="checklist-hint">→ review</span>
+              </li>
+              <li [class.warn]="openBlockerTaskCount > 0" [class.checklist-link]="openBlockerTaskCount > 0" (click)="openBlockerTaskCount > 0 && goToNotes()">
+                {{ 'customerMeeting.reviewBlockersOpen' | t }}: {{ openBlockerTaskCount }}
+                <span *ngIf="openBlockerTaskCount > 0" class="checklist-hint">→ review</span>
+              </li>
+              <li [class.warn]="uncategorizedNotesCount > 0">
+                {{ 'customerMeeting.reviewNotesCaptured' | t }}: {{ capturedNotes.length }} ({{ 'customerMeeting.reviewUncategorized' | t }}: {{ uncategorizedNotesCount }})
+              </li>
+              <li [class.blocking]="openMeetingTasksCount > 0" [class.checklist-link]="openMeetingTasksCount > 0" (click)="openMeetingTasksCount > 0 && scrollToId('tasks-section')">
+                {{ 'customerMeeting.reviewOpenTasks' | t }}: {{ openMeetingTasksCount }}
+                <span *ngIf="openMeetingTasksCount > 0" class="blocking-note">— {{ 'customerMeeting.reviewOpenTasksNote' | t }}</span>
+                <span *ngIf="openMeetingTasksCount > 0" class="checklist-hint">→ review</span>
+              </li>
+            </ul>
+          </section>
 
-              <div class="progression-notes-panel" *ngIf="expandedTaskId === task.id" (click)="$event.stopPropagation()">
-                <div class="progression-note-row" *ngFor="let pn of task.progressionNotes">
-                  <span class="muted">{{ pn.createdAt | slice:0:10 }} · {{ workspace.employeeName(pn.authorEmployeeId) }}</span>
-                  <p>{{ pn.content }}</p>
-                </div>
-                <div class="progression-empty" *ngIf="!task.progressionNotes?.length">
-                  <small class="muted">{{ 'customerMeeting.noUpdatesYet' | t }}</small>
-                </div>
-                <div class="progression-add-row">
-                  <input
-                    type="text"
-                    [name]="'progress-' + task.id"
-                    [(ngModel)]="newProgressionNoteByTask[task.id]"
-                    [placeholder]="'customerMeeting.addUpdatePlaceholder' | t"
-                    (keydown.enter)="addProgressionNote(task)"
-                    (click)="$event.stopPropagation()"
-                  />
-                  <button
-                    type="button"
-                    class="ghost-action small"
-                    [disabled]="!(newProgressionNoteByTask[task.id] ?? '').trim()"
-                    (click)="addProgressionNote(task)"
-                  >
-                    {{ 'customerMeeting.addUpdate' | t }}
-                  </button>
-                </div>
-              </div>
-            </div>
+          <div class="summary-publish-row">
+            <button type="button" class="primary-action" [disabled]="!editingMeeting" (click)="publishRecap()">
+              {{ 'customerMeeting.publishRecap' | t }}
+            </button>
+            <p class="muted">{{ 'customerMeeting.publishRecapHint' | t }}</p>
           </div>
-          <ng-template #noLinkedTasks>
-            <div class="empty-state compact-empty">
-              <strong>{{ 'customerMeeting.noTasksInFilter' | t }}</strong>
-            </div>
-          </ng-template>
-        </section>
-
-        <!-- Attachments -->
+          <pre class="recap-preview" *ngIf="lastRecap">{{ lastRecap }}</pre>
+        </div>
       </ng-container>
 
       <ng-template #runLocked>
@@ -689,85 +681,131 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
       </ng-template>
     </section>
 
-    <section class="panel" id="wrapup-section">
+    <section class="panel" id="tasks-section">
       <div class="panel-header">
         <div>
-          <span class="eyebrow">{{ 'customerMeeting.wrapUp' | t }}</span>
-          <h3>{{ 'customerMeeting.publishRecap' | t }}</h3>
-        </div>
-        <div class="topbar-actions">
-          <button type="button" class="primary-action" [disabled]="!editingMeeting" (click)="publishRecap()">
-            {{ 'customerMeeting.publishRecap' | t }}
-          </button>
+          <span class="eyebrow">{{ 'customerMeeting.assignTasks' | t }}</span>
+          <h3>{{ meetingTasksForCurrentMeeting.length }} {{ 'customerMeeting.tasksLabel' | t }}</h3>
+          <small class="muted">{{ 'customerMeeting.assignTasksSubtitle' | t }}</small>
         </div>
       </div>
 
-      <ng-container *ngIf="editing && editingMeeting; else wrapLocked">
-        <div class="form-grid">
-          <label class="field-control wide">
-            {{ 'customerMeeting.summary' | t }}
-            <textarea
-              name="summary"
-              rows="4"
-              [(ngModel)]="summaryText"
-              (ngModelChange)="onWrapUpChanged()"
-              [placeholder]="'customerMeeting.summaryPlaceholder' | t"
-            ></textarea>
-          </label>
+      <ng-container *ngIf="editing && editingMeeting; else tasksLocked">
+        <app-meeting-task-creation
+          *ngIf="creatingTaskForNote && editingMeeting && editingMeeting.customerId"
+          [meetingId]="editingMeeting.id"
+          [customerId]="editingMeeting.customerId"
+          [sourceNote]="creatingTaskForNote"
+          (created)="onTaskCreated()"
+          (cancelled)="creatingTaskForNote = null"
+        />
 
-          <label class="field-control">
-            {{ 'customerMeeting.nextMeetingDate' | t }}
-            <input
-              type="datetime-local"
-              name="nextMeetingDate"
-              [(ngModel)]="nextMeetingDateLocal"
-              (ngModelChange)="onWrapUpChanged()"
-            />
-          </label>
-
-          <label class="field-control wide">
-            {{ 'customerMeeting.nextMeetingNotes' | t }}
-            <textarea
-              name="nextMeetingNotes"
-              rows="3"
-              [(ngModel)]="nextMeetingNotesText"
-              (ngModelChange)="onWrapNextMeetingNotesChanged()"
-              [placeholder]="'customerMeeting.nextMeetingNotesPlaceholder' | t"
-            ></textarea>
-            <small class="muted">{{ 'customerMeeting.nextMeetingNotesHint' | t }}</small>
-          </label>
+        <div class="task-filter-row">
+          <button type="button" class="ghost-action" [class.active]="taskFilter === 'open'" (click)="taskFilter = 'open'">
+            {{ 'customerMeeting.taskFilterOpen' | t }} ({{ countTasksByFilter('open') }})
+          </button>
+          <button type="button" class="ghost-action" [class.active]="taskFilter === 'blocked'" (click)="taskFilter = 'blocked'">
+            {{ 'customerMeeting.taskFilterBlocked' | t }} ({{ countTasksByFilter('blocked') }})
+          </button>
+          <button type="button" class="ghost-action" [class.active]="taskFilter === 'done'" (click)="taskFilter = 'done'">
+            {{ 'customerMeeting.taskFilterDone' | t }} ({{ countTasksByFilter('done') }})
+          </button>
+          <button type="button" class="ghost-action" [class.active]="taskFilter === 'all'" (click)="taskFilter = 'all'">
+            {{ 'customerMeeting.taskFilterAll' | t }}
+          </button>
         </div>
-        <section class="meeting-review-checklist">
-          <strong>{{ 'customerMeeting.beforePublishing' | t }}</strong>
-          <ul>
-            <li [class.warn]="actionsWithoutTaskCount > 0" [class.checklist-link]="actionsWithoutTaskCount > 0" (click)="actionsWithoutTaskCount > 0 && scrollToNotesList()">
-              {{ 'customerMeeting.reviewActionsWithoutTask' | t }}: {{ actionsWithoutTaskCount }}
-              <span *ngIf="actionsWithoutTaskCount > 0" class="checklist-hint">→ review</span>
-            </li>
-            <li [class.warn]="openBlockerTaskCount > 0" [class.checklist-link]="openBlockerTaskCount > 0" (click)="openBlockerTaskCount > 0 && scrollToNotesList()">
-              {{ 'customerMeeting.reviewBlockersOpen' | t }}: {{ openBlockerTaskCount }}
-              <span *ngIf="openBlockerTaskCount > 0" class="checklist-hint">→ review</span>
-            </li>
-            <li [class.warn]="uncategorizedNotesCount > 0">
-              {{ 'customerMeeting.reviewNotesCaptured' | t }}: {{ capturedNotes.length }} ({{ 'customerMeeting.reviewUncategorized' | t }}: {{ uncategorizedNotesCount }})
-            </li>
-            <li [class.blocking]="openMeetingTasksCount > 0" [class.checklist-link]="openMeetingTasksCount > 0" (click)="openMeetingTasksCount > 0 && scrollToNotesList()">
-              {{ 'customerMeeting.reviewOpenTasks' | t }}: {{ openMeetingTasksCount }}
-              <span *ngIf="openMeetingTasksCount > 0" class="blocking-note">— {{ 'customerMeeting.reviewOpenTasksNote' | t }}</span>
-              <span *ngIf="openMeetingTasksCount > 0" class="checklist-hint">→ review</span>
-            </li>
-          </ul>
-        </section>
-        <p class="muted">{{ 'customerMeeting.publishRecapHint' | t }}</p>
-        <pre class="recap-preview" *ngIf="lastRecap">{{ lastRecap }}</pre>
+
+        <div class="linked-task-list" *ngIf="filteredMeetingTasks.length; else noLinkedTasks">
+          <div class="linked-task-card" *ngFor="let task of filteredMeetingTasks">
+            <div class="linked-task-row">
+              <button type="button" class="linked-task-title-btn" (click)="openMeetingTask(task)">
+                <strong>{{ task.title }}</strong>
+                <small class="muted">
+                  {{ 'common.owner' | t }}: {{ workspace.employeeName(task.assignedToEmployeeId) }} · {{ 'common.due' | t }} {{ task.dueDate || '-' }}
+                </small>
+              </button>
+              <div class="linked-task-meta">
+                <span class="status-chip" [ngClass]="workspace.statusClass(task.status)">
+                  {{ ('meetingTask.statusValues.' + task.status) | t }}
+                </span>
+                <button
+                  type="button"
+                  class="ghost-action small progress-toggle"
+                  [class.active]="expandedTaskId === task.id"
+                  (click)="toggleTaskExpanded(task.id)"
+                >
+                  {{ (task.progressionNotes?.length || 0) }} {{ 'customerMeeting.updates' | t }}
+                  {{ expandedTaskId === task.id ? '▲' : '▼' }}
+                </button>
+              </div>
+            </div>
+
+            <div class="progression-notes-panel" *ngIf="expandedTaskId === task.id" (click)="$event.stopPropagation()">
+              <div class="progression-note-row" *ngFor="let pn of task.progressionNotes">
+                <span class="muted">{{ pn.createdAt | slice:0:10 }} · {{ workspace.employeeName(pn.authorEmployeeId) }}</span>
+                <p>{{ pn.content }}</p>
+              </div>
+              <div class="progression-empty" *ngIf="!task.progressionNotes?.length">
+                <small class="muted">{{ 'customerMeeting.noUpdatesYet' | t }}</small>
+              </div>
+              <div class="progression-add-row">
+                <input
+                  type="text"
+                  [name]="'progress-' + task.id"
+                  [(ngModel)]="newProgressionNoteByTask[task.id]"
+                  [placeholder]="'customerMeeting.addUpdatePlaceholder' | t"
+                  (keydown.enter)="addProgressionNote(task)"
+                  (click)="$event.stopPropagation()"
+                />
+                <button
+                  type="button"
+                  class="ghost-action small"
+                  [disabled]="!(newProgressionNoteByTask[task.id] ?? '').trim()"
+                  (click)="addProgressionNote(task)"
+                >
+                  {{ 'customerMeeting.addUpdate' | t }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <ng-template #noLinkedTasks>
+          <div class="empty-state compact-empty">
+            <strong>{{ 'customerMeeting.noTasksInFilter' | t }}</strong>
+            <small class="muted">{{ 'customerMeeting.emptyTasksHint' | t }}</small>
+          </div>
+        </ng-template>
       </ng-container>
 
-      <ng-template #wrapLocked>
+      <ng-template #tasksLocked>
         <div class="empty-state compact-empty">
           <strong>{{ 'customerMeeting.completePlanToStart' | t }}</strong>
         </div>
       </ng-template>
     </section>
+
+    <div class="action-bar">
+      <button type="button" class="ghost-action" (click)="cancelled.emit()">
+        {{ 'common.cancel' | t }}
+      </button>
+      <span class="action-bar-spacer"></span>
+      <button
+        type="button"
+        class="ghost-action"
+        [disabled]="!canSave()"
+        (click)="save('continue')"
+      >
+        {{ 'customerMeeting.saveAndContinue' | t }}
+      </button>
+      <button
+        type="button"
+        class="primary-action"
+        [disabled]="!canSave()"
+        (click)="save('close')"
+      >
+        {{ 'customerMeeting.saveAndClose' | t }}
+      </button>
+    </div>
 
     <app-note-detail-modal
       *ngIf="openedNote && editingMeeting"
@@ -777,10 +815,142 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
     />
   `,
   styles: [`
-    :host { display: block; min-width: 0; }
+    :host {
+      display: block;
+      min-width: 0;
+      /* room so the sticky action bar never covers the last section */
+      padding-bottom: 84px;
+    }
     .panel-header h3 { margin: 0; }
+    .panel-header small.muted { display: block; margin-top: 4px; }
     .section-head { margin: 14px 0 10px; }
     .section-head h4 { margin: 0; }
+
+    /* ── Progress stepper ─────────────────────────────────────────────── */
+    .phase-stepper {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 14px;
+      padding: 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--bg-elevated);
+      overflow-x: auto;
+    }
+    .phase-step {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      white-space: nowrap;
+      font-size: 13px;
+      font-weight: 600;
+      transition: background 150ms ease, color 150ms ease;
+    }
+    .phase-step:disabled { cursor: not-allowed; opacity: 0.55; }
+    .phase-step.active {
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+    }
+    .phase-dot {
+      display: inline-grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1px solid currentColor;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .phase-step.active .phase-dot {
+      background: var(--accent-strong);
+      color: #fff;
+      border-color: var(--accent-strong);
+    }
+    .phase-line {
+      flex: 1;
+      min-width: 16px;
+      height: 2px;
+      border-radius: 2px;
+      background: var(--line);
+      transition: background 150ms ease;
+    }
+    .phase-line.filled { background: var(--accent); }
+
+    /* ── Notes / Summary tab toggle ───────────────────────────────────── */
+    .work-header { align-items: flex-start; }
+    .tab-toggle {
+      display: inline-flex;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--bg-canvas);
+      flex-shrink: 0;
+    }
+    .tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      padding: 7px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: background 150ms ease, color 150ms ease;
+    }
+    .tab-btn.active {
+      background: var(--bg-elevated);
+      color: var(--ink);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+    }
+    .tab-count {
+      display: inline-grid;
+      place-items: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .capture-tab { display: grid; gap: 12px; margin-top: 12px; }
+    .summary-publish-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .summary-publish-row p { margin: 0; flex: 1; min-width: 200px; }
+
+    /* ── Sticky bottom action bar ─────────────────────────────────────── */
+    .action-bar {
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+      padding: 12px 16px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--bg-elevated);
+      box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.18);
+    }
+    .action-bar-spacer { flex: 1; }
     .plan-bottom-action { padding: 16px 0 4px; display: flex; justify-content: flex-end; }
     .plan-layout {
       display: grid;
@@ -958,8 +1128,15 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
       padding: 10px;
       display: grid;
       gap: 10px;
+      align-content: start;
+      /* Grows with meeting history — keep it in view and scroll internally
+         instead of stretching the whole page. */
+      position: sticky;
+      top: 10px;
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
     }
-    .prep-sidebar h5 { margin: 0; font-size: 14px; }
+    .prep-sidebar h5 { margin: 0; font-size: 14px; position: sticky; top: 0; background: var(--bg-elevated); padding-bottom: 4px; z-index: 1; }
     .prep-block { display: grid; gap: 6px; }
     .prep-block strong { font-size: 12px; text-transform: uppercase; color: var(--muted); }
     .prep-block ul {
@@ -1157,6 +1334,12 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
+    }
+    .empty-state.compact-empty {
+      display: grid;
+      gap: 4px;
+      justify-items: center;
+      text-align: center;
     }
     .linked-task-list {
       display: grid;
@@ -1396,6 +1579,7 @@ export class CustomerMeetingFormComponent implements OnChanges {
   lastRecap = '';
   nextMeetingNotesText = '';
   captureCollapsed = false;
+  captureTab: 'notes' | 'summary' = 'summary';
   expandedTaskId: string | null = null;
   newProgressionNoteByTask: Record<string, string | undefined> = {};
   uploadingAttachment = false;
@@ -1554,9 +1738,9 @@ export class CustomerMeetingFormComponent implements OnChanges {
   scrollToSection(status: CustomerMeetingStatus): void {
     const sectionMap: Partial<Record<CustomerMeetingStatus, string>> = {
       'Planned': 'plan-section',
-      'Draft Summary': 'run-section',
-      'Tasks Created': 'run-section',
-      'Closed': 'wrapup-section'
+      'Draft Summary': 'capture-section',
+      'Tasks Created': 'tasks-section',
+      'Closed': 'capture-section'
     };
     const id = sectionMap[status];
     if (id) {
@@ -1566,6 +1750,15 @@ export class CustomerMeetingFormComponent implements OnChanges {
 
   scrollToNotesList(): void {
     document.getElementById('notes-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  scrollToId(id: string): void {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  goToNotes(): void {
+    this.captureTab = 'notes';
+    setTimeout(() => this.scrollToNotesList(), 0);
   }
 
   toggleSetupCollapsed(): void {
@@ -1727,6 +1920,9 @@ export class CustomerMeetingFormComponent implements OnChanges {
       primaryContactEmail: this.newProspect.contactEmail.trim() || undefined,
       primaryContactPhone: this.newProspect.contactPhone.trim() || undefined
     });
+    if (!created) {
+      return;
+    }
     this.pickedCustomerId = created.id;
     this.cancelProspectForm();
     this.onPlanChanged();
@@ -1956,6 +2152,7 @@ export class CustomerMeetingFormComponent implements OnChanges {
       return;
     }
     this.creatingTaskForNote = note;
+    setTimeout(() => this.scrollToId('tasks-section'), 0);
   }
 
   startEditingNote(note: MeetingNote): void {
@@ -2084,6 +2281,7 @@ export class CustomerMeetingFormComponent implements OnChanges {
     this.summaryText = '';
     this.nextMeetingNotesText = '';
     this.captureCollapsed = false;
+    this.captureTab = 'summary';
     this.pendingAttachmentFile = null;
     this.lastRecap = '';
     this.setupCollapsed = false;

@@ -14,6 +14,15 @@
       (navigate)="setView($event)"
     ></app-header>
 
+    <div class="save-error-banner" *ngIf="workspace.backendIssue() as issue" role="alert">
+      <app-icon name="alert-triangle" [size]="16"></app-icon>
+      <div class="save-error-copy">
+        <strong>{{ issue.message }}</strong>
+        <span *ngIf="issue.detail">{{ issue.detail }}</span>
+      </div>
+      <button type="button" (click)="workspace.clearBackendIssue()">Dismiss</button>
+    </div>
+
     <div class="workspace-body">
       <ng-container [ngSwitch]="activeView()">
         <app-workspace-home
@@ -40,6 +49,7 @@
 
   <app-task-drawer />
   <app-meeting-drawer />
+  <app-catch-up-drawer />
 
   <!-- ── Bottom action bar: Plan Meeting · Quick Capture · New Meeting ── -->
   <div class="bottom-action-bar" (click)="closeBarPopovers()">

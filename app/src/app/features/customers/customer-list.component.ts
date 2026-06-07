@@ -143,7 +143,10 @@ type SortDir = 'asc' | 'desc';
 
     <section class="panel">
       <div class="panel-header">
-        <h3>{{ 'customers.title' | t }}</h3>
+        <div>
+          <span class="section-eyebrow">{{ 'home.pipelineEyebrow' | t }}</span>
+          <h3>{{ 'customers.title' | t }}</h3>
+        </div>
         <div class="topbar-actions">
           <input
             type="search"
@@ -179,14 +182,20 @@ type SortDir = 'asc' | 'desc';
         <button
           *ngFor="let c of filteredCustomers"
           type="button"
-          class="workload-row workload-row-btn cust-row"
+          class="cust-row"
           (click)="viewBoard.emit(c)"
         >
-          <span class="avatar">{{ initials(c.name) }}</span>
-          <div>
-            <strong>{{ c.name }}</strong>
-            <small>{{ ('customerType.' + c.type) | t }} · {{ openTasksFor(c) }} {{ 'common.open' | t }}</small>
+          <span class="avatar" [style.--tint-h]="avatarHue(c.name)">{{ initials(c.name) }}</span>
+          <div class="cust-main">
+            <div class="cust-top">
+              <strong>{{ c.name }}</strong>
+              <span class="status-pill" [ngClass]="statusTone(c)">{{ ('customerStatus.' + c.status) | t }}</span>
+            </div>
+            <small class="cust-meta">{{ meetingContext(c) }}</small>
           </div>
+          <span class="open-badge" [class.has]="openTasksFor(c) > 0" [title]="'customers.openTasks' | t">
+            {{ openTasksFor(c) }}
+          </span>
         </button>
 
         <div *ngIf="!filteredCustomers.length" class="empty-state">
@@ -205,8 +214,20 @@ type SortDir = 'asc' | 'desc';
       min-height: 0;
       overflow-y: auto;
     }
-    /* Reset button chrome for workload-style rows. */
-    .workload-row-btn {
+    .section-eyebrow {
+      display: block;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 2px;
+    }
+    /* Pipeline row — avatar · name+status+context · open-task badge. */
+    .cust-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
       width: 100%;
       text-align: start;
       background: none;
@@ -214,10 +235,66 @@ type SortDir = 'asc' | 'desc';
       color: inherit;
       font: inherit;
       cursor: pointer;
-      padding: 0;
+      padding: 8px;
+      border-radius: var(--radius-md, 8px);
+      transition: background 160ms ease;
     }
-    .cust-row:hover { background: var(--surface-strong); border-radius: 8px; }
-    .cust-row small { display: block; font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .cust-row:hover { background: var(--bg-hover); }
+    .cust-row .avatar {
+      flex: 0 0 auto;
+      width: 38px;
+      height: 38px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 50%;
+      font-size: 13px;
+      font-weight: 700;
+      color: hsl(var(--tint-h, 200), 55%, 32%);
+      background: hsl(var(--tint-h, 200), 60%, 90%);
+    }
+    .cust-main { flex: 1 1 auto; min-width: 0; }
+    .cust-top { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .cust-top strong {
+      font-size: 14px;
+      color: var(--text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .cust-meta {
+      display: block;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+    .status-pill {
+      flex: 0 0 auto;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 2px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .status-pill.pill-danger  { background: var(--danger-soft);  color: var(--danger); }
+    .status-pill.pill-success { background: var(--success-soft); color: var(--success); }
+    .status-pill.pill-accent  { background: var(--accent-soft);  color: var(--accent); }
+    .status-pill.pill-muted   { background: var(--bg-sunken);    color: var(--text-tertiary); }
+    .open-badge {
+      flex: 0 0 auto;
+      min-width: 24px;
+      height: 24px;
+      padding: 0 7px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--bg-sunken);
+      color: var(--text-tertiary);
+    }
+    .open-badge.has { background: var(--accent); color: #fff; }
     /* Add-client popup, mirrors the note-detail modal styling. */
     .modal-backdrop {
       position: fixed;
@@ -480,7 +557,10 @@ export class CustomerListComponent {
     if (!this.newCustomer.name.trim()) {
       return;
     }
-    this.workspace.addCustomer(this.newCustomer);
+    const created = this.workspace.addCustomer(this.newCustomer);
+    if (!created) {
+      return;
+    }
     this.newCustomer = this.emptyCustomer();
     this.closeAddModal();
   }
@@ -489,6 +569,44 @@ export class CustomerListComponent {
     return this.workspace
       .meetingTasksByCustomer(customer.id)
       .filter((t) => this.workspace.isOpenMeetingTaskStatus(t.status)).length;
+  }
+
+  /** Maps a customer status to a pill colour class so risk reads at a glance. */
+  statusTone(customer: Customer): string {
+    switch (customer.status) {
+      case 'At Risk':  return 'pill-danger';
+      case 'Active':   return 'pill-success';
+      case 'Prospect': return 'pill-accent';
+      default:         return 'pill-muted';
+    }
+  }
+
+  /** Deterministic accent hue (0–360) derived from a name, for avatar tints. */
+  avatarHue(name: string): number {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) % 360;
+    return hash;
+  }
+
+  /**
+   * One-line context for the row: the next scheduled meeting if there is one,
+   * otherwise when we last met, falling back to the account type. Gives a
+   * salesperson the "where do I stand" signal the old "· N open" line lacked.
+   */
+  meetingContext(customer: Customer): string {
+    const summary = this.workspace.getCustomerPreparationSummary(customer.id);
+    if (summary.nextMeetingDate) {
+      return `${this.i18n.translate('customers.nextMeeting')} · ${this.formatDate(summary.nextMeetingDate)}`;
+    }
+    if (summary.latestMeetingDate) {
+      return `${this.i18n.translate('customers.lastMeeting')} · ${this.formatDate(summary.latestMeetingDate)}`;
+    }
+    return this.i18n.translate('customerType.' + customer.type);
+  }
+
+  private formatDate(iso: string): string {
+    const locale = this.i18n.language === 'he' ? 'he-IL' : 'en-US';
+    return new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric' }).format(new Date(iso));
   }
 
   initials(name: string): string {

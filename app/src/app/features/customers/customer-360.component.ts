@@ -24,7 +24,7 @@ type Customer360Tab = 'meetings' | 'openTasks' | 'closedTasks' | 'attachments';
           <button
             type="button"
             class="ghost-action"
-            (click)="prepareMeeting.emit(customer)"
+            (click)="workspace.openCatchUpDrawer(customer.id)"
           >
             {{ 'customers.prepareMeeting' | t }}
           </button>

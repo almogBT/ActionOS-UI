@@ -3,10 +3,14 @@
   flex-direction: column;
   min-width: 0;
   min-height: 0;
-  /* Fill the space between the fixed header and the bottom action bar so the
-     page itself never scrolls — only the active tab's list does. (header 64 +
-     body padding 24 + bottom bar 60 + body bottom padding 24 = 172) */
-  height: calc(100vh - var(--header-height, 64px) - 108px);
+  /* min-height (not a hard `height` cap) so the PAGE can grow and scroll when
+     the content is taller than the viewport, while still filling the viewport
+     when it's short. (header 64 + body padding 24 + bottom bar 60 + body bottom
+     padding 24 = 172; dvh so an embedded/mobile host that trims the visible area
+     is accounted for.) The active section keeps its OWN internal scroll via a
+     max-height on .mw-tab-scroll / the embedded inbox feed below — that's what
+     lets both scrolls coexist. */
+  min-height: calc(100dvh - var(--header-height, 64px) - 108px);
   /* Container so the summary tiles can respond to the page width (not the
      viewport), collapsing to icon+number when the sidebar leaves no room. */
   container-type: inline-size;
@@ -71,6 +75,9 @@ app-calendar-stats,
 }
 
 .mw-tab-scroll {
+  /* Bounded so the list scrolls inside itself instead of stretching the page;
+     the page still scrolls when everything together exceeds the viewport. */
+  max-height: 75dvh;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--line) transparent;

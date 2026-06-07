@@ -41,6 +41,23 @@ interface TeamWorkload {
   meetingBlockedCount: number;
 }
 
+interface ActionosBackendIssue {
+  message: string;
+  detail?: string;
+  occurredAt: string;
+}
+
+interface PendingCustomerMutation {
+  operation: (customerId: string) => Promise<unknown>;
+  failureMessage?: string;
+}
+
+interface BackendMutationOptions<TResult> {
+  failureMessage?: string;
+  onSuccess?: (result: TResult) => void;
+  onFailure?: (error: unknown) => void;
+}
+
 const UNIFIED_TASK_STATUSES: TaskStatus[] = [
   'New',
   'Sent To Owner',
@@ -77,9 +94,13 @@ export class ActionosWorkspaceService {
   private readonly pendingMeetingNoteMutations = new Map<string, Array<(meetingIdNumeric: number, noteIdNumeric: number) => Promise<unknown>>>();
   private readonly taskIdAliases = new Map<string, string>();
   private readonly pendingTaskMutations = new Map<string, Array<(taskIdNumeric: number) => Promise<unknown>>>();
+  private readonly customerIdAliases = new Map<string, string>();
+  private readonly pendingCustomerIds = new Set<string>();
+  private readonly pendingCustomerMutations = new Map<string, PendingCustomerMutation[]>();
 
   currentUserId = '';
   currentEmployeeId = '';
+  readonly backendIssue = signal<ActionosBackendIssue | null>(null);
   /** Set before navigating to the meetings view to auto-open a specific meeting. Consumed and cleared by MeetingsComponent.ngOnInit. */
   pendingOpenMeetingId: string | null = null;
   /** ID of the meeting currently open in the meeting modal. Null means no existing meeting is open. */
@@ -108,6 +129,21 @@ export class ActionosWorkspaceService {
     this.openMeetingId = null;
     this.openNewMeetingCustomerId = null;
     this.pendingNewMeetingDate = null;
+  }
+
+  /** Customer whose catch-up brief is open in the bottom drawer. Null = closed. */
+  catchUpCustomerId: string | null = null;
+
+  get catchUpDrawerOpen(): boolean {
+    return this.catchUpCustomerId !== null;
+  }
+
+  openCatchUpDrawer(customerId: string): void {
+    this.catchUpCustomerId = customerId;
+  }
+
+  closeCatchUpDrawer(): void {
+    this.catchUpCustomerId = null;
   }
 
   private readonly MAIL_NOTIF_KEY = 'actionos.mail-notif-prefs';
@@ -410,6 +446,10 @@ export class ActionosWorkspaceService {
     })();
 
     return this.bootstrapInFlight;
+  }
+
+  clearBackendIssue(): void {
+    this.backendIssue.set(null);
   }
 
   get members(): Member[] {
@@ -1364,6 +1404,9 @@ export class ActionosWorkspaceService {
     this.pendingMeetingNoteMutations.clear();
     this.taskIdAliases.clear();
     this.pendingTaskMutations.clear();
+    this.customerIdAliases.clear();
+    this.pendingCustomerIds.clear();
+    this.pendingCustomerMutations.clear();
     this.saveToStorage();
   }
 
@@ -1595,6 +1638,9 @@ export class ActionosWorkspaceService {
     this.pendingMeetingNoteMutations.clear();
     this.taskIdAliases.clear();
     this.pendingTaskMutations.clear();
+    this.customerIdAliases.clear();
+    this.pendingCustomerIds.clear();
+    this.pendingCustomerMutations.clear();
     this.selectedTaskId = '';
     this.drawerOpen = false;
     this.currentUserId = '';
@@ -1905,15 +1951,24 @@ export class ActionosWorkspaceService {
     return this.refreshInFlight;
   }
 
-  private persistAndRefresh(operation: Promise<unknown>): void {
+  private persistAndRefresh<TResult>(
+    operation: Promise<TResult>,
+    options: BackendMutationOptions<TResult> = {}
+  ): void {
     this.pendingMutationCount += 1;
     void operation
-      .then(() => {
+      .then((result) => {
+        options.onSuccess?.(result);
         this.mutationRefreshPending = true;
       })
       .catch((error) => {
         // eslint-disable-next-line no-console
         console.error('[ActionOS] Backend mutation failed.', error);
+        options.onFailure?.(error);
+        this.reportBackendIssue(
+          options.failureMessage ?? 'ActionOS could not save this change to the database.',
+          error
+        );
         this.mutationRefreshPending = true;
       })
       .finally(() => {
@@ -1932,6 +1987,129 @@ export class ActionosWorkspaceService {
   private getOrgGroupForMutation(): string | null {
     const orgGroupId = this.currentOrgGroupId ?? this.normalizeOrgGroupId(this.hostContext.snapshot.selectedOrg);
     return orgGroupId;
+  }
+
+  private reportBackendIssue(message: string, error?: unknown): void {
+    this.backendIssue.set({
+      message,
+      detail: this.describeBackendError(error),
+      occurredAt: new Date().toISOString()
+    });
+  }
+
+  private describeBackendError(error: unknown): string | undefined {
+    if (!error || typeof error !== 'object') {
+      return undefined;
+    }
+
+    const httpError = error as {
+      status?: number;
+      statusText?: string;
+      message?: string;
+      error?: unknown;
+    };
+    const detail =
+      typeof httpError.error === 'string'
+        ? httpError.error
+        : typeof (httpError.error as { message?: unknown } | null)?.message === 'string'
+          ? (httpError.error as { message: string }).message
+          : undefined;
+
+    if (typeof httpError.status === 'number' && httpError.status > 0) {
+      const label = httpError.statusText ? ` ${httpError.statusText}` : '';
+      return detail ? `HTTP ${httpError.status}${label}: ${detail}` : `HTTP ${httpError.status}${label}`;
+    }
+
+    return detail ?? httpError.message;
+  }
+
+  private resolveCustomerId(customerId: string): string {
+    let current = customerId;
+    const seen = new Set<string>();
+    while (this.customerIdAliases.has(current) && !seen.has(current)) {
+      seen.add(current);
+      current = this.customerIdAliases.get(current) as string;
+    }
+    return current;
+  }
+
+  private runCustomerMutation(
+    customerId: string,
+    operation: (customerId: string) => Promise<unknown>,
+    failureMessage?: string
+  ): void {
+    const resolvedCustomerId = this.resolveCustomerId(customerId).trim();
+    if (!resolvedCustomerId) {
+      return;
+    }
+
+    if (this.pendingCustomerIds.has(resolvedCustomerId)) {
+      const queued = this.pendingCustomerMutations.get(resolvedCustomerId) ?? [];
+      queued.push({ operation, failureMessage });
+      this.pendingCustomerMutations.set(resolvedCustomerId, queued);
+      return;
+    }
+
+    this.persistAndRefresh(operation(resolvedCustomerId), { failureMessage });
+  }
+
+  private flushPendingCustomerMutations(canonicalCustomerId: string): void {
+    if (!this.pendingCustomerMutations.size) {
+      return;
+    }
+
+    const operations: PendingCustomerMutation[] = [];
+    for (const [key, queue] of this.pendingCustomerMutations.entries()) {
+      if (this.resolveCustomerId(key) !== canonicalCustomerId) {
+        continue;
+      }
+      operations.push(...queue);
+      this.pendingCustomerMutations.delete(key);
+    }
+
+    for (const queued of operations) {
+      this.persistAndRefresh(queued.operation(canonicalCustomerId), {
+        failureMessage: queued.failureMessage
+      });
+    }
+  }
+
+  private promoteCustomerId(localCustomerId: string, canonicalCustomerId: string): void {
+    const local = localCustomerId.trim();
+    const canonical = canonicalCustomerId.trim();
+    if (!local || !canonical) {
+      return;
+    }
+
+    this.customerIdAliases.set(local, canonical);
+    this.pendingCustomerIds.delete(local);
+    this.pendingCustomerIds.delete(canonical);
+
+    if (local !== canonical) {
+      this.customerStore.customers = this.customerStore.customers.map((customer) =>
+        customer.id === local
+          ? { ...customer, id: canonical }
+          : customer
+      );
+      this.customerMeetingStore.customerMeetings = this.customerMeetingStore.customerMeetings.map((meeting) =>
+        meeting.customerId === local
+          ? { ...meeting, customerId: canonical }
+          : meeting
+      );
+      this.tasksState = this.tasksState.map((task) =>
+        task.customerId === local
+          ? { ...task, customerId: canonical }
+          : task
+      );
+      if (this.openNewMeetingCustomerId === local) {
+        this.openNewMeetingCustomerId = canonical;
+      }
+      if (this.catchUpCustomerId === local) {
+        this.catchUpCustomerId = canonical;
+      }
+    }
+
+    this.flushPendingCustomerMutations(canonical);
   }
 
   private resolveMeetingId(meetingId: string): string {
@@ -2472,7 +2650,7 @@ export class ActionosWorkspaceService {
   }
 
   customer(id: string): Customer | undefined {
-    return this.customerRepo.get(id);
+    return this.customerRepo.get(this.resolveCustomerId(id));
   }
 
   customersByStatus(status: 'all' | Customer['status'] | Customer['type']): Customer[] {
@@ -2484,51 +2662,70 @@ export class ActionosWorkspaceService {
     );
   }
 
-  addCustomer(input: CreateCustomerInput): Customer {
+  addCustomer(input: CreateCustomerInput): Customer | null {
+    const orgGroupId = this.getOrgGroupForMutation();
+    if (!orgGroupId) {
+      this.reportBackendIssue('ActionOS could not save this customer because no organization is selected.');
+      return null;
+    }
+
     const customer = this.customerRepo.add(input);
     this.recordActivity('member', customer.id, 'Customer added', customer.name);
-    const orgGroupId = this.getOrgGroupForMutation();
-    if (orgGroupId) {
-      this.persistAndRefresh(this.actionosApi.createCustomer({
-        orgGroupId,
-        name: input.name,
-        type: input.type,
-        externalGroupId: input.externalGroupId ?? null,
-        primaryContactName: input.primaryContactName ?? null,
-        primaryContactEmail: input.primaryContactEmail ?? null,
-        primaryContactPhone: input.primaryContactPhone ?? null,
-        accountOwnerUserId: input.accountOwnerEmployeeId ?? null
-      }));
-    }
+    this.pendingCustomerIds.add(customer.id);
+    this.persistAndRefresh(this.actionosApi.createCustomer({
+      orgGroupId,
+      name: input.name,
+      type: input.type,
+      externalGroupId: input.externalGroupId ?? null,
+      primaryContactName: input.primaryContactName ?? null,
+      primaryContactEmail: input.primaryContactEmail ?? null,
+      primaryContactPhone: input.primaryContactPhone ?? null,
+      accountOwnerUserId: input.accountOwnerEmployeeId ?? null
+    }), {
+      failureMessage: `Customer "${customer.name}" was not saved to ActionOS.`,
+      onSuccess: (created) => this.promoteCustomerId(customer.id, created.id),
+      onFailure: () => {
+        this.pendingCustomerIds.delete(customer.id);
+        this.pendingCustomerMutations.delete(customer.id);
+      }
+    });
     return customer;
   }
 
   updateCustomer(id: string, changes: Partial<Customer>): Customer | null {
-    const updated = this.customerRepo.update(id, changes);
+    const updated = this.customerRepo.update(this.resolveCustomerId(id), changes);
     if (updated) {
       this.recordActivity('member', updated.id, 'Customer updated', updated.name);
       if (updated.id.toLowerCase().startsWith('local-')) {
-        this.persistAndRefresh(this.actionosApi.updateCustomer(updated.id, {
-          name: changes.name !== undefined ? changes.name : undefined,
-          type: changes.type !== undefined ? changes.type : undefined,
-          status: changes.status !== undefined ? changes.status : undefined,
-          externalGroupId: changes.externalGroupId !== undefined ? changes.externalGroupId : undefined,
-          primaryContactName: changes.primaryContactName !== undefined ? changes.primaryContactName : undefined,
-          primaryContactEmail: changes.primaryContactEmail !== undefined ? changes.primaryContactEmail : undefined,
-          primaryContactPhone: changes.primaryContactPhone !== undefined ? changes.primaryContactPhone : undefined,
-          accountOwnerUserId: changes.accountOwnerEmployeeId !== undefined ? changes.accountOwnerEmployeeId : undefined
-        }));
+        this.runCustomerMutation(
+          updated.id,
+          (customerId) => this.actionosApi.updateCustomer(customerId, {
+            name: changes.name !== undefined ? changes.name : undefined,
+            type: changes.type !== undefined ? changes.type : undefined,
+            status: changes.status !== undefined ? changes.status : undefined,
+            externalGroupId: changes.externalGroupId !== undefined ? changes.externalGroupId : undefined,
+            primaryContactName: changes.primaryContactName !== undefined ? changes.primaryContactName : undefined,
+            primaryContactEmail: changes.primaryContactEmail !== undefined ? changes.primaryContactEmail : undefined,
+            primaryContactPhone: changes.primaryContactPhone !== undefined ? changes.primaryContactPhone : undefined,
+            accountOwnerUserId: changes.accountOwnerEmployeeId !== undefined ? changes.accountOwnerEmployeeId : undefined
+          }),
+          `Customer "${updated.name}" was not updated in ActionOS.`
+        );
       }
     }
     return updated;
   }
 
   promoteProspect(id: string, externalGroupId: string): Customer | null {
-    const updated = this.customerRepo.promoteProspect(id, externalGroupId);
+    const updated = this.customerRepo.promoteProspect(this.resolveCustomerId(id), externalGroupId);
     if (updated) {
       this.recordActivity('member', updated.id, 'Prospect promoted', updated.name);
       if (updated.id.toLowerCase().startsWith('local-')) {
-        this.persistAndRefresh(this.actionosApi.promoteProspect(updated.id, externalGroupId));
+        this.runCustomerMutation(
+          updated.id,
+          (customerId) => this.actionosApi.promoteProspect(customerId, externalGroupId),
+          `Customer "${updated.name}" was not promoted in ActionOS.`
+        );
       }
     }
     return updated;
@@ -2576,55 +2773,64 @@ export class ActionosWorkspaceService {
   }
 
   customerMeetingsByCustomer(customerId: string): CustomerMeeting[] {
-    return this.customerMeetingRepo.listByCustomer(customerId);
+    return this.customerMeetingRepo.listByCustomer(this.resolveCustomerId(customerId));
   }
 
   addCustomerMeeting(input: CreateCustomerMeetingInput): CustomerMeeting {
-    const meeting = this.customerMeetingRepo.add(input);
+    const customerId = this.resolveCustomerId(input.customerId);
+    const meeting = this.customerMeetingRepo.add({ ...input, customerId });
     const localMeetingId = meeting.id;
     this.recordActivity('meeting', meeting.id, 'Customer meeting created', meeting.subject);
     const meetingDate = new Date(input.meetingDate);
     if (Number.isNaN(meetingDate.getTime())) {
+      this.reportBackendIssue(`Meeting "${meeting.subject}" was not saved because its date is invalid.`);
       return meeting;
     }
 
-    this.persistAndRefresh(this.actionosApi.createCustomerMeeting(input.customerId, {
-      subject: input.subject,
-      meetingDateUtc: meetingDate.toISOString(),
-      meetingLeaderUserId: input.meetingLeaderEmployeeId,
-      goal: input.goal ?? null,
-      summary: null,
-      status: 'Planned',
-      participants: [
-        {
-          isInternal: true,
-          userId: input.meetingLeaderEmployeeId,
-          displayName: this.employeeName(input.meetingLeaderEmployeeId),
-          email: this.employee(input.meetingLeaderEmployeeId)?.email ?? null,
-          phone: null,
-          role: 'Meeting Leader'
-        },
-        ...(input.internalParticipantEmployeeIds ?? []).map((employeeId) => ({
-          isInternal: true,
-          userId: employeeId,
-          displayName: this.employeeName(employeeId),
-          email: this.employee(employeeId)?.email ?? null,
-          phone: null,
-          role: 'Participant'
-        })),
-        ...(input.customerParticipants ?? []).map((participant) => ({
-          isInternal: false,
-          userId: null,
-          displayName: participant.name,
-          email: participant.email ?? null,
-          phone: participant.phone ?? null,
-          role: participant.role ?? null
-        }))
-      ]
-    }).then((created) => {
-      this.promoteMeetingId(localMeetingId, created.id.toString());
-      return created;
-    }));
+    const createAndPromote = (persistedCustomerId: string) =>
+      this.actionosApi.createCustomerMeeting(persistedCustomerId, {
+        subject: input.subject,
+        meetingDateUtc: meetingDate.toISOString(),
+        meetingLeaderUserId: input.meetingLeaderEmployeeId,
+        goal: input.goal ?? null,
+        summary: null,
+        status: 'Planned',
+        participants: [
+          {
+            isInternal: true,
+            userId: input.meetingLeaderEmployeeId,
+            displayName: this.employeeName(input.meetingLeaderEmployeeId),
+            email: this.employee(input.meetingLeaderEmployeeId)?.email ?? null,
+            phone: null,
+            role: 'Meeting Leader'
+          },
+          ...(input.internalParticipantEmployeeIds ?? []).map((employeeId) => ({
+            isInternal: true,
+            userId: employeeId,
+            displayName: this.employeeName(employeeId),
+            email: this.employee(employeeId)?.email ?? null,
+            phone: null,
+            role: 'Participant'
+          })),
+          ...(input.customerParticipants ?? []).map((participant) => ({
+            isInternal: false,
+            userId: null,
+            displayName: participant.name,
+            email: participant.email ?? null,
+            phone: participant.phone ?? null,
+            role: participant.role ?? null
+          }))
+        ]
+      }).then((created) => {
+        this.promoteMeetingId(localMeetingId, created.id.toString());
+        return created;
+      });
+
+    this.runCustomerMutation(
+      customerId,
+      createAndPromote,
+      `Meeting "${meeting.subject}" was not saved to ActionOS.`
+    );
     return meeting;
   }
 
@@ -2876,7 +3082,8 @@ export class ActionosWorkspaceService {
   }
 
   meetingTasksByCustomer(customerId: string): Task[] {
-    return this.meetingTasks.filter(task => task.customerId === customerId);
+    const resolvedCustomerId = this.resolveCustomerId(customerId);
+    return this.meetingTasks.filter(task => task.customerId === resolvedCustomerId);
   }
 
   meetingTasksByMeeting(meetingId: string): Task[] {
@@ -3281,9 +3488,10 @@ export class ActionosWorkspaceService {
    * This is the R8 view from the Hebrew brief.
    */
   getCustomerPreparationSummary(customerId: string): CustomerPreparationSummary {
+    const resolvedCustomerId = this.resolveCustomerId(customerId);
     const today = this.todayIso;
-    const meetings = this.customerMeetingRepo.listByCustomer(customerId);
-    const allTasks = this.meetingTasksByCustomer(customerId);
+    const meetings = this.customerMeetingRepo.listByCustomer(resolvedCustomerId);
+    const allTasks = this.meetingTasksByCustomer(resolvedCustomerId);
 
     const openTasks = allTasks.filter((t) => this.isOpenMeetingTaskStatus(t.status));
     const overdueTasks = allTasks.filter((t) => this.isMeetingTaskOverdue(t));
@@ -3305,7 +3513,7 @@ export class ActionosWorkspaceService {
       .pop();
 
     return {
-      customerId,
+      customerId: resolvedCustomerId,
       priorMeetings: meetings, // already sorted newest-first by listByCustomer
       openTasks,
       overdueTasks,

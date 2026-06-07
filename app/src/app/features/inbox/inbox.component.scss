@@ -31,10 +31,13 @@
   min-height: 0;
   max-width: none;
 
+  /* Bounded to a screenful so a large notification list scrolls inside the feed
+     instead of stretching the My Work page; the page itself still scrolls when
+     the feed plus the fixed header/filters exceed the viewport. */
   .inbox-feed {
-    flex: 1;
+    flex: 0 1 auto;
     min-height: 0;
-    max-height: none;
+    max-height: 75dvh;
   }
 }
 

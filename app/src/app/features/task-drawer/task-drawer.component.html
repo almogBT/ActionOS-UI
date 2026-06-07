@@ -1,11 +1,9 @@
-<div
-  *ngIf="workspace.drawerOpen && workspace.selectedTask as task"
-  class="drawer-backdrop"
-  role="presentation"
-  (click)="closeDrawer()"
+<app-drawer-shell
+  [open]="!!(workspace.drawerOpen && workspace.selectedTask)"
+  ariaLabel="Task details"
+  (closed)="closeDrawer()"
 >
-  <aside class="task-drawer" role="dialog" aria-label="Task details" (click)="$event.stopPropagation()">
-    <div class="task-modal-handle"></div>
+  <div class="task-drawer-content" *ngIf="workspace.drawerOpen && workspace.selectedTask as task">
 
     <header class="drawer-header">
       <div>
@@ -339,5 +337,5 @@
         Send reminder
       </button>
     </footer>
-  </aside>
-</div>
+  </div>
+</app-drawer-shell>
