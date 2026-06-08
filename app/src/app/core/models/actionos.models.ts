@@ -104,6 +104,7 @@ export interface UpdateTaskInput {
   title?: string;
   description?: string;
   board?: string;
+  customerId?: string;
   status?: TaskStatus;
   priority?: Priority;
   dueDate?: string;
@@ -325,6 +326,7 @@ export interface CreateMeetingTaskInput {
 export interface UpdateMeetingTaskInput {
   title?: string;
   description?: string;
+  customerId?: string;
   assignedToEmployeeId?: string;
   dueDate?: string;
   priority?: Priority;

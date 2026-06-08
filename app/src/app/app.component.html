@@ -1,15 +1,7 @@
-<main class="actionos-shell" [ngClass]="shellClass()">
-  <app-sidebar
-    [activeView]="activeView()"
-    [open]="navOpen()"
-    (viewSelected)="setView($event)"
-    (close)="navOpen.set(false)"
-  ></app-sidebar>
-
+<main class="actionos-shell">
   <section class="workspace">
     <app-header
       [activeView]="activeView()"
-      (toggleSidebar)="toggleNav()"
       (captured)="onCaptured()"
       (navigate)="setView($event)"
     ></app-header>
@@ -25,15 +17,7 @@
 
     <div class="workspace-body">
       <ng-container [ngSwitch]="activeView()">
-        <app-workspace-home
-          *ngSwitchCase="'home'"
-          (viewChange)="setView($event)"
-          (openCustomer)="openCustomerDetail($event)"
-          (prepareCustomerMeeting)="prepareCustomerMeeting($event)"
-          (newCustomerMeeting)="startCustomerMeeting($event)"
-        />
         <app-inbox *ngSwitchCase="'inbox'" (viewChange)="setView($event)" />
-        <app-my-work *ngSwitchCase="'my-work'" (viewChange)="setView($event)" />
         <app-tasks *ngSwitchCase="'tasks'" (viewChange)="setView($event)" />
         <app-boards *ngSwitchCase="'boards'" (viewChange)="setView($event)" />
         <app-meetings *ngSwitchCase="'meetings'" [openNewTick]="meetingNewTick()" (viewChange)="setView($event)" (prepareMeeting)="prepareCustomerMeeting($event)" />
@@ -42,6 +26,14 @@
           [initialCustomer]="activeCustomer()"
           [initialView]="customerEntryView()"
           (exit)="closeCustomerDetail()"
+        />
+        <!-- My Work is the landing view; it also catches the default case. -->
+        <app-my-work
+          *ngSwitchDefault
+          (viewChange)="setView($event)"
+          (openCustomer)="openCustomerDetail($event)"
+          (prepareCustomerMeeting)="prepareCustomerMeeting($event)"
+          (newCustomerMeeting)="startCustomerMeeting($event)"
         />
       </ng-container>
     </div>
@@ -77,34 +69,10 @@
 
     <!-- Quick capture form -->
     <form class="bar-capture" (ngSubmit)="submitCapture()" (click)="$event.stopPropagation()">
-      <span class="bar-capture-icon" aria-hidden="true">
-        <app-icon name="sparkles" [size]="15"></app-icon>
+      <span class="cmd-type-chip cmd-type-chip-static" aria-hidden="true">
+        <app-icon name="check-square" [size]="12"></app-icon>
+        <span>{{ currentCaptureLabel }}</span>
       </span>
-      <div class="bar-type-host">
-        <button
-          type="button"
-          class="cmd-type-chip"
-          [class.open]="captureTypeMenuOpen()"
-          (click)="toggleCaptureTypeMenu(); $event.stopPropagation()"
-        >
-          <app-icon [name]="captureIconFor(captureType)" [size]="12"></app-icon>
-          <span>{{ currentCaptureLabel }}</span>
-          <app-icon name="chevron-down" [size]="11"></app-icon>
-        </button>
-        <div class="capture-type-menu" *ngIf="captureTypeMenuOpen()" (click)="$event.stopPropagation()">
-          <button
-            *ngFor="let type of captureTypes"
-            type="button"
-            class="capture-option"
-            [class.active]="captureType === type"
-            (click)="selectCaptureType(type)"
-          >
-            <app-icon [name]="captureIconFor(type)" [size]="14"></app-icon>
-            <span class="capture-option-label">{{ captureLabelFor(type) }}</span>
-            <span class="capture-option-shortcut">{{ captureShortcutFor(type) }}</span>
-          </button>
-        </div>
-      </div>
       <input
         class="cmd-input"
         name="captureText"
@@ -113,7 +81,7 @@
         [placeholder]="capturePlaceholder"
       />
       <button type="submit" class="cmd-submit" [disabled]="!captureText.trim()">
-        {{ 'common.capture' | t }}
+        {{ 'common.createTask' | t }}
       </button>
     </form>
 

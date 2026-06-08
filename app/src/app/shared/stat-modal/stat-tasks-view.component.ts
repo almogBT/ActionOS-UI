@@ -40,7 +40,7 @@ export type StatTaskFilter = 'all' | 'mine' | 'assignedByMe';
       [tasks]="filteredTasks"
       groupBy="none"
       density="compact"
-      [allowAddTask]="false"
+      [allowAddTask]="allowAddTask"
       [newTaskDefaults]="newTaskDefaults"
       [emptyText]="emptyText"
       (rowOpened)="rowOpened.emit()"
@@ -85,6 +85,8 @@ export class StatTasksViewComponent {
   @Input() emptyText = '';
   /** Defaults applied if the embedded table ever adds a task. */
   @Input() newTaskDefaults?: Partial<CreateTaskInput>;
+  /** Enables inline task creation for scoped boards, such as a client board. */
+  @Input() allowAddTask = false;
   @Output() rowOpened = new EventEmitter<void>();
 
   readonly filters: StatTaskFilter[] = ['all', 'mine', 'assignedByMe'];

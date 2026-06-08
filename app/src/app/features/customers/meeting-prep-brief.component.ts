@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { CustomerMeeting, Task } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
@@ -9,6 +9,7 @@ export type MeetingPrepBriefVariant = 'full' | 'compact';
 interface PrepDecisionRow {
   id: string;
   content: string;
+  meetingId: string;
   meetingSubject: string;
   meetingDate: string;
 }
@@ -16,6 +17,7 @@ interface PrepDecisionRow {
 interface PrepBlockerRow {
   id: string;
   content: string;
+  meetingId: string;
   meetingSubject: string;
   meetingDate: string;
   taskStatus?: string;
@@ -27,6 +29,7 @@ interface PrepBrief {
   nextPlannedDate?: string;
   agendaNotes: string | null;
   agendaFromSubject: string;
+  agendaMeetingId: string | null;
   counts: { overdue: number; open: number; waitingOnThem: number; waitingOnUs: number };
   overdueTasks: Task[];
   openActiveTasks: Task[];
@@ -76,7 +79,9 @@ interface PrepBrief {
       </div>
 
       <!-- Agenda carried over from the previous meeting's wrap-up notes -->
-      <div class="brief-block agenda" *ngIf="b.agendaNotes">
+      <div class="brief-block agenda" *ngIf="b.agendaNotes"
+        [class.clickable]="b.agendaMeetingId"
+        (click)="b.agendaMeetingId && openMeeting(b.agendaMeetingId)">
         <strong>{{ 'meetingPrep.agendaForThisMeeting' | t }}</strong>
         <small class="muted" *ngIf="b.agendaFromSubject">{{ b.agendaFromSubject }}</small>
         <p class="agenda-body">{{ b.agendaNotes }}</p>
@@ -86,7 +91,7 @@ interface PrepBrief {
       <div class="brief-block danger-block" *ngIf="b.overdueTasks.length">
         <strong class="danger-label">{{ 'meetingPrep.overdueTasks' | t }} ({{ b.overdueTasks.length }})</strong>
         <ul>
-          <li *ngFor="let task of limit(b.overdueTasks)" [class.clickable]="variant === 'full'" (click)="onTaskClick(task)">
+          <li *ngFor="let task of limit(b.overdueTasks)" class="clickable" (click)="onTaskClick(task)">
             <span class="row-main">
               <strong>{{ task.title }}</strong>
               <span class="status-chip" [ngClass]="workspace.statusClass(task.status)">{{ ('meetingTask.statusValues.' + task.status) | t }}</span>
@@ -101,7 +106,7 @@ interface PrepBrief {
       <div class="brief-block" *ngIf="b.waitingForInternal.length">
         <strong class="warn-label">{{ 'meetingPrep.waitingForInternal' | t }} ({{ b.waitingForInternal.length }})</strong>
         <ul>
-          <li *ngFor="let task of limit(b.waitingForInternal)" [class.clickable]="variant === 'full'" (click)="onTaskClick(task)">
+          <li *ngFor="let task of limit(b.waitingForInternal)" class="clickable" (click)="onTaskClick(task)">
             <span class="row-main"><strong>{{ task.title }}</strong></span>
             <span class="muted">{{ workspace.employeeName(task.assignedToEmployeeId) }}<span *ngIf="task.waitingReason"> · {{ task.waitingReason }}</span></span>
           </li>
@@ -112,7 +117,7 @@ interface PrepBrief {
       <div class="brief-block" *ngIf="b.waitingForCustomer.length">
         <strong>{{ 'meetingPrep.waitingForCustomer' | t }} ({{ b.waitingForCustomer.length }})</strong>
         <ul>
-          <li *ngFor="let task of limit(b.waitingForCustomer)" [class.clickable]="variant === 'full'" (click)="onTaskClick(task)">
+          <li *ngFor="let task of limit(b.waitingForCustomer)" class="clickable" (click)="onTaskClick(task)">
             <span class="row-main"><strong>{{ task.title }}</strong></span>
             <span class="muted">{{ workspace.employeeName(task.assignedToEmployeeId) }}</span>
           </li>
@@ -123,7 +128,7 @@ interface PrepBrief {
       <div class="brief-block" *ngIf="b.blockers.length">
         <strong class="danger-label">{{ 'meetingPrep.openBlockers' | t }} ({{ b.blockers.length }})</strong>
         <ul>
-          <li *ngFor="let blocker of limit(b.blockers)">
+          <li *ngFor="let blocker of limit(b.blockers)" class="clickable" (click)="openMeeting(blocker.meetingId)">
             <span class="row-main"><strong>{{ blocker.content }}</strong></span>
             <small class="muted">{{ blocker.meetingSubject }} · {{ blocker.meetingDate | slice:0:10 }}</small>
           </li>
@@ -134,7 +139,7 @@ interface PrepBrief {
       <div class="brief-block" *ngIf="b.openActiveTasks.length">
         <strong>{{ 'meetingPrep.openTasks' | t }} ({{ b.openActiveTasks.length }})</strong>
         <ul>
-          <li *ngFor="let task of limit(b.openActiveTasks)" [class.clickable]="variant === 'full'" (click)="onTaskClick(task)">
+          <li *ngFor="let task of limit(b.openActiveTasks)" class="clickable" (click)="onTaskClick(task)">
             <span class="row-main">
               <strong>{{ task.title }}</strong>
               <span class="status-chip" [ngClass]="workspace.statusClass(task.status)">{{ ('meetingTask.statusValues.' + task.status) | t }}</span>
@@ -149,7 +154,7 @@ interface PrepBrief {
       <div class="brief-block">
         <strong>{{ 'customerMeeting.recentDecisions' | t }}</strong>
         <ul *ngIf="b.decisions.length; else noDecisions">
-          <li *ngFor="let decision of limit(b.decisions)">
+          <li *ngFor="let decision of limit(b.decisions)" class="clickable" (click)="openMeeting(decision.meetingId)">
             <span class="row-main">{{ decision.content }}</span>
             <small class="muted">{{ decision.meetingSubject }} · {{ decision.meetingDate | slice:0:10 }}</small>
           </li>
@@ -163,7 +168,7 @@ interface PrepBrief {
       <div class="brief-block" *ngIf="b.completedSinceLastMeeting.length">
         <strong class="ok-label">{{ 'meetingPrep.completedSinceLastMeeting' | t }} ({{ b.completedSinceLastMeeting.length }})</strong>
         <ul>
-          <li *ngFor="let task of limit(b.completedSinceLastMeeting)" [class.clickable]="variant === 'full'" (click)="onTaskClick(task)">
+          <li *ngFor="let task of limit(b.completedSinceLastMeeting)" class="clickable" (click)="onTaskClick(task)">
             <span class="row-main"><strong>{{ task.title }}</strong></span>
             <span class="muted">{{ workspace.employeeName(task.assignedToEmployeeId) }}</span>
           </li>
@@ -174,7 +179,7 @@ interface PrepBrief {
       <div class="brief-block" *ngIf="variant === 'full' && b.priorMeetings.length">
         <strong>{{ 'meetingPrep.priorMeetings' | t }} ({{ b.priorMeetings.length }})</strong>
         <ul>
-          <li *ngFor="let m of b.priorMeetings">
+          <li *ngFor="let m of b.priorMeetings" class="clickable" (click)="openMeeting(m.id)">
             <span class="row-main"><strong>{{ m.subject }}</strong> <span class="muted">{{ m.meetingDate | slice:0:10 }}</span></span>
             <p class="muted summary-text" *ngIf="m.summary">{{ m.summary }}</p>
           </li>
@@ -241,6 +246,8 @@ interface PrepBrief {
     }
     .brief-block li.clickable { cursor: pointer; }
     .brief-block li.clickable:hover { background: var(--bg-hover, rgba(255,255,255,0.06)); }
+    .brief-block.agenda.clickable { cursor: pointer; }
+    .brief-block.agenda.clickable:hover { border-color: var(--accent); }
     .row-main { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
     .latest-update { font-size: 11px; opacity: 0.75; }
     .agenda {
@@ -275,7 +282,6 @@ export class MeetingPrepBriefComponent {
   /** When set, this meeting is excluded from "previous meeting" lookups. */
   @Input() currentMeetingId: string | null = null;
   @Input() variant: MeetingPrepBriefVariant = 'full';
-  @Output() openTask = new EventEmitter<Task>();
 
   showRecap = false;
 
@@ -286,10 +292,14 @@ export class MeetingPrepBriefComponent {
     return this.variant === 'compact' ? items.slice(0, 3) : items;
   }
 
+  /** Self-contained, like the meeting card: clicking a task opens its drawer. */
   onTaskClick(task: Task): void {
-    if (this.variant === 'full') {
-      this.openTask.emit(task);
-    }
+    this.workspace.selectMeetingTask(task, true);
+  }
+
+  /** Clicking a meeting — or a note/decision/blocker — opens that meeting. */
+  openMeeting(meetingId: string): void {
+    this.workspace.openMeetingDrawer(meetingId);
   }
 
   /** Most recent progression note date for a task, e.g. "2026-05-20". */
@@ -344,6 +354,7 @@ export class MeetingPrepBriefComponent {
       nextPlannedDate: summary.nextMeetingDate,
       agendaNotes: carryOver?.nextMeetingNotes?.trim() || null,
       agendaFromSubject: carryOver ? `${carryOver.subject} · ${carryOver.meetingDate.slice(0, 10)}` : '',
+      agendaMeetingId: carryOver?.id ?? null,
       counts: {
         overdue: overdueTasks.length,
         open: openActiveTasks.length,
@@ -372,6 +383,7 @@ export class MeetingPrepBriefComponent {
         rows.push({
           id: note.id,
           content: note.content,
+          meetingId: meeting.id,
           meetingSubject: meeting.subject,
           meetingDate: meeting.meetingDate
         });
@@ -399,6 +411,7 @@ export class MeetingPrepBriefComponent {
         rows.push({
           id: note.id,
           content: note.content,
+          meetingId: meeting.id,
           meetingSubject: meeting.subject,
           meetingDate: meeting.meetingDate,
           taskStatus: linked?.status

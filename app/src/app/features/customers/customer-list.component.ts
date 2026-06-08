@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActionosI18nService } from '../../core/i18n/actionos-i18n.service';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
@@ -21,6 +21,7 @@ type SortDir = 'asc' | 'desc';
   selector: 'app-customer-list',
   standalone: true,
   imports: [CommonModule, FormsModule, TranslatePipe, SearchableSelectComponent],
+  host: { '[class.compact]': 'compact' },
   template: `
     <div
       *ngIf="showAddModal"
@@ -156,6 +157,7 @@ type SortDir = 'asc' | 'desc';
             [placeholder]="'customers.searchPlaceholder' | t"
           />
           <button
+            *ngIf="!compact"
             type="button"
             class="add-customer-btn"
             (click)="openAddModal()"
@@ -167,7 +169,7 @@ type SortDir = 'asc' | 'desc';
         </div>
       </div>
 
-      <div class="cust-filters">
+      <div class="cust-filters" *ngIf="!compact">
         <button
           type="button"
           *ngFor="let f of filters"
@@ -422,12 +424,34 @@ type SortDir = 'asc' | 'desc';
         flex: 1 1 auto;
       }
     }
+    /* ── Compact (right-rail) variant ────────────────────────────────────
+       Tightens the list so it reads as a secondary widget: smaller header,
+       full-width small search, denser rows with smaller avatars. */
+    :host(.compact) .panel-header { margin-bottom: 8px; }
+    :host(.compact) .panel-header h3 { font-size: 14px; }
+    :host(.compact) .section-eyebrow { font-size: 10px; }
+    :host(.compact) .panel-header .topbar-actions { width: 100%; }
+    :host(.compact) .search-input {
+      min-width: 0;
+      flex: 1 1 auto;
+      padding: 0.35rem 0.6rem;
+      font-size: 12px;
+    }
+    :host(.compact) .cust-row { gap: 9px; padding: 6px 6px; }
+    :host(.compact) .cust-row .avatar { width: 30px; height: 30px; font-size: 11px; }
+    :host(.compact) .cust-top strong { font-size: 13px; }
+    :host(.compact) .cust-meta { font-size: 11px; }
+    :host(.compact) .status-pill { display: none; }
+    :host(.compact) .open-badge { min-width: 20px; height: 20px; font-size: 11px; }
   `]
 })
 export class CustomerListComponent {
   @Output() openCustomer = new EventEmitter<Customer>();
   /** Emitted when the row is clicked — opens the board preview popup on Home. */
   @Output() viewBoard = new EventEmitter<Customer>();
+  /** Slim variant for the My Work right rail: hides filters + add button and
+   *  tightens spacing so the list reads as a secondary widget, not a full page. */
+  @Input() compact = false;
 
   readonly filters: CustomerFilter[] = ['all', 'Existing', 'Prospect', 'At Risk'];
   filter: CustomerFilter = 'all';

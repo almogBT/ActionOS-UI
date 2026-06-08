@@ -1,10 +1,10 @@
 import { BoardTemplate, NavItem } from '../models/actionos.models';
 
 export const ACTIONOS_NAV_ITEMS: NavItem[] = [
-  { id: 'home', label: 'Home', shortcut: 'H', section: 'main' },
+  // My Work is the landing view (the former Home page was merged into it).
+  { id: 'my-work', label: 'My Work', shortcut: 'M', section: 'main' },
   { id: 'meetings', label: 'Meetings', shortcut: 'N', section: 'main' },
   { id: 'tasks', label: 'Tasks', shortcut: 'K', section: 'main' },
-  { id: 'my-work', label: 'My Work', shortcut: 'M', section: 'work' },
   { id: 'boards', label: 'Boards', shortcut: 'B', section: 'work' }
 ];
 

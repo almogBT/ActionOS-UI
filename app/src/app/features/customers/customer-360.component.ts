@@ -190,11 +190,18 @@ type Customer360Tab = 'meetings' | 'openTasks' | 'closedTasks' | 'attachments';
 
         <!-- Attachments -->
         <div *ngSwitchCase="'attachments'" class="empty-state">
-          <p>{{ 'attachments.mockNotice' | t }}</p>
           <p *ngIf="!attachments.length" class="muted">{{ 'customer360.noAttachments' | t }}</p>
           <div *ngFor="let a of attachments" class="attachment-row">
             <strong>{{ a.fileName }}</strong>
             <span class="muted">{{ a.sizeBytes }} bytes</span>
+            <button
+              type="button"
+              class="ghost-action small"
+              [disabled]="!workspace.canDownloadAttachment(a)"
+              (click)="workspace.downloadAttachment(a)"
+            >
+              {{ 'customerMeeting.download' | t }}
+            </button>
           </div>
         </div>
       </ng-container>
@@ -245,9 +252,17 @@ type Customer360Tab = 'meetings' | 'openTasks' | 'closedTasks' | 'attachments';
     .task-card { cursor: pointer; }
     .attachment-row {
       display: flex;
+      align-items: center;
+      gap: 0.75rem;
       justify-content: space-between;
       padding: 0.5rem 0;
       border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .attachment-row strong {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     @media (max-width: 720px) {
       .kpi-row { grid-template-columns: repeat(2, 1fr); }

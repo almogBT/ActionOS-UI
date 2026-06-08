@@ -1,16 +1,21 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActionosI18nService } from '../../core/i18n/actionos-i18n.service';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import {
-  Attachment, CreateCustomerMeetingInput, CreateMeetingNoteInput, Customer, CustomerMeeting, CustomerMeetingStatus, CustomerParticipant, Employee, MeetingNote, NoteType, ProgressionNote, Task, UpdateMeetingNoteInput } from '../../core/models/actionos.models';
+  CreateCustomerMeetingInput, Customer, CustomerMeeting, CustomerMeetingStatus, CustomerParticipant,
+  MeetingNote, Task
+} from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
 import { SearchableSelectComponent, SelectOption } from '../../shared/searchable-select/searchable-select.component';
 import { findSimilarCustomers, SimilarCustomerMatch } from '../../core/utils/customer-name-match';
-import { MeetingTaskCreationComponent } from './meeting-task-creation.component';
 import { MeetingPrepBriefComponent } from './meeting-prep-brief.component';
-import { NoteDetailModalComponent } from './note-detail-modal.component';
+import { MEETING_FORM_STYLES } from './meeting-form/meeting-form.styles';
+import { ParticipantChip, ParticipantPickerComponent, ParticipantPickerOption } from './meeting-form/participant-picker.component';
+import { MeetingNotesSectionComponent } from './meeting-form/meeting-notes-section.component';
+import { MeetingSummaryDraft, MeetingSummarySectionComponent } from './meeting-form/meeting-summary-section.component';
+import { MeetingTasksSectionComponent } from './meeting-form/meeting-tasks-section.component';
 
 export type MeetingFormSaveIntent = 'continue' | 'close';
 
@@ -23,12 +28,24 @@ interface CustomerParticipantOption extends CustomerParticipant {
   key: string;
 }
 
-type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
-
+/**
+ * Orchestrator for the customer meeting form.
+ *
+ * After the v4 simplification this component owns the meeting LIFECYCLE (draft
+ * create / persist / save / close), the Plan/Settings section (the planning gate is
+ * intentionally kept), the progress stepper, and the sticky action bar. The heavy
+ * interior — note capture, wrap-up summary, and tasks — lives in focused child
+ * components under `./meeting-form/`, and the two participant dropdowns are now a
+ * single reusable `app-participant-picker`.
+ */
 @Component({
   selector: 'app-customer-meeting-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe, SearchableSelectComponent, MeetingTaskCreationComponent, MeetingPrepBriefComponent, NoteDetailModalComponent],
+  imports: [
+    CommonModule, FormsModule, TranslatePipe, SearchableSelectComponent, MeetingPrepBriefComponent,
+    ParticipantPickerComponent, MeetingNotesSectionComponent, MeetingSummarySectionComponent,
+    MeetingTasksSectionComponent
+  ],
   template: `
     <nav class="phase-stepper" aria-label="Meeting progress">
       <button type="button" class="phase-step active" (click)="scrollToId('plan-section')">
@@ -50,7 +67,7 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
     <section class="panel" id="plan-section">
       <div class="panel-header">
         <div>
-          <span class="eyebrow">{{ customer ? customer.name : ('customerMeeting.customer' | t) }}</span>
+          <span class="eyebrow">{{ selectedCustomerForPrep?.name || ('customerMeeting.customer' | t) }}</span>
           <h3>{{ 'customerMeeting.title' | t }}</h3>
         </div>
         <span class="status-chip" [ngClass]="workspace.statusClass(currentStatus())">
@@ -58,10 +75,19 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
         </span>
       </div>
 
-
-<div class="section-head">
-        <span class="eyebrow">{{ 'customerMeeting.planSection' | t }}</span>
-        <h4>{{ 'customerMeeting.planSubtitle' | t }}</h4>
+      <div class="section-head section-head-row">
+        <div>
+          <span class="eyebrow">{{ 'customerMeeting.planSection' | t }}</span>
+          <h4>{{ 'customerMeeting.planSubtitle' | t }}</h4>
+        </div>
+        <button
+          *ngIf="selectedCustomerForPrep as prepCustomer"
+          type="button"
+          class="ghost-action small"
+          (click)="showPrepBrief = true"
+        >
+          📋 {{ 'meetingPrep.summaryFor' | t }} {{ prepCustomer.name }}
+        </button>
       </div>
 
       <article class="meeting-setup-summary" *ngIf="setupCollapsed">
@@ -79,10 +105,9 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
         </div>
       </article>
 
-      <div class="plan-layout" *ngIf="!setupCollapsed">
-        <div class="plan-main">
-          <div class="form-grid">
-            <div class="field-control" *ngIf="!customer">
+      <div *ngIf="!setupCollapsed">
+        <div class="form-grid">
+          <div class="field-control wide" *ngIf="!startedWithCustomer">
               {{ 'customerMeeting.customer' | t }}
               <app-searchable-select
                 name="formCustomer"
@@ -154,6 +179,7 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
               </div>
             </div>
 
+            <ng-container *ngIf="showPlanFields">
             <label class="field-control">
               {{ 'customerMeeting.subject' | t }}
               <input
@@ -175,6 +201,7 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
               />
             </label>
 
+            <div class="dropdowns-row">
             <label class="field-control">
               {{ 'customerMeeting.meetingLeader' | t }}
               <app-searchable-select
@@ -185,185 +212,88 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
               ></app-searchable-select>
             </label>
 
-            <label class="field-control">
-              {{ 'customerMeeting.goal' | t }}
-              <input
-                type="text"
-                name="goal"
-                [(ngModel)]="form.goal"
-                (ngModelChange)="onPlanChanged()"
-                [placeholder]="'customerMeeting.goalPlaceholder' | t"
-                maxlength="200"
-              />
-              <small class="char-counter muted">{{ (form.goal || '').length }}/200</small>
-            </label>
-
-            <div class="field-control wide">
+            <div class="field-control">
               {{ 'customerMeeting.internalParticipants' | t }}
-              <details class="participant-dropdown" (click)="$event.stopPropagation()">
-                <summary class="participant-dropdown-trigger">
-                  <span class="participant-summary-text" *ngIf="form.internalParticipantEmployeeIds.length; else chooseInternalParticipants">
-                    {{ selectedInternalParticipantsLabel() }}
-                  </span>
-                  <ng-template #chooseInternalParticipants>
-                    <span class="participant-placeholder">{{ 'customerMeeting.selectInternalParticipants' | t }}</span>
-                  </ng-template>
-                </summary>
-
-                <div class="participant-dropdown-menu">
-                  <input
-                    type="search"
-                    class="participant-search"
-                    name="internalParticipantsSearch"
-                    [(ngModel)]="internalParticipantSearch"
-                    [placeholder]="'customerMeeting.searchParticipants' | t"
-                    (click)="$event.stopPropagation()"
-                  />
-
-                  <label
-                    *ngFor="let e of filteredInternalEmployees"
-                    class="participant-option"
-                    (click)="$event.stopPropagation()"
-                  >
-                    <input
-                      type="checkbox"
-                      [checked]="form.internalParticipantEmployeeIds.includes(e.id)"
-                      (change)="toggleInternal(e.id)"
-                    />
-                    <span>{{ e.fullName }}</span>
-                  </label>
-
-                  <div class="participant-empty" *ngIf="!filteredInternalEmployees.length">
-                    {{ 'home.noMatches' | t }}
-                  </div>
-                </div>
-              </details>
-
-              <div class="selected-participants" *ngIf="form.internalParticipantEmployeeIds.length">
-                <span class="selected-participant" *ngFor="let id of form.internalParticipantEmployeeIds">
-                  <span>{{ workspace.employee(id)?.fullName }}</span>
-                  <button type="button" (click)="toggleInternal(id)" title="Remove">×</button>
-                </span>
-              </div>
+              <app-participant-picker
+                name="internalParticipants"
+                [placeholder]="'customerMeeting.selectInternalParticipants' | t"
+                [searchPlaceholder]="'customerMeeting.searchParticipants' | t"
+                [emptyText]="'home.noMatches' | t"
+                [options]="internalPickerOptions"
+                [selectedKeys]="form.internalParticipantEmployeeIds"
+                [chips]="internalChips"
+                (toggle)="toggleInternal($event)"
+                (remove)="toggleInternal($event)"
+              ></app-participant-picker>
             </div>
 
-            <div class="field-control wide">
+            <div class="field-control">
               {{ 'customerMeeting.customerParticipants' | t }}
-              <details class="participant-dropdown" (click)="$event.stopPropagation()">
-                <summary class="participant-dropdown-trigger">
-                  <span class="participant-summary-text" *ngIf="form.customerParticipants.length; else chooseCustomerParticipants">
-                    {{ selectedCustomerParticipantsLabel() }}
-                  </span>
-                  <ng-template #chooseCustomerParticipants>
-                    <span class="participant-placeholder">{{ 'customerMeeting.selectCustomerParticipants' | t }}</span>
-                  </ng-template>
-                </summary>
-
-                <div class="participant-dropdown-menu">
-                  <input
-                    type="search"
-                    class="participant-search"
-                    name="customerParticipantsSearch"
-                    [(ngModel)]="customerParticipantSearch"
-                    [placeholder]="'customerMeeting.searchParticipants' | t"
-                    (click)="$event.stopPropagation()"
-                  />
-
-                  <label
-                    *ngFor="let p of filteredCustomerParticipantOptions"
-                    class="participant-option"
-                    (click)="$event.stopPropagation()"
-                  >
-                    <input
-                      type="checkbox"
-                      [checked]="isCustomerParticipantSelected(p)"
-                      (change)="toggleCustomerParticipant(p)"
-                    />
-                    <span>
-                      {{ p.name }}
-                      <small class="muted" *ngIf="p.email"> - {{ p.email }}</small>
-                      <small class="muted" *ngIf="p.phone"> · {{ p.phone }}</small>
-                    </span>
-                  </label>
-
-                  <div class="participant-empty" *ngIf="!filteredCustomerParticipantOptions.length">
-                    {{ 'home.noMatches' | t }}
-                  </div>
-                </div>
-              </details>
-
-              <button
-                type="button"
-                class="ghost-action small add-participant-toggle"
-                (click)="showAddParticipantRow = !showAddParticipantRow"
+              <app-participant-picker
+                name="customerParticipants"
+                [placeholder]="'customerMeeting.selectCustomerParticipants' | t"
+                [searchPlaceholder]="'customerMeeting.searchParticipants' | t"
+                [emptyText]="'home.noMatches' | t"
+                [options]="customerPickerOptions"
+                [selectedKeys]="customerSelectedKeys"
+                [chips]="customerChips"
+                (toggle)="toggleCustomerParticipantByKey($event)"
+                (remove)="removeCustomerParticipantByKey($event)"
               >
-                {{ showAddParticipantRow ? ('common.cancel' | t) : ('+ ' + ('customerMeeting.addParticipant' | t)) }}
-              </button>
-
-              <div class="customer-add-row" *ngIf="showAddParticipantRow">
-                <input
-                  type="text"
-                  name="customParticipantName"
-                  [(ngModel)]="customCustomerParticipant.name"
-                  [placeholder]="'customerMeeting.participantName' | t"
-                />
-                <input
-                  type="email"
-                  name="customParticipantEmail"
-                  [(ngModel)]="customCustomerParticipant.email"
-                  [placeholder]="'customerMeeting.participantEmail' | t"
-                />
-                <input
-                  type="tel"
-                  name="customParticipantPhone"
-                  [(ngModel)]="customCustomerParticipant.phone"
-                  [placeholder]="'customerMeeting.participantPhone' | t"
-                />
-                <input
-                  type="text"
-                  name="customParticipantRole"
-                  [(ngModel)]="customCustomerParticipant.role"
-                  [placeholder]="'customerMeeting.participantRole' | t"
-                />
                 <button
                   type="button"
-                  class="primary-action small"
-                  [disabled]="!canAddCustomCustomerParticipant()"
-                  (click)="addCustomCustomerParticipant()"
+                  class="ghost-action small add-participant-toggle"
+                  (click)="showAddParticipantRow = !showAddParticipantRow"
                 >
-                  + {{ 'customerMeeting.addParticipant' | t }}
+                  {{ showAddParticipantRow ? ('common.cancel' | t) : ('+ ' + ('customerMeeting.addParticipant' | t)) }}
                 </button>
-              </div>
 
-              <div class="selected-participants" *ngIf="form.customerParticipants.length">
-                <span class="selected-participant" *ngFor="let p of form.customerParticipants; let i = index">
-                  <span>{{ p.name }}</span>
-                  <button type="button" (click)="removeCustomerParticipant(i)" title="Remove">×</button>
-                </span>
-              </div>
+                <div class="customer-add-row" *ngIf="showAddParticipantRow">
+                  <input
+                    type="text"
+                    name="customParticipantName"
+                    [(ngModel)]="customCustomerParticipant.name"
+                    [placeholder]="'customerMeeting.participantName' | t"
+                  />
+                  <input
+                    type="email"
+                    name="customParticipantEmail"
+                    [(ngModel)]="customCustomerParticipant.email"
+                    [placeholder]="'customerMeeting.participantEmail' | t"
+                  />
+                  <input
+                    type="tel"
+                    name="customParticipantPhone"
+                    [(ngModel)]="customCustomerParticipant.phone"
+                    [placeholder]="'customerMeeting.participantPhone' | t"
+                  />
+                  <input
+                    type="text"
+                    name="customParticipantRole"
+                    [(ngModel)]="customCustomerParticipant.role"
+                    [placeholder]="'customerMeeting.participantRole' | t"
+                  />
+                  <button
+                    type="button"
+                    class="primary-action small"
+                    [disabled]="!canAddCustomCustomerParticipant()"
+                    (click)="addCustomCustomerParticipant()"
+                  >
+                    + {{ 'customerMeeting.addParticipant' | t }}
+                  </button>
+                </div>
+              </app-participant-picker>
             </div>
+            </div>
+            </ng-container>
           </div>
-        </div>
-
-        <aside class="prep-sidebar" *ngIf="selectedCustomerForPrep as prepCustomer; else noPrepSidebar">
-          <h5>{{ 'meetingPrep.summaryFor' | t }} {{ prepCustomer.name }}</h5>
-          <app-meeting-prep-brief
-            variant="compact"
-            [customerId]="prepCustomer.id"
-            [currentMeetingId]="editingMeeting?.id ?? null"
-          ></app-meeting-prep-brief>
-        </aside>
-        <ng-template #noPrepSidebar>
-          <aside class="prep-sidebar muted">
-            {{ 'customerMeeting.pickCustomerForPrep' | t }}
-          </aside>
-        </ng-template>
       </div>
 
-      <div class="plan-bottom-action" *ngIf="!setupCollapsed">
+      <div class="plan-bottom-action" *ngIf="!setupCollapsed && showPlanFields">
         <button
           type="button"
           class="primary-action"
+          [class.start-ready]="!editing && canStartMeeting()"
           [disabled]="!canStartMeeting()"
           (click)="startOrCollapseSetup()"
         >
@@ -381,7 +311,7 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
             {{ (captureTab === 'notes' ? 'customerMeeting.notesTabHint' : 'customerMeeting.summaryTabHint') | t }}
           </small>
         </div>
-        <div class="tab-toggle" *ngIf="editing && editingMeeting" role="tablist">
+        <div class="tab-toggle" *ngIf="editingMeeting" role="tablist">
           <button
             type="button"
             class="tab-btn"
@@ -390,7 +320,7 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
             (click)="captureTab = 'notes'"
           >
             {{ 'customerMeeting.tabNotes' | t }}
-            <span class="tab-count" *ngIf="capturedNotes.length">{{ capturedNotes.length }}</span>
+            <span class="tab-count" *ngIf="capturedNotesCount">{{ capturedNotesCount }}</span>
           </button>
           <button
             type="button"
@@ -404,273 +334,25 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
         </div>
       </div>
 
-      <ng-container *ngIf="editing && editingMeeting; else runLocked">
+      <ng-container *ngIf="editingMeeting as meeting; else runLocked">
         <div class="capture-tab" *ngIf="captureTab === 'notes'">
-        <form class="capture-shell" (ngSubmit)="captureNote()" (click)="$event.stopPropagation()">
-          <div class="capture-type-row">
-            <button
-              type="button"
-              class="capture-chip"
-              *ngFor="let option of captureTypeOptions; let idx = index"
-              [class.active]="newNote.type === option"
-              (click)="setNoteType(option)"
-            >
-              <span>{{ ('noteType.' + option) | t }}</span>
-              <span class="chip-shortcut">⌃{{ idx + 1 }}</span>
-            </button>
-          </div>
-
-          <label class="field-control wide composer-control">
-            <input
-              #noteComposerInput
-              type="text"
-              name="noteContent"
-              [(ngModel)]="newNote.content"
-              [placeholder]="'customerMeeting.noteContentPlaceholder' | t"
-              (keydown)="onComposerKeydown($event)"
-            />
-          </label>
-
-          <div class="capture-grid" *ngIf="newNote.type === 'action'">
-            <label class="field-control">
-              {{ 'common.owner' | t }}
-              <app-searchable-select
-                name="noteOwner"
-                [(ngModel)]="newNote.ownerId"
-                [options]="noteOwnerOptions"
-              ></app-searchable-select>
-            </label>
-            <label class="field-control">
-              {{ 'common.dueDate' | t }}
-              <input type="date" name="noteDue" [(ngModel)]="newNote.dueDate" />
-            </label>
-          </div>
-          <div class="capture-actions-row">
-            <button type="submit" class="primary-action" [disabled]="!canAddNote()">
-              {{ 'customerMeeting.addNote' | t }}
-            </button>
-            <button
-              *ngIf="canCreateTaskFromType(newNote.type)"
-              type="button"
-              class="ghost-action"
-              [disabled]="!canAddNote()"
-              (click)="captureNote(true)"
-            >
-              {{ 'customerMeeting.captureAndTask' | t }}
-            </button>
-            <button type="button" class="ghost-action small" (click)="triggerNoteAttachInput()">
-              📎 {{ pendingAttachmentFile ? pendingAttachmentFile.name : ('customerMeeting.attachFile' | t) }}
-            </button>
-            <input #noteAttachInput type="file" style="display:none" (change)="onPendingAttachSelected($event)" />
-          </div>
-
-          <p class="muted action-hint" *ngIf="newNote.type === 'action' && (!newNote.ownerId || !newNote.dueDate)">
-            {{ 'customerMeeting.actionNeedsOwnerDue' | t }}
-          </p>
-        </form>
-
-        <div class="notes-list" id="notes-list" *ngIf="capturedNotes.length; else noNotesYet">
-          <div *ngFor="let n of capturedNotes" class="note-row">
-            <span class="status-chip" [ngClass]="n.type">
-              {{ ('noteType.' + n.type) | t }}
-            </span>
-            <div class="note-content">
-              <ng-container *ngIf="editingNoteId !== n.id; else editNoteForm">
-                <p>{{ n.content }}</p>
-                <div class="muted">
-                  <span *ngIf="n.createdByEmployeeId">{{ workspace.employeeName(n.createdByEmployeeId) }}</span>
-                  <span *ngIf="n.createdAt">- {{ n.createdAt | slice:0:10 }}</span>
-                  <span *ngIf="n.ownerId">- {{ 'common.owner' | t }}: {{ workspace.employeeName(n.ownerId) }}</span>
-                  <span *ngIf="n.dueDate">- {{ 'common.due' | t }} {{ n.dueDate }}</span>
-                </div>
-                <div class="note-linked" *ngIf="linkedTaskForNote(n) as linked">
-                  <span class="status-chip linked-chip">{{ 'customerMeeting.convertedToTask' | t }}</span>
-                  <span class="status-chip" [ngClass]="workspace.statusClass(linked.status)">
-                    {{ ('meetingTask.statusValues.' +linked.status) | t }}
-                  </span>
-                </div>
-                <small class="muted" *ngIf="n.type === 'action' && !isActionReady(n)">
-                  {{ 'customerMeeting.actionNeedsOwnerDue' | t }}
-                </small>
-              </ng-container>
-              <ng-template #editNoteForm>
-                <div class="note-edit-grid">
-                  <app-searchable-select
-                    [name]="'editType-' + n.id"
-                    [(ngModel)]="editingNoteDraft.type"
-                    [options]="noteTypeOptions"
-                  ></app-searchable-select>
-                  <input
-                    [name]="'editContent-' + n.id"
-                    type="text"
-                    [(ngModel)]="editingNoteDraft.content"
-                  />
-                  <app-searchable-select
-                    [name]="'editOwner-' + n.id"
-                    [(ngModel)]="editingNoteDraft.ownerId"
-                    [options]="noteOwnerOptions"
-                  ></app-searchable-select>
-                  <input
-                    [name]="'editDue-' + n.id"
-                    type="date"
-                    [(ngModel)]="editingNoteDraft.dueDate"
-                  />
-                </div>
-              </ng-template>
-            </div>
-            <div class="note-actions" (click)="$event.stopPropagation()">
-              <button
-                *ngIf="editingNoteId !== n.id"
-                type="button"
-                class="ghost-action"
-                (click)="startEditingNote(n)"
-              >
-                {{ 'common.edit' | t }}
-              </button>
-              <button
-                *ngIf="editingNoteId === n.id"
-                type="button"
-                class="primary-action"
-                [disabled]="!canSaveEditedNote()"
-                (click)="saveEditedNote(n)"
-              >
-                {{ 'common.save' | t }}
-              </button>
-              <button
-                *ngIf="editingNoteId === n.id"
-                type="button"
-                class="ghost-action"
-                (click)="cancelEditingNote()"
-              >
-                {{ 'common.cancel' | t }}
-              </button>
-              <button
-                type="button"
-                class="ghost-action danger"
-                (click)="deleteNote(n)"
-              >
-                {{ 'common.delete' | t }}
-              </button>
-              <button
-                *ngIf="canCreateTaskFromNote(n) && !n.convertedTaskId"
-                type="button"
-                class="primary-action"
-                [disabled]="n.type === 'action' && !isActionReady(n)"
-                (click)="startTaskCreation(n)"
-              >
-                {{ 'customerMeeting.createTaskFromNote' | t }}
-              </button>
-              <button
-                *ngIf="linkedTaskForNote(n) as linked"
-                type="button"
-                class="ghost-action"
-                (click)="openMeetingTask(linked)"
-              >
-                {{ 'customerMeeting.openTask' | t }}
-              </button>
-              <button
-                *ngIf="editingNoteId !== n.id"
-                type="button"
-                class="ghost-action"
-                (click)="openNoteDetail(n)"
-              >
-                {{ 'customerMeeting.noteDetails' | t }}
-              </button>
-              <button
-                *ngIf="editingNoteId !== n.id"
-                type="button"
-                class="ghost-action small"
-                (click)="triggerNoteRowAttach(n.id)"
-              >
-                📎
-              </button>
-              <input
-                [id]="'note-attach-' + n.id"
-                type="file"
-                style="display:none"
-                (change)="onNoteRowFileSelected($event, n.id)"
-              />
-            </div>
-            <div class="note-attachments" *ngIf="workspace.noteAttachments(n.id).length">
-              <div class="note-attach-chip" *ngFor="let att of workspace.noteAttachments(n.id)">
-                <span>{{ att.fileName }}</span>
-                <button type="button" (click)="removeAttachment(att.id)" title="Remove">×</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <ng-template #noNotesYet>
-          <div class="empty-state compact-empty">
-            <strong>{{ 'customerMeeting.noNotesYet' | t }}</strong>
-          </div>
-        </ng-template>
+          <app-meeting-notes-section
+            [meeting]="meeting"
+            (changed)="reloadMeeting()"
+            (createTaskFromNote)="onCreateTaskFromNote($event)"
+          ></app-meeting-notes-section>
         </div>
 
         <div class="capture-tab summary-tab" *ngIf="captureTab === 'summary'">
-          <div class="form-grid">
-            <label class="field-control wide">
-              {{ 'customerMeeting.summary' | t }}
-              <textarea
-                name="summary"
-                rows="5"
-                [(ngModel)]="summaryText"
-                (ngModelChange)="onWrapUpChanged()"
-                [placeholder]="'customerMeeting.summaryPlaceholder' | t"
-              ></textarea>
-            </label>
-
-            <label class="field-control">
-              {{ 'customerMeeting.nextMeetingDate' | t }}
-              <input
-                type="datetime-local"
-                name="nextMeetingDate"
-                [(ngModel)]="nextMeetingDateLocal"
-                (ngModelChange)="onWrapUpChanged()"
-              />
-            </label>
-
-            <label class="field-control wide">
-              {{ 'customerMeeting.nextMeetingNotes' | t }}
-              <textarea
-                name="nextMeetingNotes"
-                rows="3"
-                [(ngModel)]="nextMeetingNotesText"
-                (ngModelChange)="onWrapNextMeetingNotesChanged()"
-                [placeholder]="'customerMeeting.nextMeetingNotesPlaceholder' | t"
-              ></textarea>
-              <small class="muted">{{ 'customerMeeting.nextMeetingNotesHint' | t }}</small>
-            </label>
-          </div>
-
-          <section class="meeting-review-checklist">
-            <strong>{{ 'customerMeeting.beforePublishing' | t }}</strong>
-            <ul>
-              <li [class.warn]="actionsWithoutTaskCount > 0" [class.checklist-link]="actionsWithoutTaskCount > 0" (click)="actionsWithoutTaskCount > 0 && goToNotes()">
-                {{ 'customerMeeting.reviewActionsWithoutTask' | t }}: {{ actionsWithoutTaskCount }}
-                <span *ngIf="actionsWithoutTaskCount > 0" class="checklist-hint">→ review</span>
-              </li>
-              <li [class.warn]="openBlockerTaskCount > 0" [class.checklist-link]="openBlockerTaskCount > 0" (click)="openBlockerTaskCount > 0 && goToNotes()">
-                {{ 'customerMeeting.reviewBlockersOpen' | t }}: {{ openBlockerTaskCount }}
-                <span *ngIf="openBlockerTaskCount > 0" class="checklist-hint">→ review</span>
-              </li>
-              <li [class.warn]="uncategorizedNotesCount > 0">
-                {{ 'customerMeeting.reviewNotesCaptured' | t }}: {{ capturedNotes.length }} ({{ 'customerMeeting.reviewUncategorized' | t }}: {{ uncategorizedNotesCount }})
-              </li>
-              <li [class.blocking]="openMeetingTasksCount > 0" [class.checklist-link]="openMeetingTasksCount > 0" (click)="openMeetingTasksCount > 0 && scrollToId('tasks-section')">
-                {{ 'customerMeeting.reviewOpenTasks' | t }}: {{ openMeetingTasksCount }}
-                <span *ngIf="openMeetingTasksCount > 0" class="blocking-note">— {{ 'customerMeeting.reviewOpenTasksNote' | t }}</span>
-                <span *ngIf="openMeetingTasksCount > 0" class="checklist-hint">→ review</span>
-              </li>
-            </ul>
-          </section>
-
-          <div class="summary-publish-row">
-            <button type="button" class="primary-action" [disabled]="!editingMeeting" (click)="publishRecap()">
-              {{ 'customerMeeting.publishRecap' | t }}
-            </button>
-            <p class="muted">{{ 'customerMeeting.publishRecapHint' | t }}</p>
-          </div>
-          <pre class="recap-preview" *ngIf="lastRecap">{{ lastRecap }}</pre>
+          <app-meeting-summary-section
+            [meeting]="meeting"
+            [draft]="summaryDraft"
+            [recap]="lastRecap"
+            (changed)="onSummaryChanged()"
+            (publish)="publishRecap()"
+            (goToNotes)="goToNotes()"
+            (goToTasks)="scrollToId('tasks-section')"
+          ></app-meeting-summary-section>
         </div>
       </ng-container>
 
@@ -690,91 +372,13 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
         </div>
       </div>
 
-      <ng-container *ngIf="editing && editingMeeting; else tasksLocked">
-        <app-meeting-task-creation
-          *ngIf="creatingTaskForNote && editingMeeting && editingMeeting.customerId"
-          [meetingId]="editingMeeting.id"
-          [customerId]="editingMeeting.customerId"
-          [sourceNote]="creatingTaskForNote"
-          (created)="onTaskCreated()"
-          (cancelled)="creatingTaskForNote = null"
-        />
-
-        <div class="task-filter-row">
-          <button type="button" class="ghost-action" [class.active]="taskFilter === 'open'" (click)="taskFilter = 'open'">
-            {{ 'customerMeeting.taskFilterOpen' | t }} ({{ countTasksByFilter('open') }})
-          </button>
-          <button type="button" class="ghost-action" [class.active]="taskFilter === 'blocked'" (click)="taskFilter = 'blocked'">
-            {{ 'customerMeeting.taskFilterBlocked' | t }} ({{ countTasksByFilter('blocked') }})
-          </button>
-          <button type="button" class="ghost-action" [class.active]="taskFilter === 'done'" (click)="taskFilter = 'done'">
-            {{ 'customerMeeting.taskFilterDone' | t }} ({{ countTasksByFilter('done') }})
-          </button>
-          <button type="button" class="ghost-action" [class.active]="taskFilter === 'all'" (click)="taskFilter = 'all'">
-            {{ 'customerMeeting.taskFilterAll' | t }}
-          </button>
-        </div>
-
-        <div class="linked-task-list" *ngIf="filteredMeetingTasks.length; else noLinkedTasks">
-          <div class="linked-task-card" *ngFor="let task of filteredMeetingTasks">
-            <div class="linked-task-row">
-              <button type="button" class="linked-task-title-btn" (click)="openMeetingTask(task)">
-                <strong>{{ task.title }}</strong>
-                <small class="muted">
-                  {{ 'common.owner' | t }}: {{ workspace.employeeName(task.assignedToEmployeeId) }} · {{ 'common.due' | t }} {{ task.dueDate || '-' }}
-                </small>
-              </button>
-              <div class="linked-task-meta">
-                <span class="status-chip" [ngClass]="workspace.statusClass(task.status)">
-                  {{ ('meetingTask.statusValues.' + task.status) | t }}
-                </span>
-                <button
-                  type="button"
-                  class="ghost-action small progress-toggle"
-                  [class.active]="expandedTaskId === task.id"
-                  (click)="toggleTaskExpanded(task.id)"
-                >
-                  {{ (task.progressionNotes?.length || 0) }} {{ 'customerMeeting.updates' | t }}
-                  {{ expandedTaskId === task.id ? '▲' : '▼' }}
-                </button>
-              </div>
-            </div>
-
-            <div class="progression-notes-panel" *ngIf="expandedTaskId === task.id" (click)="$event.stopPropagation()">
-              <div class="progression-note-row" *ngFor="let pn of task.progressionNotes">
-                <span class="muted">{{ pn.createdAt | slice:0:10 }} · {{ workspace.employeeName(pn.authorEmployeeId) }}</span>
-                <p>{{ pn.content }}</p>
-              </div>
-              <div class="progression-empty" *ngIf="!task.progressionNotes?.length">
-                <small class="muted">{{ 'customerMeeting.noUpdatesYet' | t }}</small>
-              </div>
-              <div class="progression-add-row">
-                <input
-                  type="text"
-                  [name]="'progress-' + task.id"
-                  [(ngModel)]="newProgressionNoteByTask[task.id]"
-                  [placeholder]="'customerMeeting.addUpdatePlaceholder' | t"
-                  (keydown.enter)="addProgressionNote(task)"
-                  (click)="$event.stopPropagation()"
-                />
-                <button
-                  type="button"
-                  class="ghost-action small"
-                  [disabled]="!(newProgressionNoteByTask[task.id] ?? '').trim()"
-                  (click)="addProgressionNote(task)"
-                >
-                  {{ 'customerMeeting.addUpdate' | t }}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <ng-template #noLinkedTasks>
-          <div class="empty-state compact-empty">
-            <strong>{{ 'customerMeeting.noTasksInFilter' | t }}</strong>
-            <small class="muted">{{ 'customerMeeting.emptyTasksHint' | t }}</small>
-          </div>
-        </ng-template>
+      <ng-container *ngIf="editingMeeting as meeting; else tasksLocked">
+        <app-meeting-tasks-section
+          [meeting]="meeting"
+          [creatingTaskForNote]="creatingTaskForNote"
+          (taskCreated)="onTaskCreated()"
+          (cancelCreate)="creatingTaskForNote = null"
+        ></app-meeting-tasks-section>
       </ng-container>
 
       <ng-template #tasksLocked>
@@ -807,727 +411,81 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
       </button>
     </div>
 
-    <app-note-detail-modal
-      *ngIf="openedNote && editingMeeting"
-      [note]="openedNote"
-      [meeting]="editingMeeting"
-      (close)="openedNote = null"
-    />
+    <div
+      class="modal-backdrop"
+      *ngIf="showPrepBrief && selectedCustomerForPrep as prepCustomer"
+      role="presentation"
+      (click)="showPrepBrief = false"
+    >
+      <aside class="modal-card prep-modal-card" role="dialog" aria-label="Meeting summary" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <div>
+            <span class="eyebrow">{{ 'customerMeeting.planSection' | t }}</span>
+            <h2>{{ 'meetingPrep.summaryFor' | t }} {{ prepCustomer.name }}</h2>
+          </div>
+          <button type="button" class="ghost-action" (click)="showPrepBrief = false">
+            {{ 'common.close' | t }}
+          </button>
+        </header>
+        <app-meeting-prep-brief
+          variant="full"
+          [customerId]="prepCustomer.id"
+          [currentMeetingId]="editingMeeting?.id ?? null"
+        ></app-meeting-prep-brief>
+      </aside>
+    </div>
   `,
-  styles: [`
-    :host {
-      display: block;
-      min-width: 0;
-      /* room so the sticky action bar never covers the last section */
-      padding-bottom: 84px;
-    }
-    .panel-header h3 { margin: 0; }
-    .panel-header small.muted { display: block; margin-top: 4px; }
-    .section-head { margin: 14px 0 10px; }
-    .section-head h4 { margin: 0; }
-
-    /* ── Progress stepper ─────────────────────────────────────────────── */
-    .phase-stepper {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 14px;
-      padding: 6px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: var(--bg-elevated);
-      overflow-x: auto;
-    }
-    .phase-step {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border: 0;
-      background: transparent;
-      color: var(--muted);
-      padding: 6px 14px;
-      border-radius: 999px;
-      cursor: pointer;
-      white-space: nowrap;
-      font-size: 13px;
-      font-weight: 600;
-      transition: background 150ms ease, color 150ms ease;
-    }
-    .phase-step:disabled { cursor: not-allowed; opacity: 0.55; }
-    .phase-step.active {
-      background: var(--accent-soft);
-      color: var(--accent-strong);
-    }
-    .phase-dot {
-      display: inline-grid;
-      place-items: center;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      border: 1px solid currentColor;
-      font-size: 12px;
-      font-weight: 700;
-    }
-    .phase-step.active .phase-dot {
-      background: var(--accent-strong);
-      color: #fff;
-      border-color: var(--accent-strong);
-    }
-    .phase-line {
-      flex: 1;
-      min-width: 16px;
-      height: 2px;
-      border-radius: 2px;
-      background: var(--line);
-      transition: background 150ms ease;
-    }
-    .phase-line.filled { background: var(--accent); }
-
-    /* ── Notes / Summary tab toggle ───────────────────────────────────── */
-    .work-header { align-items: flex-start; }
-    .tab-toggle {
-      display: inline-flex;
-      gap: 4px;
-      padding: 4px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: var(--bg-canvas);
-      flex-shrink: 0;
-    }
-    .tab-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      border: 0;
-      background: transparent;
-      color: var(--muted);
-      padding: 7px 16px;
-      border-radius: 999px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-      transition: background 150ms ease, color 150ms ease;
-    }
-    .tab-btn.active {
-      background: var(--bg-elevated);
-      color: var(--ink);
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
-    }
-    .tab-count {
-      display: inline-grid;
-      place-items: center;
-      min-width: 18px;
-      height: 18px;
-      padding: 0 5px;
-      border-radius: 999px;
-      background: var(--accent-soft);
-      color: var(--accent-strong);
-      font-size: 11px;
-      font-weight: 700;
-    }
-    .capture-tab { display: grid; gap: 12px; margin-top: 12px; }
-    .summary-publish-row {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      flex-wrap: wrap;
-      margin-top: 4px;
-    }
-    .summary-publish-row p { margin: 0; flex: 1; min-width: 200px; }
-
-    /* ── Sticky bottom action bar ─────────────────────────────────────── */
-    .action-bar {
-      position: sticky;
-      bottom: 0;
-      z-index: 5;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 16px;
-      padding: 12px 16px;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: var(--bg-elevated);
-      box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.18);
-    }
-    .action-bar-spacer { flex: 1; }
-    .plan-bottom-action { padding: 16px 0 4px; display: flex; justify-content: flex-end; }
-    .plan-layout {
-      display: grid;
-      grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.65fr);
-      gap: 14px;
-      align-items: start;
-    }
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-    }
-    .field-control.wide { grid-column: 1 / -1; }
-    .participant-dropdown {
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      background: var(--bg-elevated);
-      overflow: hidden;
-    }
-    .participant-dropdown-trigger {
-      min-height: 40px;
-      padding: 8px 12px;
-      display: flex;
-      align-items: center;
-      cursor: pointer;
-      user-select: none;
-    }
-    .participant-dropdown-trigger::-webkit-details-marker { display: none; }
-    .participant-summary-text,
-    .participant-placeholder {
-      display: block;
-      width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-size: 14px;
-      line-height: 1.3;
-    }
-    .participant-placeholder { color: var(--muted); }
-    .participant-dropdown-menu {
-      display: grid;
-      gap: 6px;
-      max-height: 280px;
-      overflow-y: auto;
-      overflow-x: hidden;
-      border-top: 1px solid var(--line);
-      padding: 8px;
-      background: var(--bg-elevated);
-    }
-    .participant-search {
-      width: 100%;
-      min-height: 34px;
-      padding: 0 10px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--bg-elevated);
-      color: var(--ink);
-    }
-    .participant-option {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 8px;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    .participant-option input {
-      width: 18px;
-      height: 18px;
-      min-height: 18px;
-      padding: 0;
-      margin: 0;
-      flex: 0 0 auto;
-    }
-    .participant-empty {
-      padding: 6px 8px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-    .prospect-form {
-      display: grid;
-      gap: 8px;
-      padding: 12px;
-      border: 1px dashed var(--border-subtle);
-      border-radius: 10px;
-      background: var(--bg-canvas);
-      margin-top: 8px;
-    }
-    .dup-warning {
-      border: 1px solid #d9a400;
-      background: rgba(217, 164, 0, 0.10);
-      border-radius: 10px;
-      padding: 8px 10px;
-    }
-    .dup-warning-title { color: #8a6d00; font-size: 12px; }
-    .dup-warning-text { margin: 4px 0 6px; font-size: 11px; color: var(--text-secondary); }
-    .dup-warning-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
-    .dup-match {
-      width: 100%;
-      text-align: start;
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-      background: var(--bg-elevated);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 6px 10px;
-      cursor: pointer;
-      color: inherit;
-      font: inherit;
-    }
-    .dup-match:hover { border-color: var(--accent); }
-    .dup-match-name { font-weight: 600; }
-    .dup-match small { color: var(--text-secondary); font-size: 11px; }
-    .warn-action { background: #d9a400; border-color: #d9a400; }
-    .prospect-form-title {
-      font-size: 12px;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-    .prospect-form-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .customer-add-row {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) auto;
-      gap: 6px;
-      margin-top: 8px;
-      padding: 10px 12px;
-      border: 1px dashed var(--line);
-      border-radius: 10px;
-      background: var(--bg-canvas);
-    }
-    .add-participant-toggle {
-      margin-top: 8px;
-    }
-    .selected-participants {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 8px;
-    }
-    .selected-participant {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      min-height: 28px;
-      padding: 0 10px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: var(--bg-elevated);
-      font-size: 12px;
-    }
-    .selected-participant button {
-      border: 0;
-      background: transparent;
-      color: var(--muted);
-      padding: 0;
-      line-height: 1;
-      min-height: 0;
-      cursor: pointer;
-      opacity: 0;
-      transition: opacity 150ms ease;
-    }
-    .selected-participant:hover button {
-      opacity: 1;
-    }
-    .prep-sidebar {
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      background: var(--bg-elevated);
-      padding: 10px;
-      display: grid;
-      gap: 10px;
-      align-content: start;
-      /* Grows with meeting history — keep it in view and scroll internally
-         instead of stretching the whole page. */
-      position: sticky;
-      top: 10px;
-      max-height: calc(100vh - 120px);
-      overflow-y: auto;
-    }
-    .prep-sidebar h5 { margin: 0; font-size: 14px; position: sticky; top: 0; background: var(--bg-elevated); padding-bottom: 4px; z-index: 1; }
-    .prep-block { display: grid; gap: 6px; }
-    .prep-block strong { font-size: 12px; text-transform: uppercase; color: var(--muted); }
-    .prep-block ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      display: grid;
-      gap: 6px;
-    }
-    .prep-block li {
-      display: grid;
-      gap: 4px;
-      padding: 8px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--bg-canvas);
-      font-size: 13px;
-      line-height: 1.3;
-    }
-    .section-head-split-unused {
+  styles: [MEETING_FORM_STYLES, `
+    .section-head-row {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
       gap: 12px;
     }
-    .meeting-setup-summary {
-      position: sticky;
-      top: 10px;
-      z-index: 2;
-      margin-top: 12px;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      background: var(--bg-elevated);
-      padding: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-    }
-    .summary-copy {
-      display: grid;
-      gap: 4px;
-    }
-    .summary-copy small { color: var(--muted); }
-    .run-panel { overflow: hidden; }
-    .capture-shell {
-      display: grid;
-      gap: 10px;
-      padding: 12px;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      background: var(--surface-strong);
-    }
-    .capture-type-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .capture-chip {
-      border: 1px solid var(--line);
-      background: var(--bg-elevated);
-      border-radius: 999px;
-      padding: 4px 10px;
-      min-height: 34px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      color: var(--ink);
-    }
-    .capture-chip.active {
-      border-color: var(--accent-strong);
-      background: var(--accent-soft);
-      box-shadow: inset 0 0 0 1px var(--accent);
-    }
-    .chip-shortcut {
-      display: inline-grid;
-      place-items: center;
-      min-width: 22px;
-      height: 18px;
-      border-radius: 4px;
-      border: 1px solid var(--line);
-      font-size: 10px;
-      color: var(--muted);
-      padding: 0 3px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    }
-    .composer-control input {
-      min-height: 46px;
-      font-size: 16px;
-      font-weight: 600;
-    }
-    .capture-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      gap: 10px;
-      align-items: end;
-    }
-    .capture-actions-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .shortcut-hint { margin: 0; font-size: 12px; }
-    .action-hint { margin: 8px 0 0; color: var(--warning); }
-    .notes-list { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem; }
-    .note-row {
-      display: grid;
-      grid-template-columns: 110px 1fr auto;
-      gap: 0.75rem;
-      align-items: start;
-      padding: 0.75rem;
-      background: rgba(255,255,255,0.03);
-      border-radius: 0.5rem;
-      border: 1px solid rgba(255,255,255,0.05);
-    }
-    .note-content p { margin: 0; }
-    .note-content .muted {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      font-size: 0.8rem;
-      margin-top: 0.25rem;
-      color: var(--muted);
-    }
-    .note-linked {
-      margin-top: 6px;
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-    .note-actions {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      align-items: flex-start;
-      gap: 6px;
-    }
-    .note-attachments {
+    /* Leader + our-side + their-side dropdowns share one row. */
+    .dropdowns-row {
       grid-column: 1 / -1;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 6px;
-    }
-    .note-attach-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 2px 8px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: var(--bg-elevated);
-      font-size: 12px;
-    }
-    .note-attach-chip button {
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      color: var(--muted);
-      font-size: 14px;
-      padding: 0;
-      line-height: 1;
-      min-height: 0;
-    }
-    .note-edit-grid {
       display: grid;
-      grid-template-columns: minmax(0, 170px) minmax(0, 1fr);
-      gap: 8px;
-    }
-    .ghost-action.danger {
-      border-color: rgba(192, 57, 43, 0.32);
-      color: var(--danger);
-    }
-    .ghost-action.active {
-      border-color: var(--accent-strong);
-      color: var(--accent-strong);
-      background: var(--accent-soft);
-    }
-    .linked-tasks-panel {
-      margin-top: 14px;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      background: var(--bg-elevated);
-      padding: 12px;
-      display: grid;
-      gap: 10px;
-    }
-    .linked-tasks-panel h4 {
-      margin: 2px 0 0;
-      font-size: 18px;
-    }
-    .task-filter-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .empty-state.compact-empty {
-      display: grid;
-      gap: 4px;
-      justify-items: center;
-      text-align: center;
-    }
-    .linked-task-list {
-      display: grid;
-      gap: 8px;
-    }
-    .meeting-review-checklist {
-      margin-top: 12px;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      background: var(--surface-strong);
-      padding: 10px 12px;
-      display: grid;
-      gap: 6px;
-    }
-    .meeting-review-checklist strong {
-      font-size: 12px;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-    .meeting-review-checklist ul {
-      margin: 0;
-      padding-left: 18px;
-      display: grid;
-      gap: 4px;
-      font-size: 13px;
-    }
-    .meeting-review-checklist li.warn {
-      color: var(--warning);
-      font-weight: 700;
-    }
-    .meeting-review-checklist li.blocking {
-      color: var(--danger);
-      font-weight: 700;
-    }
-    .blocking-note {
-      font-size: 11px;
-      font-weight: 400;
-      opacity: 0.8;
-    }
-    .checklist-link { cursor: pointer; }
-    .checklist-link:hover { text-decoration: underline dotted; }
-    .checklist-hint {
-      font-size: 11px;
-      font-weight: 400;
-      opacity: 0.65;
-      margin-left: 4px;
-    }
-    .char-counter {
-      font-size: 11px;
-      text-align: right;
-      display: block;
-      margin-top: 2px;
-    }
-    @keyframes pulse-border {
-      0%, 100% { box-shadow: 0 0 0 0 transparent; }
-      50% { box-shadow: 0 0 0 4px var(--accent-soft); }
-    }
-    .start-ready { animation: pulse-border 2s ease-in-out infinite; }
-    .linked-chip { background: var(--olive-soft); color: var(--olive); }
-    .recap-preview {
-      margin: 0;
-      padding: 14px;
-      background: var(--surface-strong);
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      font-family: ui-monospace, SFMono-Regular, "Cascadia Mono", Menlo, Consolas, monospace;
-      font-size: 13px;
-      white-space: pre-wrap;
-      line-height: 1.5;
-      max-height: 360px;
-      overflow-y: auto;
-    }
-    .prev-meeting-notes {
-      display: grid;
-      gap: 6px;
-      padding: 10px 12px;
-      border: 1px solid var(--accent-soft);
-      border-left: 3px solid var(--accent);
-      border-radius: 8px;
-      background: var(--accent-soft);
-      margin-bottom: 10px;
-    }
-    .prev-meeting-notes .eyebrow { margin-bottom: 0; }
-    .prev-notes-body {
-      margin: 0;
-      font-size: 13px;
-      line-height: 1.5;
-      color: var(--ink);
-      white-space: pre-wrap;
-    }
-    .linked-task-card {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--bg-elevated);
-      overflow: hidden;
-    }
-    .linked-task-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      padding: 10px;
-      background: var(--bg-elevated);
-    }
-    .linked-task-title-btn {
-      flex: 1;
-      display: grid;
-      gap: 2px;
-      border: none;
-      background: var(--bg-elevated);
-      color: var(--ink);
-      text-align: left;
-      cursor: pointer;
-      padding: 4px 0;
-      min-width: 0;
-    }
-    .linked-task-title-btn:hover { background: var(--bg-hover); border-radius: 6px; }
-    .linked-task-title-btn strong { display: block; }
-    .linked-task-meta {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-    .progress-toggle { font-size: 11px; }
-    .progression-notes-panel {
-      border-top: 1px solid var(--line);
-      padding: 10px;
-      background: var(--surface-strong);
-      display: grid;
-      gap: 8px;
-    }
-    .progression-note-row {
-      display: grid;
-      gap: 2px;
-      padding: 8px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: var(--bg-elevated);
-    }
-    .progression-note-row p { margin: 0; font-size: 13px; }
-    .progression-empty { padding: 4px 0; }
-    .progression-add-row {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 8px;
-    }
-    .attachments-panel { margin-top: 14px; }
-    .attachment-list { display: grid; gap: 8px; }
-    .attachment-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      padding: 10px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--bg-canvas);
-    }
-    .attachment-info { display: grid; gap: 2px; min-width: 0; }
-    .attachment-name {
-      font-weight: 600;
-      font-size: 13px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .attachment-actions { display: flex; gap: 6px; flex-shrink: 0; }
-    a.ghost-action {
-      display: inline-flex;
-      align-items: center;
-      text-decoration: none;
-    }
-    @media (max-width: 980px) {
-      .plan-layout { grid-template-columns: 1fr; }
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+      align-items: start;
     }
     @media (max-width: 720px) {
-.form-grid { grid-template-columns: 1fr; }
-      .customer-add-row { grid-template-columns: 1fr; }
-      .note-row { grid-template-columns: 1fr; }
-      .meeting-setup-summary { flex-direction: column; align-items: flex-start; }
-      .capture-grid { grid-template-columns: 1fr; }
-      .capture-actions-row { justify-content: flex-start; }
-      .note-edit-grid { grid-template-columns: 1fr; }
+      .dropdowns-row { grid-template-columns: 1fr; }
     }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 30, 50, 0.45);
+      display: grid;
+      place-items: center;
+      z-index: 50;
+      padding: 1rem;
+    }
+    .modal-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .prep-modal-card { max-width: 560px; }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .modal-header h2 { margin: 4px 0 0; font-size: 20px; }
   `]
 })
-export class CustomerMeetingFormComponent implements OnChanges {
+export class CustomerMeetingFormComponent implements OnInit, OnChanges {
   /**
    * Optional. When provided, the customer is fixed (no picker shown - used from
    * Customer 360 -> New meeting). When omitted, a picker is shown inside the
@@ -1538,95 +496,93 @@ export class CustomerMeetingFormComponent implements OnChanges {
   @Output() saved = new EventEmitter<MeetingFormSavedEvent>();
   @Output() cancelled = new EventEmitter<void>();
 
-  readonly noteTypes: NoteType[] = ['note', 'action', 'decision', 'blocker'];
-  readonly captureTypeOptions: NoteType[] = ['note', 'action', 'decision', 'blocker'];
-  readonly meetingStatusFlow: CustomerMeetingStatus[] = [
-    'Planned',
-    'Draft Summary',
-    'Tasks Created',
-    'Closed'
-  ];
-
   form!: CreateCustomerMeetingInput & {
     customerParticipants: CustomerParticipant[];
     internalParticipantEmployeeIds: string[];
   };
   pickedCustomerId = '';
-  summaryText = '';
   meetingDateLocal = '';
-  nextMeetingDateLocal = '';
-  newNote: CreateMeetingNoteInput = { type: 'note', content: '' };
-  internalParticipantSearch = '';
-  customerParticipantSearch = '';
+  summaryDraft: MeetingSummaryDraft = { summary: '', nextMeetingDateLocal: '', nextMeetingNotes: '' };
+
   customCustomerParticipant: CustomerParticipant = { name: '', email: '', phone: '', role: '' };
   private customParticipantPool: CustomerParticipantOption[] = [];
   showProspectForm = false;
   newProspect = { name: '', contactName: '', contactEmail: '', contactPhone: '' };
   setupCollapsed = false;
-  taskFilter: MeetingTaskFilter = 'open';
-  editingNoteId: string | null = null;
-  editingNoteDraft: UpdateMeetingNoteInput & { content: string } = {
-    type: 'note',
-    content: '',
-    ownerId: undefined,
-    dueDate: undefined
-  };
+  showAddParticipantRow = false;
+  showPrepBrief = false;
+  /**
+   * True when the form opened with a customer already decided (Customer 360 entry,
+   * or editing an existing meeting). When false (new meeting from the FAB/Meetings),
+   * the form shows ONLY the client picker first and reveals the rest of the settings
+   * once a client is chosen. Tracked separately from `customer` because `customer`
+   * gets set internally when the draft is created — we must not let the picker vanish
+   * mid-edit (that caused the layout to jump).
+   */
+  startedWithCustomer = false;
 
   editing = false;
   editingMeeting: CustomerMeeting | null = null;
   creatingTaskForNote: MeetingNote | null = null;
-  openedNote: MeetingNote | null = null;
   lastRecap = '';
-  nextMeetingNotesText = '';
-  captureCollapsed = false;
   captureTab: 'notes' | 'summary' = 'summary';
-  expandedTaskId: string | null = null;
-  newProgressionNoteByTask: Record<string, string | undefined> = {};
-  uploadingAttachment = false;
-  pendingAttachmentFile: File | null = null;
-  showAddParticipantRow = false;
-  @ViewChild('noteComposerInput') noteComposerInput?: ElementRef<HTMLInputElement>;
-  @ViewChild('noteAttachInput') noteAttachInput?: ElementRef<HTMLInputElement>;
+
+  @ViewChild(MeetingNotesSectionComponent) notesSection?: MeetingNotesSectionComponent;
 
   constructor(
     public workspace: ActionosWorkspaceService,
-    private i18n: ActionosI18nService,
-    private el: ElementRef
+    private i18n: ActionosI18nService
   ) {}
 
-  @HostListener('document:click')
-  onDocumentClick(): void {
-    (this.el.nativeElement as HTMLElement)
-      .querySelectorAll<HTMLDetailsElement>('details[open]')
-      .forEach(d => d.removeAttribute('open'));
-  }
+  // ── Derived option lists ──────────────────────────────────────────────────
 
   get customerSelectOptions(): SelectOption[] {
     return [
       { value: '', label: this.i18n.translate('customerMeeting.selectCustomer') },
-      ...this.workspace.customers.map(c => ({ value: c.id, label: c.name }))
+      ...this.workspace.customers.map((c) => ({ value: c.id, label: c.name }))
     ];
   }
 
   get leaderSelectOptions(): SelectOption[] {
     return [
       { value: '', label: this.i18n.translate('customerMeeting.selectLeader') },
-      ...this.workspace.employees.map(e => ({ value: e.id, label: e.fullName }))
+      ...this.workspace.employees.map((e) => ({ value: e.id, label: e.fullName }))
     ];
   }
 
-  get noteTypeOptions(): SelectOption[] {
-    return this.noteTypes.map(n => ({
-      value: n, label: this.i18n.translate('noteType.' + n)
+  get internalPickerOptions(): ParticipantPickerOption[] {
+    return this.workspace.employees.map((e) => ({ key: e.id, label: e.fullName }));
+  }
+
+  get internalChips(): ParticipantChip[] {
+    return this.form.internalParticipantEmployeeIds.map((id) => ({
+      key: id,
+      label: this.workspace.employee(id)?.fullName ?? ''
     }));
   }
 
-  get noteOwnerOptions(): SelectOption[] {
-    return [
-      { value: undefined, label: '—' },
-      ...this.workspace.employees.map(e => ({ value: e.id, label: e.fullName }))
-    ];
+  get customerPickerOptions(): ParticipantPickerOption[] {
+    return this.customerParticipantOptions().map((p) => ({
+      key: p.key,
+      label: p.name,
+      sublabel: [p.email ? `- ${p.email}` : '', p.phone ? `· ${p.phone}` : '']
+        .filter(Boolean)
+        .join(' ')
+    }));
   }
+
+  get customerSelectedKeys(): string[] {
+    return this.form.customerParticipants.map((p) => this.customerParticipantKey(p));
+  }
+
+  get customerChips(): ParticipantChip[] {
+    return this.form.customerParticipants.map((p) => ({
+      key: this.customerParticipantKey(p),
+      label: p.name
+    }));
+  }
+
+  // ── Stepper / tab helpers ──────────────────────────────────────────────────
 
   get setupSummaryLine(): string {
     const customerName = this.selectedCustomerForPrep?.name ?? 'No customer';
@@ -1635,13 +591,8 @@ export class CustomerMeetingFormComponent implements OnChanges {
     return `${customerName} · ${when} · ${participants} participants`;
   }
 
-  get capturedNotes(): MeetingNote[] {
-    if (!this.editingMeeting) {
-      return [];
-    }
-    return [...this.editingMeeting.notes].sort((a, b) =>
-      (b.createdAt ?? '').localeCompare(a.createdAt ?? '')
-    );
+  get capturedNotesCount(): number {
+    return this.editingMeeting?.notes.length ?? 0;
   }
 
   get meetingTasksForCurrentMeeting(): Task[] {
@@ -1651,61 +602,22 @@ export class CustomerMeetingFormComponent implements OnChanges {
     return this.workspace.meetingTasksByMeeting(this.editingMeeting.id);
   }
 
-  get filteredMeetingTasks(): Task[] {
-    const tasks = this.meetingTasksForCurrentMeeting;
-    if (this.taskFilter === 'all') {
-      return tasks;
+  /** Reveal subject/date/leader/participants only once a client is chosen. */
+  get showPlanFields(): boolean {
+    return this.startedWithCustomer || !!this.pickedCustomerId;
+  }
+
+  get selectedCustomerForPrep(): Customer | null {
+    if (this.customer) {
+      return this.customer;
     }
-    if (this.taskFilter === 'done') {
-      return tasks.filter((task) => task.status === 'Done');
+    if (!this.pickedCustomerId) {
+      return null;
     }
-    if (this.taskFilter === 'blocked') {
-      return tasks.filter(
-        (task) => task.status === 'Waiting For Customer' || task.status === 'Waiting For Internal'
-      );
-    }
-    return tasks.filter((task) => this.workspace.isOpenMeetingTaskStatus(task.status));
+    return this.workspace.customer(this.pickedCustomerId) ?? null;
   }
 
-  get meetingActionsWithoutTask(): MeetingNote[] {
-    return this.capturedNotes.filter((note) => note.type === 'action' && !note.convertedTaskId);
-  }
-
-  get actionsWithoutTaskCount(): number {
-    return this.meetingActionsWithoutTask.length;
-  }
-
-  get openBlockerTaskCount(): number {
-    return this.capturedNotes
-      .filter((note) => note.type === 'blocker')
-      .filter((note) => {
-        const linked = this.linkedTaskForNote(note);
-        if (!linked) {
-          return true;
-        }
-        return this.workspace.isOpenMeetingTaskStatus(linked.status);
-      }).length;
-  }
-
-  get uncategorizedNotesCount(): number {
-    return this.capturedNotes.filter((note) => note.type === 'note').length;
-  }
-
-  get openMeetingTasksCount(): number {
-    if (!this.editingMeeting) {
-      return 0;
-    }
-    return this.meetingTasksForCurrentMeeting.filter(
-      t => t.status !== 'Done' && t.status !== 'Cancelled'
-    ).length;
-  }
-
-  get allMeetingTasksDone(): boolean {
-    if (!this.editingMeeting) {
-      return true;
-    }
-    return this.workspace.canCloseMeeting(this.editingMeeting.id);
-  }
+  // ── Lifecycle ───────────────────────────────────────────────────────────────
 
   ngOnInit(): void {
     this.initializeForm();
@@ -1720,8 +632,24 @@ export class CustomerMeetingFormComponent implements OnChanges {
     if (changes['customer'] && this.form && !this.editing && this.customer) {
       this.form.customerId = this.customer.id;
       this.pickedCustomerId = this.customer.id;
+      this.startedWithCustomer = true;
     }
   }
+
+  currentStatus(): CustomerMeetingStatus {
+    return this.editingMeeting?.status ?? 'Planned';
+  }
+
+  scrollToId(id: string): void {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  goToNotes(): void {
+    this.captureTab = 'notes';
+    setTimeout(() => document.getElementById('notes-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0);
+  }
+
+  // ── Save / start ─────────────────────────────────────────────────────────────
 
   canSave(): boolean {
     return this.canCreateDraft();
@@ -1731,167 +659,62 @@ export class CustomerMeetingFormComponent implements OnChanges {
     return this.canCreateDraft();
   }
 
-  canCollapseSetup(): boolean {
-    return this.setupCollapsed || this.canCreateDraft();
-  }
-
-  scrollToSection(status: CustomerMeetingStatus): void {
-    const sectionMap: Partial<Record<CustomerMeetingStatus, string>> = {
-      'Planned': 'plan-section',
-      'Draft Summary': 'capture-section',
-      'Tasks Created': 'tasks-section',
-      'Closed': 'capture-section'
-    };
-    const id = sectionMap[status];
-    if (id) {
-      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }
-
-  scrollToNotesList(): void {
-    document.getElementById('notes-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
-  scrollToId(id: string): void {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
-  goToNotes(): void {
-    this.captureTab = 'notes';
-    setTimeout(() => this.scrollToNotesList(), 0);
-  }
-
-  toggleSetupCollapsed(): void {
-    if (!this.setupCollapsed && !this.canCreateDraft()) {
-      return;
-    }
-    this.setupCollapsed = !this.setupCollapsed;
-    if (this.setupCollapsed) {
-      this.focusComposer();
-    }
-  }
-
-  startMeetingCapture(): void {
-    const updated = this.persistMeeting(true);
-    if (!updated) {
-      return;
-    }
-    this.setupCollapsed = true;
-    this.focusComposer();
-  }
-
   startOrCollapseSetup(): void {
     if (!this.editing) {
-      this.startMeetingCapture();
+      const updated = this.persistMeeting(true);
+      if (!updated) {
+        return;
+      }
+      this.setupCollapsed = true;
+      this.captureTab = 'notes';
+      this.notesSection?.focusComposer();
     } else {
       this.setupCollapsed = true;
     }
   }
 
-  currentStatus(): CustomerMeetingStatus {
-    return this.editingMeeting?.status ?? 'Planned';
-  }
-
-  currentStatusIndex(): number {
-    return this.meetingStatusFlow.indexOf(this.currentStatus());
-  }
-
-  statusCriteria(status: CustomerMeetingStatus): string {
-    return this.i18n.translate(`customerMeeting.statusCriteria.${status}`);
-  }
-
-  get selectedCustomerForPrep(): Customer | null {
-    if (this.customer) {
-      return this.customer;
+  save(intent: MeetingFormSaveIntent): void {
+    if (!this.canSave()) {
+      return;
     }
-    if (!this.pickedCustomerId) {
-      return null;
+    const updated = this.persistMeeting(true);
+    if (!updated) {
+      return;
     }
-    return this.workspace.customer(this.pickedCustomerId) ?? null;
+    if (intent === 'close' && updated.status !== 'Closed') {
+      const hasContent = updated.notes.length > 0 ||
+        this.workspace.meetingTasksByMeeting(updated.id).length > 0 ||
+        !!updated.summary?.trim();
+      if (hasContent) {
+        this.publishRecap();
+      }
+    }
+    this.saved.emit({ meetingId: updated.id, intent });
   }
 
-  get filteredInternalEmployees(): Employee[] {
-    const term = this.internalParticipantSearch.trim().toLowerCase();
-    const all = this.workspace.employees;
-    if (!term) {
-      return all;
-    }
-    return all.filter((e) => e.fullName.toLowerCase().includes(term));
-  }
+  // ── Plan field changes ───────────────────────────────────────────────────────
 
-  get filteredCustomerParticipantOptions(): CustomerParticipantOption[] {
-    const term = this.customerParticipantSearch.trim().toLowerCase();
-    const all = this.customerParticipantOptions();
-    if (!term) {
-      return all;
+  onPlanChanged(): void {
+    if (!this.editingMeeting) {
+      this.tryCreateDraftMeeting();
     }
-    return all.filter((p) =>
-      p.name.toLowerCase().includes(term) ||
-      (p.email?.toLowerCase().includes(term) ?? false) ||
-      (p.role?.toLowerCase().includes(term) ?? false)
-    );
-  }
-
-  onWrapNextMeetingNotesChanged(): void {
     if (this.editingMeeting) {
       this.persistMeeting(false);
     }
   }
 
-  // ── Task progression notes ───────────────────────────────────────────────
-
-  toggleTaskExpanded(taskId: string): void {
-    this.expandedTaskId = this.expandedTaskId === taskId ? null : taskId;
-  }
-
-  addProgressionNote(task: Task): void {
-    const content = (this.newProgressionNoteByTask[task.id] ?? '').trim();
-    if (!content) {
-      return;
-    }
-    this.workspace.addTaskProgressionNote(task.id, content);
-    this.newProgressionNoteByTask[task.id] = undefined;
+  onSummaryChanged(): void {
     if (this.editingMeeting) {
-      this.editingMeeting = this.workspace.customerMeeting(this.editingMeeting.id) ?? this.editingMeeting;
+      this.persistMeeting(false);
     }
-  }
-
-  // ── Attachments ──────────────────────────────────────────────────────────
-
-  triggerNoteAttachInput(): void {
-    this.noteAttachInput?.nativeElement.click();
-  }
-
-  onPendingAttachSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.pendingAttachmentFile = input.files?.[0] ?? null;
-  }
-
-  triggerNoteRowAttach(noteId: string): void {
-    const el = document.getElementById('note-attach-' + noteId) as HTMLInputElement | null;
-    el?.click();
-  }
-
-  async onNoteRowFileSelected(event: Event, noteId: string): Promise<void> {
-    const input = event.target as HTMLInputElement;
-    if (!input.files?.length || !this.editingMeeting) {
-      return;
-    }
-    for (const file of Array.from(input.files)) {
-      await this.workspace.uploadNoteAttachment(this.editingMeeting.id, noteId, file);
-    }
-    this.editingMeeting = this.workspace.customerMeeting(this.editingMeeting.id) ?? this.editingMeeting;
-    input.value = '';
-  }
-
-  removeAttachment(id: string): void {
-    this.workspace.removeAttachment(id);
   }
 
   onProspectOrCustomerPicked(): void {
     this.showProspectForm = false;
     this.onPlanChanged();
   }
+
+  // ── Prospect creation ────────────────────────────────────────────────────────
 
   canAddProspect(): boolean {
     return !!this.newProspect.name.trim();
@@ -1933,102 +756,7 @@ export class CustomerMeetingFormComponent implements OnChanges {
     this.newProspect = { name: '', contactName: '', contactEmail: '', contactPhone: '' };
   }
 
-  onPlanChanged(): void {
-    if (!this.editingMeeting) {
-      this.tryCreateDraftMeeting();
-    }
-    if (this.editingMeeting) {
-      this.persistMeeting(false);
-    }
-  }
-
-  onWrapUpChanged(): void {
-    if (this.editingMeeting) {
-      this.persistMeeting(false);
-    }
-  }
-
-  save(intent: MeetingFormSaveIntent): void {
-    if (!this.canSave()) {
-      return;
-    }
-    const updated = this.persistMeeting(true);
-    if (!updated) {
-      return;
-    }
-    if (intent === 'close' && updated.status !== 'Closed') {
-      const hasContent = updated.notes.length > 0 ||
-        this.workspace.meetingTasksByMeeting(updated.id).length > 0 ||
-        !!updated.summary?.trim();
-      if (hasContent) {
-        this.publishRecap();
-      }
-    }
-    this.saved.emit({ meetingId: updated.id, intent });
-  }
-
-  canAddNote(): boolean {
-    if (!this.newNote.content.trim()) {
-      return false;
-    }
-    if (this.newNote.type === 'action') {
-      return !!this.newNote.ownerId && !!this.newNote.dueDate;
-    }
-    return true;
-  }
-
-  canCreateTaskFromType(type: NoteType): boolean {
-    return type === 'action' || type === 'blocker';
-  }
-
-  canCreateTaskFromNote(note: MeetingNote): boolean {
-    return this.canCreateTaskFromType(note.type);
-  }
-
-  captureNote(openTaskAfter = false): void {
-    const created = this.addNoteInternal();
-    if (!created) {
-      return;
-    }
-    if (openTaskAfter && this.canCreateTaskFromNote(created)) {
-      this.startTaskCreation(created);
-    }
-  }
-
-  addNote(): void {
-    this.captureNote(false);
-  }
-
-  setNoteType(type: NoteType): void {
-    this.newNote.type = type;
-    if (type === 'action' && !this.newNote.dueDate) {
-      this.newNote.dueDate = new Date().toISOString().slice(0, 10);
-    }
-  }
-
-  onComposerKeydown(event: KeyboardEvent): void {
-    if (event.ctrlKey && event.key >= '1' && event.key <= '4') {
-      const index = Number(event.key) - 1;
-      const nextType = this.captureTypeOptions[index];
-      if (nextType) {
-        event.preventDefault();
-        this.setNoteType(nextType);
-      }
-      return;
-    }
-
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      this.captureNote(event.ctrlKey || event.metaKey);
-    }
-  }
-
-  isActionReady(note: MeetingNote): boolean {
-    if (note.type !== 'action') {
-      return true;
-    }
-    return !!note.ownerId && !!note.dueDate;
-  }
+  // ── Participants ───────────────────────────────────────────────────────────────
 
   toggleInternal(id: string): void {
     const list = this.form.internalParticipantEmployeeIds;
@@ -2041,50 +769,29 @@ export class CustomerMeetingFormComponent implements OnChanges {
     this.onPlanChanged();
   }
 
-  selectedInternalParticipantsLabel(): string {
-    const names = this.form.internalParticipantEmployeeIds
-      .map((id) => this.workspace.employee(id)?.fullName ?? '')
-      .filter((name) => !!name);
-    if (!names.length) {
-      return '';
-    }
-    if (names.length <= 2) {
-      return names.join(', ');
-    }
-    return `${names.slice(0, 2).join(', ')} +${names.length - 2}`;
-  }
-
-  selectedCustomerParticipantsLabel(): string {
-    const names = this.form.customerParticipants
-      .map((p) => p.name.trim())
-      .filter((name) => !!name);
-    if (!names.length) {
-      return '';
-    }
-    if (names.length <= 2) {
-      return names.join(', ');
-    }
-    return `${names.slice(0, 2).join(', ')} +${names.length - 2}`;
-  }
-
-  isCustomerParticipantSelected(option: CustomerParticipantOption): boolean {
-    return this.form.customerParticipants.some((p) => this.customerParticipantKey(p) === option.key);
-  }
-
-  toggleCustomerParticipant(option: CustomerParticipantOption): void {
-    const idx = this.form.customerParticipants.findIndex((p) =>
-      this.customerParticipantKey(p) === option.key
-    );
+  toggleCustomerParticipantByKey(key: string): void {
+    const idx = this.form.customerParticipants.findIndex((p) => this.customerParticipantKey(p) === key);
     if (idx === -1) {
-      this.form.customerParticipants.push({
-        name: option.name,
-        email: option.email,
-        role: option.role
-      });
+      const option = this.customerParticipantOptions().find((o) => o.key === key);
+      if (option) {
+        this.form.customerParticipants.push({
+          name: option.name,
+          email: option.email,
+          role: option.role
+        });
+      }
     } else {
       this.form.customerParticipants.splice(idx, 1);
     }
     this.onPlanChanged();
+  }
+
+  removeCustomerParticipantByKey(key: string): void {
+    const idx = this.form.customerParticipants.findIndex((p) => this.customerParticipantKey(p) === key);
+    if (idx !== -1) {
+      this.form.customerParticipants.splice(idx, 1);
+      this.onPlanChanged();
+    }
   }
 
   canAddCustomCustomerParticipant(): boolean {
@@ -2113,111 +820,17 @@ export class CustomerMeetingFormComponent implements OnChanges {
     this.onPlanChanged();
   }
 
-  removeCustomerParticipant(index: number): void {
-    this.form.customerParticipants.splice(index, 1);
-    this.onPlanChanged();
-  }
+  // ── Tasks / recap from children ──────────────────────────────────────────────
 
-  linkedTaskForNote(note: MeetingNote): Task | undefined {
-    if (!note.convertedTaskId) {
-      return undefined;
-    }
-    return this.workspace.Task(note.convertedTaskId);
-  }
-
-  countTasksByFilter(filter: MeetingTaskFilter): number {
-    if (filter === 'all') {
-      return this.meetingTasksForCurrentMeeting.length;
-    }
-    if (filter === 'done') {
-      return this.meetingTasksForCurrentMeeting.filter((task) => task.status === 'Done').length;
-    }
-    if (filter === 'blocked') {
-      return this.meetingTasksForCurrentMeeting.filter(
-        (task) => task.status === 'Waiting For Customer' || task.status === 'Waiting For Internal'
-      ).length;
-    }
-    return this.meetingTasksForCurrentMeeting.filter((task) => this.workspace.isOpenMeetingTaskStatus(task.status)).length;
-  }
-
-  openMeetingTask(task: Task): void {
-    this.workspace.selectMeetingTask(task, true);
-  }
-
-  startTaskCreation(note: MeetingNote): void {
-    if (!this.canCreateTaskFromNote(note)) {
-      return;
-    }
-    if (note.type === 'action' && !this.isActionReady(note)) {
-      return;
-    }
+  onCreateTaskFromNote(note: MeetingNote): void {
     this.creatingTaskForNote = note;
     setTimeout(() => this.scrollToId('tasks-section'), 0);
   }
 
-  startEditingNote(note: MeetingNote): void {
-    this.editingNoteId = note.id;
-    this.editingNoteDraft = {
-      type: note.type,
-      content: note.content,
-      ownerId: note.ownerId,
-      dueDate: note.dueDate
-    };
-  }
-
-  cancelEditingNote(): void {
-    this.editingNoteId = null;
-    this.editingNoteDraft = {
-      type: 'note',
-      content: '',
-      ownerId: undefined,
-      dueDate: undefined
-    };
-  }
-
-  canSaveEditedNote(): boolean {
-    if (!this.editingNoteDraft.content?.trim()) {
-      return false;
-    }
-    if (this.editingNoteDraft.type === 'action') {
-      return !!this.editingNoteDraft.ownerId && !!this.editingNoteDraft.dueDate;
-    }
-    return true;
-  }
-
-  saveEditedNote(note: MeetingNote): void {
-    if (!this.editingMeeting || !this.canSaveEditedNote()) {
-      return;
-    }
-    const updated = this.workspace.updateCustomerMeetingNote(this.editingMeeting.id, note.id, {
-      type: this.editingNoteDraft.type,
-      content: this.editingNoteDraft.content.trim(),
-      ownerId: this.editingNoteDraft.ownerId,
-      dueDate: this.editingNoteDraft.dueDate
-    });
-    if (!updated) {
-      return;
-    }
-    this.editingMeeting = this.workspace.customerMeeting(this.editingMeeting.id) ?? this.editingMeeting;
-    this.cancelEditingNote();
-  }
-
-  deleteNote(note: MeetingNote): void {
-    if (!this.editingMeeting) {
-      return;
-    }
-    const removed = this.workspace.removeCustomerMeetingNote(this.editingMeeting.id, note.id);
-    if (!removed) {
-      return;
-    }
-    this.editingMeeting = this.workspace.customerMeeting(this.editingMeeting.id) ?? this.editingMeeting;
-    if (this.editingNoteId === note.id) {
-      this.cancelEditingNote();
-    }
-  }
-
-  openNoteDetail(note: MeetingNote): void {
-    this.openedNote = note;
+  onTaskCreated(): void {
+    this.creatingTaskForNote = null;
+    this.reloadMeeting();
+    this.notesSection?.focusComposer();
   }
 
   publishRecap(): void {
@@ -2227,86 +840,42 @@ export class CustomerMeetingFormComponent implements OnChanges {
     const recap = this.workspace.publishMeetingRecap(this.editingMeeting.id);
     if (recap !== null) {
       this.lastRecap = recap;
-      this.editingMeeting =
-        this.workspace.customerMeeting(this.editingMeeting.id) ?? this.editingMeeting;
+      this.reloadMeeting();
     }
   }
 
-  onTaskCreated(): void {
-    this.creatingTaskForNote = null;
+  reloadMeeting(): void {
     if (this.editingMeeting) {
       this.editingMeeting = this.workspace.customerMeeting(this.editingMeeting.id) ?? this.editingMeeting;
     }
-    this.focusComposer();
   }
 
-  private addNoteInternal(): MeetingNote | null {
-    if (!this.editingMeeting || !this.canAddNote()) {
-      return null;
-    }
-    const created = this.workspace.addCustomerMeetingNote(this.editingMeeting.id, this.newNote);
-    this.editingMeeting = this.workspace.customerMeeting(this.editingMeeting.id) ?? this.editingMeeting;
-    if (!created) {
-      return null;
-    }
-    if (this.pendingAttachmentFile && this.editingMeeting) {
-      const meetingId = this.editingMeeting.id;
-      const noteId = created.id;
-      const file = this.pendingAttachmentFile;
-      this.pendingAttachmentFile = null;
-      void this.workspace.uploadNoteAttachment(meetingId, noteId, file).then(() => {
-        this.editingMeeting = this.workspace.customerMeeting(meetingId) ?? this.editingMeeting;
-      });
-    }
-    this.newNote = {
-      type: this.newNote.type,
-      content: '',
-      ownerId: this.newNote.ownerId,
-      dueDate: this.newNote.dueDate
-    };
-    this.focusComposer();
-    return created;
-  }
-
-  private focusComposer(): void {
-    setTimeout(() => this.noteComposerInput?.nativeElement.focus(), 0);
-  }
+  // ── Form init / load / persist ──────────────────────────────────────────────
 
   private initializeForm(): void {
     this.form = this.emptyForm();
     const now = new Date();
     now.setMinutes(0, 0, 0);
     this.meetingDateLocal = this.toLocalInput(now);
-    this.nextMeetingDateLocal = '';
-    this.summaryText = '';
-    this.nextMeetingNotesText = '';
-    this.captureCollapsed = false;
+    this.summaryDraft = { summary: '', nextMeetingDateLocal: '', nextMeetingNotes: '' };
     this.captureTab = 'summary';
-    this.pendingAttachmentFile = null;
     this.lastRecap = '';
     this.setupCollapsed = false;
-    this.taskFilter = 'open';
-    this.editingNoteId = null;
-    this.editingNoteDraft = {
-      type: 'note',
-      content: '',
-      ownerId: undefined,
-      dueDate: undefined
-    };
-    this.newNote = { type: 'note', content: '', ownerId: this.workspace.currentEmployeeId };
+    this.creatingTaskForNote = null;
     this.editing = false;
     this.editingMeeting = null;
-    this.internalParticipantSearch = '';
-    this.customerParticipantSearch = '';
     this.customCustomerParticipant = { name: '', email: '', phone: '', role: '' };
     this.customParticipantPool = [];
     this.showProspectForm = false;
     this.showAddParticipantRow = false;
+    this.showPrepBrief = false;
     this.newProspect = { name: '', contactName: '', contactEmail: '', contactPhone: '' };
     this.pickedCustomerId = this.customer?.id ?? '';
+    this.startedWithCustomer = !!this.customer;
 
     if (this.existingMeetingId) {
       this.loadExistingMeeting(this.existingMeetingId);
+      this.startedWithCustomer = true;
     } else {
       // New meeting: honor a slot the user clicked in the calendar, then clear it
       // so the next "New meeting" opened normally falls back to "now".
@@ -2374,9 +943,9 @@ export class CustomerMeetingFormComponent implements OnChanges {
       internalParticipantEmployeeIds: this.form.internalParticipantEmployeeIds,
       customerParticipants: this.form.customerParticipants.filter((p) => p.name.trim()),
       goal: this.form.goal,
-      summary: this.summaryText,
-      nextMeetingDate: this.fromLocalInput(this.nextMeetingDateLocal) || undefined,
-      nextMeetingNotes: this.nextMeetingNotesText || undefined
+      summary: this.summaryDraft.summary,
+      nextMeetingDate: this.fromLocalInput(this.summaryDraft.nextMeetingDateLocal) || undefined,
+      nextMeetingNotes: this.summaryDraft.nextMeetingNotes || undefined
     });
 
     if (!updated) {
@@ -2405,19 +974,25 @@ export class CustomerMeetingFormComponent implements OnChanges {
       goal: meeting.goal ?? ''
     };
     this.pickedCustomerId = meeting.customerId;
-    this.summaryText = meeting.summary ?? '';
-    this.nextMeetingNotesText = meeting.nextMeetingNotes ?? '';
+    this.summaryDraft = {
+      summary: meeting.summary ?? '',
+      nextMeetingDateLocal: meeting.nextMeetingDate ? this.toLocalInput(new Date(meeting.nextMeetingDate)) : '',
+      nextMeetingNotes: meeting.nextMeetingNotes ?? ''
+    };
     this.meetingDateLocal = this.toLocalInput(new Date(meeting.meetingDate));
-    this.nextMeetingDateLocal = meeting.nextMeetingDate
-      ? this.toLocalInput(new Date(meeting.nextMeetingDate))
-      : '';
     this.setupCollapsed = meeting.notes.length > 0 || meeting.status !== 'Planned';
     if (meeting.publishedRecap) {
       this.lastRecap = meeting.publishedRecap;
     }
     this.customParticipantPool = meeting.customerParticipants
-      .filter(p => p.name?.trim())
-      .map(p => ({ name: p.name.trim(), email: p.email?.trim() || undefined, phone: p.phone?.trim() || undefined, role: p.role?.trim() || undefined, key: this.customerParticipantKey(p) }));
+      .filter((p) => p.name?.trim())
+      .map((p) => ({
+        name: p.name.trim(),
+        email: p.email?.trim() || undefined,
+        phone: p.phone?.trim() || undefined,
+        role: p.role?.trim() || undefined,
+        key: this.customerParticipantKey(p)
+      }));
   }
 
   private customerParticipantOptions(): CustomerParticipantOption[] {
@@ -2429,10 +1004,7 @@ export class CustomerMeetingFormComponent implements OnChanges {
         email: customer.primaryContactEmail?.trim() || undefined,
         role: undefined
       };
-      byKey.set(this.customerParticipantKey(seed), {
-        ...seed,
-        key: this.customerParticipantKey(seed)
-      });
+      byKey.set(this.customerParticipantKey(seed), { ...seed, key: this.customerParticipantKey(seed) });
     }
 
     if (customer) {
@@ -2447,10 +1019,7 @@ export class CustomerMeetingFormComponent implements OnChanges {
             phone: participant.phone?.trim() || undefined,
             role: participant.role?.trim() || undefined
           };
-          byKey.set(this.customerParticipantKey(item), {
-            ...item,
-            key: this.customerParticipantKey(item)
-          });
+          byKey.set(this.customerParticipantKey(item), { ...item, key: this.customerParticipantKey(item) });
         }
       }
     }

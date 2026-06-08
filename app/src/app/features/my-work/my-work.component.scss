@@ -26,6 +26,249 @@
   min-height: 0;
 }
 
+/* ── Two-region shell: primary My Work column + slim secondary rail ─────── */
+.mw-shell {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  /* Wider rail — there's room on the side, so give the clients/team widgets
+     enough width to actually read names and meta. */
+  grid-template-columns: minmax(0, 1fr) clamp(320px, 30vw, 440px);
+  gap: 18px;
+  align-items: start;
+}
+
+/* The primary column keeps My Work's original fixed-header / scrolling-body
+   behaviour — all the selectors below still target these descendants. */
+.mw-main {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* The rail is exactly one screen tall (independent of the main column) so the
+   two cards can split it evenly without forcing the page to scroll. */
+.mw-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  align-self: start;
+  height: calc(100dvh - 200px);
+  min-height: 360px;
+}
+
+/* Below the desktop breakpoint the rail drops under the main column and its
+   cards reflow side-by-side (then stack on phones) instead of a tall sidebar. */
+@media (max-width: 1024px) {
+  .mw-shell { grid-template-columns: minmax(0, 1fr); }
+  .mw-rail {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    align-items: start;
+    /* Stacked under the content — natural height, not one-screen-tall. */
+    height: auto;
+    min-height: 0;
+  }
+  .rail-client-list,
+  .rail-team-list { max-height: 300px; }
+}
+
+/* ── Rail: card shell (clients + team) ─────────────────────────────────── */
+.rail-card {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-sm);
+  padding: 14px;
+  min-width: 0;
+}
+
+/* Clients and Team each take half the rail height; their lists scroll inside. */
+.rail-card-clients,
+.team-rail {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Rail clients list (sourced from external customer groups) */
+.rail-search {
+  width: 100%;
+  flex: 0 0 auto;
+  margin-bottom: 10px;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  color: var(--ink);
+  font-size: 12px;
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+}
+
+.rail-client-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.rail-client-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: start;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: var(--radius-md);
+  transition: background var(--duration-fast) var(--ease-out);
+
+  &:hover { background: var(--bg-hover); }
+}
+
+.rail-client-row .avatar {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  color: hsl(var(--tint-h, 200), 55%, 32%);
+  background: hsl(var(--tint-h, 200), 60%, 90%);
+}
+
+.rail-client-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rail-head { margin-bottom: 10px; }
+
+.rail-eyebrow {
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.rail-head h3 {
+  margin: 2px 0 0;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+/* ── Rail: team-load list ──────────────────────────────────────────────── */
+.rail-team-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.rail-team-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: start;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: var(--radius-md);
+  transition: background var(--duration-fast) var(--ease-out);
+
+  &:hover { background: var(--bg-hover); }
+}
+
+.rail-team-row .avatar {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  color: hsl(var(--tint-h, 200), 55%, 32%);
+  background: hsl(var(--tint-h, 200), 60%, 90%);
+}
+
+.rail-team-body { flex: 1 1 auto; min-width: 0; }
+
+.rail-team-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.rail-team-head strong {
+  font-size: 13px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rail-team-counts {
+  font-size: 11px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  flex: 0 0 auto;
+
+  .blocked { color: var(--danger); font-style: normal; font-weight: 600; }
+}
+
+.rail-load-bar {
+  display: flex;
+  height: 5px;
+  margin-top: 5px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-sunken);
+  overflow: hidden;
+
+  .seg { height: 100%; transition: width var(--duration-base) var(--ease-out); }
+  .seg.open    { background: var(--accent); }
+  .seg.blocked { background: var(--danger); }
+}
+
+.rail-empty {
+  padding: 16px 8px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
 .mw-hero-card,
 app-calendar-stats,
 .mw-summary,
@@ -478,6 +721,112 @@ app-calendar-stats,
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   align-items: start;
   gap: 10px;
+}
+
+/* ── Combined "Work" view: meetings carousel + tasks table (Boards-style) ─ */
+.mw-work {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mw-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-sm);
+  padding: 16px;
+}
+
+.mw-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.mw-panel-title { display: inline-flex; align-items: center; gap: 8px; }
+.mw-panel-title app-icon { color: var(--accent); }
+.mw-panel-title h3 { margin: 0; font-size: 15px; color: var(--text-primary); }
+
+.mw-panel-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+
+  .filter-strip { margin-bottom: 0; }
+}
+
+.mw-rail-nav { display: inline-flex; gap: 4px; }
+
+.mw-rail-arrow {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  color: var(--accent);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--duration-fast), border-color var(--duration-fast);
+
+  &:hover { background: var(--accent-soft); border-color: var(--accent); }
+}
+
+.mw-expand {
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--duration-fast), color var(--duration-fast), border-color var(--duration-fast);
+
+  &:hover { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+}
+
+/* Collapsed: single-row horizontal scroll-snap carousel (matches Boards). */
+.mw-carousel {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: x proximity;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-soft) transparent;
+
+  &::-webkit-scrollbar { height: 8px; }
+  &::-webkit-scrollbar-thumb { background: var(--accent-soft); border-radius: 4px; }
+}
+
+/* Expanded: up to ~3 rows of cards, then scrolls. */
+.mw-meeting-grid-expanded {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  align-items: start;
+  gap: 10px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-soft) transparent;
+
+  &::-webkit-scrollbar { width: 8px; }
+  &::-webkit-scrollbar-thumb { background: var(--accent-soft); border-radius: 4px; }
 }
 
 /* ── Task Table (Monday-style) ────────────────────────────────────────── */

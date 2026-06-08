@@ -92,6 +92,8 @@ export class TaskTableComponent {
   // ── Inline add-task ───────────────────────────────────────────────────────
   addingGroupId: string | null = null;
   newTaskTitle = '';
+  newTaskCustomerId = '';
+  addTaskError = '';
 
   // ── Inline title editing ──────────────────────────────────────────────────
   editingTitleId: string | null = null;
@@ -118,6 +120,15 @@ export class TaskTableComponent {
     'Waiting For Customer', 'Waiting For Internal', 'Waiting',
     'Planned', 'Inbox',
   ];
+
+  private readonly emptyAddGroup: TaskGroup = {
+    id: 'empty',
+    label: '',
+    tasks: [],
+    isDanger: false,
+    tone: 'muted',
+    headerless: true
+  };
 
   // ── Grouping ───────────────────────────────────────────────────────────────
 
@@ -302,6 +313,21 @@ export class TaskTableComponent {
       this.assigneeOptionCache = employees.map(e => ({ value: e.id, label: e.fullName }));
     }
     return this.assigneeOptionCache;
+  }
+
+  get customerOptions(): SelectOption[] {
+    return this.workspace.taskClientOptions.map(client => ({
+      value: client.id,
+      label: client.name
+    }));
+  }
+
+  get shouldPickCustomerForNewTask(): boolean {
+    return !this.defaultNewTaskCustomerId;
+  }
+
+  private get defaultNewTaskCustomerId(): string {
+    return this.newTaskDefaults?.customerId?.trim() ?? '';
   }
 
   /** Status options for a row's dropdown — only legal next states. */
@@ -535,15 +561,28 @@ export class TaskTableComponent {
     event.stopPropagation();
     this.addingGroupId = group.id;
     this.newTaskTitle = '';
+    this.newTaskCustomerId = this.defaultNewTaskCustomerId;
+    this.addTaskError = '';
+  }
+
+  startEmptyAdd(event: MouseEvent): void {
+    this.startAdd(this.emptyAddGroup, event);
   }
 
   confirmAdd(group: TaskGroup): void {
     const title = this.newTaskTitle.trim();
     if (!title) { this.cancelAdd(); return; }
+    const customerId = this.defaultNewTaskCustomerId || this.newTaskCustomerId.trim();
+    if (!customerId) {
+      this.addTaskError = this.t('tasks.addTask.customerRequired');
+      return;
+    }
 
     const input: CreateTaskInput = {
       ...this.newTaskDefaults,
       title,
+      source: this.newTaskDefaults?.source ?? 'board',
+      customerId,
       priority: this.newTaskDefaults?.priority ?? this.addDefaultPriority(group),
     };
     const due = this.newTaskDefaults?.dueDate ?? this.addDefaultDue(group);
@@ -552,11 +591,19 @@ export class TaskTableComponent {
     this.workspace.addTask(input);
     this.addingGroupId = null;
     this.newTaskTitle = '';
+    this.newTaskCustomerId = this.defaultNewTaskCustomerId;
+    this.addTaskError = '';
+  }
+
+  confirmEmptyAdd(): void {
+    this.confirmAdd(this.emptyAddGroup);
   }
 
   cancelAdd(): void {
     this.addingGroupId = null;
     this.newTaskTitle = '';
+    this.newTaskCustomerId = this.defaultNewTaskCustomerId;
+    this.addTaskError = '';
   }
 
   /** A new row inherits the group's own dimension when it makes sense. */
@@ -631,8 +678,8 @@ export class TaskTableComponent {
 
   /** Customer name for meeting tasks, board name for board tasks. */
   taskContext(task: Task): string {
-    return task.source === 'meeting'
-      ? (this.workspace.customer(task.customerId)?.name ?? '')
+    return task.customerId
+      ? (this.workspace.clientName(task.customerId) ?? '')
       : task.board;
   }
 

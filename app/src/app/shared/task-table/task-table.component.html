@@ -363,14 +363,25 @@
       <!-- ── Inline add-task row ─────────────────────────────────────────── -->
       <div class="add-task-row" *ngIf="allowAddTask">
         <ng-container *ngIf="addingGroupId === group.id; else addTrigger">
-          <input
-            type="text"
-            class="add-task-input"
-            [(ngModel)]="newTaskTitle"
-            [placeholder]="'tasks.addTask.placeholder' | t"
-            (keydown.enter)="confirmAdd(group)"
-            (keydown.escape)="cancelAdd()"
-          />
+          <div class="add-task-fields">
+            <input
+              type="text"
+              class="add-task-input"
+              [(ngModel)]="newTaskTitle"
+              [placeholder]="'tasks.addTask.placeholder' | t"
+              (keydown.enter)="confirmAdd(group)"
+              (keydown.escape)="cancelAdd()"
+            />
+            <app-searchable-select
+              *ngIf="shouldPickCustomerForNewTask"
+              class="add-task-client-select"
+              [(ngModel)]="newTaskCustomerId"
+              [options]="customerOptions"
+              [placeholder]="'tasks.addTask.customerPlaceholder' | t"
+              [crossLanguageMatch]="true"
+            ></app-searchable-select>
+            <span *ngIf="addTaskError" class="add-task-error">{{ addTaskError }}</span>
+          </div>
           <button type="button" class="add-task-confirm" (click)="confirmAdd(group)">{{ 'common.add' | t }}</button>
           <button type="button" class="add-task-cancel" (click)="cancelAdd()">{{ 'common.cancel' | t }}</button>
         </ng-container>
@@ -389,6 +400,36 @@
   <div class="empty-state">
     <strong>{{ emptyText || ('tasks.noTasksTitle' | t) }}</strong>
     <span *ngIf="!emptyText">{{ 'tasks.noTasksText' | t }}</span>
+    <div class="add-task-row empty-add" *ngIf="allowAddTask">
+      <ng-container *ngIf="addingGroupId === 'empty'; else emptyAddTrigger">
+        <div class="add-task-fields">
+          <input
+            type="text"
+            class="add-task-input"
+            [(ngModel)]="newTaskTitle"
+            [placeholder]="'tasks.addTask.placeholder' | t"
+            (keydown.enter)="confirmEmptyAdd()"
+            (keydown.escape)="cancelAdd()"
+          />
+          <app-searchable-select
+            *ngIf="shouldPickCustomerForNewTask"
+            class="add-task-client-select"
+            [(ngModel)]="newTaskCustomerId"
+            [options]="customerOptions"
+            [placeholder]="'tasks.addTask.customerPlaceholder' | t"
+            [crossLanguageMatch]="true"
+          ></app-searchable-select>
+          <span *ngIf="addTaskError" class="add-task-error">{{ addTaskError }}</span>
+        </div>
+        <button type="button" class="add-task-confirm" (click)="confirmEmptyAdd()">{{ 'common.add' | t }}</button>
+        <button type="button" class="add-task-cancel" (click)="cancelAdd()">{{ 'common.cancel' | t }}</button>
+      </ng-container>
+      <ng-template #emptyAddTrigger>
+        <button type="button" class="add-task-trigger" (click)="startEmptyAdd($event)">
+          + {{ 'tasks.addTask.label' | t }}
+        </button>
+      </ng-template>
+    </div>
   </div>
 </ng-template>
 

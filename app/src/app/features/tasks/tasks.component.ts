@@ -102,7 +102,7 @@ export class TasksComponent {
         startsAt: `${t.dueDate}T09:00:00`,
         durationMinutes: 30,
         kind: 'task' as const,
-        customerName: t.source === 'meeting' ? this.workspace.customer(t.customerId)?.name : undefined,
+        customerName: t.customerId ? this.workspace.clientName(t.customerId) : undefined,
         attendeeCount: 0,
         sourceId: t.id
       }))
@@ -166,8 +166,8 @@ export class TasksComponent {
 
   /** Customer name for meeting tasks, board name for board tasks (search/calendar use). */
   private taskContext(task: Task): string {
-    return task.source === 'meeting'
-      ? (this.workspace.customer(task.customerId)?.name ?? '')
+    return task.customerId
+      ? (this.workspace.clientName(task.customerId) ?? '')
       : task.board;
   }
 

@@ -9,16 +9,55 @@
   gap: 18px;
 }
 
-/* ── Selector row ──────────────────────────────────────────── */
-.selector-row {
+/* ── Client header tile (identity picker + search + new meeting) ── */
+.board-header {
   display: flex;
-  align-items: flex-end;
-  gap: 14px;
+  flex-direction: column;
+}
+
+.board-header-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
-.selector-row .field-control { min-width: 170px; }
-.selector-search { flex: 1 1 200px; }
+/* Initials avatar combined with the entity select into one control. */
+.identity-picker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 230px;
+
+  .hero-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+    border-radius: 10px;
+  }
+
+  app-searchable-select { flex: 1 1 auto; min-width: 150px; }
+}
+
+.selector-search {
+  flex: 1 1 220px;
+  min-width: 160px;
+
+  input { width: 100%; }
+}
+
+.new-meeting-btn { flex-shrink: 0; }
+
+/* Secondary line: status / type chips + owner & contact. */
+.identity-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
 
 /* ── Entity hero ───────────────────────────────────────────── */
 .entity-hero {
@@ -115,72 +154,104 @@
 .status-chip.waiting-for-customer,
 .status-chip.waiting-for-internal { background: var(--amber-soft); color: var(--amber); }
 
-/* ── Tab strip (segmented control) ─────────────────────────── */
-.board-tabs {
+/* ── Board layout: main column + recap rail (recap on the side) ── */
+.board-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(300px, 0.7fr);
+  gap: 18px;
+  align-items: start;
+  min-width: 0;
+}
+
+.board-main {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+/* Sticky recap rail, mirroring the meeting form's prep sidebar. */
+.board-recap {
+  position: sticky;
+  top: 10px;
+  min-width: 0;
+  max-height: calc(100vh - 90px);
+  overflow-y: auto;
+}
+
+@media (max-width: 960px) {
+  .board-layout { grid-template-columns: 1fr; }
+  .board-recap { position: static; max-height: none; }
+}
+
+/* ── Meeting carousel tools (in the panel head) ────────────── */
+.rail-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rail-nav {
   display: inline-flex;
   gap: 4px;
-  width: fit-content;
-  max-width: 100%;
-  align-self: center;
-  padding: 5px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-pill);
-  background: var(--glass-soft);
-
-  button {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 38px;
-    padding: 0 16px;
-    border: 1px solid transparent;
-    border-radius: var(--radius-pill);
-    background: transparent;
-    color: var(--text-secondary);
-    font-size: 13px;
-    font-weight: 700;
-    white-space: nowrap;
-    cursor: pointer;
-    transition: background var(--duration-fast) var(--ease-out),
-      color var(--duration-fast) var(--ease-out),
-      box-shadow var(--duration-fast) var(--ease-out);
-
-    &:hover:not(.active) { color: var(--ink); background: var(--bg-elevated); }
-
-    &.active {
-      color: #fff;
-      background: linear-gradient(135deg, var(--accent-strong), var(--accent));
-      box-shadow: 0 8px 18px rgba(0, 120, 120, 0.20);
-    }
-  }
 }
 
-.board-tab-count {
-  display: inline-grid;
+.rail-arrow {
+  display: grid;
   place-items: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: 800;
-  background: var(--bg-sunken);
-  color: var(--text-secondary);
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  color: var(--accent);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--duration-fast);
 
-  &.is-danger { background: var(--danger-soft); color: var(--danger); }
+  &:hover { background: var(--accent-soft); border-color: var(--accent); }
 }
 
-.board-tabs button.active .board-tab-count {
-  background: rgba(255, 255, 255, 0.25);
-  color: #fff;
+/* Collapsed: single-row horizontal scroll-snap carousel. */
+.carousel-track {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: x proximity;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-soft) transparent;
+
+  &::-webkit-scrollbar { height: 8px; }
+  &::-webkit-scrollbar-thumb { background: var(--accent-soft); border-radius: 4px; }
 }
 
-/* ── Toolbar (filter strip + count) ────────────────────────── */
-.board-toolbar {
+/* Expanded: up to 3 rows of cards, then scrolls vertically. A card row is
+   ~150px tall + 10px gap → 3 rows ≈ 480px. */
+.meeting-grid-expanded {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  align-items: start;
+  gap: 10px;
+  max-height: 480px;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-soft) transparent;
+
+  &::-webkit-scrollbar { width: 8px; }
+  &::-webkit-scrollbar-thumb { background: var(--accent-soft); border-radius: 4px; }
+}
+
+/* ── Inline toolbar (filter strip + count) inside a panel head ── */
+.board-toolbar-inline {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
@@ -222,229 +293,27 @@
   &.badge-danger { color: var(--danger); border-color: var(--danger-soft); background: var(--danger-soft); }
 }
 
-/* ── Overview grid ─────────────────────────────────────────── */
-.overview-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
-  min-width: 0;
-}
-
-@media (max-width: 960px) {
-  .overview-grid { grid-template-columns: 1fr; }
-}
-
 /* ── Panel head ────────────────────────────────────────────── */
 .board-panel-head { margin-bottom: 12px; }
 .board-panel-head h3 { margin: 4px 0 0; font-size: 16px; color: var(--text-primary); }
 
-/* ── Entity list (meetings rows) ───────────────────────────── */
-.entity-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: 420px;
-  overflow-y: auto;
-}
-
-.entity-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  background: var(--bg-canvas);
-  transition: border-color var(--duration-fast) var(--ease-out), transform var(--duration-fast) var(--ease-out);
-
-  &.clickable { cursor: pointer; }
-  &:hover { border-color: var(--accent); transform: translateY(-1px); }
-}
-
-.entity-main {
-  flex: 1 1 0;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-
-  strong { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  small  { font-size: 11px; color: var(--text-tertiary); }
-}
-
-.count-badge.count-inline {
-  flex-shrink: 0;
-}
-
-/* ── Recap (mini, in overview) ─────────────────────────────── */
-.recap-mini {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--bg-canvas);
-  cursor: pointer;
-  transition: border-color var(--duration-fast) var(--ease-out);
-
-  &:hover { border-color: var(--accent); }
-}
-
-.recap-mini-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-
-  strong { font-size: 14px; color: var(--text-primary); }
-}
-
-.recap-date { font-size: 11px; color: var(--text-tertiary); }
-
-.recap-excerpt {
-  margin: 2px 0 0;
-  font-size: 13px;
-  color: var(--ink);
-  line-height: 1.45;
-  white-space: pre-line;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-
-  &.muted { color: var(--muted); font-style: italic; }
-}
-
-.recap-open { align-self: flex-start; margin-top: 8px; }
-
-/* ── Note chips ────────────────────────────────────────────── */
-.note-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
-
-.note-chip {
-  font-size: 11px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: var(--radius-pill);
-  background: var(--surface-strong);
-  color: var(--text-secondary);
-
-  &.decision { background: var(--blue-soft);  color: var(--blue); }
-  &.action   { background: var(--teal-soft);  color: var(--teal); }
-  &.blocker  { background: var(--rust-soft);  color: var(--rust); }
-}
-
-/* ── Recap card (full, recap tab) ──────────────────────────── */
-.recap-card { display: flex; flex-direction: column; gap: 14px; }
-
-.recap-head {
+/* Head with a trailing tools/toolbar cluster (meetings rail, task filters). */
+.board-panel-head.with-action {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-
-  h3 { margin: 4px 0 2px; font-size: 18px; color: var(--text-primary); }
+  flex-wrap: wrap;
 }
 
-.recap-goal {
-  margin: 0;
-  font-size: 13px;
-  color: var(--text-secondary);
-  background: var(--accent-soft);
-  border-radius: var(--radius-md);
-  padding: 8px 12px;
-}
-
-.recap-body {
+/* ── Recap rail title (above the shared prep brief) ────────── */
+.recap-title {
+  margin: 0 0 10px;
   font-size: 14px;
-  line-height: 1.55;
-  color: var(--ink);
-  white-space: pre-line;
-
-  &.muted { color: var(--muted); font-style: italic; }
-}
-
-.note-block {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding-top: 10px;
-  border-top: 1px solid var(--line);
-}
-
-.note-block-label {
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--muted);
-}
-
-.note-count {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--danger);
-  background: var(--danger-soft);
-  border-radius: 999px;
-  padding: 1px 7px;
-  margin-inline-start: 4px;
-}
-
-.note-line {
-  font-size: 13px;
-  line-height: 1.4;
-  color: var(--ink);
-  padding-inline-start: 14px;
-  position: relative;
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset-inline-start: 0;
-    top: 7px;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--muted);
-  }
-
-  &.decision::before { background: var(--blue); }
-  &.action::before   { background: var(--teal); }
-  &.blocker::before  { background: var(--rust); }
-
-  &.convertible {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 10px;
-  }
-}
-
-.note-line-text { flex: 1; min-width: 0; }
-
-.next-meeting {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding-top: 10px;
-  border-top: 1px solid var(--line);
-}
-
-.recap-footer { padding-top: 4px; }
-
-/* ── Meeting grids (use the shared <app-meeting-card>) ─────── */
-.board-meeting-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  align-items: start;
-  gap: 10px;
-}
-
-/* ── Responsive ────────────────────────────────────────────── */
-@media (max-width: 900px) {
-  .board-tabs {
-    display: flex;
-    width: 100%;
-    button { flex: 1; justify-content: center; }
-  }
+  color: var(--text-primary);
+  position: sticky;
+  top: 0;
+  background: var(--bg-elevated);
+  padding-bottom: 4px;
+  z-index: 1;
 }

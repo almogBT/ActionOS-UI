@@ -1,42 +1,36 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActionosI18nService } from '../../core/i18n/actionos-i18n.service';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import {
-  CalendarEvent, Customer, CustomerMeeting, Member, MeetingNote, NoteType,
-  Task, TaskStatus, ViewId
+  CalendarEvent, Customer, CustomerMeeting, Task, ViewId
 } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
 import { CalendarStatsComponent } from '../../shared/calendar-stats/calendar-stats.component';
 import { IconComponent } from '../../shared/icons/icon.component';
 import { MeetingCardComponent } from '../../shared/meeting-card/meeting-card.component';
-import { AppDatePipe } from '../../shared/pipes/app-date.pipe';
+import { MeetingPrepBriefComponent } from '../customers/meeting-prep-brief.component';
 import { SearchableSelectComponent, SelectOption } from '../../shared/searchable-select/searchable-select.component';
 import { StatTileComponent } from '../../shared/stat-tile/stat-tile.component';
 import { TaskTableComponent } from '../../shared/task-table/task-table.component';
 
-export type BoardEntityType = 'client' | 'member';
-
-/** Tabs on the client board. Member board only uses overview/tasks. */
-export type BoardTab = 'overview' | 'recap' | 'meetings' | 'tasks';
-
-/** Quick filter applied to the Tasks tab. Driven by the stat tiles too. */
+/** Quick filter applied to the task table. Driven by the stat tiles too. */
 export type TaskLens = 'all' | 'open' | 'overdue' | 'blocked';
 
 /**
- * A board is the profile for one client (or member): who they are, what just
- * happened (recap & notes), and what is still open. The layout mirrors My Work
- * and Tasks — actionable stat tiles, a calendar strip, meeting cards, and the
- * one shared task table — so the whole app reads the same way.
+ * The Clients page: the profile for one client — who they are, what just
+ * happened, and what is still open. The layout mirrors My Work and Tasks —
+ * actionable stat tiles, a calendar strip, a meeting carousel, the shared
+ * meeting prep brief on the side, and the one shared task table — so the whole
+ * app reads the same way. There are no tabs: the overview *is* the board.
  */
 @Component({
   selector: 'app-boards',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, TranslatePipe, AppDatePipe, IconComponent,
+    CommonModule, FormsModule, TranslatePipe, IconComponent,
     SearchableSelectComponent, StatTileComponent, CalendarStatsComponent, TaskTableComponent,
-    MeetingCardComponent
+    MeetingCardComponent, MeetingPrepBriefComponent
   ],
   templateUrl: './boards.component.html',
   styleUrl: './boards.component.scss'
@@ -44,48 +38,41 @@ export type TaskLens = 'all' | 'open' | 'overdue' | 'blocked';
 export class BoardsComponent {
   @Output() viewChange = new EventEmitter<ViewId>();
 
-  entityType: BoardEntityType = 'client';
-  selectedClientId = '';
-  selectedMemberId = '';
   boardSearch = '';
 
-  activeTab: BoardTab = 'overview';
   taskLens: TaskLens = 'all';
 
-  constructor(public workspace: ActionosWorkspaceService, private i18n: ActionosI18nService) {
-    const clients = workspace.customers;
-    if (clients.length) {
-      this.selectedClientId = clients[0].id;
-    }
-    const members = workspace.members;
-    if (members.length) {
-      this.selectedMemberId = members[0].id;
+  /** Meeting rail: false = single-row carousel, true = 3-row grid (scrolls if more). */
+  meetingsExpanded = false;
+
+  // Selection is backed by the singleton service so it persists when the user
+  // leaves the Clients view (which destroys this component) and comes back.
+  get selectedClientId(): string { return this.workspace.boardClientId; }
+  set selectedClientId(value: string) { this.workspace.boardClientId = value; }
+
+  constructor(public workspace: ActionosWorkspaceService) {
+    // Seed a default only on first visit; a prior selection is left untouched.
+    if (!this.selectedClientId) {
+      const clients = workspace.taskClientOptions;
+      if (clients.length) this.selectedClientId = clients[0].id;
     }
   }
 
   // ── Selectors / options ───────────────────────────────────────────────
 
   get selectedClient(): Customer | null {
-    return this.workspace.customers.find(c => c.id === this.selectedClientId) ?? null;
-  }
-
-  get selectedMember(): Member | null {
-    return this.workspace.members.find(m => m.id === this.selectedMemberId) ?? null;
-  }
-
-  get boardTypeOptions(): SelectOption[] {
-    return [
-      { value: 'client', label: this.i18n.translate('boards.clientBoard') },
-      { value: 'member', label: this.i18n.translate('boards.memberBoard') }
-    ];
+    const id = this.selectedClientId;
+    if (!id) return null;
+    // Resolve whether the picked id is a customer id or an external group id.
+    return this.workspace.customer(id)
+      ?? this.workspace.customers.find(c => c.externalGroupId === id)
+      ?? null;
   }
 
   get clientSelectOptions(): SelectOption[] {
-    return this.workspace.customers.map(c => ({ value: c.id, label: c.name }));
-  }
-
-  get memberSelectOptions(): SelectOption[] {
-    return this.workspace.members.map(m => ({ value: m.id, label: m.name }));
+    // Source the full client list (external customer groups + customers), the
+    // same set the Tasks board uses — not just the local customer repo.
+    return this.workspace.taskClientOptions.map(c => ({ value: c.id, label: c.name }));
   }
 
   get taskLensOptions(): { id: TaskLens; labelKey: string }[] {
@@ -97,38 +84,25 @@ export class BoardsComponent {
     ];
   }
 
-  // ── Tabs ────────────────────────────────────────────────────────────────
+  // ── View state ────────────────────────────────────────────────────────
 
-  get clientTabs(): { id: BoardTab; icon: 'columns' | 'file-text' | 'calendar' | 'check-square'; labelKey: string; count?: number; danger?: boolean }[] {
-    return [
-      { id: 'overview', icon: 'columns',      labelKey: 'boards.tabs.overview' },
-      { id: 'recap',    icon: 'file-text',    labelKey: 'boards.tabs.recap',    count: this.clientMeetingCount },
-      { id: 'meetings', icon: 'calendar',     labelKey: 'boards.meetings',      count: this.clientMeetingCount },
-      { id: 'tasks',    icon: 'check-square', labelKey: 'boards.tasks',         count: this.clientOpenCount, danger: this.clientOverdueCount > 0 }
-    ];
-  }
-
-  get memberTabs(): { id: BoardTab; icon: 'columns' | 'check-square'; labelKey: string; count?: number; danger?: boolean }[] {
-    return [
-      { id: 'overview', icon: 'columns',      labelKey: 'boards.tabs.overview' },
-      { id: 'tasks',    icon: 'check-square', labelKey: 'boards.tasks', count: this.memberOpenCount, danger: this.memberOverdueCount > 0 }
-    ];
-  }
-
-  selectTab(tab: BoardTab): void {
-    this.activeTab = tab;
-  }
-
-  onEntityTypeChange(): void {
-    this.boardSearch = '';
-    this.taskLens = 'all';
-    this.activeTab = 'overview';
-  }
-
-  /** Stat-tile click → jump to the matching tab with the right lens applied. */
-  openLens(tab: BoardTab, lens: TaskLens): void {
+  /** Stat-tile click → apply the matching lens to the task table below. */
+  openLens(lens: TaskLens): void {
     this.taskLens = lens;
-    this.activeTab = tab;
+  }
+
+  /** Scroll the meeting carousel by ~one viewport. dir: -1 prev, +1 next. */
+  scrollRail(track: HTMLElement, dir: number): void {
+    track.scrollBy({ left: dir * track.clientWidth * 0.8, behavior: 'smooth' });
+  }
+
+  /** Translate vertical wheel motion into horizontal scroll on the carousel. */
+  onRailWheel(e: WheelEvent, track: HTMLElement): void {
+    if (track.scrollWidth <= track.clientWidth) return;   // nothing to scroll
+    const delta = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+    if (!delta) return;
+    e.preventDefault();
+    track.scrollBy({ left: delta, behavior: 'auto' });
   }
 
   // ── Client: meetings ──────────────────────────────────────────────────
@@ -136,12 +110,12 @@ export class BoardsComponent {
   /** All of the client's meetings, newest first (search-independent). */
   get clientMeetingsSorted(): CustomerMeeting[] {
     if (!this.selectedClientId) return [];
-    return this.workspace.customerMeetingsByCustomer(this.selectedClientId)
+    return this.workspace.visibleCustomerMeetingsByCustomer(this.selectedClientId)
       .slice()
       .sort((a, b) => b.meetingDate.localeCompare(a.meetingDate));
   }
 
-  /** Search-filtered meetings for the Meetings tab. */
+  /** Meetings shown in the carousel — the board search filters these too. */
   get clientMeetings(): CustomerMeeting[] {
     const meetings = this.clientMeetingsSorted;
     if (!this.boardSearch) return meetings;
@@ -153,16 +127,8 @@ export class BoardsComponent {
     );
   }
 
-  get latestMeeting(): CustomerMeeting | null {
-    return this.clientMeetingsSorted[0] ?? null;
-  }
-
   get clientMeetingCount(): number {
-    return this.clientMeetingsSorted.length;
-  }
-
-  meetingTaskCountFor(meetingId: string): number {
-    return this.workspace.meetingTasksByMeeting(meetingId).length;
+    return this.clientMeetings.length;
   }
 
   /** Calendar feed for the client board, built from their meetings. */
@@ -183,21 +149,6 @@ export class BoardsComponent {
 
   onCalEventOpened(evt: CalendarEvent): void {
     this.workspace.openMeetingDrawer(evt.sourceId);
-  }
-
-  // ── Recap & notes ─────────────────────────────────────────────────────
-
-  recapText(m: CustomerMeeting): string {
-    return (m.publishedRecap ?? m.summary ?? '').trim();
-  }
-
-  notesOfType(m: CustomerMeeting, type: NoteType): MeetingNote[] {
-    return m.notes.filter(n => n.type === type);
-  }
-
-  /** Pending (not yet converted) action items — surfaced for one-click convert. */
-  pendingActions(m: CustomerMeeting): MeetingNote[] {
-    return m.notes.filter(n => n.type === 'action' && !n.convertedTaskId);
   }
 
   // ── Client: tasks ─────────────────────────────────────────────────────
@@ -231,48 +182,6 @@ export class BoardsComponent {
   get clientOverdueCount(): number { return this.clientTasksAll.filter(t => this.isOverdue(t)).length; }
   get clientBlockedCount(): number { return this.clientTasksAll.filter(t => this.isBlocked(t)).length; }
 
-  // ── Member ────────────────────────────────────────────────────────────
-
-  get selectedMemberEmployeeId(): string {
-    return this.selectedMemberId
-      ? (this.workspace.employeeIdForMember(this.selectedMemberId) ?? '')
-      : '';
-  }
-
-  private memberBaseTasks(): Task[] {
-    if (!this.selectedMemberId) return [];
-    const employeeId = this.workspace.employeeIdForMember(this.selectedMemberId);
-    if (!employeeId) return [];
-    return this.workspace.meetingTasks.filter(t =>
-      t.assignedToEmployeeId === employeeId || t.openedByEmployeeId === employeeId
-    );
-  }
-
-  /** Search-filtered member tasks (before the lens filter). */
-  get memberTasks(): Task[] {
-    const tasks = this.memberBaseTasks();
-    if (!this.boardSearch) return tasks;
-    const q = this.boardSearch.toLowerCase();
-    return tasks.filter(t =>
-      t.title.toLowerCase().includes(q) ||
-      t.status.toLowerCase().includes(q) ||
-      (this.workspace.customer(t.customerId)?.name?.toLowerCase().includes(q) ?? false)
-    );
-  }
-
-  get memberTasksForTab(): Task[] {
-    return this.applyLens(this.memberTasks);
-  }
-
-  get memberOpenTasks(): Task[] {
-    return this.memberBaseTasks().filter(t => this.workspace.isOpenMeetingTaskStatus(t.status));
-  }
-
-  get memberOpenCount(): number { return this.memberOpenTasks.length; }
-  get memberTotalCount(): number { return this.memberBaseTasks().length; }
-  get memberOverdueCount(): number { return this.memberBaseTasks().filter(t => this.isOverdue(t)).length; }
-  get memberBlockedCount(): number { return this.memberBaseTasks().filter(t => this.isBlocked(t)).length; }
-
   // ── Shared task helpers ───────────────────────────────────────────────
 
   isOverdue(task: Task): boolean {
@@ -294,19 +203,5 @@ export class BoardsComponent {
       case 'blocked': return tasks.filter(t => this.isBlocked(t));
       default:        return tasks;
     }
-  }
-
-  // ── Navigation ────────────────────────────────────────────────────────
-
-  openView(view: ViewId): void {
-    this.viewChange.emit(view);
-  }
-
-  openMeeting(meetingId: string): void {
-    this.workspace.openMeetingDrawer(meetingId);
-  }
-
-  convertAction(meetingId: string, noteId: string): void {
-    this.workspace.convertMeetingAction(meetingId, noteId);
   }
 }

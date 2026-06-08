@@ -90,7 +90,7 @@ export class MeetingsComponent implements OnInit, OnChanges {
 
   /** Customer-scoped only — the stable set the attention rail is built from. */
   get customerScopedMeetings(): CustomerMeeting[] {
-    const all = this.workspace.customerMeetings;
+    const all = this.workspace.visibleCustomerMeetings;
     return this.customerFilter === 'all'
       ? all
       : all.filter(m => m.customerId === this.customerFilter);

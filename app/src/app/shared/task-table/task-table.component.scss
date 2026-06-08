@@ -819,10 +819,11 @@ button.assignee-avatar:active { transform: scale(0.94); }
 /* ── Inline add-task row ───────────────────────────────────────────────── */
 .add-task-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   padding: 8px 10px;
   border-top: 1px dashed var(--line);
+  flex-wrap: wrap;
 }
 
 .add-task-trigger {
@@ -837,8 +838,15 @@ button.assignee-avatar:active { transform: scale(0.94); }
   &:hover { color: var(--accent); background: var(--accent-soft); }
 }
 
-.add-task-input {
+.add-task-fields {
   flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 240px);
+  gap: 8px;
+}
+
+.add-task-input {
   min-width: 0;
   height: 32px;
   border: 1px solid var(--accent);
@@ -848,6 +856,15 @@ button.assignee-avatar:active { transform: scale(0.94); }
   font-size: 13px;
   padding: 0 10px;
   &:focus { outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+}
+
+.add-task-client-select { min-width: 0; }
+
+.add-task-error {
+  grid-column: 1 / -1;
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .add-task-confirm, .add-task-cancel {
@@ -878,6 +895,14 @@ button.assignee-avatar:active { transform: scale(0.94); }
   span   { font-size: 13px; color: var(--muted); }
 }
 
+.empty-add {
+  width: min(100%, 720px);
+  margin: 10px auto 0;
+  border: none;
+  padding: 0;
+  text-align: start;
+}
+
 /* ── Compact density (modals / popups) ─────────────────────────────────── */
 :host(.density-compact) {
   .col-hide-sm { display: none !important; }
@@ -892,6 +917,7 @@ button.assignee-avatar:active { transform: scale(0.94); }
   .cell { padding: 5px 8px; }
   .group-header { position: static; }
   .task-table-header { position: static; }
+  .add-task-fields { grid-template-columns: 1fr; }
 }
 
 /* ── Responsive ────────────────────────────────────────────────────────── */
@@ -901,4 +927,5 @@ button.assignee-avatar:active { transform: scale(0.94); }
   .task-table.with-select .task-row { grid-template-columns: 36px 120px minmax(0, 1fr) 100px; }
   .task-table:not(.with-select) .task-table-header,
   .task-table:not(.with-select) .task-row { grid-template-columns: 120px minmax(0, 1fr) 100px; }
+  .add-task-fields { grid-template-columns: 1fr; flex-basis: 100%; }
 }

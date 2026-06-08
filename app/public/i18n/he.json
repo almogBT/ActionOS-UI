@@ -48,7 +48,7 @@
     "inbox": "תיבה",
     "my-work": "העבודה שלי",
     "tasks": "משימות",
-    "boards": "לוחות",
+    "boards": "לוח לקוח",
     "meetings": "פגישות",
     "customers": "לקוחות",
     "members": "צוות"
@@ -298,49 +298,23 @@
     "fromMeeting": "מהפגישה שלך"
   },
   "boards": {
-    "eyebrow": "לוחות",
-    "title": "לוחות",
-    "subtitle": "לוח לכל לקוח ולכל חבר צוות — כל הפגישות והמשימות במקום אחד.",
-    "addFromMeeting": "הוסף מפגישה",
-    "manageClients": "ניהול לקוחות",
-    "tabs": {
-      "overview": "סקירה",
-      "recap": "סיכום"
-    },
+    "subtitle": "כל הפגישות והמשימות של לקוח במקום אחד.",
     "hero": {
       "owner": "אחראי",
-      "newMeeting": "פגישה חדשה",
-      "allClients": "כל הלקוחות"
+      "newMeeting": "פגישה חדשה"
     },
-    "recapEyebrow": "סיכום פגישה",
-    "latestRecap": "סיכום אחרון",
-    "noRecapYet": "טרם פורסם סיכום לפגישה זו.",
-    "openRecap": "פתח סיכום →",
-    "openFullRecap": "פתח סיכום מלא",
-    "earlierMeetings": "פגישות קודמות",
-    "boardType": "סוג לוח",
-    "clientBoard": "לוח לקוח",
-    "memberBoard": "לוח חבר צוות",
-    "selectClient": "לקוח",
-    "selectMember": "חבר צוות",
+    "expandMeetings": "הצג הכל",
+    "collapseMeetings": "כווץ",
     "chooseClient": "בחר לקוח…",
-    "chooseMember": "בחר חבר צוות…",
     "meetings": "פגישות",
     "tasks": "משימות",
     "openTasks": "משימות פתוחות",
-    "totalTasks": "סה״כ משימות",
     "blocked": "תקוע",
     "clientMeetingsTitle": "פגישות לקוח",
-    "clientTasksTitle": "משימות מפגישות",
-    "tasksLabel": "משימות",
     "noMeetings": "אין עדיין פגישות עבור לקוח זה.",
     "noTasks": "אין עדיין משימות עבור לקוח זה.",
     "selectClientPrompt": "בחר לקוח כדי לראות את הלוח שלו.",
-    "selectMemberPrompt": "בחר חבר צוות כדי לראות את הלוח שלו.",
-    "searchPlaceholder": "חיפוש…",
-    "item": "פריט",
-    "noItemsTitle": "אין תוצאות",
-    "noItemsText": "נקה את החיפוש או שנה את הסינון כדי לראות יותר."
+    "searchPlaceholder": "חיפוש…"
   },
   "myWork": {
     "eyebrow": "רק שלך",
@@ -349,6 +323,7 @@
     "goToMeetings": "עבור לפגישות",
     "tabs": {
       "inbox": "תיבת דואר",
+      "work": "משימות ופגישות",
       "tasks": "משימות",
       "meetings": "פגישות",
       "week": "השבוע שלי"
@@ -441,7 +416,7 @@
     },
     "badge": {
       "meeting": "פגישה",
-      "board": "לוח"
+      "board": "עצמאית"
     },
     "col": {
       "origin": "מקור",
@@ -486,7 +461,9 @@
     },
     "addTask": {
       "label": "הוסף משימה",
-      "placeholder": "כותרת משימה חדשה…"
+      "placeholder": "כותרת משימה חדשה…",
+      "customerPlaceholder": "בחר לקוח...",
+      "customerRequired": "בחר לקוח לפני הוספת המשימה."
     }
   },
   "meetings": {

@@ -5,7 +5,8 @@ import {
 } from '@angular/core';
 import { ActionosI18nService, ActionosLanguage } from '../../../core/i18n/actionos-i18n.service';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
-import { MailNotificationPrefs, QuickCaptureType, Task, ViewId } from '../../../core/models/actionos.models';
+import { MailNotificationPrefs, NavItem, QuickCaptureType, Task, ViewId } from '../../../core/models/actionos.models';
+import { ACTIONOS_NAV_ITEMS } from '../../../core/config/actionos-ui.config';
 import { ActionosWorkspaceService } from '../../../core/services/actionos-workspace.service';
 import { ThemeService } from '../../../core/services/theme.service';
 import { IconComponent, IconName } from '../../icons/icon.component';
@@ -20,7 +21,6 @@ import { IconComponent, IconName } from '../../icons/icon.component';
 })
 export class HeaderComponent {
   @Input() activeView: ViewId = 'home';
-  @Output() readonly toggleSidebar = new EventEmitter<void>();
   @Output() readonly captured = new EventEmitter<void>();
   @Output() readonly navigate = new EventEmitter<ViewId>();
 
@@ -28,6 +28,9 @@ export class HeaderComponent {
   readonly workspace = inject(ActionosWorkspaceService);
   readonly theme = inject(ThemeService);
   private readonly host = inject(ElementRef<HTMLElement>);
+
+  // Primary navigation now lives in the header (the dropdown sidebar was removed).
+  readonly navItems: NavItem[] = ACTIONOS_NAV_ITEMS;
 
   readonly quickCaptureTypes: QuickCaptureType[] = ['task', 'action', 'decision', 'blocker', 'note'];
   readonly mailNotifKeys: (keyof MailNotificationPrefs)[] = ['newTasks', 'overdueTasks', 'dueTodayTasks', 'meetingSummaries'];
@@ -96,6 +99,19 @@ export class HeaderComponent {
       note: 'Capture a note...',
     };
     return map[this.quickCaptureType] ?? 'Capture...';
+  }
+
+  iconFor(id: ViewId): IconName {
+    const map: Record<ViewId, IconName> = {
+      home: 'home',
+      inbox: 'inbox',
+      'my-work': 'check-square',
+      tasks: 'check-circle',
+      boards: 'columns',
+      meetings: 'calendar',
+      customers: 'users',
+    };
+    return map[id] ?? 'home';
   }
 
   captureIconFor(type: QuickCaptureType): IconName {

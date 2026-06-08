@@ -1,8 +1,8 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
-import { Component, HostListener, Inject, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, Inject, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActionosI18nService } from './core/i18n/actionos-i18n.service';
-import { Customer, NavItem, QuickCaptureType, Task, ViewId } from './core/models/actionos.models';
+import { Customer, NavItem, Task, ViewId } from './core/models/actionos.models';
 import { ACTIONOS_NAV_ITEMS } from './core/config/actionos-ui.config';
 import { TranslatePipe } from './core/i18n/translate.pipe';
 import { IconComponent, IconName } from './shared/icons/icon.component';
@@ -19,9 +19,7 @@ import { TasksComponent } from './features/tasks/tasks.component';
 import { MeetingDrawerComponent } from './features/meeting-drawer/meeting-drawer.component';
 import { TaskDrawerComponent } from './features/task-drawer/task-drawer.component';
 import { CatchUpDrawerComponent } from './features/catch-up-drawer/catch-up-drawer.component';
-import { WorkspaceHomeComponent } from './features/workspace-home/workspace-home.component';
 import { HeaderComponent } from './shared/layout/header/header.component';
-import { SidebarComponent } from './shared/layout/sidebar/sidebar.component';
 
 
 @Component({
@@ -31,7 +29,6 @@ import { SidebarComponent } from './shared/layout/sidebar/sidebar.component';
     CommonModule,
     FormsModule,
     TranslatePipe,
-    WorkspaceHomeComponent,
     InboxComponent,
     MyWorkComponent,
     TasksComponent,
@@ -42,7 +39,6 @@ import { SidebarComponent } from './shared/layout/sidebar/sidebar.component';
     MeetingDrawerComponent,
     CatchUpDrawerComponent,
     HeaderComponent,
-    SidebarComponent,
     IconComponent,
     SearchableSelectComponent,
   ],
@@ -55,15 +51,12 @@ export class AppComponent implements OnInit {
   readonly theme = inject(ThemeService);
 
   readonly navItems: NavItem[] = ACTIONOS_NAV_ITEMS;
-  readonly activeView = signal<ViewId>('home');
-  readonly navOpen = signal<boolean>(false);
+  // My Work is the landing view — the former Home page was merged into it.
+  readonly activeView = signal<ViewId>('my-work');
   readonly meetingNewTick = signal(0);
 
   // ── Bottom action bar: quick capture ──
-  readonly captureTypes: QuickCaptureType[] = ['task', 'action', 'decision', 'blocker', 'note'];
-  captureType: QuickCaptureType = 'task';
   captureText = '';
-  readonly captureTypeMenuOpen = signal(false);
 
   // ── Bottom action bar: plan meeting ──
   readonly showPlanPicker = signal(false);
@@ -72,10 +65,6 @@ export class AppComponent implements OnInit {
   // Customer the detail view should open with, handed off from the Home list.
   readonly activeCustomer = signal<Customer | null>(null);
   readonly customerEntryView = signal<CustomersSubView>('detail');
-
-  readonly shellClass = computed(() => ({
-    'nav-open': this.navOpen()
-  }));
 
   constructor(@Inject(DOCUMENT) private readonly doc: Document) {
     // Touch the theme service at boot so its DOM side-effect runs immediately.
@@ -88,7 +77,6 @@ export class AppComponent implements OnInit {
 
   setView(view: ViewId): void {
     this.activeView.set(view);
-    this.navOpen.set(false);
   }
 
   /** Home list → open a customer's 360 detail. */
@@ -110,22 +98,18 @@ export class AppComponent implements OnInit {
 
   /** FAB — start a new meeting from anywhere in the app. */
   startNewMeeting(): void {
-    this.setView('meetings');
-    this.meetingNewTick.update(n => n + 1);
+    // Open the new-meeting drawer in place; do NOT navigate to the Meetings page.
+    this.workspace.openNewMeetingModal();
   }
 
-  /** Detail view asked to exit — clear selection and return Home. */
+  /** Detail view asked to exit — clear selection and return to the landing view. */
   closeCustomerDetail(): void {
     this.activeCustomer.set(null);
-    this.setView('home');
-  }
-
-  toggleNav(): void {
-    this.navOpen.update(v => !v);
+    this.setView('my-work');
   }
 
   onCaptured(): void {
-    // Capture lands tasks in inbox / notes go to meetings, mirror the prior behavior.
+    // Header capture returns to the work view after saving.
     this.activeView.set('my-work');
   }
 
@@ -140,58 +124,25 @@ export class AppComponent implements OnInit {
     ];
   }
 
-  captureIconFor(type: QuickCaptureType): IconName {
-    const map: Record<QuickCaptureType, IconName> = {
-      task: 'check-square', action: 'zap', decision: 'check-circle',
-      blocker: 'alert-triangle', note: 'file-text',
-    };
-    return map[type] ?? 'sparkles';
-  }
-
-  captureLabelFor(type: QuickCaptureType): string {
-    return this.i18n.translate('quickCapture.' + type);
-  }
-
   get currentCaptureLabel(): string {
-    return this.captureLabelFor(this.captureType);
+    return this.i18n.translate('quickCapture.task');
   }
 
   get capturePlaceholder(): string {
-    return this.captureLabelFor(this.captureType) + '...';
-  }
-
-  captureShortcutFor(type: QuickCaptureType): string {
-    const map: Record<QuickCaptureType, string> = {
-      task: 'T', action: 'A', decision: 'D', blocker: 'B', note: 'N',
-    };
-    return map[type] ?? '';
-  }
-
-  selectCaptureType(type: QuickCaptureType): void {
-    this.captureType = type;
-    this.captureTypeMenuOpen.set(false);
-  }
-
-  toggleCaptureTypeMenu(): void {
-    this.captureTypeMenuOpen.update(v => !v);
-    this.showPlanPicker.set(false);
+    return this.currentCaptureLabel + '...';
   }
 
   submitCapture(): void {
-    if (!this.captureText.trim()) return;
-    const result = this.workspace.quickCapture(this.captureType, this.captureText);
+    const taskTitle = this.captureText.trim();
+    if (!taskTitle) return;
+    const result = this.workspace.quickCapture('task', taskTitle);
     if (!result) return;
     this.captureText = '';
-    if (this.captureType === 'task') {
-      this.workspace.selectTask(result as Task, true);
-    } else {
-      this.activeView.set('my-work');
-    }
+    this.workspace.selectTask(result as Task, true);
   }
 
   togglePlanPicker(): void {
     this.showPlanPicker.update(v => !v);
-    this.captureTypeMenuOpen.set(false);
   }
 
   onPlanCustomerSelected(customerId: string): void {
@@ -205,20 +156,7 @@ export class AppComponent implements OnInit {
   }
 
   closeBarPopovers(): void {
-    this.captureTypeMenuOpen.set(false);
     this.showPlanPicker.set(false);
-  }
-
-  @HostListener('window:keydown', ['$event'])
-  onKey(event: KeyboardEvent): void {
-    const target = event.target as HTMLElement | null;
-    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
-      return;
-    }
-    if (event.key === '[') {
-      event.preventDefault();
-      this.toggleNav();
-    }
   }
 
   iconFor(id: ViewId): IconName {

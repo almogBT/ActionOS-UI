@@ -1,0 +1,2538 @@
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG4: Expected 2 arguments, but got 1.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:86:54:
+[37m      86 │ ...     [zero]="clientOpenCount === 0" (tileClick)="[32mopenLens[37m('open')"
+         ╵                                                     [32m~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG4: Expected 2 arguments, but got 1.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:90:71:
+[37m      90 │ ...zero]="clientOverdueCount === 0" (tileClick)="[32mopenLens[37m('overdue')"
+         ╵                                                  [32m~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG4: Expected 2 arguments, but got 1.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:94:57:
+[37m      94 │ ...zero]="clientBlockedCount === 0" (tileClick)="[32mopenLens[37m('blocked')"
+         ╵                                                  [32m~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'meetingsExpanded' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:98:57:
+[37m      98 │ ...]="clientMeetingCount === 0" (tileClick)="[32mmeetingsExpanded[37m = true"
+         ╵                                              [32m~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'meetingsExpanded' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:115:46:
+[37m      115 │ ...ass="rail-nav" *ngIf="![32mmeetingsExpanded[37m && clientMeetingsSorte...
+          ╵                           [32m~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollRail' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:68:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="[32mscrollRail[37m(railTrack, -1)"
+          ╵                                           [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollRail' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:68:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="[32mscrollRail[37m(railTrack, 1)"
+          ╵                                            [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'meetingsExpanded' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:121:74:
+[37m      121 │ ...ost-action small" (click)="[32mmeetingsExpanded[37m = !meetingsExpanded">
+          ╵                               [32m~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'meetingsExpanded' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:121:94:
+[37m      121 │ ...ost-action small" (click)="meetingsExpanded = ![32mmeetingsExpanded[37m">
+          ╵                                                   [32m~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'meetingsExpanded' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:122:22:
+[37m      122 │                   {{ ([32mmeetingsExpanded[37m ? 'boards.collapseMeetings...
+          ╵                       [32m~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'meetingsExpanded' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:129:27:
+[37m      129 │ ...          <div *ngIf="![32mmeetingsExpanded[37m" class="carousel-track...
+          ╵                           [32m~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'onRailWheel' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:129:88:
+[37m      129 │ ...ousel-track" #railTrack (wheel)="[32monRailWheel[37m($event, railTrack)">
+          ╵                                     [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'meetingsExpanded' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:133:26:
+[37m      133 │               <div *ngIf="[32mmeetingsExpanded[37m" class="meeting-grid-e...
+          ╵                           [32m~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG4: Expected 2 arguments, but got 1.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:259:54:
+[37m      259 │ ...    [zero]="memberOpenCount === 0" (tileClick)="[32mopenLens[37m('open')"
+          ╵                                                    [32m~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG4: Expected 2 arguments, but got 1.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:263:71:
+[37m      263 │ ...ero]="memberOverdueCount === 0" (tileClick)="[32mopenLens[37m('overdue')"
+          ╵                                                 [32m~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG4: Expected 2 arguments, but got 1.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:267:57:
+[37m      267 │ ...ero]="memberBlockedCount === 0" (tileClick)="[32mopenLens[37m('blocked')"
+          ╵                                                 [32m~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG4: Expected 2 arguments, but got 1.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:271:55:
+[37m      271 │ ...    [zero]="memberTotalCount === 0" (tileClick)="[32mopenLens[37m('all')"
+          ╵                                                     [32m~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG4: Expected 2 arguments, but got 1.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:86:54:
+[37m      86 │ ...     [zero]="clientOpenCount === 0" (tileClick)="[32mopenLens[37m('open')"
+         ╵                                                     [32m~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG4: Expected 2 arguments, but got 1.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:90:71:
+[37m      90 │ ...zero]="clientOverdueCount === 0" (tileClick)="[32mopenLens[37m('overdue')"
+         ╵                                                  [32m~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG4: Expected 2 arguments, but got 1.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:94:57:
+[37m      94 │ ...zero]="clientBlockedCount === 0" (tileClick)="[32mopenLens[37m('blocked')"
+         ╵                                                  [32m~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'meetingsExpanded' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:98:57:
+[37m      98 │ ...]="clientMeetingCount === 0" (tileClick)="[32mmeetingsExpanded[37m = true"
+         ╵                                              [32m~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'meetingsExpanded' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:115:46:
+[37m      115 │ ...ass="rail-nav" *ngIf="![32mmeetingsExpanded[37m && clientMeetingsSorte...
+          ╵                           [32m~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollRail' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:68:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="[32mscrollRail[37m(railTrack, -1)"
+          ╵                                           [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollRail' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:68:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="[32mscrollRail[37m(railTrack, 1)"
+          ╵                                            [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'meetingsExpanded' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:121:74:
+[37m      121 │ ...ost-action small" (click)="[32mmeetingsExpanded[37m = !meetingsExpanded">
+          ╵                               [32m~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'meetingsExpanded' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:121:94:
+[37m      121 │ ...ost-action small" (click)="meetingsExpanded = ![32mmeetingsExpanded[37m">
+          ╵                                                   [32m~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'meetingsExpanded' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:122:22:
+[37m      122 │                   {{ ([32mmeetingsExpanded[37m ? 'boards.collapseMeetings...
+          ╵                       [32m~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'meetingsExpanded' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:129:27:
+[37m      129 │ ...          <div *ngIf="![32mmeetingsExpanded[37m" class="carousel-track...
+          ╵                           [32m~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'onRailWheel' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:129:88:
+[37m      129 │ ...ousel-track" #railTrack (wheel)="[32monRailWheel[37m($event, railTrack)">
+          ╵                                     [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'meetingsExpanded' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:133:26:
+[37m      133 │               <div *ngIf="[32mmeetingsExpanded[37m" class="meeting-grid-e...
+          ╵                           [32m~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG4: Expected 2 arguments, but got 1.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:259:54:
+[37m      259 │ ...    [zero]="memberOpenCount === 0" (tileClick)="[32mopenLens[37m('open')"
+          ╵                                                    [32m~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG4: Expected 2 arguments, but got 1.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:263:71:
+[37m      263 │ ...ero]="memberOverdueCount === 0" (tileClick)="[32mopenLens[37m('overdue')"
+          ╵                                                 [32m~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG4: Expected 2 arguments, but got 1.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:267:57:
+[37m      267 │ ...ero]="memberBlockedCount === 0" (tileClick)="[32mopenLens[37m('blocked')"
+          ╵                                                 [32m~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG4: Expected 2 arguments, but got 1.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:271:55:
+[37m      271 │ ...    [zero]="memberTotalCount === 0" (tileClick)="[32mopenLens[37m('all')"
+          ╵                                                     [32m~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'BoardTab'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:50:13:
+[37m      50 │   activeTab: [32mBoardTab[37m = 'overview';
+         ╵              [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'BoardTab'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:100:26:
+[37m      100 │   get clientTabs(): { id: [32mBoardTab[37m; icon: 'columns' | 'file-text'...
+          ╵                           [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'BoardTab'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:109:26:
+[37m      109 │   get memberTabs(): { id: [32mBoardTab[37m; icon: 'columns' | 'check-squa...
+          ╵                           [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'BoardTab'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:116:17:
+[37m      116 │   selectTab(tab: [32mBoardTab[37m): void {
+          ╵                  [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'BoardTab'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:127:16:
+[37m      127 │   openLens(tab: [32mBoardTab[37m, lens: TaskLens): void {
+          ╵                 [32m~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG4: Expected 2 arguments, but got 1.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:86:54:
+[37m      86 │ ...     [zero]="clientOpenCount === 0" (tileClick)="[32mopenLens[37m('open')"
+         ╵                                                     [32m~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG4: Expected 2 arguments, but got 1.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:90:71:
+[37m      90 │ ...zero]="clientOverdueCount === 0" (tileClick)="[32mopenLens[37m('overdue')"
+         ╵                                                  [32m~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG4: Expected 2 arguments, but got 1.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:94:57:
+[37m      94 │ ...zero]="clientBlockedCount === 0" (tileClick)="[32mopenLens[37m('blocked')"
+         ╵                                                  [32m~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollRail' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:68:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="[32mscrollRail[37m(railTrack, -1)"
+          ╵                                           [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollRail' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:68:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="[32mscrollRail[37m(railTrack, 1)"
+          ╵                                            [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'onRailWheel' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:129:88:
+[37m      129 │ ...ousel-track" #railTrack (wheel)="[32monRailWheel[37m($event, railTrack)">
+          ╵                                     [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG4: Expected 2 arguments, but got 1.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:259:54:
+[37m      259 │ ...    [zero]="memberOpenCount === 0" (tileClick)="[32mopenLens[37m('open')"
+          ╵                                                    [32m~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG4: Expected 2 arguments, but got 1.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:263:71:
+[37m      263 │ ...ero]="memberOverdueCount === 0" (tileClick)="[32mopenLens[37m('overdue')"
+          ╵                                                 [32m~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG4: Expected 2 arguments, but got 1.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:267:57:
+[37m      267 │ ...ero]="memberBlockedCount === 0" (tileClick)="[32mopenLens[37m('blocked')"
+          ╵                                                 [32m~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG4: Expected 2 arguments, but got 1.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:271:55:
+[37m      271 │ ...    [zero]="memberTotalCount === 0" (tileClick)="[32mopenLens[37m('all')"
+          ╵                                                     [32m~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'BoardTab'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:102:26:
+[37m      102 │   get clientTabs(): { id: [32mBoardTab[37m; icon: 'columns' | 'file-text'...
+          ╵                           [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'BoardTab'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:111:26:
+[37m      111 │   get memberTabs(): { id: [32mBoardTab[37m; icon: 'columns' | 'check-squa...
+          ╵                           [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'BoardTab'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:118:17:
+[37m      118 │   selectTab(tab: [32mBoardTab[37m): void {
+          ╵                  [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'activeTab' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:119:9:
+[37m      119 │     this.[32mactiveTab[37m = tab;
+          ╵          [32m~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'activeTab' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:125:9:
+[37m      125 │     this.[32mactiveTab[37m = 'overview';
+          ╵          [32m~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'BoardTab'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:129:16:
+[37m      129 │   openLens(tab: [32mBoardTab[37m, lens: TaskLens): void {
+          ╵                 [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'activeTab' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:131:9:
+[37m      131 │     this.[32mactiveTab[37m = tab;
+          ╵          [32m~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS-991010: 'imports' must be an array of components, directives, pipes, or NgModules.
+  Value is of type '[CommonModule, FormsModule, TranslatePipe, InboxComponent, MyWorkComponent, TasksComponent, BoardsComponent, MeetingsComponent, CustomersComponent, TaskDrawerComponent, MeetingDrawerComponent, CatchUpDrawerComponent, HeaderComponent, (not statically analyzable), IconComponent, SearchableSelectComponent]'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:28:11:
+[37m      28 │   imports: [32m[[37m
+         ╵            [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'SidebarComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:42:4:
+[37m      42 │     [32mSidebarComponent[37m,
+         ╵     [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'navOpen' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:73:21:
+[37m      73 │     'nav-open': this.[32mnavOpen[37m()
+         ╵                      [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'navOpen' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:87:9:
+[37m      87 │     this.[32mnavOpen[37m.set(false);
+         ╵          [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'navOpen' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:120:9:
+[37m      120 │     this.[32mnavOpen[37m.update(v => !v);
+          ╵          [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'v' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:120:24:
+[37m      120 │     this.navOpen.update([32mv[37m => !v);
+          ╵                         [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'navOpen' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:83:9:
+[37m      83 │     this.[32mnavOpen[37m.set(false);
+         ╵          [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'navOpen' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:116:9:
+[37m      116 │     this.[32mnavOpen[37m.update(v => !v);
+          ╵          [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'v' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:116:24:
+[37m      116 │     this.navOpen.update([32mv[37m => !v);
+          ╵                         [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'navOpen' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:115:9:
+[37m      115 │     this.[32mnavOpen[37m.update(v => !v);
+          ╵          [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'v' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:115:24:
+[37m      115 │     this.navOpen.update([32mv[37m => !v);
+          ╵                         [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'toggleNav' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:207:11:
+[37m      207 │       this.[32mtoggleNav[37m();
+          ╵            [32m~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:116:79:
+[37m      116 │ ...e="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, -1)"
+          ╵                                                      [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'railTrack' does not exist on type 'BoardsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:118:79:
+[37m      118 │ ...pe="button" class="rail-arrow" (click)="scrollRail([32mrailTrack[37m, 1)"
+          ╵                                                       [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:39:15:
+[37m      39 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS-991010: 'imports' must be an array of components, directives, pipes, or NgModules.
+  Value is of type '[CommonModule, FormsModule, TranslatePipe, (not statically analyzable), IconComponent, SearchableSelectComponent, StatTileComponent, CalendarStatsComponent, TaskTableComponent, MeetingCardComponent, MeetingPrepBriefComponent]'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:33:11:
+[37m      33 │   imports: [32m[[37m
+         ╵            [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'AppDatePipe'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:34:46:
+[37m      34 │ ...monModule, FormsModule, TranslatePipe, [32mAppDatePipe[37m, IconComponent,
+         ╵                                           [32m~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG1: Property 'setEntityType' does not exist on type 'BoardsComponent'. Did you mean 'entityType'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:11:44:
+[37m      11 │ ...tityType !== 'client' && [32msetEntityType[37m('client')">{{ 'boards.cl...
+         ╵                             [32m~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG1: Property 'setEntityType' does not exist on type 'BoardsComponent'. Did you mean 'entityType'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.html:14:44:
+[37m      14 │ ...tityType !== 'member' && [32msetEntityType[37m('member')">{{ 'boards.me...
+         ╵                             [32m~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component BoardsComponent.
+
+    src/app/features/boards/boards.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./boards.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'ACTIONOS_NAV_ITEMS'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.ts:54:22:
+[37m      54 │   readonly navTiles = [32mACTIONOS_NAV_ITEMS[37m.filter(i => i.id !== 'hom...
+         ╵                       [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'i' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.ts:54:48:
+[37m      54 │ ...es = ACTIONOS_NAV_ITEMS.filter([32mi[37m => i.id !== 'home' && i.id !==...
+         ╵                                   [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'IconName'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.ts:56:23:
+[37m      56 │   iconFor(id: ViewId): [32mIconName[37m {
+         ╵                        [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'IconName'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.ts:57:30:
+[37m      57 │     const map: Record<ViewId, [32mIconName[37m> = {
+         ╵                               [32m~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS-991010: 'imports' must be an array of components, directives, pipes, or NgModules.
+  Value is of type '[CommonModule, TranslatePipe, AppDatePipe, InboxComponent, TaskTableComponent, IconComponent, CalendarStatsComponent, CalendarCreatePickerComponent, MeetingCardComponent, StatModalComponent, StatTasksViewComponent, StatMeetingsViewComponent, StatTileComponent, (not statically analyzable), BoardPreviewModalComponent]'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.ts:30:11:
+[37m      30 │   imports: [32m[[37m
+         ╵            [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'CustomerListComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.ts:34:4:
+[37m      34 │     [32mCustomerListComponent[37m, BoardPreviewModalComponent
+         ╵     [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-customer-list' is not a known element:
+1. If 'app-customer-list' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-customer-list' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:149:6:
+[37m      149 │       [32m<app-customer-list[37m
+          ╵       [32m~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'compact' since it isn't a known property of 'app-customer-list'.
+1. If 'app-customer-list' is an Angular component and it has 'compact' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-customer-list' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:150:8:
+[37m      150 │         [32m[compact]="true"[37m
+          ╵         [32m~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type 'Event' is not assignable to parameter of type 'Customer'.
+  Type 'Event' is missing the following properties from type 'Customer': id, externalGroupId, name, status, and 2 more.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:151:37:
+[37m      151 │         (viewBoard)="openClientBoard([32m$event[37m)"
+          ╵                                      [32m~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type 'Event' is not assignable to parameter of type 'Customer'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:152:42:
+[37m      152 │         (openCustomer)="openCustomer.emit([32m$event[37m)"
+          ╵                                           [32m~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-customer-list' is not a known element:
+1. If 'app-customer-list' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-customer-list' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:149:6:
+[37m      149 │       [32m<app-customer-list[37m
+          ╵       [32m~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'compact' since it isn't a known property of 'app-customer-list'.
+1. If 'app-customer-list' is an Angular component and it has 'compact' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-customer-list' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:150:8:
+[37m      150 │         [32m[compact]="true"[37m
+          ╵         [32m~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type 'Event' is not assignable to parameter of type 'Customer'.
+  Type 'Event' is missing the following properties from type 'Customer': id, externalGroupId, name, status, and 2 more.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:151:37:
+[37m      151 │         (viewBoard)="openClientBoard([32m$event[37m)"
+          ╵                                      [32m~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type 'Event' is not assignable to parameter of type 'Customer'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:152:42:
+[37m      152 │         (openCustomer)="openCustomer.emit([32m$event[37m)"
+          ╵                                           [32m~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'QuickCaptureType'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:59:25:
+[37m      59 │   readonly captureTypes: [32mQuickCaptureType[37m[] = ['task', 'action', '...
+         ╵                          [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'QuickCaptureType'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:60:15:
+[37m      60 │   captureType: [32mQuickCaptureType[37m = 'task';
+         ╵                [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'QuickCaptureType'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:130:23:
+[37m      130 │   captureIconFor(type: [32mQuickCaptureType[37m): IconName {
+          ╵                        [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'QuickCaptureType'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:131:22:
+[37m      131 │     const map: Record<[32mQuickCaptureType[37m, IconName> = {
+          ╵                       [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'QuickCaptureType'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:138:24:
+[37m      138 │   captureLabelFor(type: [32mQuickCaptureType[37m): string {
+          ╵                         [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'QuickCaptureType'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:150:27:
+[37m      150 │   captureShortcutFor(type: [32mQuickCaptureType[37m): string {
+          ╵                            [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'QuickCaptureType'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:151:22:
+[37m      151 │     const map: Record<[32mQuickCaptureType[37m, string> = {
+          ╵                       [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'QuickCaptureType'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:157:26:
+[37m      157 │   selectCaptureType(type: [32mQuickCaptureType[37m): void {
+          ╵                           [32m~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'captureTypeMenuOpen' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:79:24:
+[37m      79 │           [class.open]="[32mcaptureTypeMenuOpen[37m()"
+         ╵                         [32m~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:45:15:
+[37m      45 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG1: Property 'captureType' does not exist on type 'AppComponent'. Did you mean 'captureText'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:82:43:
+[37m      82 │ ...-icon [name]="captureIconFor([32mcaptureType[37m)" [size]="12"></app-icon>
+         ╵                                 [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:45:15:
+[37m      45 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'captureTypeMenuOpen' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:86:46:
+[37m      86 │ ...ure-type-menu" *ngIf="[32mcaptureTypeMenuOpen[37m()" (click)="$event.st...
+         ╵                          [32m~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:45:15:
+[37m      45 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'captureTypes' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:88:32:
+[37m      88 │             *ngFor="let type of [32mcaptureTypes[37m"
+         ╵                                 [32m~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:45:15:
+[37m      45 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG1: Property 'captureType' does not exist on type 'AppComponent'. Did you mean 'captureText'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:91:28:
+[37m      91 │             [class.active]="[32mcaptureType[37m === type"
+         ╵                             [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:45:15:
+[37m      45 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'QuickCaptureType'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:127:23:
+[37m      127 │   captureIconFor(type: [32mQuickCaptureType[37m): IconName {
+          ╵                        [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'QuickCaptureType'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:128:22:
+[37m      128 │     const map: Record<[32mQuickCaptureType[37m, IconName> = {
+          ╵                       [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'QuickCaptureType'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:135:24:
+[37m      135 │   captureLabelFor(type: [32mQuickCaptureType[37m): string {
+          ╵                         [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'captureType' does not exist on type 'AppComponent'. Did you mean 'captureText'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:140:37:
+[37m      140 │     return this.captureLabelFor(this.[32mcaptureType[37m);
+          ╵                                      [32m~~~~~~~~~~~[0m
+
+  'captureText' is declared here.
+
+    src/app/app.component.ts:59:2:
+[37m      59 │   [32mcaptureText[37m = '';
+         ╵   [32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'captureType' does not exist on type 'AppComponent'. Did you mean 'captureText'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:144:37:
+[37m      144 │     return this.captureLabelFor(this.[32mcaptureType[37m) + '...';
+          ╵                                      [32m~~~~~~~~~~~[0m
+
+  'captureText' is declared here.
+
+    src/app/app.component.ts:59:2:
+[37m      59 │   [32mcaptureText[37m = '';
+         ╵   [32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'QuickCaptureType'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:147:27:
+[37m      147 │   captureShortcutFor(type: [32mQuickCaptureType[37m): string {
+          ╵                            [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'QuickCaptureType'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:148:22:
+[37m      148 │     const map: Record<[32mQuickCaptureType[37m, string> = {
+          ╵                       [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'QuickCaptureType'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:154:26:
+[37m      154 │   selectCaptureType(type: [32mQuickCaptureType[37m): void {
+          ╵                           [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'captureType' does not exist on type 'AppComponent'. Did you mean 'captureText'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:155:9:
+[37m      155 │     this.[32mcaptureType[37m = type;
+          ╵          [32m~~~~~~~~~~~[0m
+
+  'captureText' is declared here.
+
+    src/app/app.component.ts:59:2:
+[37m      59 │   [32mcaptureText[37m = '';
+         ╵   [32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'captureTypeMenuOpen' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:156:9:
+[37m      156 │     this.[32mcaptureTypeMenuOpen[37m.set(false);
+          ╵          [32m~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'captureTypeMenuOpen' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:160:9:
+[37m      160 │     this.[32mcaptureTypeMenuOpen[37m.update(v => !v);
+          ╵          [32m~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'v' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:160:36:
+[37m      160 │     this.captureTypeMenuOpen.update([32mv[37m => !v);
+          ╵                                     [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'captureType' does not exist on type 'AppComponent'. Did you mean 'captureText'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:166:52:
+[37m      166 │ ... this.workspace.quickCapture(this.[32mcaptureType[37m, this.captureText);
+          ╵                                      [32m~~~~~~~~~~~[0m
+
+  'captureText' is declared here.
+
+    src/app/app.component.ts:59:2:
+[37m      59 │   [32mcaptureText[37m = '';
+         ╵   [32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'captureType' does not exist on type 'AppComponent'. Did you mean 'captureText'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:169:13:
+[37m      169 │     if (this.[32mcaptureType[37m === 'task') {
+          ╵              [32m~~~~~~~~~~~[0m
+
+  'captureText' is declared here.
+
+    src/app/app.component.ts:59:2:
+[37m      59 │   [32mcaptureText[37m = '';
+         ╵   [32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'captureTypeMenuOpen' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:178:9:
+[37m      178 │     this.[32mcaptureTypeMenuOpen[37m.set(false);
+          ╵          [32m~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'captureTypeMenuOpen' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.ts:192:9:
+[37m      192 │     this.[32mcaptureTypeMenuOpen[37m.set(false);
+          ╵          [32m~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'captureTypeMenuOpen' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:79:24:
+[37m      79 │           [class.open]="[32mcaptureTypeMenuOpen[37m()"
+         ╵                         [32m~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:45:15:
+[37m      45 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'toggleCaptureTypeMenu' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:80:19:
+[37m      80 │           (click)="[32mtoggleCaptureTypeMenu[37m(); $event.stopPropagation()"
+         ╵                    [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:45:15:
+[37m      45 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'captureIconFor' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:82:28:
+[37m      82 │           <app-icon [name]="[32mcaptureIconFor[37m(captureType)" [size]="1...
+         ╵                             [32m~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:45:15:
+[37m      45 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG1: Property 'captureType' does not exist on type 'AppComponent'. Did you mean 'captureText'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:82:43:
+[37m      82 │ ...-icon [name]="captureIconFor([32mcaptureType[37m)" [size]="12"></app-icon>
+         ╵                                 [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:45:15:
+[37m      45 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'captureTypeMenuOpen' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:86:46:
+[37m      86 │ ...ure-type-menu" *ngIf="[32mcaptureTypeMenuOpen[37m()" (click)="$event.st...
+         ╵                          [32m~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:45:15:
+[37m      45 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'captureTypes' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:88:32:
+[37m      88 │             *ngFor="let type of [32mcaptureTypes[37m"
+         ╵                                 [32m~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:45:15:
+[37m      45 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG1: Property 'captureType' does not exist on type 'AppComponent'. Did you mean 'captureText'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:91:28:
+[37m      91 │             [class.active]="[32mcaptureType[37m === type"
+         ╵                             [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:45:15:
+[37m      45 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'selectCaptureType' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:92:21:
+[37m      92 │             (click)="[32mselectCaptureType[37m(type)"
+         ╵                      [32m~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:45:15:
+[37m      45 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'captureIconFor' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:94:30:
+[37m      94 │ ...       <app-icon [name]="[32mcaptureIconFor[37m(type)" [size]="14"></ap...
+         ╵                             [32m~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:45:15:
+[37m      45 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'captureLabelFor' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:95:50:
+[37m      95 │ ...an class="capture-option-label">{{ [32mcaptureLabelFor[37m(type) }}</span>
+         ╵                                       [32m~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:45:15:
+[37m      45 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'captureShortcutFor' does not exist on type 'AppComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/app.component.html:96:53:
+[37m      96 │ ...ss="capture-option-shortcut">{{ [32mcaptureShortcutFor[37m(type) }}</span>
+         ╵                                    [32m~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AppComponent.
+
+    src/app/app.component.ts:45:15:
+[37m      45 │   templateUrl: [32m'./app.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'openMeeting' does not exist on type 'MeetingPrepBriefComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:126:83:
+[37m      126 │ ...ers)" class="clickable" (click)="[32mopenMeeting[37m(blocker.meetingId)">
+          ╵                                     [32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'meetingId' does not exist on type 'PrepBlockerRow'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:126:103:
+[37m      126 │ ...ers)" class="clickable" (click)="openMeeting(blocker.[32mmeetingId[37m)">
+          ╵                                                         [32m~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'openMeeting' does not exist on type 'MeetingPrepBriefComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:126:83:
+[37m      126 │ ...ers)" class="clickable" (click)="[32mopenMeeting[37m(blocker.meetingId)">
+          ╵                                     [32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'meetingId' does not exist on type 'PrepBlockerRow'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:126:103:
+[37m      126 │ ...ers)" class="clickable" (click)="openMeeting(blocker.[32mmeetingId[37m)">
+          ╵                                                         [32m~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'openMeeting' does not exist on type 'MeetingPrepBriefComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:152:85:
+[37m      152 │ ...ns)" class="clickable" (click)="[32mopenMeeting[37m(decision.meetingId)">
+          ╵                                    [32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'meetingId' does not exist on type 'PrepDecisionRow'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:152:106:
+[37m      152 │ ...ns)" class="clickable" (click)="openMeeting(decision.[32mmeetingId[37m)">
+          ╵                                                         [32m~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'openMeeting' does not exist on type 'MeetingPrepBriefComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:126:83:
+[37m      126 │ ...ers)" class="clickable" (click)="[32mopenMeeting[37m(blocker.meetingId)">
+          ╵                                     [32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'meetingId' does not exist on type 'PrepBlockerRow'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:126:103:
+[37m      126 │ ...ers)" class="clickable" (click)="openMeeting(blocker.[32mmeetingId[37m)">
+          ╵                                                         [32m~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'openMeeting' does not exist on type 'MeetingPrepBriefComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:152:85:
+[37m      152 │ ...ns)" class="clickable" (click)="[32mopenMeeting[37m(decision.meetingId)">
+          ╵                                    [32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'meetingId' does not exist on type 'PrepDecisionRow'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:152:106:
+[37m      152 │ ...ns)" class="clickable" (click)="openMeeting(decision.[32mmeetingId[37m)">
+          ╵                                                         [32m~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'openMeeting' does not exist on type 'MeetingPrepBriefComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:177:75:
+[37m      177 │ ...f b.priorMeetings" class="clickable" (click)="[32mopenMeeting[37m(m.id)">
+          ╵                                                  [32m~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'openMeeting' does not exist on type 'MeetingPrepBriefComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:128:83:
+[37m      128 │ ...ers)" class="clickable" (click)="[32mopenMeeting[37m(blocker.meetingId)">
+          ╵                                     [32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'openMeeting' does not exist on type 'MeetingPrepBriefComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:154:85:
+[37m      154 │ ...ns)" class="clickable" (click)="[32mopenMeeting[37m(decision.meetingId)">
+          ╵                                    [32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'openMeeting' does not exist on type 'MeetingPrepBriefComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:179:75:
+[37m      179 │ ...f b.priorMeetings" class="clickable" (click)="[32mopenMeeting[37m(m.id)">
+          ╵                                                  [32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2345: Argument of type '{ id: string; content: string; meetingSubject: string; meetingDate: string; }' is not assignable to parameter of type 'PrepDecisionRow'.
+  Property 'meetingId' is missing in type '{ id: string; content: string; meetingSubject: string; meetingDate: string; }' but required in type 'PrepDecisionRow'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:374:18:
+[37m      374 │         rows.push([32m{[37m
+          ╵                   [32m^[0m
+
+  'meetingId' is declared here.
+
+    src/app/features/customers/meeting-prep-brief.component.ts:12:2:
+[37m      12 │   [32mmeetingId[37m: string;
+         ╵   [32m~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2345: Argument of type '{ id: string; content: string; meetingSubject: string; meetingDate: string; taskStatus: TaskStatus | undefined; }' is not assignable to parameter of type 'PrepBlockerRow'.
+  Property 'meetingId' is missing in type '{ id: string; content: string; meetingSubject: string; meetingDate: string; taskStatus: TaskStatus | undefined; }' but required in type 'PrepBlockerRow'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:401:18:
+[37m      401 │         rows.push([32m{[37m
+          ╵                   [32m^[0m
+
+  'meetingId' is declared here.
+
+    src/app/features/customers/meeting-prep-brief.component.ts:20:2:
+[37m      20 │   [32mmeetingId[37m: string;
+         ╵   [32m~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'openMeeting' does not exist on type 'MeetingPrepBriefComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:128:83:
+[37m      128 │ ...ers)" class="clickable" (click)="[32mopenMeeting[37m(blocker.meetingId)">
+          ╵                                     [32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'openMeeting' does not exist on type 'MeetingPrepBriefComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:154:85:
+[37m      154 │ ...ns)" class="clickable" (click)="[32mopenMeeting[37m(decision.meetingId)">
+          ╵                                    [32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'openMeeting' does not exist on type 'MeetingPrepBriefComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:179:75:
+[37m      179 │ ...f b.priorMeetings" class="clickable" (click)="[32mopenMeeting[37m(m.id)">
+          ╵                                                  [32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2345: Argument of type '{ id: string; content: string; meetingSubject: string; meetingDate: string; taskStatus: TaskStatus | undefined; }' is not assignable to parameter of type 'PrepBlockerRow'.
+  Property 'meetingId' is missing in type '{ id: string; content: string; meetingSubject: string; meetingDate: string; taskStatus: TaskStatus | undefined; }' but required in type 'PrepBlockerRow'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:402:18:
+[37m      402 │         rows.push([32m{[37m
+          ╵                   [32m^[0m
+
+  'meetingId' is declared here.
+
+    src/app/features/customers/meeting-prep-brief.component.ts:20:2:
+[37m      20 │   [32mmeetingId[37m: string;
+         ╵   [32m~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'openMeeting' does not exist on type 'MeetingPrepBriefComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:128:83:
+[37m      128 │ ...ers)" class="clickable" (click)="[32mopenMeeting[37m(blocker.meetingId)">
+          ╵                                     [32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'openMeeting' does not exist on type 'MeetingPrepBriefComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:154:85:
+[37m      154 │ ...ns)" class="clickable" (click)="[32mopenMeeting[37m(decision.meetingId)">
+          ╵                                    [32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'openMeeting' does not exist on type 'MeetingPrepBriefComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:179:75:
+[37m      179 │ ...f b.priorMeetings" class="clickable" (click)="[32mopenMeeting[37m(m.id)">
+          ╵                                                  [32m~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'Task'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep.component.ts:52:17:
+[37m      52 │   openTask(task: [32mTask[37m): void {
+         ╵                  [32m~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'openTask' does not exist on type 'CatchUpDrawerComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/catch-up-drawer/catch-up-drawer.component.ts:141:78:
+[37m      141 │ ...r="let task of g.tasks" class="cu-task" (click)="[32mopenTask[37m(task)">
+          ╵                                                     [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'openTask' does not exist on type 'CatchUpDrawerComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/catch-up-drawer/catch-up-drawer.component.ts:167:83:
+[37m      167 │ ... of visibleOrphanTasks" class="cu-task" (click)="[32mopenTask[37m(task)">
+          ╵                                                     [32m~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG7: This comparison appears to be unintentional because the types '"inbox" | "work"' and '"tasks"' have no overlap.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:19:61:
+[37m      19 │ ..."button" role="tab" [attr.aria-selected]="[32mactiveTab() === 'tasks'[37m"
+         ╵                                              [32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG7: This comparison appears to be unintentional because the types '"inbox" | "work"' and '"tasks"' have no overlap.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:20:24:
+[37m      20 │ ...    [class.active]="[32mactiveTab() === 'tasks'[37m" (click)="activeTab...
+         ╵                        [32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type '"tasks"' is not assignable to parameter of type '"inbox" | "work"'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:20:72:
+[37m      20 │ ...ctive]="activeTab() === 'tasks'" (click)="activeTab.set([32m'tasks'[37m)">
+         ╵                                                            [32m~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG7: This comparison appears to be unintentional because the types '"inbox" | "work"' and '"meetings"' have no overlap.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:27:61:
+[37m      27 │ ...tton" role="tab" [attr.aria-selected]="[32mactiveTab() === 'meetings'[37m"
+         ╵                                           [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG7: This comparison appears to be unintentional because the types '"inbox" | "work"' and '"meetings"' have no overlap.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:28:24:
+[37m      28 │ ...   [class.active]="[32mactiveTab() === 'meetings'[37m" (click)="activeT...
+         ╵                       [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type '"meetings"' is not assignable to parameter of type '"inbox" | "work"'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:28:75:
+[37m      28 │ ...="activeTab() === 'meetings'" (click)="activeTab.set([32m'meetings'[37m)">
+         ╵                                                         [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG7: This comparison appears to be unintentional because the types '"inbox" | "work"' and '"tasks"' have no overlap.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:76:23:
+[37m      76 │   <ng-container *ngIf="[32mactiveTab() === 'tasks'[37m">
+         ╵                        [32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG7: This comparison appears to be unintentional because the types '"inbox" | "work"' and '"meetings"' have no overlap.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:112:23:
+[37m      112 │   <ng-container *ngIf="[32mactiveTab() === 'meetings'[37m">
+          ╵                        [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG7: This comparison appears to be unintentional because the types '"inbox" | "work"' and '"tasks"' have no overlap.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:19:61:
+[37m      19 │ ..."button" role="tab" [attr.aria-selected]="[32mactiveTab() === 'tasks'[37m"
+         ╵                                              [32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG7: This comparison appears to be unintentional because the types '"inbox" | "work"' and '"tasks"' have no overlap.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:20:24:
+[37m      20 │ ...    [class.active]="[32mactiveTab() === 'tasks'[37m" (click)="activeTab...
+         ╵                        [32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type '"tasks"' is not assignable to parameter of type '"inbox" | "work"'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:20:72:
+[37m      20 │ ...ctive]="activeTab() === 'tasks'" (click)="activeTab.set([32m'tasks'[37m)">
+         ╵                                                            [32m~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG7: This comparison appears to be unintentional because the types '"inbox" | "work"' and '"meetings"' have no overlap.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:27:61:
+[37m      27 │ ...tton" role="tab" [attr.aria-selected]="[32mactiveTab() === 'meetings'[37m"
+         ╵                                           [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG7: This comparison appears to be unintentional because the types '"inbox" | "work"' and '"meetings"' have no overlap.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:28:24:
+[37m      28 │ ...   [class.active]="[32mactiveTab() === 'meetings'[37m" (click)="activeT...
+         ╵                       [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type '"meetings"' is not assignable to parameter of type '"inbox" | "work"'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:28:75:
+[37m      28 │ ...="activeTab() === 'meetings'" (click)="activeTab.set([32m'meetings'[37m)">
+         ╵                                                         [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG7: This comparison appears to be unintentional because the types '"inbox" | "work"' and '"tasks"' have no overlap.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:76:23:
+[37m      76 │   <ng-container *ngIf="[32mactiveTab() === 'tasks'[37m">
+         ╵                        [32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG7: This comparison appears to be unintentional because the types '"inbox" | "work"' and '"meetings"' have no overlap.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:112:23:
+[37m      112 │   <ng-container *ngIf="[32mactiveTab() === 'meetings'[37m">
+          ╵                        [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG7: This comparison appears to be unintentional because the types '"inbox" | "work"' and '"tasks"' have no overlap.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:70:23:
+[37m      70 │   <ng-container *ngIf="[32mactiveTab() === 'tasks'[37m">
+         ╵                        [32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG7: This comparison appears to be unintentional because the types '"inbox" | "work"' and '"meetings"' have no overlap.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:106:23:
+[37m      106 │   <ng-container *ngIf="[32mactiveTab() === 'meetings'[37m">
+          ╵                        [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m

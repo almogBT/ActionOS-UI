@@ -10,11 +10,13 @@
 
 .workspace {
   min-width: 0;
-  padding-top: var(--header-height);
+  /* Clear the floating header (12px top offset + 60px bar). */
+  padding-top: calc(var(--header-height) + 20px);
 }
 
 .workspace-body {
-  padding: 24px 28px calc(60px + 24px); /* 60px = bottom action bar height */
+  /* Bottom clears the floating action bar (60px bar + 12px offset + gap). */
+  padding: 24px 28px calc(60px + 12px + 24px);
 }
 
 .save-error-banner {
@@ -60,7 +62,7 @@
 @media (max-width: 720px) {
   .workspace-body {
     padding: 14px;
-    padding-bottom: calc(60px + 20px);
+    padding-bottom: calc(60px + 12px + 16px);
   }
   .save-error-banner {
     margin: 12px 14px 0;
@@ -76,21 +78,22 @@
   }
 }
 
-/* ── Bottom action bar — matches sidebar/header teal ── */
+/* ── Bottom action bar — floating, rounded, matches header teal ── */
 .bottom-action-bar {
   position: fixed;
-  bottom: 0;
-  inset-inline-start: 0;
-  inset-inline-end: 0;
+  bottom: 12px;
+  inset-inline-start: 16px;
+  inset-inline-end: 16px;
   z-index: 50;
   display: flex;
   align-items: center;
   gap: 10px;
   height: 60px;
-  padding: 0 22px;
-  border-top: 1px solid var(--sidebar-border);
+  padding: 0 16px;
+  border: 1px solid var(--sidebar-border);
+  border-radius: var(--radius-xl);
   background: var(--sidebar-bg);
-  box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
 }
 
 .bar-btn {
@@ -169,14 +172,7 @@
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.12);
 }
 
-.bar-capture-icon {
-  color: rgba(255, 255, 255, 0.70);
-  flex-shrink: 0;
-  display: inline-grid;
-  place-items: center;
-}
-
-/* Type chip */
+/* Task chip */
 .bar-capture .cmd-type-chip {
   display: inline-flex;
   align-items: center;
@@ -189,16 +185,8 @@
   color: rgba(255, 255, 255, 0.90);
   font-size: 12px;
   font-weight: 700;
-  cursor: pointer;
+  cursor: default;
   flex-shrink: 0;
-  transition: background var(--duration-fast), border-color var(--duration-fast);
-}
-
-.bar-capture .cmd-type-chip:hover,
-.bar-capture .cmd-type-chip.open {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.50);
-  color: #ffffff;
 }
 
 .bar-capture .cmd-input {
@@ -243,56 +231,6 @@
 }
 
 /* Type menu popover — opens upward */
-.bar-type-host {
-  position: relative;
-  flex-shrink: 0;
-}
-
-.bar-type-host .capture-type-menu {
-  position: absolute;
-  bottom: calc(100% + 12px);
-  left: 0;
-  min-width: 180px;
-  padding: 6px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  background: var(--bg-elevated);
-  box-shadow: var(--shadow-md);
-  z-index: 200;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.bar-type-host .capture-option {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 7px 10px;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: 13px;
-  text-align: start;
-  cursor: pointer;
-  transition: background var(--duration-fast), color var(--duration-fast);
-}
-
-.bar-type-host .capture-option:hover,
-.bar-type-host .capture-option.active {
-  background: var(--accent-soft);
-  color: var(--accent);
-}
-
-.bar-type-host .capture-option-shortcut {
-  margin-inline-start: auto;
-  font-size: 10px;
-  font-weight: 800;
-  opacity: 0.5;
-}
-
 /* Plan meeting popover — opens upward */
 .bar-plan-host {
   position: relative;

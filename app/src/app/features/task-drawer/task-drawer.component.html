@@ -21,9 +21,19 @@
         {{ ('priority.' + workspace.statusClass(task.priority)) | t }}
       </span>
       <span class="source-pill">
-        {{ 'meetingTask.customer' | t }}: {{ workspace.customer(task.customerId)?.name || task.board || '-' }}
+        {{ 'meetingTask.customer' | t }}: {{ workspace.clientName(task.customerId) || task.board || '-' }}
       </span>
     </div>
+
+    <p class="drawer-meta muted">
+      <span>{{ 'meetingTask.openedBy' | t }}: {{ workspace.employeeName(task.openedByEmployeeId) || '-' }}</span>
+      <span *ngIf="task.source === 'meeting' && workspace.customerMeeting(task.sourceMeetingId) as meeting">
+        · {{ 'meetingTask.sourceMeeting' | t }}: {{ meeting.subject || '-' }}
+      </span>
+      <span *ngIf="isCompletedStatus(task.status) && task.completedAt">
+        · Completed: {{ task.completedAt | appDate:'datetime':'-' }}
+      </span>
+    </p>
 
     <section class="drawer-section">
       <div class="panel-header compact">
@@ -61,10 +71,9 @@
               [ngModel]="task.status"
               (ngModelChange)="updateMeetingTaskStatus(task, $event)"
               [options]="meetingTaskStatusOptions"
+              [createNewLabel]="'+ ' + ('tasks.status.addStatus' | t)"
+              (createNew)="startAddStatus()"
             ></app-searchable-select>
-            <button type="button" class="add-status-link" *ngIf="!addingStatus" (click)="startAddStatus()">
-              + {{ 'tasks.status.addStatus' | t }}
-            </button>
             <div class="add-status-row" *ngIf="addingStatus">
               <input
                 type="text"
@@ -97,9 +106,22 @@
             ></app-searchable-select>
           </label>
 
-          <label class="field-control">
-            {{ 'meetingTask.openedBy' | t }}
-            <input disabled [value]="workspace.employeeName(task.openedByEmployeeId)" />
+          <label class="field-control" [class.field-missing]="isMissingCustomer(task)">
+            {{ 'meetingTask.customer' | t }}<span class="req" *ngIf="task.source !== 'meeting'"> *</span>
+            <app-searchable-select
+              *ngIf="task.source !== 'meeting'; else fixedTaskCustomer"
+              [ngModel]="task.customerId"
+              (ngModelChange)="changeTaskCustomer(task, $event)"
+              [options]="customerSelectOptions"
+              [placeholder]="'tasks.addTask.customerPlaceholder' | t"
+              [crossLanguageMatch]="true"
+            ></app-searchable-select>
+            <ng-template #fixedTaskCustomer>
+              <input disabled [value]="workspace.clientName(task.customerId) || '-'" />
+            </ng-template>
+            <small class="muted customer-hint" *ngIf="isMissingCustomer(task)">
+              {{ 'tasks.addTask.customerRequired' | t }}
+            </small>
           </label>
 
           <label class="field-control">
@@ -109,21 +131,6 @@
               [ngModel]="task.dueDate"
               (ngModelChange)="updateMeetingTaskField(task, 'dueDate', $event)"
             />
-          </label>
-
-          <label class="field-control">
-            {{ 'meetingTask.sourceMeeting' | t }}
-            <input disabled [value]="workspace.customerMeeting(task.sourceMeetingId)?.subject || '-'" />
-          </label>
-
-          <label class="field-control detail-wide">
-            {{ 'meetingTask.treatmentNotes' | t }}
-            <textarea
-              rows="3"
-              [ngModel]="task.treatmentNotes"
-              (ngModelChange)="updateMeetingTaskField(task, 'treatmentNotes', $event)"
-              [placeholder]="'meetingTask.treatmentNotesPlaceholder' | t"
-            ></textarea>
           </label>
 
           <label *ngIf="shouldShowStatusReason(task)" class="field-control detail-wide">
@@ -146,13 +153,40 @@
             />
           </label>
 
-          <label *ngIf="isCompletedStatus(task.status)" class="field-control">
-            Completed at
-            <input disabled [value]="task.completedAt | appDate:'datetime':'-'" />
-          </label>
         </div>
 
         <p *ngIf="statusValidationMessage && shouldShowStatusReason(task)" class="status-validation">{{ statusValidationMessage }}</p>
+      </div>
+    </section>
+
+    <section class="drawer-section">
+      <div class="panel-header compact">
+        <div>
+          <span class="eyebrow">{{ 'drawer.discussion' | t }}</span>
+          <h3>{{ 'common.comments' | t }}</h3>
+        </div>
+        <button type="button" class="ghost-action small section-toggle" (click)="toggleSection('comments')">
+          {{ isSectionCollapsed('comments') ? '+' : '-' }}
+        </button>
+      </div>
+
+      <div *ngIf="!isSectionCollapsed('comments')" class="section-body">
+        <form class="comment-form" (ngSubmit)="addMeetingComment(task)">
+          <textarea name="meetingCommentText" rows="3" [(ngModel)]="meetingCommentText" [placeholder]="'drawer.commentPlaceholder' | t"></textarea>
+          <button type="submit" class="primary-action" [disabled]="!meetingCommentText.trim()">{{ 'common.comment' | t }}</button>
+        </form>
+
+        <div *ngIf="workspace.commentsForMeetingTask(task.id).length; else noMeetingDrawerComments" class="comment-list">
+          <article *ngFor="let comment of workspace.commentsForMeetingTask(task.id)" class="comment">
+            <strong>{{ workspace.memberName(comment.createdByUserId) }}</strong>
+            <p>{{ comment.body }}</p>
+            <small>{{ comment.createdAt | appDate:'datetime' }}</small>
+          </article>
+        </div>
+
+        <ng-template #noMeetingDrawerComments>
+          <div class="empty-state compact-empty">{{ 'drawer.noComments' | t }}</div>
+        </ng-template>
       </div>
     </section>
 
@@ -179,7 +213,17 @@
           <div class="task-attach-row" *ngFor="let att of workspace.attachmentsFor('meeting-task', task.id)">
             <span class="task-attach-name">{{ att.fileName }}</span>
             <small class="muted">{{ att.uploadedAt | appDate }}</small>
-            <button type="button" class="ghost-action small danger" (click)="workspace.removeAttachment(att.id)">x</button>
+            <div class="task-attach-actions">
+              <button
+                type="button"
+                class="ghost-action small"
+                [disabled]="!workspace.canDownloadAttachment(att)"
+                (click)="workspace.downloadAttachment(att)"
+              >
+                {{ 'customerMeeting.download' | t }}
+              </button>
+              <button type="button" class="ghost-action small danger" (click)="workspace.removeAttachment(att.id)">x</button>
+            </div>
           </div>
         </div>
         <ng-template #noTaskAttachments>
@@ -283,48 +327,12 @@
       </div>
     </section>
 
-    <section class="drawer-section">
-      <div class="panel-header compact">
-        <div>
-          <span class="eyebrow">{{ 'drawer.discussion' | t }}</span>
-          <h3>{{ 'common.comments' | t }}</h3>
-        </div>
-        <button type="button" class="ghost-action small section-toggle" (click)="toggleSection('comments')">
-          {{ isSectionCollapsed('comments') ? '+' : '-' }}
-        </button>
-      </div>
-
-      <div *ngIf="!isSectionCollapsed('comments')" class="section-body">
-        <form class="comment-form" (ngSubmit)="addMeetingComment(task)">
-          <textarea name="meetingCommentText" rows="3" [(ngModel)]="meetingCommentText" [placeholder]="'drawer.commentPlaceholder' | t"></textarea>
-          <button type="submit" class="primary-action" [disabled]="!meetingCommentText.trim()">{{ 'common.comment' | t }}</button>
-        </form>
-
-        <div *ngIf="workspace.commentsForMeetingTask(task.id).length; else noMeetingDrawerComments" class="comment-list">
-          <article *ngFor="let comment of workspace.commentsForMeetingTask(task.id)" class="comment">
-            <strong>{{ workspace.memberName(comment.createdByUserId) }}</strong>
-            <p>{{ comment.body }}</p>
-            <small>{{ comment.createdAt | appDate:'datetime' }}</small>
-          </article>
-        </div>
-
-        <ng-template #noMeetingDrawerComments>
-          <div class="empty-state compact-empty">{{ 'drawer.noComments' | t }}</div>
-        </ng-template>
-      </div>
-    </section>
-
     <footer class="drawer-footer">
       <button
         type="button"
-        class="ghost-action"
-        (click)="updateMeetingTaskStatus(task, 'In Progress')"
-      >
-        {{ 'drawer.start' | t }}
-      </button>
-      <button
-        type="button"
         class="primary-action"
+        [disabled]="isMissingCustomer(task)"
+        [title]="isMissingCustomer(task) ? ('tasks.addTask.customerRequired' | t) : ''"
         (click)="updateMeetingTaskStatus(task, 'Done')"
       >
         {{ 'drawer.markDone' | t }}

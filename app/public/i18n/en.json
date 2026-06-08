@@ -48,7 +48,7 @@
     "inbox": "Inbox",
     "my-work": "My Work",
     "tasks": "Tasks",
-    "boards": "Boards",
+    "boards": "Clients",
     "meetings": "Meetings",
     "customers": "Customers",
     "members": "Members"
@@ -298,49 +298,23 @@
     "fromMeeting": "From your meeting"
   },
   "boards": {
-    "eyebrow": "Boards",
-    "title": "Boards",
-    "subtitle": "Per-client and per-member boards — see every meeting and task in one place.",
-    "addFromMeeting": "Add from a meeting",
-    "manageClients": "Manage clients",
-    "tabs": {
-      "overview": "Overview",
-      "recap": "Recap"
-    },
+    "subtitle": "Every meeting and task for a client in one place.",
     "hero": {
       "owner": "Owner",
-      "newMeeting": "New meeting",
-      "allClients": "All clients"
+      "newMeeting": "New meeting"
     },
-    "recapEyebrow": "Meeting recap",
-    "latestRecap": "Latest recap",
-    "noRecapYet": "No recap published for this meeting yet.",
-    "openRecap": "Open recap →",
-    "openFullRecap": "Open full recap",
-    "earlierMeetings": "Earlier meetings",
-    "boardType": "Board type",
-    "clientBoard": "Client board",
-    "memberBoard": "Member board",
-    "selectClient": "Client",
-    "selectMember": "Member",
+    "expandMeetings": "Expand all",
+    "collapseMeetings": "Collapse",
     "chooseClient": "Select a client…",
-    "chooseMember": "Select a member…",
     "meetings": "Meetings",
     "tasks": "Tasks",
     "openTasks": "Open tasks",
-    "totalTasks": "Total tasks",
     "blocked": "Blocked",
     "clientMeetingsTitle": "Client meetings",
-    "clientTasksTitle": "Meeting tasks",
-    "tasksLabel": "tasks",
     "noMeetings": "No meetings for this client yet.",
     "noTasks": "No tasks for this client yet.",
     "selectClientPrompt": "Select a client above to view their board.",
-    "selectMemberPrompt": "Select a member above to view their board.",
-    "searchPlaceholder": "Search…",
-    "item": "Item",
-    "noItemsTitle": "Nothing matches",
-    "noItemsText": "Clear the search or change the filter to see more."
+    "searchPlaceholder": "Search…"
   },
   "myWork": {
     "eyebrow": "Just yours",
@@ -349,6 +323,7 @@
     "goToMeetings": "Go to meetings",
     "tabs": {
       "inbox": "Inbox",
+      "work": "Tasks & Meetings",
       "tasks": "Tasks",
       "meetings": "Meetings",
       "week": "My Week"
@@ -441,7 +416,7 @@
     },
     "badge": {
       "meeting": "Meeting",
-      "board": "Board"
+      "board": "Standalone"
     },
     "col": {
       "origin": "Origin",
@@ -486,7 +461,9 @@
     },
     "addTask": {
       "label": "Add task",
-      "placeholder": "New task title…"
+      "placeholder": "New task title…",
+      "customerPlaceholder": "Pick a customer...",
+      "customerRequired": "Pick a customer before adding this task."
     }
   },
   "meetings": {

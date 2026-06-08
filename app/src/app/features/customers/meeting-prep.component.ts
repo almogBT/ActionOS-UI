@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
-import { Customer, Task } from '../../core/models/actionos.models';
+import { Customer } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
 import { MeetingPrepBriefComponent } from './meeting-prep-brief.component';
 
@@ -32,7 +32,6 @@ import { MeetingPrepBriefComponent } from './meeting-prep-brief.component';
       <app-meeting-prep-brief
         variant="full"
         [customerId]="customer.id"
-        (openTask)="openTask($event)"
       ></app-meeting-prep-brief>
     </section>
   `,
@@ -49,10 +48,6 @@ export class MeetingPrepComponent {
   @Output() startMeeting = new EventEmitter<Customer>();
 
   constructor(public workspace: ActionosWorkspaceService) {}
-
-  openTask(task: Task): void {
-    this.workspace.selectMeetingTask(task, true);
-  }
 
   print(): void {
     window.print();

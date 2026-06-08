@@ -272,6 +272,7 @@ export interface CreateActionosTaskRequest {
 export interface UpdateActionosTaskRequest {
   title?: string | null;
   description?: string | null;
+  customerId?: string | null;
   status?: string | null;
   statusChangeReason?: string | null;
   priority?: string | null;
@@ -297,10 +298,23 @@ export interface CreateActionosAttachmentRequest {
   storageUrl: string;
 }
 
+export interface UploadActionosAttachmentRequest {
+  orgGroupId: string;
+  entityType: string;
+  entityId: string;
+  file: File;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ActionosRepositoryService {
   private readonly http = inject(HttpClient);
   private readonly base = environment.actionosApiUrl.replace(/\/$/, '');
+
+  private traceMutation(label: string, method: string, path: string, payload?: unknown): void {
+    // Keep production diagnostics searchable without exposing tokens or response bodies.
+    // eslint-disable-next-line no-console
+    console.info(`[ActionOS API] ${label}: ${method} ${path}`, payload ?? '');
+  }
 
   async bootstrap(orgGroupId: string): Promise<ActionosBootstrapDto> {
     return await firstValueFrom(
@@ -333,24 +347,30 @@ export class ActionosRepositoryService {
   }
 
   async createCustomerMeeting(customerId: string, request: CreateActionosCustomerMeetingRequest): Promise<ActionosApiCustomerMeetingDto> {
+    const path = `/api/actionos/customers/${encodeURIComponent(customerId)}/meetings`;
+    this.traceMutation('createCustomerMeeting', 'POST', path, request);
     return await firstValueFrom(
       this.http.post<ActionosApiCustomerMeetingDto>(
-        `${this.base}/api/actionos/customers/${encodeURIComponent(customerId)}/meetings`,
+        `${this.base}${path}`,
         request
       )
     );
   }
 
   async updateCustomerMeeting(meetingId: number, request: UpdateActionosCustomerMeetingRequest): Promise<ActionosApiCustomerMeetingDto> {
+    const path = `/api/actionos/customers/meetings/${meetingId}`;
+    this.traceMutation('updateCustomerMeeting', 'PATCH', path, request);
     return await firstValueFrom(
-      this.http.patch<ActionosApiCustomerMeetingDto>(`${this.base}/api/actionos/customers/meetings/${meetingId}`, request)
+      this.http.patch<ActionosApiCustomerMeetingDto>(`${this.base}${path}`, request)
     );
   }
 
   async createCustomerMeetingNote(meetingId: number, request: CreateActionosCustomerMeetingNoteRequest): Promise<ActionosApiMeetingNoteDto> {
+    const path = `/api/actionos/meetings/${meetingId}/notes`;
+    this.traceMutation('createCustomerMeetingNote', 'POST', path, request);
     return await firstValueFrom(
       this.http.post<ActionosApiMeetingNoteDto>(
-        `${this.base}/api/actionos/meetings/${meetingId}/notes`,
+        `${this.base}${path}`,
         request
       )
     );
@@ -361,17 +381,21 @@ export class ActionosRepositoryService {
     noteId: number,
     request: UpdateActionosCustomerMeetingNoteRequest
   ): Promise<ActionosApiMeetingNoteDto> {
+    const path = `/api/actionos/meetings/${meetingId}/notes/${noteId}`;
+    this.traceMutation('updateCustomerMeetingNote', 'PATCH', path, request);
     return await firstValueFrom(
       this.http.patch<ActionosApiMeetingNoteDto>(
-        `${this.base}/api/actionos/meetings/${meetingId}/notes/${noteId}`,
+        `${this.base}${path}`,
         request
       )
     );
   }
 
   async deleteCustomerMeetingNote(meetingId: number, noteId: number): Promise<void> {
+    const path = `/api/actionos/meetings/${meetingId}/notes/${noteId}`;
+    this.traceMutation('deleteCustomerMeetingNote', 'DELETE', path);
     await firstValueFrom(
-      this.http.delete(`${this.base}/api/actionos/meetings/${meetingId}/notes/${noteId}`)
+      this.http.delete(`${this.base}${path}`)
     );
   }
 
@@ -486,6 +510,26 @@ export class ActionosRepositoryService {
   async createAttachment(request: CreateActionosAttachmentRequest): Promise<ActionosApiAttachmentDto> {
     return await firstValueFrom(
       this.http.post<ActionosApiAttachmentDto>(`${this.base}/api/actionos/attachments`, request)
+    );
+  }
+
+  async uploadAttachment(request: UploadActionosAttachmentRequest): Promise<ActionosApiAttachmentDto> {
+    const form = new FormData();
+    form.set('orgGroupId', request.orgGroupId);
+    form.set('entityType', request.entityType);
+    form.set('entityId', request.entityId);
+    form.set('file', request.file, request.file.name);
+
+    return await firstValueFrom(
+      this.http.post<ActionosApiAttachmentDto>(`${this.base}/api/actionos/attachments/upload`, form)
+    );
+  }
+
+  async downloadAttachment(attachmentId: number): Promise<Blob> {
+    return await firstValueFrom(
+      this.http.get(`${this.base}/api/actionos/attachments/${attachmentId}/download`, {
+        responseType: 'blob'
+      })
     );
   }
 

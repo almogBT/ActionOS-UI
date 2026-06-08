@@ -74,7 +74,7 @@ export class InMemoryAttachmentStorage implements AttachmentStoragePort {
       fileName: file.name,
       mimeType: file.type || 'application/octet-stream',
       sizeBytes: file.size,
-      url: `pending://${id}`,
+      url: this.createObjectUrl(file) ?? `pending://${id}`,
       linkedEntityType: entityType,
       linkedEntityId: entityId,
       uploadedAt: this.now(),
@@ -83,6 +83,14 @@ export class InMemoryAttachmentStorage implements AttachmentStoragePort {
     this.state.attachments.push(attachment);
     this.save();
     return attachment;
+  }
+
+  private createObjectUrl(file: File): string | null {
+    if (typeof URL === 'undefined' || typeof URL.createObjectURL !== 'function') {
+      return null;
+    }
+
+    return URL.createObjectURL(file);
   }
 
   remove(id: string): void {

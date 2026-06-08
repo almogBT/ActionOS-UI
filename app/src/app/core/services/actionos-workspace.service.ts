@@ -110,6 +110,10 @@ export class ActionosWorkspaceService {
   /** ISO date to prefill into the new-meeting form (set when creating from a calendar slot). Consumed and cleared by the meeting form. */
   pendingNewMeetingDate: string | null = null;
 
+  /** Last selected client on the Clients page — held on the singleton so it
+   *  survives the component being destroyed/recreated on navigation away/back. */
+  boardClientId = '';
+
   get meetingModalOpen(): boolean {
     return this.openMeetingId !== null || this.openNewMeetingCustomerId !== undefined && this.openNewMeetingCustomerId !== null;
   }
@@ -785,7 +789,7 @@ export class ActionosWorkspaceService {
   /** Secondary line for a task feed item: "Board · High · due 2026-06-05". */
   private inboxTaskContext(task: Task): string {
     const parts: string[] = [];
-    const place = task.source === 'meeting' ? this.customer(task.customerId)?.name : task.board;
+    const place = task.customerId ? this.clientName(task.customerId) : task.board;
     if (place) {
       parts.push(place);
     }
@@ -932,6 +936,7 @@ export class ActionosWorkspaceService {
       title,
       description: '',
       board: 'Fritz Meetings',
+      source: 'board',
       priority: 'Medium',
       dueDate: this.toLocalIsoDate(date),
       assigneeId: this.currentUserId,
@@ -965,6 +970,8 @@ export class ActionosWorkspaceService {
     }
 
     const nextStatus = changes.status ? this.toUnifiedStatus(changes.status) : undefined;
+    const nextCustomerId = changes.customerId !== undefined ? this.resolveCustomerId(changes.customerId).trim() : undefined;
+    const nextCustomerName = nextCustomerId ? this.customer(nextCustomerId)?.name : undefined;
     const nextAssigneeIds = changes.assigneeIds ? [...changes.assigneeIds] : task.assigneeIds;
     const nextAssignedToEmployeeId = changes.assigneeIds
       ? (nextAssigneeIds[0] ? this.employeeIdForMember(nextAssigneeIds[0]) ?? '' : '')
@@ -996,10 +1003,11 @@ export class ActionosWorkspaceService {
       return {
         ...item,
         ...changes,
-        source: 'meeting',
+        source: item.source,
         status: nextStatus ?? item.status,
         title: changes.title?.trim() || item.title,
-        board: changes.board?.trim() || item.board,
+        board: changes.board?.trim() || nextCustomerName || item.board,
+        customerId: nextCustomerId !== undefined ? nextCustomerId : item.customerId,
         description: changes.description ?? item.description,
         assigneeIds: nextAssigneeIds,
         assignedToEmployeeId: nextAssignedToEmployeeId,
@@ -1021,6 +1029,7 @@ export class ActionosWorkspaceService {
       this.actionosApi.updateTask(taskIdNumeric, {
         title: changes.title !== undefined ? changes.title : undefined,
         description: changes.description !== undefined ? changes.description : undefined,
+        customerId: changes.customerId !== undefined ? (nextCustomerId || null) : undefined,
         status: changes.status !== undefined ? nextStatus : undefined,
         statusChangeReason: changes.status !== undefined && nextStatus && nextStatus !== task.status
           ? 'Updated in ActionOS UI'
@@ -1045,14 +1054,17 @@ export class ActionosWorkspaceService {
       this.currentEmployeeId;
     const resolvedAssigneeMemberId = this.memberIdForEmployee(assignedToEmployeeId) || assigneeId;
     const openedByEmployeeId = input.openedByEmployeeId || this.currentEmployeeId;
+    const customerId = input.customerId ? this.resolveCustomerId(input.customerId).trim() : '';
+    const customerName = customerId ? this.clientName(customerId) : undefined;
+    const source: Task['source'] = input.source ?? (input.sourceMeetingId ? 'meeting' : 'board');
     const now = new Date().toISOString();
     const task: Task = {
       id: `task-${this.nextTaskNumber++}`,
       title: input.title.trim(),
       description: input.description?.trim() || '',
-      source: 'meeting',
-      board: input.board?.trim() || 'Fritz Meetings',
-      customerId: input.customerId ?? '',
+      source,
+      board: input.board?.trim() || customerName || 'Fritz Meetings',
+      customerId,
       status: 'New',
       priority: input.priority,
       dueDate: input.dueDate || this.todayIso,
@@ -1207,13 +1219,13 @@ export class ActionosWorkspaceService {
       title: overrides?.title || note.content,
       description: `Created from meeting: ${this.meetingState.title}`,
       board: overrides?.board || this.meetingState.linkedBoard,
+      source: 'meeting',
+      sourceMeetingId: this.meetingState.id,
       priority: overrides?.priority || 'High',
       dueDate: overrides?.dueDate || note.dueDate || this.addDays(this.todayIso, 3),
       assigneeId: overrides?.assigneeId || note.ownerId || this.currentUserId
     });
 
-    task.sourceMeetingId = this.meetingState.id;
-    this.tasksState = this.tasksState.map(item => item.id === task.id ? task : item);
     note.convertedTaskId = task.id;
     this.recordActivity('meeting', this.meetingState.id, 'Meeting action converted', note.content);
     this.saveToStorage();
@@ -2445,12 +2457,13 @@ export class ActionosWorkspaceService {
         ? (task.waitingReason || task.blockedBy || 'Waiting for next input')
         : undefined;
       const blockedBy = task.blockedBy ?? (status === 'Waiting For Internal' ? waitingReason : undefined);
+      const source: Task['source'] = task.sourceMeetingId || task.source === 'meeting' ? 'meeting' : 'board';
 
       return {
         id: task.id ?? `task-${index + 1}`,
         title: task.title ?? 'Untitled task',
         description: task.description ?? '',
-        source: 'meeting',
+        source,
         board: task.board ?? 'ActionOS Core',
         customerId: task.customerId ?? '',
         status,
@@ -2536,9 +2549,8 @@ export class ActionosWorkspaceService {
   }
 
   /**
-   * Hard-unifies every stored/seeded task into the progression-capable meeting
-   * shape. We intentionally drop the legacy source marker first and then
-   * rewrite tasks as source='meeting' so no hidden board-type tasks remain.
+   * Hard-unifies every stored/seeded task into the progression-capable task
+   * shape while preserving whether it was born from a meeting or standalone.
    */
   private normalizeUnifiedTasks(tasks: Partial<Task>[]): Partial<Task>[] {
     const meetingTasks = tasks.filter(task => task.source === 'meeting');
@@ -2556,7 +2568,7 @@ export class ActionosWorkspaceService {
 
       return {
         ...task,
-        source: 'meeting' as const,
+        source: task.sourceMeetingId ? 'meeting' as const : 'board' as const,
         status: this.toUnifiedStatus(task.status),
         assignedToEmployeeId,
         openedByEmployeeId,
@@ -2649,8 +2661,42 @@ export class ActionosWorkspaceService {
     return this.customerRepo.list().sort((a, b) => a.name.localeCompare(b.name));
   }
 
+  get taskClientOptions(): { id: string; name: string }[] {
+    const byId = new Map<string, { id: string; name: string }>();
+    const add = (id: string | null | undefined, name: string | null | undefined): void => {
+      const trimmedId = id?.trim();
+      if (!trimmedId || byId.has(trimmedId)) {
+        return;
+      }
+      byId.set(trimmedId, { id: trimmedId, name: name?.trim() || trimmedId });
+    };
+
+    this.externalCustomerGroups.forEach(group => add(group.id, group.name));
+    this.customers.forEach(customer => {
+      add(customer.id, customer.name);
+      add(customer.externalGroupId, customer.name);
+    });
+
+    return Array.from(byId.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }
+
   customer(id: string): Customer | undefined {
     return this.customerRepo.get(this.resolveCustomerId(id));
+  }
+
+  clientName(id: string): string | undefined {
+    const resolvedId = this.resolveCustomerId(id).trim();
+    if (!resolvedId) {
+      return undefined;
+    }
+
+    const customer = this.customerRepo.get(resolvedId)
+      ?? this.customerRepo.list().find(c => c.externalGroupId === resolvedId);
+    if (customer) {
+      return customer.name;
+    }
+
+    return this.externalCustomerGroups.find(group => group.id === resolvedId)?.name;
   }
 
   customersByStatus(status: 'all' | Customer['status'] | Customer['type']): Customer[] {
@@ -2774,6 +2820,27 @@ export class ActionosWorkspaceService {
 
   customerMeetingsByCustomer(customerId: string): CustomerMeeting[] {
     return this.customerMeetingRepo.listByCustomer(this.resolveCustomerId(customerId));
+  }
+
+  /**
+   * Whether a meeting should appear in the app's meeting lists/cards. Draft stages
+   * (Planned / Draft Summary) are hidden so half-started or abandoned drafts don't
+   * clutter overviews — only meetings that reached "Tasks Created" or "Closed" show.
+   * Note: this is a DISPLAY filter only; lookups by id, persistence, and the calendar
+   * still operate on the full set.
+   */
+  isMeetingListVisible(meeting: CustomerMeeting): boolean {
+    return meeting.status === 'Tasks Created' || meeting.status === 'Closed';
+  }
+
+  /** `customerMeetings` filtered to the statuses shown in lists/cards. */
+  get visibleCustomerMeetings(): CustomerMeeting[] {
+    return this.customerMeetings.filter((m) => this.isMeetingListVisible(m));
+  }
+
+  /** `customerMeetingsByCustomer` filtered to the statuses shown in lists/cards. */
+  visibleCustomerMeetingsByCustomer(customerId: string): CustomerMeeting[] {
+    return this.customerMeetingsByCustomer(customerId).filter((m) => this.isMeetingListVisible(m));
   }
 
   addCustomerMeeting(input: CreateCustomerMeetingInput): CustomerMeeting {
@@ -3266,6 +3333,10 @@ export class ActionosWorkspaceService {
     const next: UpdateMeetingTaskInput = { ...changes };
     const normalizedStatusChangeReason = statusChangeReason?.trim();
 
+    if (next.customerId !== undefined) {
+      next.customerId = this.resolveCustomerId(next.customerId).trim();
+    }
+
     if (next.assignedToEmployeeId && !this.employeeDirectory.isAssignable(next.assignedToEmployeeId)) {
       // eslint-disable-next-line no-console
       console.warn('[ActionOS] Refused to reassign task to non-fritz/inactive employee:', next.assignedToEmployeeId);
@@ -3314,6 +3385,9 @@ export class ActionosWorkspaceService {
     const updated: Task = {
       ...this.tasksState[index],
       ...next,
+      board: next.customerId
+        ? (this.clientName(next.customerId) ?? this.tasksState[index].board)
+        : this.tasksState[index].board,
       updatedAt: new Date().toISOString()
     };
     this.tasksState = this.tasksState.map(task => task.id === resolvedTaskId ? updated : task);
@@ -3325,6 +3399,7 @@ export class ActionosWorkspaceService {
       this.actionosApi.updateTask(taskIdNumeric, {
         title: next.title !== undefined ? next.title : undefined,
         description: next.description !== undefined ? next.description : undefined,
+        customerId: next.customerId !== undefined ? (next.customerId || null) : undefined,
         status: next.status !== undefined ? next.status : undefined,
         statusChangeReason: next.status !== undefined && next.status !== previousStatus
           ? normalizedStatusChangeReason
@@ -3534,6 +3609,38 @@ export class ActionosWorkspaceService {
     return this.attachments.list('meeting-note', this.resolveMeetingNoteId(noteId));
   }
 
+  canDownloadAttachment(attachment: Attachment): boolean {
+    const url = (attachment.url ?? '').trim();
+    return (this.parseNumericId(attachment.id) != null && this.isActionosStoredAttachmentUrl(url))
+      || this.isDirectAttachmentUrl(url);
+  }
+
+  async downloadAttachment(attachment: Attachment): Promise<void> {
+    const url = (attachment.url ?? '').trim();
+    const attachmentId = this.parseNumericId(attachment.id);
+    try {
+      if (attachmentId != null && this.isActionosStoredAttachmentUrl(url)) {
+        const blob = await this.actionosApi.downloadAttachment(attachmentId);
+        this.triggerBlobDownload(blob, attachment.fileName);
+        return;
+      }
+
+      if (this.isDirectAttachmentUrl(url)) {
+        this.triggerUrlDownload(url, attachment.fileName);
+        return;
+      }
+
+      this.reportBackendIssue(
+        `Attachment "${attachment.fileName}" is not available for download.`,
+        { message: 'The file was saved before ActionOS had binary attachment storage. Please re-attach it.' }
+      );
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('[ActionOS] Attachment download failed.', error);
+      this.reportBackendIssue(`ActionOS could not download "${attachment.fileName}".`, error);
+    }
+  }
+
   async uploadAttachment(
     file: File,
     entityType: AttachmentEntityType,
@@ -3545,29 +3652,58 @@ export class ActionosWorkspaceService {
     if (orgGroupId) {
       if (entityType === 'meeting-task') {
         this.runTaskMutation(entityId, (taskIdNumeric) =>
-          this.actionosApi.createAttachment({
+          this.actionosApi.uploadAttachment({
             orgGroupId,
             entityType,
             entityId: taskIdNumeric.toString(),
-            fileName: attachment.fileName,
-            mimeType: attachment.mimeType,
-            sizeBytes: attachment.sizeBytes,
-            storageUrl: attachment.url
+            file
           })
         );
       } else {
-        this.persistAndRefresh(this.actionosApi.createAttachment({
+        this.persistAndRefresh(this.actionosApi.uploadAttachment({
           orgGroupId,
           entityType,
           entityId,
-          fileName: attachment.fileName,
-          mimeType: attachment.mimeType,
-          sizeBytes: attachment.sizeBytes,
-          storageUrl: attachment.url
+          file
         }));
       }
     }
     return attachment;
+  }
+
+  private isActionosStoredAttachmentUrl(url: string): boolean {
+    return url.toLowerCase().startsWith('local://actionos-attachments/');
+  }
+
+  private isDirectAttachmentUrl(url: string): boolean {
+    return /^(blob:|data:|https?:\/\/)/i.test(url);
+  }
+
+  private triggerBlobDownload(blob: Blob, fileName: string): void {
+    if (typeof URL === 'undefined' || typeof URL.createObjectURL !== 'function') {
+      this.reportBackendIssue(`ActionOS could not download "${fileName}".`);
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(blob);
+    this.triggerUrlDownload(objectUrl, fileName);
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+  }
+
+  private triggerUrlDownload(url: string, fileName: string): void {
+    if (typeof document === 'undefined') {
+      this.reportBackendIssue(`ActionOS could not download "${fileName}".`);
+      return;
+    }
+
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = fileName || 'attachment';
+    anchor.rel = 'noopener';
+    anchor.target = '_blank';
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
   }
 
   async uploadNoteAttachment(meetingId: string, noteId: string, file: File): Promise<Attachment | null> {
@@ -3586,14 +3722,11 @@ export class ActionosWorkspaceService {
     const orgGroupId = this.getOrgGroupForMutation();
     if (orgGroupId) {
       this.runMeetingNoteMutation(resolvedMeetingId, resolvedNoteId, (_meetingIdNumeric, noteIdNumeric) =>
-        this.actionosApi.createAttachment({
+        this.actionosApi.uploadAttachment({
           orgGroupId,
           entityType: 'meeting-note',
           entityId: noteIdNumeric.toString(),
-          fileName: attachment.fileName,
-          mimeType: attachment.mimeType,
-          sizeBytes: attachment.sizeBytes,
-          storageUrl: attachment.url
+          file
         })
       );
     }
@@ -3803,6 +3936,7 @@ export class ActionosWorkspaceService {
         startsAt: `${t.dueDate}T09:00:00`,
         durationMinutes: 30,
         kind: 'task' as CalendarEventKind,
+        customerName: t.customerId ? this.clientName(t.customerId) : undefined,
         attendeeCount: 0,
         sourceId: t.id
       }));
@@ -3872,6 +4006,7 @@ export class ActionosWorkspaceService {
         startsAt: `${t.dueDate}T09:00:00`,
         durationMinutes: 30,
         kind: 'task' as CalendarEventKind,
+        customerName: t.customerId ? this.clientName(t.customerId) : undefined,
         attendeeCount: 0,
         sourceId: t.id
       }));
@@ -3921,6 +4056,7 @@ export class ActionosWorkspaceService {
         startsAt: `${t.dueDate}T09:00:00`,
         durationMinutes: 30,
         kind: 'task' as CalendarEventKind,
+        customerName: t.customerId ? this.clientName(t.customerId) : undefined,
         attendeeCount: 0,
         sourceId: t.id
       }));

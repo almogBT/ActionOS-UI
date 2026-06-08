@@ -1,4 +1,6 @@
 <section class="screen">
+ <div class="mw-shell">
+  <div class="mw-main">
 
   <!-- ── Mood tile (greeting) + tab navigation — one connected card ──────── -->
   <div class="mw-hero-card">
@@ -14,19 +16,13 @@
         <span>{{ 'myWork.tabs.inbox' | t }}</span>
         <span *ngIf="workspace.inboxUnreadCount" class="mw-tab-count">{{ workspace.inboxUnreadCount }}</span>
       </button>
-      <button type="button" role="tab" [attr.aria-selected]="activeTab() === 'tasks'"
-        [class.active]="activeTab() === 'tasks'" (click)="activeTab.set('tasks')">
+      <button type="button" role="tab" [attr.aria-selected]="activeTab() === 'work'"
+        [class.active]="activeTab() === 'work'" (click)="activeTab.set('work')">
         <app-icon name="check-square" [size]="15"></app-icon>
-        <span>{{ 'myWork.tabs.tasks' | t }}</span>
+        <span>{{ 'myWork.tabs.work' | t }}</span>
         <span *ngIf="tasksTabCount" class="mw-tab-count" [class.is-danger]="hasOverdueTasks">
           {{ tasksTabCount }}
         </span>
-      </button>
-      <button type="button" role="tab" [attr.aria-selected]="activeTab() === 'meetings'"
-        [class.active]="activeTab() === 'meetings'" (click)="activeTab.set('meetings')">
-        <app-icon name="calendar" [size]="15"></app-icon>
-        <span>{{ 'myWork.tabs.meetings' | t }}</span>
-        <span *ngIf="summaryFollowups" class="mw-tab-count is-danger">{{ summaryFollowups }}</span>
       </button>
     </nav>
   </div>
@@ -70,72 +66,184 @@
     <app-inbox class="mw-flex-fill" [embedded]="true" (viewChange)="openView($event)"></app-inbox>
   </ng-container>
 
-  <!-- ── Tasks Tab ──────────────────────────────────────────────────────── -->
-  <ng-container *ngIf="activeTab() === 'tasks'">
+  <!-- ── Work view: meetings carousel + tasks table (Boards-style) ───────── -->
+  <ng-container *ngIf="activeTab() === 'work'">
+    <div class="mw-tab-scroll mw-work">
 
-    <div class="mw-toolbar">
-      <div class="filter-strip">
-        <button
-          *ngFor="let f of taskFilterOptions"
-          type="button"
-          [class.active]="taskFilter === f.id"
-          (click)="taskFilter = f.id"
-        >{{ f.labelKey | t }}</button>
-      </div>
-      <span class="count-badge" [class.badge-danger]="hasOverdueTasks">
-        {{ myFilteredTasks.length }}
-      </span>
-    </div>
-
-    <div class="mw-tab-scroll">
-      <app-task-table
-        *ngIf="myFilteredTasks.length; else tasksEmpty"
-        [tasks]="myFilteredTasks"
-        groupBy="due"
-        [emptyText]="'myWork.noTasksTitle' | t"
-      ></app-task-table>
-
-      <ng-template #tasksEmpty>
-        <div class="mw-empty">
-          <span class="mw-empty-glyph">✅</span>
-          <strong>{{ 'myWork.noTasksTitle' | t }}</strong>
-          <span>{{ 'myWork.noTasksText' | t }}</span>
+      <!-- Meetings panel (carousel → expandable grid) -->
+      <section class="mw-panel">
+        <div class="mw-panel-head">
+          <div class="mw-panel-title">
+            <app-icon name="calendar" [size]="15"></app-icon>
+            <h3>{{ 'myWork.tabs.meetings' | t }}</h3>
+          </div>
+          <div class="mw-panel-tools">
+            <div class="filter-strip">
+              <button
+                *ngFor="let f of meetingFilterOptions"
+                type="button"
+                [class.active]="meetingFilter === f.id"
+                (click)="meetingFilter = f.id"
+              >{{ f.labelKey | t }}</button>
+            </div>
+            <span class="count-badge" [class.badge-danger]="workspace.myUnconvertedActionItems.length > 0">
+              {{ myMeetings.length }}
+            </span>
+            <div class="mw-rail-nav" *ngIf="!meetingsExpanded && myMeetings.length > 1">
+              <button type="button" class="mw-rail-arrow" (click)="scrollRail(railTrack, -1)"
+                [attr.aria-label]="'meetingsOverview.scrollPrev' | t">‹</button>
+              <button type="button" class="mw-rail-arrow" (click)="scrollRail(railTrack, 1)"
+                [attr.aria-label]="'meetingsOverview.scrollNext' | t">›</button>
+            </div>
+            <button type="button" class="mw-expand" *ngIf="myMeetings.length > 1"
+              (click)="meetingsExpanded = !meetingsExpanded">
+              {{ (meetingsExpanded ? 'boards.collapseMeetings' : 'boards.expandMeetings') | t }}
+            </button>
+          </div>
         </div>
-      </ng-template>
-    </div>
 
-  </ng-container>
-
-  <!-- ── Meetings Tab ───────────────────────────────────────────────────── -->
-  <ng-container *ngIf="activeTab() === 'meetings'">
-
-    <div class="mw-toolbar">
-      <div class="filter-strip">
-        <button
-          *ngFor="let f of meetingFilterOptions"
-          type="button"
-          [class.active]="meetingFilter === f.id"
-          (click)="meetingFilter = f.id"
-        >{{ f.labelKey | t }}</button>
-      </div>
-      <span class="count-badge" [class.badge-danger]="workspace.myUnconvertedActionItems.length > 0">
-        {{ myMeetings.length }}
-      </span>
-    </div>
-
-    <div class="mw-tab-scroll">
-      <div *ngIf="myMeetings.length; else noMeetings" class="mw-meeting-grid">
-        <app-meeting-card *ngFor="let m of myMeetings" [meeting]="m"></app-meeting-card>
-      </div>
-
-      <ng-template #noMeetings>
-        <div class="empty-state">
+        <div #railTrack
+          [hidden]="!myMeetings.length"
+          [class.mw-carousel]="!meetingsExpanded"
+          [class.mw-meeting-grid-expanded]="meetingsExpanded"
+          (wheel)="onRailWheel($event, railTrack)">
+          <app-meeting-card *ngFor="let m of myMeetings"
+            [meeting]="m"
+            [variant]="meetingsExpanded ? 'grid' : 'rail'"></app-meeting-card>
+        </div>
+        <div class="empty-state" *ngIf="!myMeetings.length">
           <strong>{{ 'myWork.meetings.noMeetings' | t }}</strong>
         </div>
-      </ng-template>
-    </div>
+      </section>
 
+      <!-- Tasks panel (shared table) -->
+      <section class="mw-panel">
+        <div class="mw-panel-head">
+          <div class="mw-panel-title">
+            <app-icon name="check-square" [size]="15"></app-icon>
+            <h3>{{ 'myWork.tabs.tasks' | t }}</h3>
+          </div>
+          <div class="mw-panel-tools">
+            <div class="filter-strip">
+              <button
+                *ngFor="let f of taskFilterOptions"
+                type="button"
+                [class.active]="taskFilter === f.id"
+                (click)="taskFilter = f.id"
+              >{{ f.labelKey | t }}</button>
+            </div>
+            <span class="count-badge" [class.badge-danger]="hasOverdueTasks">
+              {{ myFilteredTasks.length }}
+            </span>
+          </div>
+        </div>
+
+        <app-task-table
+          *ngIf="myFilteredTasks.length; else tasksEmpty"
+          [tasks]="myFilteredTasks"
+          groupBy="due"
+          [emptyText]="'myWork.noTasksTitle' | t"
+        ></app-task-table>
+
+        <ng-template #tasksEmpty>
+          <div class="mw-empty">
+            <span class="mw-empty-glyph">✅</span>
+            <strong>{{ 'myWork.noTasksTitle' | t }}</strong>
+            <span>{{ 'myWork.noTasksText' | t }}</span>
+          </div>
+        </ng-template>
+      </section>
+
+    </div>
   </ng-container>
+
+  </div><!-- /.mw-main -->
+
+  <!-- ── Right rail: clients · team (secondary, but roomy) ──────────────── -->
+  <aside class="mw-rail">
+
+    <!-- Clients — read from the allowed external customer groups -->
+    <section class="rail-card rail-card-clients">
+      <header class="rail-head">
+        <span class="rail-eyebrow">{{ 'home.pipelineEyebrow' | t }}</span>
+        <h3>{{ 'customers.title' | t }}</h3>
+      </header>
+
+      <input
+        type="search"
+        class="rail-search"
+        [(ngModel)]="railClientSearch"
+        [placeholder]="'customers.searchPlaceholder' | t"
+      />
+
+      <div class="rail-client-list" *ngIf="railClients.length; else noClients">
+        <button
+          *ngFor="let g of railClients"
+          type="button"
+          class="rail-client-row"
+          (click)="openClientGroup(g)"
+        >
+          <span class="avatar" [style.--tint-h]="avatarHue(g.name)">{{ nameInitials(g.name) }}</span>
+          <strong class="rail-client-name">{{ g.name }}</strong>
+        </button>
+      </div>
+      <ng-template #noClients>
+        <div class="rail-empty">{{ 'customers.noCustomersTitle' | t }}</div>
+      </ng-template>
+    </section>
+
+    <!-- Team load (compact) -->
+    <section class="rail-card team-rail">
+      <header class="rail-head">
+        <span class="rail-eyebrow">{{ 'home.teamLoadEyebrow' | t }}</span>
+        <h3>{{ 'home.ownersAndBlockers' | t }}</h3>
+      </header>
+
+      <div class="rail-team-list" *ngIf="railWorkload.length; else noTeam">
+        <button
+          *ngFor="let w of railWorkload"
+          type="button"
+          class="rail-team-row"
+          (click)="openMemberBoard(w.member.id, w.member.name)"
+        >
+          <span class="avatar" [style.--tint-h]="avatarHue(w.member.name)">
+            {{ workspace.initials(w.member.id) }}
+          </span>
+          <div class="rail-team-body">
+            <div class="rail-team-head">
+              <strong>{{ w.member.name }}</strong>
+              <span class="rail-team-counts">
+                {{ openTotal(w) }} {{ 'home.openShort' | t }}
+                <em *ngIf="blockedTotal(w)" class="blocked">· {{ blockedTotal(w) }} {{ 'home.blockedShort' | t }}</em>
+              </span>
+            </div>
+            <div class="rail-load-bar" *ngIf="loadTotal(w)">
+              <span class="seg open"    [style.width.%]="openTotal(w) / maxLoad * 100"></span>
+              <span class="seg blocked" [style.width.%]="blockedTotal(w) / maxLoad * 100"></span>
+            </div>
+          </div>
+        </button>
+      </div>
+      <ng-template #noTeam>
+        <div class="rail-empty">{{ 'home.noMatches' | t }}</div>
+      </ng-template>
+    </section>
+
+  </aside>
+
+ </div><!-- /.mw-shell -->
+
+  <!-- ── Board preview popup (client / member quick view) ────────────────── -->
+  <app-board-preview-modal
+    *ngIf="boardPreview as preview"
+    [entityType]="preview.type"
+    [entityId]="preview.id"
+    [entityName]="preview.name"
+    (close)="closeBoardPreview()"
+    (openFullProfile)="openClientFullProfile(preview.id)"
+    (newMeeting)="onNewMeeting()"
+    (prepareMeeting)="onPrepareMeeting()"
+  ></app-board-preview-modal>
 
   <!-- ── Summary-tile popups (shared stat-modal shell) ──────────────────── -->
 

@@ -1,15 +1,7 @@
 <header class="app-header">
 
-  <!-- Left: menu toggle + breadcrumb / title -->
+  <!-- Left: brand / current section -->
   <div class="header-left">
-    <button
-      type="button"
-      class="icon-btn"
-      (click)="toggleSidebar.emit()"
-      aria-label="Open navigation menu"
-    >
-      <app-icon name="menu" [size]="18"></app-icon>
-    </button>
     <div class="page-title">
       <div class="breadcrumb">
         <span class="bc-root">{{ 'app.brand' | t }}</span>
@@ -21,6 +13,21 @@
       <h1>{{ ('nav.' + activeView) | t }}</h1>
     </div>
   </div>
+
+  <!-- Center: primary navigation (replaces the old dropdown sidebar) -->
+  <nav class="header-nav" aria-label="Primary navigation">
+    <button
+      *ngFor="let item of navItems"
+      type="button"
+      class="header-nav-item"
+      [class.active]="activeView === item.id"
+      (click)="go(item.id)"
+      [attr.aria-current]="activeView === item.id ? 'page' : null"
+    >
+      <app-icon [name]="iconFor(item.id)" [size]="16"></app-icon>
+      <span class="header-nav-label">{{ ('nav.' + item.id) | t }}</span>
+    </button>
+  </nav>
 
   <!-- Right: theme · notifications · settings · user -->
   <div class="header-right">

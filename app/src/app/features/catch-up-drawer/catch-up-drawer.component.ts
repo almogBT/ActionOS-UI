@@ -187,7 +187,6 @@ const BUCKET_ORDER: Record<TaskBucket, number> = { overdue: 0, open: 1, waiting:
           <app-meeting-prep-brief
             variant="full"
             [customerId]="cid"
-            (openTask)="openTask($event)"
           ></app-meeting-prep-brief>
         </div>
       </ng-container>
@@ -334,7 +333,7 @@ export class CatchUpDrawerComponent {
 
   private get meetings(): CustomerMeeting[] {
     const id = this.customerId;
-    return id ? this.workspace.customerMeetingsByCustomer(id) : [];
+    return id ? this.workspace.visibleCustomerMeetingsByCustomer(id) : [];
   }
 
   private get allTasks(): Task[] {

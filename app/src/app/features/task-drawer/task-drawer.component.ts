@@ -3,7 +3,7 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActionosI18nService } from '../../core/i18n/actionos-i18n.service';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
-import { Comment, Priority, Task, TaskStatus } from '../../core/models/actionos.models';
+import { Comment, Priority, Task, TaskStatus, UpdateMeetingTaskInput } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
 import { AppDatePipe } from '../../shared/pipes/app-date.pipe';
 import { SearchableSelectComponent, SelectOption } from '../../shared/searchable-select/searchable-select.component';
@@ -25,6 +25,7 @@ type TaskSectionId = 'details' | 'attachments' | 'alerts' | 'checklist' | 'watch
       background: var(--bg-canvas);
     }
     .task-attach-name { flex: 1; font-size: 13px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .task-attach-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
     .watcher-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
     .watcher-chip {
       display: flex; align-items: center; gap: 4px;
@@ -33,20 +34,21 @@ type TaskSectionId = 'details' | 'attachments' | 'alerts' | 'checklist' | 'watch
       background: var(--bg-canvas); font-size: 13px; color: var(--text-primary);
     }
     .watcher-chip button { padding: 0 2px; font-size: 11px; line-height: 1; }
+    .req { color: #dc2626; font-weight: 700; }
+    .field-missing .req { color: #dc2626; }
+    .field-missing app-searchable-select { outline: 1px solid #f87171; border-radius: var(--radius-md); }
+    .customer-hint { color: #dc2626; font-size: 12px; }
+    .drawer-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 6px;
+      margin: 6px 0 0;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
     .section-toggle { margin-inline-start: auto; min-width: 34px; }
     .section-body { display: grid; gap: 12px; margin-top: 10px; }
     .status-reason-hint { font-size: 12px; }
-    .add-status-link {
-      align-self: flex-start;
-      margin-top: 4px;
-      padding: 0;
-      border: none;
-      background: transparent;
-      color: var(--accent);
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-    }
     .add-status-row { display: flex; gap: 6px; margin-top: 6px; }
     .add-status-row input {
       flex: 1; min-width: 0; height: 30px;
@@ -125,6 +127,10 @@ export class TaskDrawerComponent {
     return this.workspace.employees.map(e => ({ value: e.id, label: e.fullName }));
   }
 
+  get customerSelectOptions(): SelectOption[] {
+    return this.workspace.taskClientOptions.map(client => ({ value: client.id, label: client.name }));
+  }
+
   watcherSelectModel: string | null = null;
 
   watcherCandidateOptions(task: Task): SelectOption[] {
@@ -198,10 +204,22 @@ export class TaskDrawerComponent {
   }
 
   updateMeetingTaskField<K extends keyof Task>(task: Task, field: K, value: Task[K]): void {
-    this.workspace.updateMeetingTask(task.id, { [field]: value } as Partial<Task>);
+    this.workspace.updateMeetingTask(task.id, { [field]: value } as UpdateMeetingTaskInput);
     if (field === 'waitingReason' && this.statusValidationMessage) {
       this.statusValidationMessage = '';
     }
+  }
+
+  /** Non-meeting tasks must always be tied to a client. Meeting tasks inherit
+   *  their client from the meeting, so this only applies to board/standalone. */
+  isMissingCustomer(task: Task): boolean {
+    return task.source !== 'meeting' && !task.customerId?.trim();
+  }
+
+  /** Assign/clear the task's client. Routed through its own handler so the
+   *  required-client rule is enforced and the change is always persisted. */
+  changeTaskCustomer(task: Task, customerId: string): void {
+    this.workspace.updateMeetingTask(task.id, { customerId });
   }
 
   startAddStatus(): void {
