@@ -110,7 +110,7 @@ export class BoardsComponent {
   /** All of the client's meetings, newest first (search-independent). */
   get clientMeetingsSorted(): CustomerMeeting[] {
     if (!this.selectedClientId) return [];
-    return this.workspace.visibleCustomerMeetingsByCustomer(this.selectedClientId)
+    return this.workspace.customerMeetingsByCustomer(this.selectedClientId)
       .slice()
       .sort((a, b) => b.meetingDate.localeCompare(a.meetingDate));
   }

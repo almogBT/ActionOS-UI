@@ -2536,3 +2536,181 @@
          ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
 
 [39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'agendaMeetingId' does not exist on type 'PrepBrief'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:82:29:
+[37m      82 │         [class.clickable]="b.[32magendaMeetingId[37m"
+         ╵                              [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'agendaMeetingId' does not exist on type 'PrepBrief'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:83:19:
+[37m      83 │         (click)="b.[32magendaMeetingId[37m && openMeeting(b.agendaMeetingI...
+         ╵                    [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'agendaMeetingId' does not exist on type 'PrepBrief'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:83:52:
+[37m      83 │ ...    (click)="b.agendaMeetingId && openMeeting(b.[32magendaMeetingId[37m)">
+         ╵                                                    [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2741: Property 'agendaMeetingId' is missing in type '{ lastMeeting: CustomerMeeting; daysSince: number | null; nextPlannedDate: string | undefined; agendaNotes: string | null; agendaFromSubject: string; counts: { overdue: number; open: number; waitingOnThem: number; waitingOnUs: number; }; ... 8 more ...; lastRecap: string | null; }' but required in type 'PrepBrief'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-prep-brief.component.ts:349:4:
+[37m      349 │     [32mreturn[37m {
+          ╵     [32m~~~~~~[0m
+
+  'agendaMeetingId' is declared here.
+
+    src/app/features/customers/meeting-prep-brief.component.ts:32:2:
+[37m      32 │   [32magendaMeetingId[37m: string | null;
+         ╵   [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'showPrepBrief' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:87:19:
+[37m      87 │           (click)="[32mshowPrepBrief[37m = true"
+         ╵                    [32m~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'showPrepBrief' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:87:19:
+[37m      87 │           (click)="[32mshowPrepBrief[37m = true"
+         ╵                    [32m~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'showPrepBrief' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:87:19:
+[37m      87 │           (click)="[32mshowPrepBrief[37m = true"
+         ╵                    [32m~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Unexpected closing tag "div". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:301:6:
+[37m      301 │       [32m</div>[37m
+          ╵       [32m~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'showPrepBrief' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:87:19:
+[37m      87 │           (click)="[32mshowPrepBrief[37m = true"
+         ╵                    [32m~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'showPrepBrief' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:87:19:
+[37m      87 │           (click)="[32mshowPrepBrief[37m = true"
+         ╵                    [32m~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'showPrepBrief' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:412:13:
+[37m      412 │       *ngIf="[32mshowPrepBrief[37m && selectedCustomerForPrep as prepCust...
+          ╵              [32m~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'showPrepBrief' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:414:15:
+[37m      414 │       (click)="[32mshowPrepBrief[37m = false"
+          ╵                [32m~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'showPrepBrief' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:422:62:
+[37m      422 │ ...pe="button" class="ghost-action" (click)="[32mshowPrepBrief[37m = false">
+          ╵                                              [32m~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'showPrepBrief' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:87:19:
+[37m      87 │           (click)="[32mshowPrepBrief[37m = true"
+         ╵                    [32m~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'showPrepBrief' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:412:13:
+[37m      412 │       *ngIf="[32mshowPrepBrief[37m && selectedCustomerForPrep as prepCust...
+          ╵              [32m~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'showPrepBrief' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:414:15:
+[37m      414 │       (click)="[32mshowPrepBrief[37m = false"
+          ╵                [32m~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'showPrepBrief' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:422:62:
+[37m      422 │ ...pe="button" class="ghost-action" (click)="[32mshowPrepBrief[37m = false">
+          ╵                                              [32m~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Unexpected closing tag "div". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:286:10:
+[37m      286 │           [32m</div>[37m
+          ╵           [32m~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'isMissingCustomer' does not exist on type 'TaskDrawerComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-drawer.component.html:109:62:
+[37m      109 │ ...="field-control" [class.field-missing]="[32misMissingCustomer[37m(task)">
+          ╵                                            [32m~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskDrawerComponent.
+
+    src/app/features/task-drawer/task-drawer.component.ts:18:15:
+[37m      18 │   templateUrl: [32m'./task-drawer.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'changeTaskCustomer' does not exist on type 'TaskDrawerComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-drawer.component.html:114:31:
+[37m      114 │               (ngModelChange)="[32mchangeTaskCustomer[37m(task, $event)"
+          ╵                                [32m~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskDrawerComponent.
+
+    src/app/features/task-drawer/task-drawer.component.ts:18:15:
+[37m      18 │   templateUrl: [32m'./task-drawer.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'isMissingCustomer' does not exist on type 'TaskDrawerComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-drawer.component.html:122:54:
+[37m      122 │ ...mall class="muted customer-hint" *ngIf="[32misMissingCustomer[37m(task)">
+          ╵                                            [32m~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskDrawerComponent.
+
+    src/app/features/task-drawer/task-drawer.component.ts:18:15:
+[37m      18 │   templateUrl: [32m'./task-drawer.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Unexpected closing tag "ng-container". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:287:12:
+[37m      287 │             [32m</ng-container>[37m
+          ╵             [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m

@@ -333,7 +333,7 @@ export class CatchUpDrawerComponent {
 
   private get meetings(): CustomerMeeting[] {
     const id = this.customerId;
-    return id ? this.workspace.visibleCustomerMeetingsByCustomer(id) : [];
+    return id ? this.workspace.customerMeetingsByCustomer(id) : [];
   }
 
   private get allTasks(): Task[] {

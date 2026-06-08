@@ -234,7 +234,7 @@ export class BoardPreviewModalComponent implements OnChanges {
 
   private get clientMeetings(): CustomerMeeting[] {
     if (this.entityType !== 'client' || !this.entityId) return [];
-    return this.workspace.visibleCustomerMeetingsByCustomer(this.entityId)
+    return this.workspace.customerMeetingsByCustomer(this.entityId)
       .slice()
       .sort((a, b) => b.meetingDate.localeCompare(a.meetingDate));
   }
@@ -243,7 +243,7 @@ export class BoardPreviewModalComponent implements OnChanges {
     if (this.entityType !== 'member' || !this.entityId) return [];
     const employeeId = this.workspace.employeeIdForMember(this.entityId);
     if (!employeeId) return [];
-    return this.workspace.visibleCustomerMeetings
+    return this.workspace.customerMeetings
       .filter(m =>
         m.meetingLeaderEmployeeId === employeeId ||
         m.internalParticipantEmployeeIds.includes(employeeId)

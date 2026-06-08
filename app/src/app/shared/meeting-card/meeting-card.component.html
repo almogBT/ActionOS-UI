@@ -1,6 +1,10 @@
 <article class="meeting-card" (click)="onOpen()">
   <div class="card-top">
-    <span class="status-chip" [ngClass]="workspace.statusClass(meeting.status)">
+    <span
+      *ngIf="workspace.shouldShowMeetingStatus(meeting.status)"
+      class="status-chip"
+      [ngClass]="workspace.statusClass(meeting.status)"
+    >
       {{ ('customerMeeting.statusValues.' + meeting.status) | t }}
     </span>
     <span *ngIf="isLed" class="led-badge">{{ 'meetingsOverview.ledBadge' | t }}</span>
@@ -56,7 +60,7 @@
     <p class="recap-meta">
       {{ customerName }}
       · {{ meeting.meetingDate | appDate }}
-      · {{ ('customerMeeting.statusValues.' + meeting.status) | t }}
+      <ng-container *ngIf="workspace.shouldShowMeetingStatus(meeting.status)">· {{ ('customerMeeting.statusValues.' + meeting.status) | t }}</ng-container>
       · {{ 'recap.ledBy' | t }} {{ leaderName }}
     </p>
 

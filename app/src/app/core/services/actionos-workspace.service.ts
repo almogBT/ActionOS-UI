@@ -2823,24 +2823,13 @@ export class ActionosWorkspaceService {
   }
 
   /**
-   * Whether a meeting should appear in the app's meeting lists/cards. Draft stages
-   * (Planned / Draft Summary) are hidden so half-started or abandoned drafts don't
-   * clutter overviews — only meetings that reached "Tasks Created" or "Closed" show.
-   * Note: this is a DISPLAY filter only; lookups by id, persistence, and the calendar
-   * still operate on the full set.
+   * Whether a meeting's status chip should be displayed. Only the "completed"
+   * stages — Tasks Created and Closed — show a status label; earlier draft stages
+   * (Planned / Draft Summary) render no chip. The meeting itself is always shown;
+   * this only controls the status badge.
    */
-  isMeetingListVisible(meeting: CustomerMeeting): boolean {
-    return meeting.status === 'Tasks Created' || meeting.status === 'Closed';
-  }
-
-  /** `customerMeetings` filtered to the statuses shown in lists/cards. */
-  get visibleCustomerMeetings(): CustomerMeeting[] {
-    return this.customerMeetings.filter((m) => this.isMeetingListVisible(m));
-  }
-
-  /** `customerMeetingsByCustomer` filtered to the statuses shown in lists/cards. */
-  visibleCustomerMeetingsByCustomer(customerId: string): CustomerMeeting[] {
-    return this.customerMeetingsByCustomer(customerId).filter((m) => this.isMeetingListVisible(m));
+  shouldShowMeetingStatus(status: CustomerMeetingStatus): boolean {
+    return status === 'Tasks Created' || status === 'Closed';
   }
 
   addCustomerMeeting(input: CreateCustomerMeetingInput): CustomerMeeting {

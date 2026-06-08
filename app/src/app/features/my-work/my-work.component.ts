@@ -78,7 +78,7 @@ export class MyWorkComponent {
 
   get myMeetings(): CustomerMeeting[] {
     const empId = this.workspace.currentEmployeeId;
-    const all = this.workspace.visibleCustomerMeetings;
+    const all = this.workspace.customerMeetings;
     const isMine = (m: CustomerMeeting) =>
       m.meetingLeaderEmployeeId === empId || m.internalParticipantEmployeeIds.includes(empId);
 

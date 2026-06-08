@@ -70,7 +70,11 @@ interface CustomerParticipantOption extends CustomerParticipant {
           <span class="eyebrow">{{ selectedCustomerForPrep?.name || ('customerMeeting.customer' | t) }}</span>
           <h3>{{ 'customerMeeting.title' | t }}</h3>
         </div>
-        <span class="status-chip" [ngClass]="workspace.statusClass(currentStatus())">
+        <span
+          *ngIf="workspace.shouldShowMeetingStatus(currentStatus())"
+          class="status-chip"
+          [ngClass]="workspace.statusClass(currentStatus())"
+        >
           {{ ('customerMeeting.statusValues.' + currentStatus()) | t }}
         </span>
       </div>
@@ -96,7 +100,11 @@ interface CustomerParticipantOption extends CustomerParticipant {
           <small>{{ setupSummaryLine }}</small>
         </div>
         <div class="topbar-actions">
-          <span class="status-chip" [ngClass]="workspace.statusClass(currentStatus())">
+          <span
+            *ngIf="workspace.shouldShowMeetingStatus(currentStatus())"
+            class="status-chip"
+            [ngClass]="workspace.statusClass(currentStatus())"
+          >
             {{ ('customerMeeting.statusValues.' + currentStatus()) | t }}
           </span>
           <button type="button" class="ghost-action" (click)="setupCollapsed = false">
