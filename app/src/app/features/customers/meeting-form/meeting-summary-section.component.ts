@@ -9,25 +9,22 @@ import { MEETING_FORM_STYLES } from './meeting-form.styles';
 /** Editable wrap-up fields the parent owns and persists alongside the rest of the meeting. */
 export interface MeetingSummaryDraft {
   summary: string;
-  nextMeetingDateLocal: string;
-  nextMeetingNotes: string;
 }
 
 /**
- * Wrap-up tab: meeting summary, next-meeting date/notes, the "before publishing"
- * follow-up checklist, and the recap publish action.
+ * Wrap-up tab: the meeting summary, the "before publishing" follow-up checklist, and
+ * the recap publish action. (The "notes for the next meeting" field now lives in the
+ * Notes tab, and next-meeting scheduling was removed.)
  *
- * Tailored for the account-manager flow — the next-meeting fields and open-follow-up
- * counts are front and centre. The parent owns the editable `draft` (so it can persist
- * everything in one call) and owns the publish/recap lifecycle (so closing the meeting
- * can reuse it); this component just renders and emits intent.
+ * The parent owns the editable `draft` and the publish/recap lifecycle (so closing the
+ * meeting can reuse it); this component just renders and emits intent.
  */
 @Component({
   selector: 'app-meeting-summary-section',
   standalone: true,
   imports: [CommonModule, FormsModule, TranslatePipe],
   template: `
-    <div class="form-grid">
+    <section class="summary-card">
       <label class="field-control wide">
         {{ 'customerMeeting.summary' | t }}
         <textarea
@@ -39,60 +36,88 @@ export interface MeetingSummaryDraft {
         ></textarea>
       </label>
 
-      <label class="field-control">
-        {{ 'customerMeeting.nextMeetingDate' | t }}
-        <input
-          type="datetime-local"
-          name="nextMeetingDate"
-          [(ngModel)]="draft.nextMeetingDateLocal"
-          (ngModelChange)="changed.emit()"
-        />
-      </label>
+      <div class="meeting-review-checklist" *ngIf="hasChecklistItems">
+        <strong>{{ 'customerMeeting.beforePublishing' | t }}</strong>
+        <ul>
+          <li *ngIf="actionsWithoutTaskCount > 0" class="warn checklist-link" (click)="goToNotes.emit()">
+            {{ 'customerMeeting.reviewActionsWithoutTask' | t }}: {{ actionsWithoutTaskCount }}
+            <span class="checklist-hint">→ review</span>
+          </li>
+          <li *ngIf="openBlockerTaskCount > 0" class="warn checklist-link" (click)="goToNotes.emit()">
+            {{ 'customerMeeting.reviewBlockersOpen' | t }}: {{ openBlockerTaskCount }}
+            <span class="checklist-hint">→ review</span>
+          </li>
+          <li *ngIf="capturedNotes.length > 0">
+            {{ 'customerMeeting.reviewNotesCaptured' | t }}: {{ capturedNotes.length }}
+            <ul class="checklist-notes">
+              <li *ngFor="let n of capturedNotes">
+                <span class="checklist-note-type">{{ ('noteType.' + n.type) | t }}</span>
+                {{ n.content }}
+              </li>
+            </ul>
+          </li>
+          <li *ngIf="openMeetingTasksCount > 0" class="blocking checklist-link" (click)="goToTasks.emit()">
+            {{ 'customerMeeting.reviewOpenTasks' | t }}: {{ openMeetingTasksCount }}
+            <span class="blocking-note">— {{ 'customerMeeting.reviewOpenTasksNote' | t }}</span>
+            <span class="checklist-hint">→ review</span>
+          </li>
+        </ul>
+      </div>
 
-      <label class="field-control wide">
-        {{ 'customerMeeting.nextMeetingNotes' | t }}
-        <textarea
-          name="nextMeetingNotes"
-          rows="3"
-          [(ngModel)]="draft.nextMeetingNotes"
-          (ngModelChange)="changed.emit()"
-          [placeholder]="'customerMeeting.nextMeetingNotesPlaceholder' | t"
-        ></textarea>
-        <small class="muted">{{ 'customerMeeting.nextMeetingNotesHint' | t }}</small>
-      </label>
-    </div>
-
-    <section class="meeting-review-checklist">
-      <strong>{{ 'customerMeeting.beforePublishing' | t }}</strong>
-      <ul>
-        <li [class.warn]="actionsWithoutTaskCount > 0" [class.checklist-link]="actionsWithoutTaskCount > 0" (click)="actionsWithoutTaskCount > 0 && goToNotes.emit()">
-          {{ 'customerMeeting.reviewActionsWithoutTask' | t }}: {{ actionsWithoutTaskCount }}
-          <span *ngIf="actionsWithoutTaskCount > 0" class="checklist-hint">→ review</span>
-        </li>
-        <li [class.warn]="openBlockerTaskCount > 0" [class.checklist-link]="openBlockerTaskCount > 0" (click)="openBlockerTaskCount > 0 && goToNotes.emit()">
-          {{ 'customerMeeting.reviewBlockersOpen' | t }}: {{ openBlockerTaskCount }}
-          <span *ngIf="openBlockerTaskCount > 0" class="checklist-hint">→ review</span>
-        </li>
-        <li [class.warn]="uncategorizedNotesCount > 0">
-          {{ 'customerMeeting.reviewNotesCaptured' | t }}: {{ capturedNotes.length }} ({{ 'customerMeeting.reviewUncategorized' | t }}: {{ uncategorizedNotesCount }})
-        </li>
-        <li [class.blocking]="openMeetingTasksCount > 0" [class.checklist-link]="openMeetingTasksCount > 0" (click)="openMeetingTasksCount > 0 && goToTasks.emit()">
-          {{ 'customerMeeting.reviewOpenTasks' | t }}: {{ openMeetingTasksCount }}
-          <span *ngIf="openMeetingTasksCount > 0" class="blocking-note">— {{ 'customerMeeting.reviewOpenTasksNote' | t }}</span>
-          <span *ngIf="openMeetingTasksCount > 0" class="checklist-hint">→ review</span>
-        </li>
-      </ul>
+      <div class="summary-actions">
+        <small class="muted">{{ 'customerMeeting.publishRecapHint' | t }}</small>
+        <button type="button" class="primary-action small" (click)="publish.emit()">
+          {{ 'customerMeeting.publishRecap' | t }}
+        </button>
+      </div>
     </section>
-
-    <div class="summary-publish-row">
-      <button type="button" class="primary-action" (click)="publish.emit()">
-        {{ 'customerMeeting.publishRecap' | t }}
-      </button>
-      <p class="muted">{{ 'customerMeeting.publishRecapHint' | t }}</p>
-    </div>
     <pre class="recap-preview" *ngIf="recap">{{ recap }}</pre>
   `,
-  styles: [MEETING_FORM_STYLES]
+  styles: [MEETING_FORM_STYLES, `
+    .summary-card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--bg-elevated);
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+    /* Checklist now lives inside the summary card — drop its own card chrome. */
+    .summary-card .meeting-review-checklist {
+      margin-top: 0;
+      border: none;
+      border-top: 1px solid var(--line);
+      border-radius: 0;
+      background: transparent;
+      padding: 10px 0 0;
+    }
+    .summary-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .summary-actions small { color: var(--muted); flex: 1; min-width: 160px; }
+    /* What each captured note said, listed under the count. */
+    .meeting-review-checklist .checklist-notes {
+      display: block;
+      margin: 4px 0 2px;
+      padding-inline-start: 16px;
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--text-secondary);
+    }
+    .meeting-review-checklist .checklist-notes li {
+      list-style: disc;
+      margin: 2px 0;
+    }
+    .checklist-note-type {
+      font-weight: 700;
+      color: var(--muted);
+      margin-inline-end: 4px;
+    }
+  `]
 })
 export class MeetingSummarySectionComponent {
   @Input() meeting!: CustomerMeeting;
@@ -127,10 +152,6 @@ export class MeetingSummarySectionComponent {
       }).length;
   }
 
-  get uncategorizedNotesCount(): number {
-    return this.capturedNotes.filter((n) => n.type === 'note').length;
-  }
-
   get openMeetingTasksCount(): number {
     if (!this.meeting) {
       return 0;
@@ -138,6 +159,14 @@ export class MeetingSummarySectionComponent {
     return this.workspace
       .meetingTasksByMeeting(this.meeting.id)
       .filter((t) => t.status !== 'Done' && t.status !== 'Cancelled').length;
+  }
+
+  /** Whether the pre-publish checklist has anything worth showing (else hide it). */
+  get hasChecklistItems(): boolean {
+    return this.actionsWithoutTaskCount > 0
+      || this.openBlockerTaskCount > 0
+      || this.capturedNotes.length > 0
+      || this.openMeetingTasksCount > 0;
   }
 
   private linkedTaskForNote(note: MeetingNote): Task | undefined {

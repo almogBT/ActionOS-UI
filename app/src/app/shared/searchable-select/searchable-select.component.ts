@@ -43,7 +43,7 @@ export interface SelectOption {
           (click)="triggerCreate()"
         >{{ createNewLabel }}</button>
         <button
-          *ngFor="let opt of filteredOptions"
+          *ngFor="let opt of filteredOptions; trackBy: trackOption"
           type="button"
           class="ss-option"
           [class.ss-selected]="isSelected(opt.value)"
@@ -196,6 +196,17 @@ export class SearchableSelectComponent implements ControlValueAccessor, OnDestro
   private onChange: (v: any) => void = () => {};
   private onTouched: () => void = () => {};
   private outsideClickListenerAttached = false;
+  private readonly filteredOptionsCache: {
+    crossLanguageMatch: boolean;
+    options: SelectOption[] | null;
+    searchText: string;
+    value: SelectOption[];
+  } = {
+    crossLanguageMatch: false,
+    options: null,
+    searchText: '',
+    value: []
+  };
 
   private readonly outsideClickListener = (event: MouseEvent): void => {
     if (!this.el.nativeElement.contains(event.target as Node)) {
@@ -224,14 +235,35 @@ export class SearchableSelectComponent implements ControlValueAccessor, OnDestro
   }
 
   get filteredOptions(): SelectOption[] {
-    if (!this.searchText) return this.options;
-    const q = this.searchText.toLowerCase();
-    if (this.crossLanguageMatch) {
-      return this.options.filter(o =>
-        o.label.toLowerCase().includes(q) || customerNameMatchesSearch(o.label, this.searchText)
-      );
+    if (
+      this.filteredOptionsCache.options === this.options &&
+      this.filteredOptionsCache.searchText === this.searchText &&
+      this.filteredOptionsCache.crossLanguageMatch === this.crossLanguageMatch
+    ) {
+      return this.filteredOptionsCache.value;
     }
-    return this.options.filter(o => o.label.toLowerCase().includes(q));
+
+    let value: SelectOption[];
+    if (!this.searchText) {
+      value = this.options;
+    } else {
+      const q = this.searchText.toLowerCase();
+      value = this.crossLanguageMatch
+        ? this.options.filter(o =>
+            o.label.toLowerCase().includes(q) || customerNameMatchesSearch(o.label, this.searchText)
+          )
+        : this.options.filter(o => o.label.toLowerCase().includes(q));
+    }
+
+    this.filteredOptionsCache.options = this.options;
+    this.filteredOptionsCache.searchText = this.searchText;
+    this.filteredOptionsCache.crossLanguageMatch = this.crossLanguageMatch;
+    this.filteredOptionsCache.value = value;
+    return value;
+  }
+
+  trackOption(_index: number, option: SelectOption): string {
+    return String(option.value);
   }
 
   isSelected(v: any): boolean { return this.value === v; }

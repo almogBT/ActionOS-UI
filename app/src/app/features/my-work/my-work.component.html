@@ -80,7 +80,7 @@
           <div class="mw-panel-tools">
             <div class="filter-strip">
               <button
-                *ngFor="let f of meetingFilterOptions"
+                *ngFor="let f of meetingFilterOptions; trackBy: trackMeetingFilter"
                 type="button"
                 [class.active]="meetingFilter === f.id"
                 (click)="meetingFilter = f.id"
@@ -107,7 +107,7 @@
           [class.mw-carousel]="!meetingsExpanded"
           [class.mw-meeting-grid-expanded]="meetingsExpanded"
           (wheel)="onRailWheel($event, railTrack)">
-          <app-meeting-card *ngFor="let m of myMeetings"
+          <app-meeting-card *ngFor="let m of myMeetings; trackBy: trackMeeting"
             [meeting]="m"
             [variant]="meetingsExpanded ? 'grid' : 'rail'"></app-meeting-card>
         </div>
@@ -126,7 +126,7 @@
           <div class="mw-panel-tools">
             <div class="filter-strip">
               <button
-                *ngFor="let f of taskFilterOptions"
+                *ngFor="let f of taskFilterOptions; trackBy: trackTaskFilter"
                 type="button"
                 [class.active]="taskFilter === f.id"
                 (click)="taskFilter = f.id"
@@ -178,7 +178,7 @@
 
       <div class="rail-client-list" *ngIf="railClients.length; else noClients">
         <button
-          *ngFor="let g of railClients"
+          *ngFor="let g of railClients; trackBy: trackRailClient"
           type="button"
           class="rail-client-row"
           (click)="openClientGroup(g)"
@@ -199,9 +199,16 @@
         <h3>{{ 'home.ownersAndBlockers' | t }}</h3>
       </header>
 
+      <input
+        type="search"
+        class="rail-search"
+        [(ngModel)]="railWorkloadSearch"
+        [placeholder]="'home.teamSearchPlaceholder' | t"
+      />
+
       <div class="rail-team-list" *ngIf="railWorkload.length; else noTeam">
         <button
-          *ngFor="let w of railWorkload"
+          *ngFor="let w of railWorkload; trackBy: trackWorkload"
           type="button"
           class="rail-team-row"
           (click)="openMemberBoard(w.member.id, w.member.name)"
@@ -286,9 +293,9 @@
     [closeLabel]="'common.close' | t"
     (close)="closeStat()"
   >
-    <article *ngFor="let item of followupItems" class="mw-followup">
+    <article *ngFor="let item of followupItems; trackBy: trackFollowup" class="mw-followup">
       <div class="mw-followup-body">
-        <span class="mw-followup-meeting">{{ workspace.customer(item.meeting.customerId)?.name }} · {{ item.meeting.subject }}</span>
+        <span class="mw-followup-meeting">{{ workspace.clientName(item.meeting.customerId) }} · {{ item.meeting.subject }}</span>
         <p class="mw-followup-text">{{ item.note.content }}</p>
       </div>
       <button type="button" class="ghost-action small" (click)="convertFollowup(item)">

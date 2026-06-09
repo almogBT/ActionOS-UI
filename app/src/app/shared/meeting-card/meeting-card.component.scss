@@ -11,55 +11,83 @@
 
 /* ── Card shell ────────────────────────────────────────────────────────── */
 .meeting-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 8px;
   height: 100%;
   padding: 12px;
+  padding-inline-start: 16px;     /* room for the state spine */
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--bg-elevated);
   box-shadow: var(--shadow-sm);
   cursor: pointer;
   overflow: hidden;
+  --spine-color: var(--accent);
   transition:
     transform var(--duration-fast) var(--ease-out),
     border-color var(--duration-fast) var(--ease-out),
     box-shadow var(--duration-fast) var(--ease-out);
+
+  /* Colored left spine encodes meeting state at a glance. */
+  &::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 4px;
+    background: var(--spine-color);
+  }
 
   &:hover {
     transform: translateY(-2px);
     border-color: var(--accent);
     box-shadow: var(--shadow-md);
   }
+
+  &.state-upcoming  { --spine-color: var(--accent); }
+  &.state-attention { --spine-color: var(--warning); }
+  &.state-blocked   { --spine-color: var(--danger); }
+  &.state-closed    { --spine-color: var(--olive); }
 }
 
-/* Left accent stripe when the current rep led the meeting. */
+/* Bolder accent border when the current rep led the meeting. */
 :host(.card-led) .meeting-card {
-  border-inline-start: 3px solid var(--accent);
+  border-width: 2px;
+  border-color: var(--accent);
 }
 
 .card-top {
   display: flex;
   align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  min-height: 22px;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 20px;
 }
 
-.led-badge {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--accent);
-  background: var(--accent-soft);
-  padding: 2px 7px;
-  border-radius: 999px;
+/* Customer name — a noticeable colored eyebrow above the subject title. */
+.card-eyebrow {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: var(--accent-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.card-top-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .card-date {
-  margin-inline-start: auto;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
   color: var(--muted);
   white-space: nowrap;
 }
@@ -72,19 +100,13 @@
   flex: 1 1 auto;          /* absorb slack so footer/metrics pin to the bottom */
 }
 
-.card-customer {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--ink);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.card-subject {
+/* Subject — the bold primary title of the tile. */
+.card-title {
   margin: 0;
-  font-size: 12px;
-  color: var(--text-secondary);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--ink);
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -108,11 +130,60 @@
   opacity: 0.7;
 }
 
+/* Adaptive lead line: meeting goal (upcoming) or a wrap-up nudge. */
+.card-lead {
+  margin: 2px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+  min-width: 0;
+}
+
+.lead-goal {
+  font-weight: 600;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lead-wrapup {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 700;
+  color: var(--warning);
+
+  app-icon { flex-shrink: 0; }
+}
+
+/* Customer-side attendees ("who you met / will meet"). */
+.card-attendees {
+  margin: 2px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  min-width: 0;
+
+  app-icon { color: var(--muted); flex-shrink: 0; }
+}
+
+.attendee-names {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
 /* ── Outcome metrics row (open tasks · follow-ups · blockers) ───────────── */
+/* Only non-zero metrics render (see template); each is color-coded so a real
+   signal pops instead of a row of grey zeros. */
 .card-metrics {
   display: flex;
   align-items: center;
   gap: 6px;
+  min-height: 24px;
 
   .metric {
     display: inline-flex;
@@ -129,6 +200,18 @@
 
     app-icon { color: var(--muted); }
 
+    &.metric-tasks {
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-color: var(--accent-soft);
+      app-icon { color: var(--accent); }
+    }
+
+    &.metric-actions {
+      color: var(--warning);
+      app-icon { color: var(--warning); }
+    }
+
     &.metric-danger {
       color: var(--danger);
       background: var(--danger-soft);
@@ -136,10 +219,10 @@
       app-icon { color: var(--danger); }
     }
 
-    &.metric-zero {
-      opacity: 0.45;
-      &.metric-danger { background: var(--surface-strong); border-color: var(--line); color: var(--muted); }
-      &.metric-danger app-icon { color: var(--muted); }
+    /* "All clear" placeholder — present so tiles keep a consistent height. */
+    &.metric-clear {
+      opacity: 0.5;
+      app-icon { color: var(--muted); }
     }
   }
 }
@@ -179,31 +262,38 @@
   color: var(--muted);
 }
 
+/* Quieter ghost button — it no longer competes with the title/eyebrow for
+   attention on every single card. */
 .recap-btn {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   flex-shrink: 0;
   padding: 5px 12px;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--line);
   border-radius: var(--radius-pill);
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: transparent;
+  color: var(--text-secondary);
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  transition: background var(--duration-fast), color var(--duration-fast);
+  transition:
+    background var(--duration-fast),
+    color var(--duration-fast),
+    border-color var(--duration-fast);
 
-  &:hover { background: var(--accent); color: #fff; }
+  &:hover { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
 }
 
 /* ── Rail variant: trim to the essentials so tiles stay tiny ───────────── */
 :host(.mc-rail) {
-  .meeting-card { padding: 10px; gap: 6px; }
+  .meeting-card { padding: 10px; padding-inline-start: 13px; gap: 6px; }
   .card-date,
   .card-summary,
+  .card-lead,
+  .card-attendees,
   .recap-btn { display: none; }
-  .card-subject { -webkit-line-clamp: 1; }
+  .card-title { font-size: 14px; -webkit-line-clamp: 2; }
 }
 
 /* ── Recap popup (read-only recap sections) ────────────────────────────── */

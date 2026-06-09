@@ -17,13 +17,21 @@ import { StatTasksViewComponent } from '../../shared/stat-modal/stat-tasks-view.
 import { StatTileComponent } from '../../shared/stat-tile/stat-tile.component';
 
 type MeetingLane = 'upcoming' | 'in-progress' | 'closed';
+/** The two list sections: open (Tasks Created) vs Completed (Closed). */
+type MeetingSection = 'tasks-created' | 'completed';
 export type MeetingTileLens = 'upcoming' | 'in-progress' | 'open-tasks';
 type QuickFilter = 'all' | 'week' | 'followups' | 'led';
 
 interface LaneBucket {
-  lane: MeetingLane;
+  lane: MeetingSection;
   labelKey: string;
   meetings: CustomerMeeting[];
+}
+
+interface MeetingLaneCache {
+  source: CustomerMeeting[];
+  today: string;
+  lanes: Record<MeetingLane, CustomerMeeting[]>;
 }
 
 @Component({
@@ -56,6 +64,34 @@ export class MeetingsComponent implements OnInit, OnChanges {
     { id: 'led',       labelKey: 'meetingsOverview.filterLed' }
   ];
 
+  private readonly emptyMeetings: CustomerMeeting[] = [];
+
+  private customerFilterOptionsCache: { clients: { id: string; name: string }[]; language: string; options: SelectOption[] } | null = null;
+  private prepPickerOptionsCache: { clients: { id: string; name: string }[]; options: SelectOption[] } | null = null;
+  private customerScopedMeetingsCache: {
+    meetings: CustomerMeeting[];
+    customerFilter: string;
+    result: CustomerMeeting[];
+  } | null = null;
+  private filteredMeetingsCache: {
+    scopedMeetings: CustomerMeeting[];
+    search: string;
+    quickFilter: QuickFilter;
+    currentEmployeeId: string;
+    today: string;
+    weekEnd: string;
+    result: CustomerMeeting[];
+  } | null = null;
+  private attentionMeetingsCache: {
+    scopedMeetings: CustomerMeeting[];
+    today: string;
+    result: CustomerMeeting[];
+  } | null = null;
+  private laneCache: MeetingLaneCache | null = null;
+  private bucketsCache: { laneCache: MeetingLaneCache; buckets: LaneBucket[] } | null = null;
+  private meetingCalendarEventsCache: { events: CalendarEvent[]; result: CalendarEvent[] } | null = null;
+  private actionItemsCache = new WeakMap<CustomerMeeting, { notes: MeetingNote[]; result: MeetingNote[] }>();
+
   constructor(public workspace: ActionosWorkspaceService, private i18n: ActionosI18nService) {}
 
   ngOnInit(): void {
@@ -78,42 +114,93 @@ export class MeetingsComponent implements OnInit, OnChanges {
   // ── Customer filter ───────────────────────────────────────────────────────
 
   get customerFilterOptions(): SelectOption[] {
-    return [
+    const clients = this.workspace.clientOptions;
+    const language = this.i18n.language;
+    const cached = this.customerFilterOptionsCache;
+    if (cached && cached.clients === clients && cached.language === language) {
+      return cached.options;
+    }
+
+    const options = [
       { value: 'all', label: this.i18n.translate('meetingsOverview.allCustomers') },
-      ...this.workspace.customers.map(c => ({ value: c.id, label: c.name }))
+      ...clients.map(c => ({ value: c.id, label: c.name }))
     ];
+    this.customerFilterOptionsCache = { clients, language, options };
+    return options;
   }
 
   get prepPickerOptions(): SelectOption[] {
-    return this.workspace.customers.map(c => ({ value: c.id, label: c.name }));
+    const clients = this.workspace.clientOptions;
+    const cached = this.prepPickerOptionsCache;
+    if (cached && cached.clients === clients) {
+      return cached.options;
+    }
+
+    const options = clients.map(c => ({ value: c.id, label: c.name }));
+    this.prepPickerOptionsCache = { clients, options };
+    return options;
   }
 
   /** Customer-scoped only — the stable set the attention rail is built from. */
   get customerScopedMeetings(): CustomerMeeting[] {
     const all = this.workspace.customerMeetings;
-    return this.customerFilter === 'all'
+    const cached = this.customerScopedMeetingsCache;
+    if (cached && cached.meetings === all && cached.customerFilter === this.customerFilter) {
+      return cached.result;
+    }
+
+    const result = this.customerFilter === 'all'
       ? all
-      : all.filter(m => m.customerId === this.customerFilter);
+      : this.workspace.customerMeetingsByCustomer(this.customerFilter);
+    this.customerScopedMeetingsCache = { meetings: all, customerFilter: this.customerFilter, result };
+    return result;
   }
 
   /** Customer scope + search + active quick-filter — drives the lanes. */
   get filteredMeetings(): CustomerMeeting[] {
-    let list = this.customerScopedMeetings;
+    const scopedMeetings = this.customerScopedMeetings;
+    const search = this.search.trim().toLowerCase();
+    const today = this.todayIso();
+    const weekEnd = this.weekEndIso(today);
+    const currentEmployeeId = this.workspace.currentEmployeeId;
+    const cached = this.filteredMeetingsCache;
+    if (
+      cached &&
+      cached.scopedMeetings === scopedMeetings &&
+      cached.search === search &&
+      cached.quickFilter === this.quickFilter &&
+      cached.currentEmployeeId === currentEmployeeId &&
+      cached.today === today &&
+      cached.weekEnd === weekEnd
+    ) {
+      return cached.result;
+    }
 
-    const q = this.search.trim().toLowerCase();
-    if (q) {
+    let list = scopedMeetings;
+
+    if (search) {
       list = list.filter(m =>
-        m.subject.toLowerCase().includes(q) ||
-        (this.workspace.customer(m.customerId)?.name ?? '').toLowerCase().includes(q) ||
-        (m.goal ?? '').toLowerCase().includes(q)
+        m.subject.toLowerCase().includes(search) ||
+        (this.workspace.clientName(m.customerId) ?? '').toLowerCase().includes(search) ||
+        (m.goal ?? '').toLowerCase().includes(search)
       );
     }
 
     switch (this.quickFilter) {
-      case 'week':      list = list.filter(m => this.isThisWeek(m)); break;
+      case 'week':      list = list.filter(m => this.isWithinWeek(m, today, weekEnd)); break;
       case 'followups': list = list.filter(m => this.meetingActionItems(m).length > 0); break;
       case 'led':       list = list.filter(m => this.isMeetingLed(m)); break;
     }
+
+    this.filteredMeetingsCache = {
+      scopedMeetings,
+      search,
+      quickFilter: this.quickFilter,
+      currentEmployeeId,
+      today,
+      weekEnd,
+      result: list
+    };
     return list;
   }
 
@@ -122,36 +209,59 @@ export class MeetingsComponent implements OnInit, OnChanges {
   }
 
   // ── Attention rail ──────────────────────────────────────────────────────────
-  // Meetings that are waiting on the rep: open follow-up action items, or a
-  // meeting that has already happened but was never wrapped up.
+  // Meetings that still have at least one open task (any task not Done/Cancelled).
 
   get attentionMeetings(): CustomerMeeting[] {
-    const today = new Date().toISOString().slice(0, 10);
-    return this.customerScopedMeetings
-      .filter(m => this.needsAttention(m, today))
+    const scopedMeetings = this.customerScopedMeetings;
+    const today = this.todayIso();
+    const cached = this.attentionMeetingsCache;
+    if (cached && cached.scopedMeetings === scopedMeetings && cached.today === today) {
+      return cached.result;
+    }
+
+    const result = scopedMeetings
+      .filter(m => this.needsAttention(m))
       .sort((a, b) => a.meetingDate.localeCompare(b.meetingDate));
+    this.attentionMeetingsCache = { scopedMeetings, today, result };
+    return result;
   }
 
-  private needsAttention(m: CustomerMeeting, today: string): boolean {
-    if (m.status === 'Closed') return false;
-    if (this.meetingActionItems(m).length > 0) return true;
-    const day = m.meetingDate.slice(0, 10);
-    return day < today && (m.status === 'Planned' || m.status === 'Draft Summary');
+  private needsAttention(m: CustomerMeeting): boolean {
+    // Surfaced while the meeting still has an open task (not Done / not Cancelled).
+    return this.workspace
+      .meetingTasksByMeeting(m.id)
+      .some(t => this.workspace.isOpenMeetingTaskStatus(t.status));
   }
 
   // ── Lanes ─────────────────────────────────────────────────────────────────
 
   get buckets(): LaneBucket[] {
-    return [
-      { lane: 'upcoming',    labelKey: 'meetingsOverview.upcoming',   meetings: this.getLane('upcoming') },
-      { lane: 'in-progress', labelKey: 'meetingsOverview.inProgress', meetings: this.getLane('in-progress') },
-      { lane: 'closed',      labelKey: 'meetingsOverview.closed',     meetings: this.getLane('closed') }
+    const laneCache = this.getLaneCache();
+    const cached = this.bucketsCache;
+    if (cached && cached.laneCache === laneCache) {
+      return cached.buckets;
+    }
+
+    // Two sections only: everything that isn't Closed (upcoming + still-active,
+    // shown under "Tasks Created") and the Closed meetings ("Completed").
+    const buckets: LaneBucket[] = [
+      {
+        lane: 'tasks-created',
+        labelKey: 'meetingsOverview.tasksCreatedLane',
+        meetings: [...laneCache.lanes.upcoming, ...laneCache.lanes['in-progress']]
+      },
+      {
+        lane: 'completed',
+        labelKey: 'meetingsOverview.completedLane',
+        meetings: laneCache.lanes.closed
+      }
     ];
+    this.bucketsCache = { laneCache, buckets };
+    return buckets;
   }
 
   getLane(lane: MeetingLane): CustomerMeeting[] {
-    const today = new Date().toISOString().slice(0, 10);
-    return this.filteredMeetings.filter(m => this.assignLane(m, today) === lane);
+    return this.getLaneCache().lanes[lane] ?? this.emptyMeetings;
   }
 
   // ── Lane collapse ───────────────────────────────────────────────────────────
@@ -159,13 +269,13 @@ export class MeetingsComponent implements OnInit, OnChanges {
   // hundreds of meetings: a collapsed lane renders no cards at all, and an
   // expanded lane scrolls inside a capped viewport instead of growing the page.
 
-  private collapsedLanes = new Set<MeetingLane>();
+  private collapsedLanes = new Set<MeetingSection>();
 
-  isLaneCollapsed(lane: MeetingLane): boolean {
+  isLaneCollapsed(lane: MeetingSection): boolean {
     return this.collapsedLanes.has(lane);
   }
 
-  toggleLane(lane: MeetingLane): void {
+  toggleLane(lane: MeetingSection): void {
     if (this.collapsedLanes.has(lane)) {
       this.collapsedLanes.delete(lane);
     } else {
@@ -182,15 +292,14 @@ export class MeetingsComponent implements OnInit, OnChanges {
   }
 
   meetingActionItems(m: CustomerMeeting): MeetingNote[] {
-    return m.notes.filter(n => n.type === 'action' && !n.convertedTaskId);
-  }
+    const cached = this.actionItemsCache.get(m);
+    if (cached && cached.notes === m.notes) {
+      return cached.result;
+    }
 
-  private isThisWeek(m: CustomerMeeting): boolean {
-    const day = m.meetingDate.slice(0, 10);
-    const now = new Date();
-    const start = now.toISOString().slice(0, 10);
-    const end = new Date(now.getTime() + 7 * 86_400_000).toISOString().slice(0, 10);
-    return day >= start && day <= end;
+    const result = m.notes.filter(n => n.type === 'action' && !n.convertedTaskId);
+    this.actionItemsCache.set(m, { notes: m.notes, result });
+    return result;
   }
 
   get openMeetingTasksCount(): number {
@@ -204,7 +313,15 @@ export class MeetingsComponent implements OnInit, OnChanges {
   // ── Calendar (meetings only, no tasks) ────────────────────────────────────
 
   get meetingCalendarEvents(): CalendarEvent[] {
-    return this.workspace.calendarEvents.filter(e => e.kind !== 'task');
+    const events = this.workspace.calendarEvents;
+    const cached = this.meetingCalendarEventsCache;
+    if (cached && cached.events === events) {
+      return cached.result;
+    }
+
+    const result = events.filter(e => e.kind !== 'task');
+    this.meetingCalendarEventsCache = { events, result };
+    return result;
   }
 
   onCalendarEventOpened(evt: CalendarEvent): void {
@@ -243,12 +360,12 @@ export class MeetingsComponent implements OnInit, OnChanges {
   // ── Actions ───────────────────────────────────────────────────────────────
 
   onPrepCustomerSelected(customerId: string): void {
-    const customer = this.workspace.customers.find(c => c.id === customerId);
-    if (customer) {
-      this.showPrepPicker = false;
-      this.prepPickerCustomerId = '';
-      this.prepareMeeting.emit(customer);
+    if (!customerId) {
+      return;
     }
+    this.showPrepPicker = false;
+    this.prepPickerCustomerId = '';
+    this.workspace.openCatchUpDrawer(customerId);
   }
 
   newMeeting(): void {
@@ -284,11 +401,59 @@ export class MeetingsComponent implements OnInit, OnChanges {
     this.customerFilter = 'all';
   }
 
+  trackQuickFilter(_: number, filter: { id: QuickFilter }): QuickFilter {
+    return filter.id;
+  }
+
+  trackBucket(_: number, bucket: LaneBucket): MeetingSection {
+    return bucket.lane;
+  }
+
+  trackMeeting(_: number, meeting: CustomerMeeting): string {
+    return meeting.id;
+  }
+
   private assignLane(m: CustomerMeeting, today: string): MeetingLane {
     const meetingDay = m.meetingDate.slice(0, 10);
     const closedStatuses: CustomerMeetingStatus[] = ['Closed'];
     if (closedStatuses.includes(m.status)) return 'closed';
     if (meetingDay >= today) return 'upcoming';
     return 'in-progress';
+  }
+
+  private getLaneCache(): MeetingLaneCache {
+    const source = this.filteredMeetings;
+    const today = this.todayIso();
+    const cached = this.laneCache;
+    if (cached && cached.source === source && cached.today === today) {
+      return cached;
+    }
+
+    const lanes: Record<MeetingLane, CustomerMeeting[]> = {
+      upcoming: [],
+      'in-progress': [],
+      closed: []
+    };
+    source.forEach((meeting) => {
+      lanes[this.assignLane(meeting, today)].push(meeting);
+    });
+
+    const nextCache = { source, today, lanes };
+    this.laneCache = nextCache;
+    return nextCache;
+  }
+
+  private isWithinWeek(m: CustomerMeeting, today: string, weekEnd: string): boolean {
+    const day = m.meetingDate.slice(0, 10);
+    return day >= today && day <= weekEnd;
+  }
+
+  private todayIso(): string {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  private weekEndIso(today: string): string {
+    const start = new Date(`${today}T00:00:00Z`);
+    return new Date(start.getTime() + 7 * 86_400_000).toISOString().slice(0, 10);
   }
 }

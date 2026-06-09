@@ -15,23 +15,7 @@ import { SearchableSelectComponent, SelectOption } from '../../shared/searchable
   template: `
     <section class="panel inline-create" (click)="$event.stopPropagation()">
       <div class="panel-header">
-        <div>
-          <span class="eyebrow">{{ 'meetingTask.title' | t }}</span>
-          <h3>{{ 'meetingTask.createTask' | t }}</h3>
-        </div>
-        <div class="topbar-actions">
-          <button type="button" class="ghost-action" (click)="cancelled.emit()">
-            {{ 'common.cancel' | t }}
-          </button>
-          <button
-            type="button"
-            class="primary-action"
-            [disabled]="!canCreate()"
-            (click)="create()"
-          >
-            {{ 'meetingTask.createTask' | t }}
-          </button>
-        </div>
+        <h3>{{ 'meetingTask.createTask' | t }}</h3>
       </div>
 
       <div class="form-grid">
@@ -55,34 +39,45 @@ import { SearchableSelectComponent, SelectOption } from '../../shared/searchable
           ></textarea>
         </label>
 
-        <label class="field-control">
-          {{ 'meetingTask.assignedTo' | t }}
-          <app-searchable-select
-            name="taskAssignee"
-            [(ngModel)]="form.assignedToEmployeeId"
-            [options]="assigneeOptions"
-          ></app-searchable-select>
-          <small class="muted">{{ 'meetingTask.assignedToHint' | t }}</small>
-        </label>
+        <div class="task-meta-row">
+          <label class="field-control">
+            {{ 'meetingTask.assignedTo' | t }}
+            <app-searchable-select
+              name="taskAssignee"
+              [(ngModel)]="form.assignedToEmployeeId"
+              [options]="assigneeOptions"
+            ></app-searchable-select>
+            <small class="muted">{{ 'meetingTask.assignedToHint' | t }}</small>
+          </label>
 
-        <label class="field-control">
-          {{ 'meetingTask.openedBy' | t }}
-          <input type="text" disabled [value]="workspace.employeeName(workspace.currentEmployeeId)" />
-        </label>
+          <label class="field-control">
+            {{ 'meetingTask.dueDate' | t }}
+            <input type="date" name="taskDue" [(ngModel)]="form.dueDate" />
+          </label>
 
-        <label class="field-control">
-          {{ 'meetingTask.dueDate' | t }}
-          <input type="date" name="taskDue" [(ngModel)]="form.dueDate" />
-        </label>
+          <label class="field-control">
+            {{ 'meetingTask.priority' | t }}
+            <app-searchable-select
+              name="taskPriority"
+              [(ngModel)]="form.priority"
+              [options]="priorityOptions"
+            ></app-searchable-select>
+          </label>
+        </div>
+      </div>
 
-        <label class="field-control">
-          {{ 'meetingTask.priority' | t }}
-          <app-searchable-select
-            name="taskPriority"
-            [(ngModel)]="form.priority"
-            [options]="priorityOptions"
-          ></app-searchable-select>
-        </label>
+      <div class="create-actions">
+        <button type="button" class="ghost-action" (click)="cancelled.emit()">
+          {{ 'common.cancel' | t }}
+        </button>
+        <button
+          type="button"
+          class="primary-action"
+          [disabled]="!canCreate()"
+          (click)="create()"
+        >
+          {{ 'meetingTask.createTask' | t }}
+        </button>
       </div>
     </section>
   `,
@@ -99,9 +94,25 @@ import { SearchableSelectComponent, SelectOption } from '../../shared/searchable
       gap: 1rem;
     }
     .field-control.wide { grid-column: 1 / -1; }
+    /* Assigned to · Due date · Priority share one row. */
+    .task-meta-row {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+      align-items: start;
+    }
     small.muted { display: block; margin-top: 0.25rem; opacity: 0.7; }
+    /* Cancel / Create pinned to the bottom corner of the panel. */
+    .create-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 1rem;
+    }
     @media (max-width: 720px) {
       .form-grid { grid-template-columns: 1fr; }
+      .task-meta-row { grid-template-columns: 1fr; }
     }
   `]
 })
@@ -127,7 +138,7 @@ export class MeetingTaskCreationComponent {
   get assigneeOptions(): SelectOption[] {
     return [
       { value: '', label: this.i18n.translate('meetingTask.selectAssignee') },
-      ...this.workspace.employees.map(e => ({ value: e.id, label: e.email ? `${e.fullName} (${e.email})` : e.fullName }))
+      ...this.workspace.employees.map(e => ({ value: e.id, label: e.fullName }))
     ];
   }
 

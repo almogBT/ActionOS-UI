@@ -2,11 +2,7 @@
 
   <!-- ── Header ──────────────────────────────────────────────────────────── -->
   <div class="screen-title">
-    <div>
-      <span class="eyebrow">{{ 'tasks.eyebrow' | t }}</span>
-      <h2>{{ 'tasks.title' | t }}</h2>
-      <p class="screen-sub">{{ 'tasks.subtitle' | t }}</p>
-    </div>
+    <p class="screen-sub">{{ 'tasks.subtitle' | t }}</p>
     <button type="button" class="ghost-action" (click)="openView('my-work')">{{ 'tasks.openMyWork' | t }}</button>
   </div>
 
@@ -34,20 +30,36 @@
     ></app-stat-tile>
   </app-calendar-stats>
 
-  <!-- ── Controls: audience filter · origin · search ─────────────────────── -->
+  <!-- ── Controls: audience · group-by · count · origin · search (one row) ─── -->
   <div class="tasks-controls">
-    <div class="filter-strip">
-      <button
-        *ngFor="let f of audienceOptions"
-        type="button"
-        [class.active]="audience === f.id"
-        (click)="audience = f.id"
-      >{{ f.labelKey | t }}</button>
+    <div class="controls-filters">
+      <div class="filter-strip" role="tablist" [attr.aria-label]="'tasks.audience.all' | t">
+        <button
+          *ngFor="let f of audienceOptions; trackBy: trackAudience"
+          type="button"
+          [class.active]="audience === f.id"
+          (click)="audience = f.id"
+        >{{ f.labelKey | t }}</button>
+      </div>
+
+      <span class="controls-divider" aria-hidden="true"></span>
+
+      <span class="filter-strip-label">{{ 'tasks.groupBy.label' | t }}</span>
+      <div class="filter-strip" role="tablist" [attr.aria-label]="'tasks.groupBy.label' | t">
+        <button
+          *ngFor="let g of groupByOptions; trackBy: trackGroupBy"
+          type="button"
+          [class.active]="groupBy === g.id"
+          (click)="groupBy = g.id"
+        >{{ g.labelKey | t }}</button>
+      </div>
+
+      <span class="controls-count">{{ filteredTasks.length }}</span>
     </div>
 
     <div class="controls-right">
       <select class="origin-select" [(ngModel)]="origin" [attr.aria-label]="'tasks.origin.label' | t">
-        <option *ngFor="let o of originOptions" [value]="o.id">{{ o.labelKey | t }}</option>
+        <option *ngFor="let o of originOptions; trackBy: trackOrigin" [value]="o.id">{{ o.labelKey | t }}</option>
       </select>
       <input
         type="search"
@@ -58,11 +70,11 @@
     </div>
   </div>
 
-  <!-- ── The one shared task table ───────────────────────────────────────── -->
+  <!-- ── The one shared task table (group switch lives in the row above) ───── -->
   <app-task-table
     [tasks]="filteredTasks"
-    groupBy="due"
-    [showGroupSwitch]="true"
+    [groupBy]="groupBy"
+    [showGroupSwitch]="false"
     [allowAddTask]="origin !== 'meeting'"
   ></app-task-table>
 

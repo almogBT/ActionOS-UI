@@ -93,7 +93,7 @@ import { MEETING_FORM_STYLES } from './meeting-form.styles';
     </form>
 
     <div class="notes-list" id="notes-list" *ngIf="capturedNotes.length; else noNotesYet">
-      <div *ngFor="let n of capturedNotes" class="note-row">
+      <div *ngFor="let n of capturedNotes; trackBy: trackNote" class="note-row">
         <span class="status-chip" [ngClass]="n.type">
           {{ ('noteType.' + n.type) | t }}
         </span>
@@ -236,6 +236,18 @@ import { MEETING_FORM_STYLES } from './meeting-form.styles';
       </div>
     </ng-template>
 
+    <label class="field-control wide next-meeting-notes">
+      {{ 'customerMeeting.nextMeetingNotes' | t }}
+      <textarea
+        name="nextMeetingNotes"
+        rows="3"
+        [ngModel]="nextMeetingNotes"
+        (ngModelChange)="nextMeetingNotesChange.emit($event)"
+        [placeholder]="'customerMeeting.nextMeetingNotesPlaceholder' | t"
+      ></textarea>
+      <small class="muted">{{ 'customerMeeting.nextMeetingNotesHint' | t }}</small>
+    </label>
+
     <app-note-detail-modal
       *ngIf="openedNote"
       [note]="openedNote"
@@ -243,7 +255,7 @@ import { MEETING_FORM_STYLES } from './meeting-form.styles';
       (close)="openedNote = null"
     />
   `,
-  styles: [MEETING_FORM_STYLES]
+  styles: [MEETING_FORM_STYLES, `.next-meeting-notes { margin-top: 14px; }`]
 })
 export class MeetingNotesSectionComponent implements OnInit {
   @Input() meeting!: CustomerMeeting;
@@ -252,6 +264,10 @@ export class MeetingNotesSectionComponent implements OnInit {
   @Output() changed = new EventEmitter<void>();
   /** Emitted when the user wants to turn a note into a task. */
   @Output() createTaskFromNote = new EventEmitter<MeetingNote>();
+
+  /** "Notes for the next meeting" now lives in this (Notes) tab; the parent persists it. */
+  @Input() nextMeetingNotes = '';
+  @Output() nextMeetingNotesChange = new EventEmitter<string>();
 
   /** Only Note + Action are offered when creating; legacy types stay editable. */
   readonly captureTypeOptions: NoteType[] = ['note', 'action'];
@@ -286,6 +302,12 @@ export class MeetingNotesSectionComponent implements OnInit {
     return [...this.meeting.notes].sort((a, b) =>
       (b.createdAt ?? '').localeCompare(a.createdAt ?? '')
     );
+  }
+
+  /** Stable identity for the notes list so background store refreshes don't
+   *  destroy/recreate rows (which looked like notes "disappearing and reappearing"). */
+  trackNote(_index: number, note: MeetingNote): string {
+    return note.id;
   }
 
   get noteOwnerOptions(): SelectOption[] {

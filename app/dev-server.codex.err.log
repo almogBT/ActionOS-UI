@@ -2714,3 +2714,2486 @@
           ╵             [32m~~~~~~~~~~~~~~~[0m
 
 [39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'visibleCustomerMeetingsByCustomer' does not exist on type 'ActionosWorkspaceService'. Did you mean 'customerMeetingsByCustomer'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:113:26:
+[37m      113 │ ...this.workspace.[32mvisibleCustomerMeetingsByCustomer[37m(this.selected...
+          ╵                   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  'customerMeetingsByCustomer' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:2821:2:
+[37m      2821 │   [32mcustomerMeetingsByCustomer[37m(customerId: string): CustomerMeetin...
+           ╵   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'a' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:115:13:
+[37m      115 │       .sort(([32ma[37m, b) => b.meetingDate.localeCompare(a.meetingDate));
+          ╵              [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'b' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:115:16:
+[37m      115 │       .sort((a, [32mb[37m) => b.meetingDate.localeCompare(a.meetingDate));
+          ╵                 [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'visibleCustomerMeetingsByCustomer' does not exist on type 'ActionosWorkspaceService'. Did you mean 'customerMeetingsByCustomer'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/catch-up-drawer/catch-up-drawer.component.ts:336:31:
+[37m      336 │ ...n id ? this.workspace.[32mvisibleCustomerMeetingsByCustomer[37m(id) : [];
+          ╵                          [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  'customerMeetingsByCustomer' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:2821:2:
+[37m      2821 │   [32mcustomerMeetingsByCustomer[37m(customerId: string): CustomerMeetin...
+           ╵   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'visibleCustomerMeetings' does not exist on type 'ActionosWorkspaceService'. Did you mean 'customerMeetings'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.ts:93:31:
+[37m      93 │     const all = this.workspace.[32mvisibleCustomerMeetings[37m;
+         ╵                                [32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  'customerMeetings' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:2813:6:
+[37m      2813 │   get [32mcustomerMeetings[37m(): CustomerMeeting[] {
+           ╵       [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'm' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.ts:96:19:
+[37m      96 │       : all.filter([32mm[37m => m.customerId === this.customerFilter);
+         ╵                    [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'visibleCustomerMeetings' does not exist on type 'ActionosWorkspaceService'. Did you mean 'customerMeetings'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.ts:81:31:
+[37m      81 │     const all = this.workspace.[32mvisibleCustomerMeetings[37m;
+         ╵                                [32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  'customerMeetings' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:2813:6:
+[37m      2813 │   get [32mcustomerMeetings[37m(): CustomerMeeting[] {
+           ╵       [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'm' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.ts:86:41:
+[37m      86 │ ... 'upcoming': return all.filter([32mm[37m => isMine(m) && m.status !== '...
+         ╵                                   [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'm' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.ts:87:41:
+[37m      87 │ ... 'led':      return all.filter([32mm[37m => m.meetingLeaderEmployeeId =...
+         ╵                                   [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'm' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.ts:88:41:
+[37m      88 │ ... 'past':     return all.filter([32mm[37m => isMine(m) && m.status === '...
+         ╵                                   [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'visibleCustomerMeetingsByCustomer' does not exist on type 'ActionosWorkspaceService'. Did you mean 'customerMeetingsByCustomer'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:237:26:
+[37m      237 │ ...n this.workspace.[32mvisibleCustomerMeetingsByCustomer[37m(this.entityId)
+          ╵                     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  'customerMeetingsByCustomer' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:2821:2:
+[37m      2821 │   [32mcustomerMeetingsByCustomer[37m(customerId: string): CustomerMeetin...
+           ╵   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'a' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:239:13:
+[37m      239 │       .sort(([32ma[37m, b) => b.meetingDate.localeCompare(a.meetingDate));
+          ╵              [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'b' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:239:16:
+[37m      239 │       .sort((a, [32mb[37m) => b.meetingDate.localeCompare(a.meetingDate));
+          ╵                 [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'visibleCustomerMeetings' does not exist on type 'ActionosWorkspaceService'. Did you mean 'customerMeetings'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:246:26:
+[37m      246 │     return this.workspace.[32mvisibleCustomerMeetings[37m
+          ╵                           [32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  'customerMeetings' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:2813:6:
+[37m      2813 │   get [32mcustomerMeetings[37m(): CustomerMeeting[] {
+           ╵       [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'm' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:247:14:
+[37m      247 │       .filter([32mm[37m =>
+          ╵               [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'a' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:251:13:
+[37m      251 │       .sort(([32ma[37m, b) => b.meetingDate.localeCompare(a.meetingDate));
+          ╵              [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'b' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:251:16:
+[37m      251 │       .sort((a, [32mb[37m) => b.meetingDate.localeCompare(a.meetingDate));
+          ╵                 [32m^[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'visibleCustomerMeetingsByCustomer' does not exist on type 'ActionosWorkspaceService'. Did you mean 'customerMeetingsByCustomer'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:113:26:
+[37m      113 │ ...this.workspace.[32mvisibleCustomerMeetingsByCustomer[37m(this.selected...
+          ╵                   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  'customerMeetingsByCustomer' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:2821:2:
+[37m      2821 │   [32mcustomerMeetingsByCustomer[37m(customerId: string): CustomerMeetin...
+           ╵   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'a' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:115:13:
+[37m      115 │       .sort(([32ma[37m, b) => b.meetingDate.localeCompare(a.meetingDate));
+          ╵              [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'b' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:115:16:
+[37m      115 │       .sort((a, [32mb[37m) => b.meetingDate.localeCompare(a.meetingDate));
+          ╵                 [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'visibleCustomerMeetingsByCustomer' does not exist on type 'ActionosWorkspaceService'. Did you mean 'customerMeetingsByCustomer'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/catch-up-drawer/catch-up-drawer.component.ts:336:31:
+[37m      336 │ ...n id ? this.workspace.[32mvisibleCustomerMeetingsByCustomer[37m(id) : [];
+          ╵                          [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  'customerMeetingsByCustomer' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:2821:2:
+[37m      2821 │   [32mcustomerMeetingsByCustomer[37m(customerId: string): CustomerMeetin...
+           ╵   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'visibleCustomerMeetings' does not exist on type 'ActionosWorkspaceService'. Did you mean 'customerMeetings'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.ts:81:31:
+[37m      81 │     const all = this.workspace.[32mvisibleCustomerMeetings[37m;
+         ╵                                [32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  'customerMeetings' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:2813:6:
+[37m      2813 │   get [32mcustomerMeetings[37m(): CustomerMeeting[] {
+           ╵       [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'm' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.ts:86:41:
+[37m      86 │ ... 'upcoming': return all.filter([32mm[37m => isMine(m) && m.status !== '...
+         ╵                                   [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'm' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.ts:87:41:
+[37m      87 │ ... 'led':      return all.filter([32mm[37m => m.meetingLeaderEmployeeId =...
+         ╵                                   [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'm' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.ts:88:41:
+[37m      88 │ ... 'past':     return all.filter([32mm[37m => isMine(m) && m.status === '...
+         ╵                                   [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'visibleCustomerMeetingsByCustomer' does not exist on type 'ActionosWorkspaceService'. Did you mean 'customerMeetingsByCustomer'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:237:26:
+[37m      237 │ ...n this.workspace.[32mvisibleCustomerMeetingsByCustomer[37m(this.entityId)
+          ╵                     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  'customerMeetingsByCustomer' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:2821:2:
+[37m      2821 │   [32mcustomerMeetingsByCustomer[37m(customerId: string): CustomerMeetin...
+           ╵   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'a' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:239:13:
+[37m      239 │       .sort(([32ma[37m, b) => b.meetingDate.localeCompare(a.meetingDate));
+          ╵              [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'b' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:239:16:
+[37m      239 │       .sort((a, [32mb[37m) => b.meetingDate.localeCompare(a.meetingDate));
+          ╵                 [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'visibleCustomerMeetings' does not exist on type 'ActionosWorkspaceService'. Did you mean 'customerMeetings'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:246:26:
+[37m      246 │     return this.workspace.[32mvisibleCustomerMeetings[37m
+          ╵                           [32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  'customerMeetings' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:2813:6:
+[37m      2813 │   get [32mcustomerMeetings[37m(): CustomerMeeting[] {
+           ╵       [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'm' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:247:14:
+[37m      247 │       .filter([32mm[37m =>
+          ╵               [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'a' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:251:13:
+[37m      251 │       .sort(([32ma[37m, b) => b.meetingDate.localeCompare(a.meetingDate));
+          ╵              [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'b' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:251:16:
+[37m      251 │       .sort((a, [32mb[37m) => b.meetingDate.localeCompare(a.meetingDate));
+          ╵                 [32m^[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'visibleCustomerMeetingsByCustomer' does not exist on type 'ActionosWorkspaceService'. Did you mean 'customerMeetingsByCustomer'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:113:26:
+[37m      113 │ ...this.workspace.[32mvisibleCustomerMeetingsByCustomer[37m(this.selected...
+          ╵                   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  'customerMeetingsByCustomer' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:2821:2:
+[37m      2821 │   [32mcustomerMeetingsByCustomer[37m(customerId: string): CustomerMeetin...
+           ╵   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'a' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:115:13:
+[37m      115 │       .sort(([32ma[37m, b) => b.meetingDate.localeCompare(a.meetingDate));
+          ╵              [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'b' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:115:16:
+[37m      115 │       .sort((a, [32mb[37m) => b.meetingDate.localeCompare(a.meetingDate));
+          ╵                 [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'visibleCustomerMeetingsByCustomer' does not exist on type 'ActionosWorkspaceService'. Did you mean 'customerMeetingsByCustomer'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/catch-up-drawer/catch-up-drawer.component.ts:336:31:
+[37m      336 │ ...n id ? this.workspace.[32mvisibleCustomerMeetingsByCustomer[37m(id) : [];
+          ╵                          [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  'customerMeetingsByCustomer' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:2821:2:
+[37m      2821 │   [32mcustomerMeetingsByCustomer[37m(customerId: string): CustomerMeetin...
+           ╵   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'visibleCustomerMeetingsByCustomer' does not exist on type 'ActionosWorkspaceService'. Did you mean 'customerMeetingsByCustomer'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:237:26:
+[37m      237 │ ...n this.workspace.[32mvisibleCustomerMeetingsByCustomer[37m(this.entityId)
+          ╵                     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  'customerMeetingsByCustomer' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:2821:2:
+[37m      2821 │   [32mcustomerMeetingsByCustomer[37m(customerId: string): CustomerMeetin...
+           ╵   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'a' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:239:13:
+[37m      239 │       .sort(([32ma[37m, b) => b.meetingDate.localeCompare(a.meetingDate));
+          ╵              [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'b' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:239:16:
+[37m      239 │       .sort((a, [32mb[37m) => b.meetingDate.localeCompare(a.meetingDate));
+          ╵                 [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'visibleCustomerMeetings' does not exist on type 'ActionosWorkspaceService'. Did you mean 'customerMeetings'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:246:26:
+[37m      246 │     return this.workspace.[32mvisibleCustomerMeetings[37m
+          ╵                           [32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  'customerMeetings' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:2813:6:
+[37m      2813 │   get [32mcustomerMeetings[37m(): CustomerMeeting[] {
+           ╵       [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'm' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:247:14:
+[37m      247 │       .filter([32mm[37m =>
+          ╵               [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'a' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:251:13:
+[37m      251 │       .sort(([32ma[37m, b) => b.meetingDate.localeCompare(a.meetingDate));
+          ╵              [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'b' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:251:16:
+[37m      251 │       .sort((a, [32mb[37m) => b.meetingDate.localeCompare(a.meetingDate));
+          ╵                 [32m^[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'visibleCustomerMeetingsByCustomer' does not exist on type 'ActionosWorkspaceService'. Did you mean 'customerMeetingsByCustomer'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/catch-up-drawer/catch-up-drawer.component.ts:336:31:
+[37m      336 │ ...n id ? this.workspace.[32mvisibleCustomerMeetingsByCustomer[37m(id) : [];
+          ╵                          [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  'customerMeetingsByCustomer' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:2821:2:
+[37m      2821 │   [32mcustomerMeetingsByCustomer[37m(customerId: string): CustomerMeetin...
+           ╵   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'visibleCustomerMeetingsByCustomer' does not exist on type 'ActionosWorkspaceService'. Did you mean 'customerMeetingsByCustomer'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:237:26:
+[37m      237 │ ...n this.workspace.[32mvisibleCustomerMeetingsByCustomer[37m(this.entityId)
+          ╵                     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  'customerMeetingsByCustomer' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:2821:2:
+[37m      2821 │   [32mcustomerMeetingsByCustomer[37m(customerId: string): CustomerMeetin...
+           ╵   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'a' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:239:13:
+[37m      239 │       .sort(([32ma[37m, b) => b.meetingDate.localeCompare(a.meetingDate));
+          ╵              [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'b' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:239:16:
+[37m      239 │       .sort((a, [32mb[37m) => b.meetingDate.localeCompare(a.meetingDate));
+          ╵                 [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'visibleCustomerMeetings' does not exist on type 'ActionosWorkspaceService'. Did you mean 'customerMeetings'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:246:26:
+[37m      246 │     return this.workspace.[32mvisibleCustomerMeetings[37m
+          ╵                           [32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  'customerMeetings' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:2813:6:
+[37m      2813 │   get [32mcustomerMeetings[37m(): CustomerMeeting[] {
+           ╵       [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'm' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:247:14:
+[37m      247 │       .filter([32mm[37m =>
+          ╵               [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'a' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:251:13:
+[37m      251 │       .sort(([32ma[37m, b) => b.meetingDate.localeCompare(a.meetingDate));
+          ╵              [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'b' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:251:16:
+[37m      251 │       .sort((a, [32mb[37m) => b.meetingDate.localeCompare(a.meetingDate));
+          ╵                 [32m^[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'visibleCustomerMeetingsByCustomer' does not exist on type 'ActionosWorkspaceService'. Did you mean 'customerMeetingsByCustomer'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/catch-up-drawer/catch-up-drawer.component.ts:336:31:
+[37m      336 │ ...n id ? this.workspace.[32mvisibleCustomerMeetingsByCustomer[37m(id) : [];
+          ╵                          [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  'customerMeetingsByCustomer' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:2821:2:
+[37m      2821 │   [32mcustomerMeetingsByCustomer[37m(customerId: string): CustomerMeetin...
+           ╵   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'visibleCustomerMeetings' does not exist on type 'ActionosWorkspaceService'. Did you mean 'customerMeetings'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:246:26:
+[37m      246 │     return this.workspace.[32mvisibleCustomerMeetings[37m
+          ╵                           [32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  'customerMeetings' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:2813:6:
+[37m      2813 │   get [32mcustomerMeetings[37m(): CustomerMeeting[] {
+           ╵       [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'm' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:247:14:
+[37m      247 │       .filter([32mm[37m =>
+          ╵               [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'a' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:251:13:
+[37m      251 │       .sort(([32ma[37m, b) => b.meetingDate.localeCompare(a.meetingDate));
+          ╵              [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'b' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/workspace-home/board-preview-modal.component.ts:251:16:
+[37m      251 │       .sort((a, [32mb[37m) => b.meetingDate.localeCompare(a.meetingDate));
+          ╵                 [32m^[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'visibleCustomerMeetingsByCustomer' does not exist on type 'ActionosWorkspaceService'. Did you mean 'customerMeetingsByCustomer'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/catch-up-drawer/catch-up-drawer.component.ts:336:31:
+[37m      336 │ ...n id ? this.workspace.[32mvisibleCustomerMeetingsByCustomer[37m(id) : [];
+          ╵                          [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  'customerMeetingsByCustomer' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:2821:2:
+[37m      2821 │   [32mcustomerMeetingsByCustomer[37m(customerId: string): CustomerMeetin...
+           ╵   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'customerById' does not exist on type 'ActionosWorkspaceService'. Did you mean 'customer'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:2826:16:
+[37m      2826 │     return this.[32mcustomerById[37m().get(this.resolveCustomerId(id));
+           ╵                 [32m~~~~~~~~~~~~[0m
+
+  'customer' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:2825:2:
+[37m      2825 │   [32mcustomer[37m(id: string): Customer | undefined {
+           ╵   [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'customerById' does not exist on type 'ActionosWorkspaceService'. Did you mean 'customer'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:2835:26:
+[37m      2835 │     const customer = this.[32mcustomerById[37m().get(resolvedId)
+           ╵                           [32m~~~~~~~~~~~~[0m
+
+  'customer' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:2825:2:
+[37m      2825 │   [32mcustomer[37m(id: string): Customer | undefined {
+           ╵   [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'customerByExternalGroupId' does not exist on type 'ActionosWorkspaceService'. Did you mean 'customerByExternalGroupCache'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:2836:14:
+[37m      2836 │       ?? this.[32mcustomerByExternalGroupId[37m().get(resolvedId);
+           ╵               [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  'customerByExternalGroupCache' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:113:19:
+[37m      113 │   private readonly [32mcustomerByExternalGroupCache[37m: RevisionCache<Ma...
+          ╵                    [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDuplicate member "customerMeetingsByCustomer" in class body[0m [duplicate-class-member]
+
+    src/app/core/services/actionos-workspace.service.ts:2452:4:
+[37m      2452 │     [32mcustomerMeetingsByCustomer[37m() {
+           ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  The original member "customerMeetingsByCustomer" is here:
+
+    src/app/core/services/actionos-workspace.service.ts:2448:4:
+[37m      2448 │     [32mcustomerMeetingsByCustomer[37m(customerId) {
+           ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2393: Duplicate function implementation.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:2999:2:
+[37m      2999 │   [32mcustomerMeetingsByCustomer[37m(customerId: string): CustomerMeetin...
+           ╵   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2554: Expected 1 arguments, but got 0.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3001:16:
+[37m      3001 │     return this.[32mcustomerMeetingsByCustomer[37m().get(resolvedCustome...
+           ╵                 [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  An argument for 'customerId' was not provided.
+
+    src/app/core/services/actionos-workspace.service.ts:2999:29:
+[37m      2999 │ ...tomerMeetingsByCustomer([32mcustomerId: string[37m): CustomerMeeting[] {
+           ╵                            [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'get' does not exist on type 'CustomerMeeting[]'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3001:45:
+[37m      3001 │ ...customerMeetingsByCustomer().[32mget[37m(resolvedCustomerId) ?? this....
+           ╵                                 [32m~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2393: Duplicate function implementation.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3004:10:
+[37m      3004 │   private [32mcustomerMeetingsByCustomer[37m(): Map<string, CustomerMeet...
+           ╵           [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDuplicate member "customerMeetingsByCustomer" in class body[0m [duplicate-class-member]
+
+    src/app/core/services/actionos-workspace.service.ts:2452:4:
+[37m      2452 │     [32mcustomerMeetingsByCustomer[37m() {
+           ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  The original member "customerMeetingsByCustomer" is here:
+
+    src/app/core/services/actionos-workspace.service.ts:2448:4:
+[37m      2448 │     [32mcustomerMeetingsByCustomer[37m(customerId) {
+           ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2393: Duplicate function implementation.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:2999:2:
+[37m      2999 │   [32mcustomerMeetingsByCustomer[37m(customerId: string): CustomerMeetin...
+           ╵   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2554: Expected 1 arguments, but got 0.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3001:16:
+[37m      3001 │     return this.[32mcustomerMeetingsByCustomer[37m().get(resolvedCustome...
+           ╵                 [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  An argument for 'customerId' was not provided.
+
+    src/app/core/services/actionos-workspace.service.ts:2999:29:
+[37m      2999 │ ...tomerMeetingsByCustomer([32mcustomerId: string[37m): CustomerMeeting[] {
+           ╵                            [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'get' does not exist on type 'CustomerMeeting[]'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3001:45:
+[37m      3001 │ ...customerMeetingsByCustomer().[32mget[37m(resolvedCustomerId) ?? this....
+           ╵                                 [32m~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2393: Duplicate function implementation.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3004:10:
+[37m      3004 │   private [32mcustomerMeetingsByCustomer[37m(): Map<string, CustomerMeet...
+           ╵           [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDuplicate member "customerMeetingsByCustomer" in class body[0m [duplicate-class-member]
+
+    src/app/core/services/actionos-workspace.service.ts:2452:4:
+[37m      2452 │     [32mcustomerMeetingsByCustomer[37m() {
+           ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  The original member "customerMeetingsByCustomer" is here:
+
+    src/app/core/services/actionos-workspace.service.ts:2448:4:
+[37m      2448 │     [32mcustomerMeetingsByCustomer[37m(customerId) {
+           ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2393: Duplicate function implementation.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:2999:2:
+[37m      2999 │   [32mcustomerMeetingsByCustomer[37m(customerId: string): CustomerMeetin...
+           ╵   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2554: Expected 1 arguments, but got 0.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3001:16:
+[37m      3001 │     return this.[32mcustomerMeetingsByCustomer[37m().get(resolvedCustome...
+           ╵                 [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  An argument for 'customerId' was not provided.
+
+    src/app/core/services/actionos-workspace.service.ts:2999:29:
+[37m      2999 │ ...tomerMeetingsByCustomer([32mcustomerId: string[37m): CustomerMeeting[] {
+           ╵                            [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'get' does not exist on type 'CustomerMeeting[]'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3001:45:
+[37m      3001 │ ...customerMeetingsByCustomer().[32mget[37m(resolvedCustomerId) ?? this....
+           ╵                                 [32m~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2393: Duplicate function implementation.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3004:10:
+[37m      3004 │   private [32mcustomerMeetingsByCustomer[37m(): Map<string, CustomerMeet...
+           ╵           [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDuplicate member "customerMeetingsByCustomer" in class body[0m [duplicate-class-member]
+
+    src/app/core/services/actionos-workspace.service.ts:2454:4:
+[37m      2454 │     [32mcustomerMeetingsByCustomer[37m() {
+           ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  The original member "customerMeetingsByCustomer" is here:
+
+    src/app/core/services/actionos-workspace.service.ts:2450:4:
+[37m      2450 │     [32mcustomerMeetingsByCustomer[37m(customerId) {
+           ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'bumpDataRevision' does not exist on type 'ActionosWorkspaceService'. Did you mean 'dataRevision'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:1789:9:
+[37m      1789 │     this.[32mbumpDataRevision[37m();
+           ╵          [32m~~~~~~~~~~~~~~~~[0m
+
+  'dataRevision' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:105:10:
+[37m      105 │   private [32mdataRevision[37m = 0;
+          ╵           [32m~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'bumpDataRevision' does not exist on type 'ActionosWorkspaceService'. Did you mean 'dataRevision'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:1855:9:
+[37m      1855 │     this.[32mbumpDataRevision[37m();
+           ╵          [32m~~~~~~~~~~~~~~~~[0m
+
+  'dataRevision' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:105:10:
+[37m      105 │   private [32mdataRevision[37m = 0;
+          ╵           [32m~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2393: Duplicate function implementation.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3001:2:
+[37m      3001 │   [32mcustomerMeetingsByCustomer[37m(customerId: string): CustomerMeetin...
+           ╵   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2554: Expected 1 arguments, but got 0.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3003:16:
+[37m      3003 │     return this.[32mcustomerMeetingsByCustomer[37m().get(resolvedCustome...
+           ╵                 [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  An argument for 'customerId' was not provided.
+
+    src/app/core/services/actionos-workspace.service.ts:3001:29:
+[37m      3001 │ ...tomerMeetingsByCustomer([32mcustomerId: string[37m): CustomerMeeting[] {
+           ╵                            [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'get' does not exist on type 'CustomerMeeting[]'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3003:45:
+[37m      3003 │ ...customerMeetingsByCustomer().[32mget[37m(resolvedCustomerId) ?? this....
+           ╵                                 [32m~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2393: Duplicate function implementation.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3006:10:
+[37m      3006 │   private [32mcustomerMeetingsByCustomer[37m(): Map<string, CustomerMeet...
+           ╵           [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDuplicate member "customerMeetingsByCustomer" in class body[0m [duplicate-class-member]
+
+    src/app/core/services/actionos-workspace.service.ts:2458:4:
+[37m      2458 │     [32mcustomerMeetingsByCustomer[37m() {
+           ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  The original member "customerMeetingsByCustomer" is here:
+
+    src/app/core/services/actionos-workspace.service.ts:2454:4:
+[37m      2454 │     [32mcustomerMeetingsByCustomer[37m(customerId) {
+           ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2393: Duplicate function implementation.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3006:2:
+[37m      3006 │   [32mcustomerMeetingsByCustomer[37m(customerId: string): CustomerMeetin...
+           ╵   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2554: Expected 1 arguments, but got 0.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3008:16:
+[37m      3008 │     return this.[32mcustomerMeetingsByCustomer[37m().get(resolvedCustome...
+           ╵                 [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  An argument for 'customerId' was not provided.
+
+    src/app/core/services/actionos-workspace.service.ts:3006:29:
+[37m      3006 │ ...tomerMeetingsByCustomer([32mcustomerId: string[37m): CustomerMeeting[] {
+           ╵                            [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'get' does not exist on type 'CustomerMeeting[]'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3008:45:
+[37m      3008 │ ...customerMeetingsByCustomer().[32mget[37m(resolvedCustomerId) ?? this....
+           ╵                                 [32m~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2393: Duplicate function implementation.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3011:10:
+[37m      3011 │   private [32mcustomerMeetingsByCustomer[37m(): Map<string, CustomerMeet...
+           ╵           [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDuplicate member "customerMeetingsByCustomer" in class body[0m [duplicate-class-member]
+
+    src/app/core/services/actionos-workspace.service.ts:2462:4:
+[37m      2462 │     [32mcustomerMeetingsByCustomer[37m() {
+           ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  The original member "customerMeetingsByCustomer" is here:
+
+    src/app/core/services/actionos-workspace.service.ts:2458:4:
+[37m      2458 │     [32mcustomerMeetingsByCustomer[37m(customerId) {
+           ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2393: Duplicate function implementation.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3010:2:
+[37m      3010 │   [32mcustomerMeetingsByCustomer[37m(customerId: string): CustomerMeetin...
+           ╵   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2554: Expected 1 arguments, but got 0.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3012:16:
+[37m      3012 │     return this.[32mcustomerMeetingsByCustomer[37m().get(resolvedCustome...
+           ╵                 [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  An argument for 'customerId' was not provided.
+
+    src/app/core/services/actionos-workspace.service.ts:3010:29:
+[37m      3010 │ ...tomerMeetingsByCustomer([32mcustomerId: string[37m): CustomerMeeting[] {
+           ╵                            [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'get' does not exist on type 'CustomerMeeting[]'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3012:45:
+[37m      3012 │ ...customerMeetingsByCustomer().[32mget[37m(resolvedCustomerId) ?? this....
+           ╵                                 [32m~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2393: Duplicate function implementation.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3015:10:
+[37m      3015 │   private [32mcustomerMeetingsByCustomer[37m(): Map<string, CustomerMeet...
+           ╵           [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDuplicate member "customerMeetingsByCustomer" in class body[0m [duplicate-class-member]
+
+    src/app/core/services/actionos-workspace.service.ts:2469:4:
+[37m      2469 │     [32mcustomerMeetingsByCustomer[37m() {
+           ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  The original member "customerMeetingsByCustomer" is here:
+
+    src/app/core/services/actionos-workspace.service.ts:2465:4:
+[37m      2465 │     [32mcustomerMeetingsByCustomer[37m(customerId) {
+           ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2393: Duplicate function implementation.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3018:2:
+[37m      3018 │   [32mcustomerMeetingsByCustomer[37m(customerId: string): CustomerMeetin...
+           ╵   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2554: Expected 1 arguments, but got 0.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3020:16:
+[37m      3020 │     return this.[32mcustomerMeetingsByCustomer[37m().get(resolvedCustome...
+           ╵                 [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  An argument for 'customerId' was not provided.
+
+    src/app/core/services/actionos-workspace.service.ts:3018:29:
+[37m      3018 │ ...tomerMeetingsByCustomer([32mcustomerId: string[37m): CustomerMeeting[] {
+           ╵                            [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'get' does not exist on type 'CustomerMeeting[]'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3020:45:
+[37m      3020 │ ...customerMeetingsByCustomer().[32mget[37m(resolvedCustomerId) ?? this....
+           ╵                                 [32m~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2393: Duplicate function implementation.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3023:10:
+[37m      3023 │   private [32mcustomerMeetingsByCustomer[37m(): Map<string, CustomerMeet...
+           ╵           [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDuplicate member "customerMeetingsByCustomer" in class body[0m [duplicate-class-member]
+
+    src/app/core/services/actionos-workspace.service.ts:2468:4:
+[37m      2468 │     [32mcustomerMeetingsByCustomer[37m() {
+           ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  The original member "customerMeetingsByCustomer" is here:
+
+    src/app/core/services/actionos-workspace.service.ts:2464:4:
+[37m      2464 │     [32mcustomerMeetingsByCustomer[37m(customerId) {
+           ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2393: Duplicate function implementation.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3017:2:
+[37m      3017 │   [32mcustomerMeetingsByCustomer[37m(customerId: string): CustomerMeetin...
+           ╵   [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2554: Expected 1 arguments, but got 0.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3019:16:
+[37m      3019 │     return this.[32mcustomerMeetingsByCustomer[37m().get(resolvedCustome...
+           ╵                 [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  An argument for 'customerId' was not provided.
+
+    src/app/core/services/actionos-workspace.service.ts:3017:29:
+[37m      3017 │ ...tomerMeetingsByCustomer([32mcustomerId: string[37m): CustomerMeeting[] {
+           ╵                            [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'get' does not exist on type 'CustomerMeeting[]'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3019:45:
+[37m      3019 │ ...customerMeetingsByCustomer().[32mget[37m(resolvedCustomerId) ?? this....
+           ╵                                 [32m~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2393: Duplicate function implementation.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3022:10:
+[37m      3022 │   private [32mcustomerMeetingsByCustomer[37m(): Map<string, CustomerMeet...
+           ╵           [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'ChecklistItem'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:354:42:
+[37m      354 │ ...tem(index: number, item: [32mChecklistItem[37m): string { return `${it...
+          ╵                             [32m~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'ChecklistItem'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:354:42:
+[37m      354 │ ...tem(index: number, item: [32mChecklistItem[37m): string { return `${it...
+          ╵                             [32m~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Opening tag "div" not terminated.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inbox/inbox.component.html:132:12:
+[37m      132 │             [32m<div[37m
+          ╵             [32m~~~~[0m
+
+  Error occurs in the template of component InboxComponent.
+
+    src/app/features/inbox/inbox.component.ts:44:15:
+[37m      44 │   templateUrl: [32m'./inbox.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Unexpected closing tag "div". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inbox/inbox.component.html:162:10:
+[37m      162 │           [32m</div>[37m
+          ╵           [32m~~~~~~[0m
+
+  Error occurs in the template of component InboxComponent.
+
+    src/app/features/inbox/inbox.component.ts:44:15:
+[37m      44 │   templateUrl: [32m'./inbox.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Unexpected closing tag "article". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inbox/inbox.component.html:163:8:
+[37m      163 │         [32m</article>[37m
+          ╵         [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component InboxComponent.
+
+    src/app/features/inbox/inbox.component.ts:44:15:
+[37m      44 │   templateUrl: [32m'./inbox.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Unexpected closing tag "ng-container". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inbox/inbox.component.html:165:6:
+[37m      165 │       [32m</ng-container>[37m
+          ╵       [32m~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component InboxComponent.
+
+    src/app/features/inbox/inbox.component.ts:44:15:
+[37m      44 │   templateUrl: [32m'./inbox.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Unexpected closing tag "div". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inbox/inbox.component.html:167:2:
+[37m      167 │   [32m</div>[37m
+          ╵   [32m~~~~~~[0m
+
+  Error occurs in the template of component InboxComponent.
+
+    src/app/features/inbox/inbox.component.ts:44:15:
+[37m      44 │   templateUrl: [32m'./inbox.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Unexpected closing tag "section". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/inbox/inbox.component.html:189:0:
+[37m      189 │ [32m</section>[37m
+          ╵ [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component InboxComponent.
+
+    src/app/features/inbox/inbox.component.ts:44:15:
+[37m      44 │   templateUrl: [32m'./inbox.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Opening tag "button" not terminated.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:180:8:
+[37m      180 │         [32m<button[37m
+          ╵         [32m~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Unexpected closing tag "button". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:189:8:
+[37m      189 │         [32m</button>[37m
+          ╵         [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Opening tag "button" not terminated.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:204:8:
+[37m      204 │         [32m<button[37m
+          ╵         [32m~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Unexpected closing tag "button". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:227:8:
+[37m      227 │         [32m</button>[37m
+          ╵         [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDuplicate member "taskLensOptions" in class body[0m [duplicate-class-member]
+
+    src/app/features/boards/boards.component.ts:308:8:
+[37m      308 │     get [32mtaskLensOptions[37m() {
+          ╵         [32m~~~~~~~~~~~~~~~[0m
+
+  The original member "taskLensOptions" is here:
+
+    src/app/features/boards/boards.component.ts:264:4:
+[37m      264 │     [32mtaskLensOptions[37m = [
+          ╵     [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2300: Duplicate identifier 'taskLensOptions'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:54:11:
+[37m      54 │   readonly [32mtaskLensOptions[37m: { id: TaskLens; labelKey: string }[] = [
+         ╵            [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2300: Duplicate identifier 'taskLensOptions'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:127:6:
+[37m      127 │   get [32mtaskLensOptions[37m(): { id: TaskLens; labelKey: string }[] {
+          ╵       [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2300: Duplicate identifier 'taskLensOptions'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:127:6:
+[37m      127 │   get [32mtaskLensOptions[37m(): { id: TaskLens; labelKey: string }[] {
+          ╵       [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDuplicate member "taskLensOptions" in class body[0m [duplicate-class-member]
+
+    src/app/features/boards/boards.component.ts:315:8:
+[37m      315 │     get [32mtaskLensOptions[37m() {
+          ╵         [32m~~~~~~~~~~~~~~~[0m
+
+  The original member "taskLensOptions" is here:
+
+    src/app/features/boards/boards.component.ts:264:4:
+[37m      264 │     [32mtaskLensOptions[37m = [
+          ╵     [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2300: Duplicate identifier 'taskLensOptions'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:54:11:
+[37m      54 │   readonly [32mtaskLensOptions[37m: { id: TaskLens; labelKey: string }[] = [
+         ╵            [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2300: Duplicate identifier 'taskLensOptions'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:135:6:
+[37m      135 │   get [32mtaskLensOptions[37m(): { id: TaskLens; labelKey: string }[] {
+          ╵       [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2300: Duplicate identifier 'taskLensOptions'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:135:6:
+[37m      135 │   get [32mtaskLensOptions[37m(): { id: TaskLens; labelKey: string }[] {
+          ╵       [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDuplicate member "taskLensOptions" in class body[0m [duplicate-class-member]
+
+    src/app/features/boards/boards.component.ts:322:8:
+[37m      322 │     get [32mtaskLensOptions[37m() {
+          ╵         [32m~~~~~~~~~~~~~~~[0m
+
+  The original member "taskLensOptions" is here:
+
+    src/app/features/boards/boards.component.ts:264:4:
+[37m      264 │     [32mtaskLensOptions[37m = [
+          ╵     [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2300: Duplicate identifier 'taskLensOptions'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:54:11:
+[37m      54 │   readonly [32mtaskLensOptions[37m: { id: TaskLens; labelKey: string }[] = [
+         ╵            [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2300: Duplicate identifier 'taskLensOptions'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:143:6:
+[37m      143 │   get [32mtaskLensOptions[37m(): { id: TaskLens; labelKey: string }[] {
+          ╵       [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2300: Duplicate identifier 'taskLensOptions'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:143:6:
+[37m      143 │   get [32mtaskLensOptions[37m(): { id: TaskLens; labelKey: string }[] {
+          ╵       [32m~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'clientTaskCounts' does not exist on type 'BoardsComponent'. Did you mean 'clientTaskCountsCache'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:284:46:
+[37m      284 │ ... clientOpenCount(): number { return this.[32mclientTaskCounts[37m.open; }
+          ╵                                             [32m~~~~~~~~~~~~~~~~[0m
+
+  'clientTaskCountsCache' is declared here.
+
+    src/app/features/boards/boards.component.ts:91:10:
+[37m      91 │   private [32mclientTaskCountsCache[37m: {
+         ╵           [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'clientTaskCounts' does not exist on type 'BoardsComponent'. Did you mean 'clientTaskCountsCache'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:285:49:
+[37m      285 │ ...tOverdueCount(): number { return this.[32mclientTaskCounts[37m.overdue; }
+          ╵                                          [32m~~~~~~~~~~~~~~~~[0m
+
+  'clientTaskCountsCache' is declared here.
+
+    src/app/features/boards/boards.component.ts:91:10:
+[37m      91 │   private [32mclientTaskCountsCache[37m: {
+         ╵           [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'clientTaskCounts' does not exist on type 'BoardsComponent'. Did you mean 'clientTaskCountsCache'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/boards/boards.component.ts:286:49:
+[37m      286 │ ...tBlockedCount(): number { return this.[32mclientTaskCounts[37m.blocked; }
+          ╵                                          [32m~~~~~~~~~~~~~~~~[0m
+
+  'clientTaskCountsCache' is declared here.
+
+    src/app/features/boards/boards.component.ts:91:10:
+[37m      91 │   private [32mclientTaskCountsCache[37m: {
+         ╵           [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type 'MeetingSection' is not assignable to parameter of type 'MeetingLane'.
+  Type '"tasks-created"' is not assignable to type 'MeetingLane'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:98:125:
+[37m      98 │ ...s="lane-section" [class.collapsed]="isLaneCollapsed(bucket.[32mlane[37m)">
+         ╵                                                               [32m~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type 'MeetingSection' is not assignable to parameter of type 'MeetingLane'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:102:35:
+[37m      102 │         (click)="toggleLane(bucket.[32mlane[37m)"
+          ╵                                    [32m~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type 'MeetingSection' is not assignable to parameter of type 'MeetingLane'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:103:54:
+[37m      103 │         [attr.aria-expanded]="!isLaneCollapsed(bucket.[32mlane[37m)"
+          ╵                                                       [32m~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type 'MeetingSection' is not assignable to parameter of type 'MeetingLane'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:111:42:
+[37m      111 │       <div *ngIf="!isLaneCollapsed(bucket.[32mlane[37m)" class="lane-body">
+          ╵                                           [32m~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '({ lane: "upcoming"; labelKey: string; meetings: CustomerMeeting[]; } | { lane: "in-progress"; labelKey: string; meetings: CustomerMeeting[]; } | { lane: "closed"; labelKey: string; meetings: CustomerMeeting[]; })[]' is not assignable to type 'LaneBucket[]'.
+  Type '{ lane: "upcoming"; labelKey: string; meetings: CustomerMeeting[]; } | { lane: "in-progress"; labelKey: string; meetings: CustomerMeeting[]; } | { lane: "closed"; labelKey: string; meetings: CustomerMeeting[]; }' is not assignable to type 'LaneBucket'.
+    Type '{ lane: "upcoming"; labelKey: string; meetings: CustomerMeeting[]; }' is not assignable to type 'LaneBucket'.
+      Types of property 'lane' are incompatible.
+        Type '"upcoming"' is not assignable to type 'MeetingSection'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.ts:251:37:
+[37m      251 │     this.bucketsCache = { laneCache, [32mbuckets[37m };
+          ╵                                      [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '({ lane: "upcoming"; labelKey: string; meetings: CustomerMeeting[]; } | { lane: "in-progress"; labelKey: string; meetings: CustomerMeeting[]; } | { lane: "closed"; labelKey: string; meetings: CustomerMeeting[]; })[]' is not assignable to type 'LaneBucket[]'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.ts:252:4:
+[37m      252 │     [32mreturn[37m buckets;
+          ╵     [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type 'MeetingSection' is not assignable to type 'MeetingLane'.
+  Type '"tasks-created"' is not assignable to type 'MeetingLane'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.ts:401:4:
+[37m      401 │     [32mreturn[37m bucket.lane;
+          ╵     [32m~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type 'MeetingSection' is not assignable to parameter of type 'MeetingLane'.
+  Type '"tasks-created"' is not assignable to type 'MeetingLane'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:98:125:
+[37m      98 │ ...s="lane-section" [class.collapsed]="isLaneCollapsed(bucket.[32mlane[37m)">
+         ╵                                                               [32m~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type 'MeetingSection' is not assignable to parameter of type 'MeetingLane'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:102:35:
+[37m      102 │         (click)="toggleLane(bucket.[32mlane[37m)"
+          ╵                                    [32m~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type 'MeetingSection' is not assignable to parameter of type 'MeetingLane'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:103:54:
+[37m      103 │         [attr.aria-expanded]="!isLaneCollapsed(bucket.[32mlane[37m)"
+          ╵                                                       [32m~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type 'MeetingSection' is not assignable to parameter of type 'MeetingLane'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:111:42:
+[37m      111 │       <div *ngIf="!isLaneCollapsed(bucket.[32mlane[37m)" class="lane-body">
+          ╵                                           [32m~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type 'MeetingSection' is not assignable to type 'MeetingLane'.
+  Type '"tasks-created"' is not assignable to type 'MeetingLane'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.ts:410:4:
+[37m      410 │     [32mreturn[37m bucket.lane;
+          ╵     [32m~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type 'MeetingSection' is not assignable to type 'MeetingLane'.
+  Type '"tasks-created"' is not assignable to type 'MeetingLane'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.ts:410:4:
+[37m      410 │     [32mreturn[37m bucket.lane;
+          ╵     [32m~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'nextMeetingDateLocal' does not exist in type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:513:53:
+[37m      513 │ ...aft = { summary: '', [32mnextMeetingDateLocal[37m: '', nextMeetingNote...
+          ╵                         [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'nextMeetingDateLocal' does not exist in type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:868:39:
+[37m      868 │ ...aft = { summary: '', [32mnextMeetingDateLocal[37m: '', nextMeetingNote...
+          ╵                         [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'nextMeetingDateLocal' does not exist on type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:955:61:
+[37m      955 │ ...mLocalInput(this.summaryDraft.[32mnextMeetingDateLocal[37m) || undefined,
+          ╵                                  [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'nextMeetingNotes' does not exist on type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:956:42:
+[37m      956 │ ...nextMeetingNotes: this.summaryDraft.[32mnextMeetingNotes[37m || undefined
+          ╵                                        [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'nextMeetingDateLocal' does not exist in type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:987:6:
+[37m      987 │       [32mnextMeetingDateLocal[37m: meeting.nextMeetingDate ? this.toLoca...
+          ╵       [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'nextMeetingDateLocal' does not exist on type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-summary-section.component.ts:44:29:
+[37m      44 │           [(ngModel)]="draft.[32mnextMeetingDateLocal[37m"
+         ╵                              [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'nextMeetingDateLocal' does not exist on type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-summary-section.component.ts:44:29:
+[37m      44 │           [(ngModel)]="draft.[32mnextMeetingDateLocal[37m"
+         ╵                              [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'nextMeetingNotes' does not exist on type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-summary-section.component.ts:54:29:
+[37m      54 │           [(ngModel)]="draft.[32mnextMeetingNotes[37m"
+         ╵                              [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'nextMeetingNotes' does not exist on type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-summary-section.component.ts:54:29:
+[37m      54 │           [(ngModel)]="draft.[32mnextMeetingNotes[37m"
+         ╵                              [32m~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'nextMeetingDateLocal' does not exist in type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:513:53:
+[37m      513 │ ...aft = { summary: '', [32mnextMeetingDateLocal[37m: '', nextMeetingNote...
+          ╵                         [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'nextMeetingDateLocal' does not exist in type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:868:39:
+[37m      868 │ ...aft = { summary: '', [32mnextMeetingDateLocal[37m: '', nextMeetingNote...
+          ╵                         [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'nextMeetingDateLocal' does not exist on type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:955:61:
+[37m      955 │ ...mLocalInput(this.summaryDraft.[32mnextMeetingDateLocal[37m) || undefined,
+          ╵                                  [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'nextMeetingNotes' does not exist on type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:956:42:
+[37m      956 │ ...nextMeetingNotes: this.summaryDraft.[32mnextMeetingNotes[37m || undefined
+          ╵                                        [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'nextMeetingDateLocal' does not exist in type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:987:6:
+[37m      987 │       [32mnextMeetingDateLocal[37m: meeting.nextMeetingDate ? this.toLoca...
+          ╵       [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'nextMeetingDateLocal' does not exist in type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:513:53:
+[37m      513 │ ...aft = { summary: '', [32mnextMeetingDateLocal[37m: '', nextMeetingNote...
+          ╵                         [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'nextMeetingDateLocal' does not exist in type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:868:39:
+[37m      868 │ ...aft = { summary: '', [32mnextMeetingDateLocal[37m: '', nextMeetingNote...
+          ╵                         [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'nextMeetingDateLocal' does not exist on type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:955:61:
+[37m      955 │ ...mLocalInput(this.summaryDraft.[32mnextMeetingDateLocal[37m) || undefined,
+          ╵                                  [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'nextMeetingNotes' does not exist on type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:956:42:
+[37m      956 │ ...nextMeetingNotes: this.summaryDraft.[32mnextMeetingNotes[37m || undefined
+          ╵                                        [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'nextMeetingDateLocal' does not exist in type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:987:6:
+[37m      987 │       [32mnextMeetingDateLocal[37m: meeting.nextMeetingDate ? this.toLoca...
+          ╵       [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'nextMeetingNotes' does not exist on type 'MeetingNotesSectionComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-notes-section.component.ts:244:19:
+[37m      244 │         [ngModel]="[32mnextMeetingNotes[37m"
+          ╵                    [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'nextMeetingNotesChange' does not exist on type 'MeetingNotesSectionComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-notes-section.component.ts:245:25:
+[37m      245 │         (ngModelChange)="[32mnextMeetingNotesChange[37m.emit($event)"
+          ╵                          [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'nextMeetingDateLocal' does not exist in type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:513:53:
+[37m      513 │ ...aft = { summary: '', [32mnextMeetingDateLocal[37m: '', nextMeetingNote...
+          ╵                         [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'nextMeetingDateLocal' does not exist in type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:868:39:
+[37m      868 │ ...aft = { summary: '', [32mnextMeetingDateLocal[37m: '', nextMeetingNote...
+          ╵                         [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'nextMeetingDateLocal' does not exist on type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:955:61:
+[37m      955 │ ...mLocalInput(this.summaryDraft.[32mnextMeetingDateLocal[37m) || undefined,
+          ╵                                  [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'nextMeetingNotes' does not exist on type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:956:42:
+[37m      956 │ ...nextMeetingNotes: this.summaryDraft.[32mnextMeetingNotes[37m || undefined
+          ╵                                        [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'nextMeetingDateLocal' does not exist in type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:987:6:
+[37m      987 │       [32mnextMeetingDateLocal[37m: meeting.nextMeetingDate ? this.toLoca...
+          ╵       [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'nextMeetingDateLocal' does not exist in type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:513:53:
+[37m      513 │ ...aft = { summary: '', [32mnextMeetingDateLocal[37m: '', nextMeetingNote...
+          ╵                         [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'nextMeetingDateLocal' does not exist in type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:868:39:
+[37m      868 │ ...aft = { summary: '', [32mnextMeetingDateLocal[37m: '', nextMeetingNote...
+          ╵                         [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'nextMeetingDateLocal' does not exist on type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:955:61:
+[37m      955 │ ...mLocalInput(this.summaryDraft.[32mnextMeetingDateLocal[37m) || undefined,
+          ╵                                  [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'nextMeetingNotes' does not exist on type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:956:42:
+[37m      956 │ ...nextMeetingNotes: this.summaryDraft.[32mnextMeetingNotes[37m || undefined
+          ╵                                        [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'nextMeetingDateLocal' does not exist in type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:987:6:
+[37m      987 │       [32mnextMeetingDateLocal[37m: meeting.nextMeetingDate ? this.toLoca...
+          ╵       [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'nextMeetingNotesText' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:349:32:
+[37m      349 │             [nextMeetingNotes]="[32mnextMeetingNotesText[37m"
+          ╵                                 [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'onNextMeetingNotesChanged' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:350:38:
+[37m      350 │ ...     (nextMeetingNotesChange)="[32monNextMeetingNotesChanged[37m($event)"
+          ╵                                   [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'nextMeetingDateLocal' does not exist in type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:515:53:
+[37m      515 │ ...aft = { summary: '', [32mnextMeetingDateLocal[37m: '', nextMeetingNote...
+          ╵                         [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'nextMeetingDateLocal' does not exist in type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:870:39:
+[37m      870 │ ...aft = { summary: '', [32mnextMeetingDateLocal[37m: '', nextMeetingNote...
+          ╵                         [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'nextMeetingDateLocal' does not exist on type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:957:61:
+[37m      957 │ ...mLocalInput(this.summaryDraft.[32mnextMeetingDateLocal[37m) || undefined,
+          ╵                                  [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'nextMeetingNotes' does not exist on type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:958:42:
+[37m      958 │ ...nextMeetingNotes: this.summaryDraft.[32mnextMeetingNotes[37m || undefined
+          ╵                                        [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'nextMeetingDateLocal' does not exist in type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:989:6:
+[37m      989 │       [32mnextMeetingDateLocal[37m: meeting.nextMeetingDate ? this.toLoca...
+          ╵       [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'onNextMeetingNotesChanged' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:350:38:
+[37m      350 │ ...     (nextMeetingNotesChange)="[32monNextMeetingNotesChanged[37m($event)"
+          ╵                                   [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'nextMeetingDateLocal' does not exist in type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:872:39:
+[37m      872 │ ...aft = { summary: '', [32mnextMeetingDateLocal[37m: '', nextMeetingNote...
+          ╵                         [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'nextMeetingDateLocal' does not exist on type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:959:61:
+[37m      959 │ ...mLocalInput(this.summaryDraft.[32mnextMeetingDateLocal[37m) || undefined,
+          ╵                                  [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'nextMeetingNotes' does not exist on type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:960:42:
+[37m      960 │ ...nextMeetingNotes: this.summaryDraft.[32mnextMeetingNotes[37m || undefined
+          ╵                                        [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'nextMeetingDateLocal' does not exist in type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:991:6:
+[37m      991 │       [32mnextMeetingDateLocal[37m: meeting.nextMeetingDate ? this.toLoca...
+          ╵       [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'onNextMeetingNotesChanged' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:350:38:
+[37m      350 │ ...     (nextMeetingNotesChange)="[32monNextMeetingNotesChanged[37m($event)"
+          ╵                                   [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'nextMeetingDateLocal' does not exist on type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:960:61:
+[37m      960 │ ...mLocalInput(this.summaryDraft.[32mnextMeetingDateLocal[37m) || undefined,
+          ╵                                  [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'nextMeetingNotes' does not exist on type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:961:42:
+[37m      961 │ ...nextMeetingNotes: this.summaryDraft.[32mnextMeetingNotes[37m || undefined
+          ╵                                        [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'nextMeetingDateLocal' does not exist in type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:992:6:
+[37m      992 │       [32mnextMeetingDateLocal[37m: meeting.nextMeetingDate ? this.toLoca...
+          ╵       [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'onNextMeetingNotesChanged' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:350:38:
+[37m      350 │ ...     (nextMeetingNotesChange)="[32monNextMeetingNotesChanged[37m($event)"
+          ╵                                   [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'nextMeetingDateLocal' does not exist in type 'MeetingSummaryDraft'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:991:6:
+[37m      991 │       [32mnextMeetingDateLocal[37m: meeting.nextMeetingDate ? this.toLoca...
+          ╵       [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'onNextMeetingNotesChanged' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:350:38:
+[37m      350 │ ...     (nextMeetingNotesChange)="[32monNextMeetingNotesChanged[37m($event)"
+          ╵                                   [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'hasChecklistItems' does not exist on type 'MeetingSummarySectionComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-summary-section.component.ts:39:51:
+[37m      39 │ ...  <div class="meeting-review-checklist" *ngIf="[32mhasChecklistItems[37m">
+         ╵                                                   [32m~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'finish' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:405:60:
+[37m      405 │ ... <button type="button" class="primary-action" (click)="[32mfinish[37m()">
+          ╵                                                           [32m~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'finish' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:405:60:
+[37m      405 │ ... <button type="button" class="primary-action" (click)="[32mfinish[37m()">
+          ╵                                                           [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'canSave' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:671:14:
+[37m      671 │     if (!this.[32mcanSave[37m()) {
+          ╵               [32m~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'creatingBlankTask' does not exist on type 'MeetingTasksSectionComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-tasks-section.component.ts:26:37:
+[37m      26 │ ..."(creatingTaskForNote || [32mcreatingBlankTask[37m) && meeting.customerId"
+         ╵                             [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'onCreated' does not exist on type 'MeetingTasksSectionComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-tasks-section.component.ts:30:17:
+[37m      30 │       (created)="[32monCreated[37m()"
+         ╵                  [32m~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG1: Property 'onCancelCreate' does not exist on type 'MeetingTasksSectionComponent'. Did you mean 'cancelCreate'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-tasks-section.component.ts:31:19:
+[37m      31 │       (cancelled)="[32monCancelCreate[37m()"
+         ╵                    [32m~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'creatingBlankTask' does not exist on type 'MeetingTasksSectionComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-tasks-section.component.ts:26:37:
+[37m      26 │ ..."(creatingTaskForNote || [32mcreatingBlankTask[37m) && meeting.customerId"
+         ╵                             [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'onCreated' does not exist on type 'MeetingTasksSectionComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-tasks-section.component.ts:30:17:
+[37m      30 │       (created)="[32monCreated[37m()"
+         ╵                  [32m~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG1: Property 'onCancelCreate' does not exist on type 'MeetingTasksSectionComponent'. Did you mean 'cancelCreate'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-tasks-section.component.ts:31:19:
+[37m      31 │       (cancelled)="[32monCancelCreate[37m()"
+         ╵                    [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'creatingBlankTask' does not exist on type 'MeetingTasksSectionComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-tasks-section.component.ts:48:40:
+[37m      48 │         *ngIf="!creatingTaskForNote && ![32mcreatingBlankTask[37m"
+         ╵                                         [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'startBlankTask' does not exist on type 'MeetingTasksSectionComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-tasks-section.component.ts:51:17:
+[37m      51 │         (click)="[32mstartBlankTask[37m()"
+         ╵                  [32m~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Unexpected closing tag "section". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:315:4:
+[37m      315 │     [32m</section>[37m
+          ╵     [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'collapsedSections' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:70:74:
+[37m      70 │ ...le" [class.collapsed]="[32mcollapsedSections[37m.plan" (click)="toggleS...
+         ╵                           [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'toggleSection' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:70:107:
+[37m      70 │ ...dSections.plan" (click)="[32mtoggleSection[37m('plan')" aria-label="Tog...
+         ╵                             [32m~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'collapsedSections' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:85:28:
+[37m      85 │       <ng-container *ngIf="![32mcollapsedSections[37m.plan">
+         ╵                             [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'collapsedSections' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:321:74:
+[37m      321 │ ...le" [class.collapsed]="[32mcollapsedSections[37m.capture" (click)="tog...
+          ╵                           [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'toggleSection' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:321:110:
+[37m      321 │ ...ctions.capture" (click)="[32mtoggleSection[37m('capture')" aria-label=...
+          ╵                             [32m~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'collapsedSections' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:330:58:
+[37m      330 │ ...If="editingMeeting && ![32mcollapsedSections[37m.capture" role="tablist">
+          ╵                           [32m~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'collapsedSections' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:70:74:
+[37m      70 │ ...le" [class.collapsed]="[32mcollapsedSections[37m.plan" (click)="toggleS...
+         ╵                           [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'toggleSection' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:70:107:
+[37m      70 │ ...dSections.plan" (click)="[32mtoggleSection[37m('plan')" aria-label="Tog...
+         ╵                             [32m~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'collapsedSections' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:85:28:
+[37m      85 │       <ng-container *ngIf="![32mcollapsedSections[37m.plan">
+         ╵                             [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'collapsedSections' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:321:74:
+[37m      321 │ ...le" [class.collapsed]="[32mcollapsedSections[37m.capture" (click)="tog...
+          ╵                           [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'toggleSection' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:321:110:
+[37m      321 │ ...ctions.capture" (click)="[32mtoggleSection[37m('capture')" aria-label=...
+          ╵                             [32m~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'collapsedSections' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:330:58:
+[37m      330 │ ...If="editingMeeting && ![32mcollapsedSections[37m.capture" role="tablist">
+          ╵                           [32m~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Unexpected closing tag "section". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:383:4:
+[37m      383 │     [32m</section>[37m
+          ╵     [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Unexpected closing tag "section". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:413:4:
+[37m      413 │     [32m</section>[37m
+          ╵     [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Unexpected closing tag "section". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:413:4:
+[37m      413 │     [32m</section>[37m
+          ╵     [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'collapsedSections' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:70:74:
+[37m      70 │ ...le" [class.collapsed]="[32mcollapsedSections[37m.plan" (click)="toggleS...
+         ╵                           [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'toggleSection' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:70:107:
+[37m      70 │ ...dSections.plan" (click)="[32mtoggleSection[37m('plan')" aria-label="Tog...
+         ╵                             [32m~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'collapsedSections' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:85:28:
+[37m      85 │       <ng-container *ngIf="![32mcollapsedSections[37m.plan">
+         ╵                             [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'collapsedSections' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:321:74:
+[37m      321 │ ...le" [class.collapsed]="[32mcollapsedSections[37m.capture" (click)="tog...
+          ╵                           [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'toggleSection' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:321:110:
+[37m      321 │ ...ctions.capture" (click)="[32mtoggleSection[37m('capture')" aria-label=...
+          ╵                             [32m~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'collapsedSections' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:330:58:
+[37m      330 │ ...If="editingMeeting && ![32mcollapsedSections[37m.capture" role="tablist">
+          ╵                           [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'collapsedSections' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:353:28:
+[37m      353 │       <ng-container *ngIf="![32mcollapsedSections[37m.capture">
+          ╵                             [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'collapsedSections' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:389:74:
+[37m      389 │ ...le" [class.collapsed]="[32mcollapsedSections[37m.tasks" (click)="toggl...
+          ╵                           [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'toggleSection' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:389:108:
+[37m      389 │ ...Sections.tasks" (click)="[32mtoggleSection[37m('tasks')" aria-label="T...
+          ╵                             [32m~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'collapsedSections' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:398:28:
+[37m      398 │       <ng-container *ngIf="![32mcollapsedSections[37m.tasks">
+          ╵                             [32m~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'toggleSection' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:70:107:
+[37m      70 │ ...dSections.plan" (click)="[32mtoggleSection[37m('plan')" aria-label="Tog...
+         ╵                             [32m~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'toggleSection' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:321:110:
+[37m      321 │ ...ctions.capture" (click)="[32mtoggleSection[37m('capture')" aria-label=...
+          ╵                             [32m~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'toggleSection' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:389:108:
+[37m      389 │ ...Sections.tasks" (click)="[32mtoggleSection[37m('tasks')" aria-label="T...
+          ╵                             [32m~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'trackNote' does not exist on type 'MeetingNotesSectionComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-notes-section.component.ts:96:52:
+[37m      96 │ ...For="let n of capturedNotes; trackBy: [32mtrackNote[37m" class="note-row">
+         ╵                                          [32m~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'zIndex' does not exist on type 'DrawerShellComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/shared/drawer-shell/drawer-shell.component.ts:39:23:
+[37m      39 │       [style.z-index]="[32mzIndex[37m"
+         ╵                        [32m~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'tryAutoCloseMeeting' does not exist on type 'ActionosWorkspaceService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3831:11:
+[37m      3831 │       this.[32mtryAutoCloseMeeting[37m(updated.sourceMeetingId);
+           ╵            [32m~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'selectedClientForPrep' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:77:37:
+[37m      77 │ ...n class="eyebrow">{{ [32mselectedClientForPrep[37m?.name || ('customerM...
+         ╵                         [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'selectedClientForPrep' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:97:17:
+[37m      97 │           *ngIf="[32mselectedClientForPrep[37m as prepCustomer"
+         ╵                  [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'selectedClientForPrep' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:432:30:
+[37m      432 │       *ngIf="showPrepBrief && [32mselectedClientForPrep[37m as prepCustomer"
+          ╵                               [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'selectedClientForPrep' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:77:37:
+[37m      77 │ ...n class="eyebrow">{{ [32mselectedClientForPrep[37m?.name || ('customerM...
+         ╵                         [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'selectedClientForPrep' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:97:17:
+[37m      97 │           *ngIf="[32mselectedClientForPrep[37m as prepCustomer"
+         ╵                  [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'selectedClientForPrep' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:432:30:
+[37m      432 │       *ngIf="showPrepBrief && [32mselectedClientForPrep[37m as prepCustomer"
+          ╵                               [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'selectedClientForPrep' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:77:37:
+[37m      77 │ ...n class="eyebrow">{{ [32mselectedClientForPrep[37m?.name || ('customerM...
+         ╵                         [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'selectedClientForPrep' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:97:17:
+[37m      97 │           *ngIf="[32mselectedClientForPrep[37m as prepCustomer"
+         ╵                  [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'selectedClientForPrep' does not exist on type 'CustomerMeetingFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-meeting-form.component.ts:432:30:
+[37m      432 │       *ngIf="showPrepBrief && [32mselectedClientForPrep[37m as prepCustomer"
+          ╵                               [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'mergeHomePageDirectoryUsers' does not exist on type 'ActionosWorkspaceService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:523:19:
+[37m      523 │         await this.[32mmergeHomePageDirectoryUsers[37m();
+          ╵                    [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'mergeHomePageDirectoryUsers' does not exist on type 'ActionosWorkspaceService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:2153:19:
+[37m      2153 │         await this.[32mmergeHomePageDirectoryUsers[37m();
+           ╵                    [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG1: Property 'railWorkloadSearch' does not exist on type 'MyWorkComponent'. Did you mean 'railWorkload'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:205:21:
+[37m      205 │         [(ngModel)]="[32mrailWorkloadSearch[37m"
+          ╵                      [32m~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG1: Property 'railWorkloadSearch' does not exist on type 'MyWorkComponent'. Did you mean 'railWorkload'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:205:21:
+[37m      205 │         [(ngModel)]="[32mrailWorkloadSearch[37m"
+          ╵                      [32m~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG1: Property 'railWorkloadSearch' does not exist on type 'MyWorkComponent'. Did you mean 'railWorkload'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:205:21:
+[37m      205 │         [(ngModel)]="[32mrailWorkloadSearch[37m"
+          ╵                      [32m~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG1: Property 'railWorkloadSearch' does not exist on type 'MyWorkComponent'. Did you mean 'railWorkload'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:205:21:
+[37m      205 │         [(ngModel)]="[32mrailWorkloadSearch[37m"
+          ╵                      [32m~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG1: Property 'railWorkloadSearch' does not exist on type 'MyWorkComponent'. Did you mean 'railWorkload'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:205:21:
+[37m      205 │         [(ngModel)]="[32mrailWorkloadSearch[37m"
+          ╵                      [32m~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG1: Property 'railWorkloadSearch' does not exist on type 'MyWorkComponent'. Did you mean 'railWorkload'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/my-work/my-work.component.html:205:21:
+[37m      205 │         [(ngModel)]="[32mrailWorkloadSearch[37m"
+          ╵                      [32m~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MyWorkComponent.
+
+    src/app/features/my-work/my-work.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./my-work.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'refreshDirectoryUsers' does not exist on type 'ActionosWorkspaceService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:523:19:
+[37m      523 │         await this.[32mrefreshDirectoryUsers[37m(selectedOrg);
+          ╵                    [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'refreshDirectoryUsers' does not exist on type 'ActionosWorkspaceService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:2280:19:
+[37m      2280 │         await this.[32mrefreshDirectoryUsers[37m(orgGroupId);
+           ╵                    [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'Id' does not exist on type 'HomePageUserDto'. Did you mean 'id'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:1964:26:
+[37m      1964 │       id: user.id ?? user.[32mId[37m ?? '',
+           ╵                           [32m~~[0m
+
+  'id' is declared here.
+
+    src/app/core/services/homepage-server.service.ts:7:2:
+[37m      7 │   [32mid[37m: string;
+        ╵   [32m~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'DisplayName' does not exist on type 'HomePageUserDto'. Did you mean 'displayName'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:1965:44:
+[37m      1965 │       displayName: user.displayName ?? user.[32mDisplayName[37m ?? '',
+           ╵                                             [32m~~~~~~~~~~~[0m
+
+  'displayName' is declared here.
+
+    src/app/core/services/homepage-server.service.ts:8:2:
+[37m      8 │   [32mdisplayName[37m: string;
+        ╵   [32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'email' does not exist on type 'HomePageUserDto'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:1966:18:
+[37m      1966 │       email: user.[32memail[37m ?? user.Email ?? '',
+           ╵                   [32m~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'Email' does not exist on type 'HomePageUserDto'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:1966:32:
+[37m      1966 │       email: user.email ?? user.[32mEmail[37m ?? '',
+           ╵                                 [32m~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'isActive' does not exist on type 'HomePageUserDto'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:1967:21:
+[37m      1967 │       isActive: user.[32misActive[37m ?? user.IsActive ?? true
+           ╵                      [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'IsActive' does not exist on type 'HomePageUserDto'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:1967:38:
+[37m      1967 │       isActive: user.isActive ?? user.[32mIsActive[37m ?? true
+           ╵                                       [32m~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'EmployeeDirectoryPort'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:397:38:
+[37m      397 │ ...y employeeDirectory: [32mEmployeeDirectoryPort[37m = new InMemoryEmplo...
+          ╵                         [32m~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'InMemoryEmployeeDirectory'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:397:66:
+[37m      397 │ ...Directory: EmployeeDirectoryPort = new [32mInMemoryEmployeeDirectory[37m(
+          ╵                                           [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'a' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3293:65:
+[37m      3293 │ ...mployeeDirectory.list().sort(([32ma[37m, b) => a.fullName.localeCompa...
+           ╵                                  [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'b' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3293:68:
+[37m      3293 │ ...oyeeDirectory.list().sort((a, [32mb[37m) => a.fullName.localeCompare(...
+           ╵                                  [32m^[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'employeeDirectory' does not exist on type 'ActionosWorkspaceService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:960:54:
+[37m      960 │ ...edByEmployeeId && this.[32memployeeDirectory[37m.isAssignable(note.cre...
+          ╵                           [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'employeeDirectory' does not exist on type 'ActionosWorkspaceService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3290:34:
+[37m      3290 │ ...ortedEmployees = this.[32memployeeDirectory[37m.list().sort((a, b) =>...
+           ╵                          [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'a' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3290:65:
+[37m      3290 │ ...mployeeDirectory.list().sort(([32ma[37m, b) => a.fullName.localeCompa...
+           ╵                                  [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'b' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3290:68:
+[37m      3290 │ ...oyeeDirectory.list().sort((a, [32mb[37m) => a.fullName.localeCompare(...
+           ╵                                  [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'employeeDirectory' does not exist on type 'ActionosWorkspaceService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3312:16:
+[37m      3312 │     return this.[32memployeeDirectory[37m.isAssignable(id);
+           ╵                 [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'employeeDirectory' does not exist on type 'ActionosWorkspaceService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3768:14:
+[37m      3768 │     if (!this.[32memployeeDirectory[37m.isAssignable(input.assignedToEmp...
+           ╵               [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'employeeDirectory' does not exist on type 'ActionosWorkspaceService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3952:43:
+[37m      3952 │ ...ToEmployeeId && !this.[32memployeeDirectory[37m.isAssignable(next.ass...
+           ╵                          [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'employeeDirectory' does not exist on type 'ActionosWorkspaceService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:4088:14:
+[37m      4088 │     if (!this.[32memployeeDirectory[37m.isAssignable(employeeId)) {
+           ╵               [32m~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'employeeDirectory' does not exist on type 'ActionosWorkspaceService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3290:34:
+[37m      3290 │ ...ortedEmployees = this.[32memployeeDirectory[37m.list().sort((a, b) =>...
+           ╵                          [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'a' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3290:65:
+[37m      3290 │ ...mployeeDirectory.list().sort(([32ma[37m, b) => a.fullName.localeCompa...
+           ╵                                  [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'b' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3290:68:
+[37m      3290 │ ...oyeeDirectory.list().sort((a, [32mb[37m) => a.fullName.localeCompare(...
+           ╵                                  [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'employeeDirectory' does not exist on type 'ActionosWorkspaceService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3312:16:
+[37m      3312 │     return this.[32memployeeDirectory[37m.isAssignable(id);
+           ╵                 [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'employeeDirectory' does not exist on type 'ActionosWorkspaceService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3768:14:
+[37m      3768 │     if (!this.[32memployeeDirectory[37m.isAssignable(input.assignedToEmp...
+           ╵               [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'employeeDirectory' does not exist on type 'ActionosWorkspaceService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3952:43:
+[37m      3952 │ ...ToEmployeeId && !this.[32memployeeDirectory[37m.isAssignable(next.ass...
+           ╵                          [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'employeeDirectory' does not exist on type 'ActionosWorkspaceService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:4088:14:
+[37m      4088 │     if (!this.[32memployeeDirectory[37m.isAssignable(employeeId)) {
+           ╵               [32m~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'employeeDirectory' does not exist on type 'ActionosWorkspaceService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3343:34:
+[37m      3343 │ ...ortedEmployees = this.[32memployeeDirectory[37m.list().sort((a, b) =>...
+           ╵                          [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'a' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3343:65:
+[37m      3343 │ ...mployeeDirectory.list().sort(([32ma[37m, b) => a.fullName.localeCompa...
+           ╵                                  [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'b' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3343:68:
+[37m      3343 │ ...oyeeDirectory.list().sort((a, [32mb[37m) => a.fullName.localeCompare(...
+           ╵                                  [32m^[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'employeeDirectory' does not exist on type 'ActionosWorkspaceService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3365:16:
+[37m      3365 │     return this.[32memployeeDirectory[37m.isAssignable(id);
+           ╵                 [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'employeeDirectory' does not exist on type 'ActionosWorkspaceService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3821:14:
+[37m      3821 │     if (!this.[32memployeeDirectory[37m.isAssignable(input.assignedToEmp...
+           ╵               [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'employeeDirectory' does not exist on type 'ActionosWorkspaceService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:4005:43:
+[37m      4005 │ ...ToEmployeeId && !this.[32memployeeDirectory[37m.isAssignable(next.ass...
+           ╵                          [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'employeeDirectory' does not exist on type 'ActionosWorkspaceService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:4141:14:
+[37m      4141 │     if (!this.[32memployeeDirectory[37m.isAssignable(employeeId)) {
+           ╵               [32m~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'employeeDirectory' does not exist on type 'ActionosWorkspaceService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:3823:14:
+[37m      3823 │     if (!this.[32memployeeDirectory[37m.isAssignable(input.assignedToEmp...
+           ╵               [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'employeeDirectory' does not exist on type 'ActionosWorkspaceService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:4007:43:
+[37m      4007 │ ...ToEmployeeId && !this.[32memployeeDirectory[37m.isAssignable(next.ass...
+           ╵                          [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'employeeDirectory' does not exist on type 'ActionosWorkspaceService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:4143:14:
+[37m      4143 │     if (!this.[32memployeeDirectory[37m.isAssignable(employeeId)) {
+           ╵               [32m~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m

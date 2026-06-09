@@ -1,5 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, HostListener, Input, Output } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
+
+/**
+ * Base stacking layer for drawers. Each drawer that opens is bumped one step
+ * above the last so the most-recently-opened sheet always wins, regardless of
+ * the order the drawer components appear in the DOM. The band stays small (and
+ * resets when every drawer closes) so drawers never climb over overlays that
+ * must sit above them, e.g. the calendar create-picker (950) or task-table
+ * popovers (1045+).
+ */
+const DRAWER_BASE_Z = 900;
 
 /**
  * Reusable bottom-sheet drawer shell.
@@ -26,6 +36,7 @@ import { Component, EventEmitter, HostListener, Input, Output } from '@angular/c
       *ngIf="open"
       class="ds-backdrop"
       role="presentation"
+      [style.z-index]="zIndex"
       (click)="onBackdrop()"
     >
       <aside
@@ -92,13 +103,55 @@ import { Component, EventEmitter, HostListener, Input, Output } from '@angular/c
     }
   `]
 })
-export class DrawerShellComponent {
+export class DrawerShellComponent implements OnChanges, OnDestroy {
+  /** Number of drawers currently open, shared across all shell instances. */
+  private static activeCount = 0;
+  /** Highest z-index handed out so far; resets to base when all drawers close. */
+  private static topZ = DRAWER_BASE_Z;
+
   @Input() open = false;
   @Input() ariaLabel = '';
   @Input() maxWidth = '960px';
   @Input() bodyPadding = '14px 24px 24px';
   @Input() dismissable = true;
   @Output() closed = new EventEmitter<void>();
+
+  /** Stacking layer for this drawer's backdrop; assigned when it opens. */
+  zIndex = DRAWER_BASE_Z;
+  /** Whether this instance is currently counted as open (guards double-counts). */
+  private counted = false;
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['open']) {
+      this.syncStack(this.open);
+    }
+  }
+
+  ngOnDestroy(): void {
+    // A drawer torn down while still open must release its slot, or the shared
+    // counter never returns to zero and the band would creep upward.
+    this.syncStack(false);
+  }
+
+  /**
+   * Keep the shared stack in sync with this drawer's open state. On open it
+   * claims the next z-index above every other open drawer; on close it releases
+   * its slot and resets the band once nothing is left open.
+   */
+  private syncStack(open: boolean): void {
+    if (open && !this.counted) {
+      this.counted = true;
+      DrawerShellComponent.activeCount += 1;
+      DrawerShellComponent.topZ += 1;
+      this.zIndex = DrawerShellComponent.topZ;
+    } else if (!open && this.counted) {
+      this.counted = false;
+      DrawerShellComponent.activeCount = Math.max(0, DrawerShellComponent.activeCount - 1);
+      if (DrawerShellComponent.activeCount === 0) {
+        DrawerShellComponent.topZ = DRAWER_BASE_Z;
+      }
+    }
+  }
 
   onBackdrop(): void {
     if (this.dismissable) {

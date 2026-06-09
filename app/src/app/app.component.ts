@@ -116,11 +116,9 @@ export class AppComponent implements OnInit {
   // ── Bottom bar: capture helpers ──
 
   get planCustomerOptions(): SelectOption[] {
-    const sorted = [...this.workspace.customers]
-      .sort((a, b) => a.name.localeCompare(b.name));
     return [
       { value: '', label: this.i18n.translate('meetingsOverview.selectCustomer') },
-      ...sorted.map(c => ({ value: c.id, label: c.name }))
+      ...this.workspace.clientOptions.map(c => ({ value: c.id, label: c.name }))
     ];
   }
 
@@ -147,10 +145,7 @@ export class AppComponent implements OnInit {
 
   onPlanCustomerSelected(customerId: string): void {
     if (!customerId) return;
-    const customer = this.workspace.customer(customerId);
-    if (customer) {
-      this.prepareCustomerMeeting(customer);
-    }
+    this.workspace.openCatchUpDrawer(customerId);
     this.showPlanPicker.set(false);
     this.planCustomerId = '';
   }

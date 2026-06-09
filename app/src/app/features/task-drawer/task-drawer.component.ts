@@ -47,7 +47,127 @@ type TaskSectionId = 'details' | 'attachments' | 'alerts' | 'checklist' | 'watch
       color: var(--text-secondary);
     }
     .section-toggle { margin-inline-start: auto; min-width: 34px; }
-    .section-body { display: grid; gap: 12px; margin-top: 10px; }
+    .section-body { display: grid; gap: 14px; margin-top: 10px; }
+    /* Rows inside the details section keep their own grid; cancel the global
+       field-control top margin so the section gap drives the rhythm. */
+    .section-body .field-control { margin-top: 0; }
+    /* ── Summary header ─────────────────────────────────────────── */
+    .dh-meta-line {
+      display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px;
+      margin: 0; font-size: 12px; color: var(--text-secondary);
+    }
+    .dh-meta-line .eyebrow { color: var(--text-tertiary); }
+    .dh-meta-line .dh-client { color: var(--accent-strong); font-weight: 800; }
+
+    .drawer-header { display: flex; }
+    .dh-title-wrap { flex: 1; min-width: 0; }
+    .dh-title-row { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+    .dh-title-input {
+      flex: 1; min-width: 0;
+      border: 1px solid transparent; border-radius: var(--radius-md); background: transparent;
+      color: var(--text-primary); font-size: 22px; font-weight: 800; line-height: 1.2;
+      padding: 4px 8px; margin-inline-start: -8px;
+      transition: background var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out);
+    }
+    .dh-title-input:hover { background: var(--bg-sunken); }
+    .dh-title-input:focus { outline: none; border-color: var(--accent); background: var(--bg-elevated); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+    /* Labeled chip row — status · priority · assignee, each with a title above */
+    .dh-fields {
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px; margin-top: 14px;
+    }
+    .dh-field { display: grid; gap: 6px; min-width: 0; }
+    .dh-field-label {
+      font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--text-tertiary);
+    }
+    @media (max-width: 560px) { .dh-fields { grid-template-columns: 1fr; } }
+
+    .chip-select { min-width: 0; width: 100%; }
+    ::ng-deep .chip-select .ss-trigger {
+      min-height: 34px; padding: 5px 30px 5px 14px;
+      border-radius: var(--radius-pill); border-color: transparent;
+      background-color: var(--bg-sunken); font-size: 12px; font-weight: 800;
+    }
+    [dir="rtl"] ::ng-deep .chip-select .ss-trigger { padding: 5px 14px 5px 30px; }
+
+    ::ng-deep .status-chip-select.new .ss-trigger,
+    ::ng-deep .status-chip-select.done .ss-trigger { color: var(--success); background-color: var(--success-soft); }
+    ::ng-deep .status-chip-select.planned .ss-trigger { color: var(--info); background-color: var(--info-soft); }
+    ::ng-deep .status-chip-select.in-progress .ss-trigger,
+    ::ng-deep .status-chip-select.sent-to-owner .ss-trigger { color: var(--accent-strong); background-color: var(--accent-soft); }
+    ::ng-deep .status-chip-select.waiting .ss-trigger,
+    ::ng-deep .status-chip-select.waiting-for-customer .ss-trigger,
+    ::ng-deep .status-chip-select.waiting-for-internal .ss-trigger { color: var(--warning); background-color: var(--warning-soft); }
+
+    ::ng-deep .priority-chip-select.low .ss-trigger { color: var(--success); background-color: var(--success-soft); }
+    ::ng-deep .priority-chip-select.medium .ss-trigger { color: var(--info); background-color: var(--info-soft); }
+    ::ng-deep .priority-chip-select.high .ss-trigger { color: var(--warning); background-color: var(--warning-soft); }
+    ::ng-deep .priority-chip-select.critical .ss-trigger { color: var(--text-on-accent); background-color: var(--danger); }
+
+    .chip-date {
+      display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;
+      height: 38px; padding: 0 16px; border-radius: var(--radius-pill);
+      background: var(--bg-sunken); font-size: 14px; font-weight: 800; color: var(--text-secondary);
+    }
+    .chip-date input { border: none; background: transparent; color: inherit; font: inherit; padding: 0; min-height: 0; font-size: 14px; }
+    .chip-date.overdue { background: var(--danger-soft); color: var(--danger); }
+
+    .dh-reason {
+      display: grid; gap: 10px; margin-top: 12px; padding: 12px 14px;
+      border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: var(--bg-sunken);
+    }
+    .dh-reason .primary-action.small { justify-self: start; min-height: 32px; padding: 0 16px; font-size: 12px; font-weight: 700; }
+
+    /* Watchers — compact block near the bottom */
+    .dh-watchers {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+      margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-subtle);
+    }
+    .dh-watchers-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-tertiary); }
+    .dh-watchers .chip-select { width: auto; min-width: 140px; }
+
+    /* Footer buttons: normal size, distributed across the row */
+    .drawer-footer { display: flex; gap: 10px; justify-content: space-between; align-items: center; }
+
+    /* Bottom actions of the Details section — add-step ↔ attach-file */
+    .details-actions {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; flex-wrap: wrap; margin-top: 4px;
+    }
+
+    /* ── Details sub-blocks (checklist / files) ─────────────────── */
+    .details-block { display: grid; gap: 8px; }
+    .details-block-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .details-block-head .eyebrow { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-tertiary); }
+    .details-block-head .muted { font-size: 12px; font-weight: 700; }
+
+    /* Add-watcher "+" chip */
+    .watcher-add { width: auto; }
+    ::ng-deep .watcher-add .ss-trigger {
+      min-height: 30px; padding: 4px 14px;
+      border: none; border-radius: var(--radius-pill);
+      background-color: var(--accent-soft); background-image: none;
+      color: var(--accent-strong); font-size: 14px; font-weight: 800; cursor: pointer;
+    }
+    ::ng-deep .watcher-add .ss-trigger:hover { background-color: var(--accent); color: var(--text-on-accent); }
+    ::ng-deep .watcher-add .ss-placeholder { color: inherit; font-weight: 800; }
+
+    /* ── Activity timeline — flat rows, no card-in-card ─────────── */
+    .section-body .comment-list { gap: 0; margin-top: 12px; }
+    .section-body .comment {
+      border: none; background: transparent; border-radius: 0; margin: 0;
+      padding: 12px 0; border-bottom: 1px solid var(--border-subtle);
+      display: grid; gap: 4px;
+    }
+    .section-body .comment:last-child { border-bottom: none; }
+    .comment-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+    .comment-head strong { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+    .comment-head small { flex-shrink: 0; font-size: 11px; color: var(--text-tertiary); }
+    .section-body .comment p { margin: 0; color: var(--text-secondary); line-height: 1.45; }
+    .section-body .comment.is-system { border-inline-start: 3px solid var(--border-strong); padding-inline-start: 12px; }
+    .section-body .comment.is-system .comment-head strong { color: var(--text-tertiary); }
     .status-reason-hint { font-size: 12px; }
     .add-status-row { display: flex; gap: 6px; margin-top: 6px; }
     .add-status-row input {
@@ -88,6 +208,8 @@ export class TaskDrawerComponent {
 
   meetingChecklistText = '';
   meetingCommentText = '';
+  /** Reveals the checklist input when a task has no steps yet. */
+  addingStep = false;
   addingStatus = false;
   newStatusDraft = '';
   uploadingAttachment = false;
@@ -128,7 +250,7 @@ export class TaskDrawerComponent {
   }
 
   get customerSelectOptions(): SelectOption[] {
-    return this.workspace.taskClientOptions.map(client => ({ value: client.id, label: client.name }));
+    return this.workspace.clientOptions.map(client => ({ value: client.id, label: client.name }));
   }
 
   watcherSelectModel: string | null = null;
@@ -270,6 +392,18 @@ export class TaskDrawerComponent {
     }
 
     this.resetStatusChangeState();
+  }
+
+  /** Apply the staged status once a reason has been entered (chip → reason → confirm). */
+  confirmStatusChange(task: Task): void {
+    if (this.pendingStatusChange) {
+      this.updateMeetingTaskStatus(task, this.pendingStatusChange);
+    }
+  }
+
+  /** Status-change entries are stored as comments; show them as system rows in the timeline. */
+  isStatusComment(body: string): boolean {
+    return this.isStatusChangeComment(body);
   }
 
   addMeetingChecklistItem(task: Task): void {

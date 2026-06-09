@@ -95,9 +95,16 @@ export interface CreateTaskInput {
   openedByEmployeeId?: string;
   assignedToEmployeeId?: string;
   priority: Priority;
+  status?: TaskStatus;
   dueDate?: string;
   assigneeId?: string;
   description?: string;
+  checklist?: ChecklistItem[];
+  watcherIds?: string[];
+  watcherEmployeeIds?: string[];
+  waitingReason?: string;
+  treatmentNotes?: string;
+  completedAt?: string;
 }
 
 export interface UpdateTaskInput {

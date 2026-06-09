@@ -69,6 +69,22 @@ export class InboxComponent {
     { id: 'meetings', labelKey: 'inbox.filters.meetings' },
     { id: 'waiting',  labelKey: 'inbox.filters.waiting' }
   ];
+  private readonly visibleItemsCache: {
+    feed: InboxFeedItem[] | null;
+    filter: InboxFilter | null;
+    search: string;
+    value: InboxFeedItem[];
+  } = { feed: null, filter: null, search: '', value: [] };
+  private readonly groupsCache: {
+    items: InboxFeedItem[] | null;
+    today: string;
+    value: InboxGroup[];
+    weekAgo: string;
+  } = { items: null, today: '', value: [], weekAgo: '' };
+  private readonly countsCache: {
+    counts: Map<InboxFilter, number>;
+    feed: InboxFeedItem[] | null;
+  } = { counts: new Map(), feed: null };
 
   // ── Derived views ─────────────────────────────────────────────────────────
 
@@ -76,7 +92,16 @@ export class InboxComponent {
   get visibleItems(): InboxFeedItem[] {
     const active = this.filter();
     const term = this.search().trim().toLowerCase();
-    let items = this.workspace.inboxFeed;
+    const feed = this.workspace.inboxFeed;
+    if (
+      this.visibleItemsCache.feed === feed &&
+      this.visibleItemsCache.filter === active &&
+      this.visibleItemsCache.search === term
+    ) {
+      return this.visibleItemsCache.value;
+    }
+
+    let items = feed;
     if (active !== 'all') {
       items = items.filter(item => item.category === active);
     }
@@ -86,6 +111,10 @@ export class InboxComponent {
         (item.contextText?.toLowerCase().includes(term) ?? false)
       );
     }
+    this.visibleItemsCache.feed = feed;
+    this.visibleItemsCache.filter = active;
+    this.visibleItemsCache.search = term;
+    this.visibleItemsCache.value = items;
     return items;
   }
 
@@ -94,6 +123,14 @@ export class InboxComponent {
     const items = this.visibleItems;
     const today = this.workspace.todayIso;
     const weekAgo = this.workspace.dateAfter(-7);
+    if (
+      this.groupsCache.items === items &&
+      this.groupsCache.today === today &&
+      this.groupsCache.weekAgo === weekAgo
+    ) {
+      return this.groupsCache.value;
+    }
+
     const dayOf = (ts: string) => ts.slice(0, 10);
 
     const buckets: { id: string; labelKey: string; items: InboxFeedItem[] }[] = [
@@ -102,9 +139,14 @@ export class InboxComponent {
       { id: 'earlier', labelKey: 'inbox.groups.earlier', items: items.filter(i => dayOf(i.timestamp) < weekAgo) }
     ];
 
-    return buckets
+    const value = buckets
       .filter(b => b.items.length)
       .map(b => ({ id: b.id, labelKey: b.labelKey, rows: this.toRows(b.items) }));
+    this.groupsCache.items = items;
+    this.groupsCache.today = today;
+    this.groupsCache.weekAgo = weekAgo;
+    this.groupsCache.value = value;
+    return value;
   }
 
   /** Collapse meeting items (2+ from the same meeting) into one row. */
@@ -145,8 +187,20 @@ export class InboxComponent {
   }
 
   countFor(id: InboxFilter): number {
-    const all = this.workspace.inboxFeed;
-    return id === 'all' ? all.length : all.filter(item => item.category === id).length;
+    const feed = this.workspace.inboxFeed;
+    if (this.countsCache.feed !== feed) {
+      this.countsCache.feed = feed;
+      this.countsCache.counts = new Map<InboxFilter, number>([
+        ['all', feed.length],
+        ['tasks', 0],
+        ['meetings', 0],
+        ['waiting', 0]
+      ]);
+      for (const item of feed) {
+        this.countsCache.counts.set(item.category, (this.countsCache.counts.get(item.category) ?? 0) + 1);
+      }
+    }
+    return this.countsCache.counts.get(id) ?? 0;
   }
 
   groupHasUnread(row: InboxMeetingRow): boolean {
@@ -255,6 +309,26 @@ export class InboxComponent {
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────────
+
+  trackFilter(_index: number, filter: { id: InboxFilter }): InboxFilter {
+    return filter.id;
+  }
+
+  trackGroup(_index: number, group: InboxGroup): string {
+    return group.id;
+  }
+
+  trackRow(_index: number, row: InboxRow): string {
+    return row.key;
+  }
+
+  trackItem(_index: number, item: InboxFeedItem): string {
+    return item.id;
+  }
+
+  trackAction(_index: number, action: { id: InboxActionId }): InboxActionId {
+    return action.id;
+  }
 
   private taskById(id: string): Task | undefined {
     return this.workspace.meetingTasks.find(task => task.id === id);

@@ -23,7 +23,7 @@
   <!-- ── Filter pills ───────────────────────────────────────────────────── -->
   <div class="inbox-filters">
     <button
-      *ngFor="let f of filters"
+      *ngFor="let f of filters; trackBy: trackFilter"
       type="button"
       class="inbox-pill"
       [class.active]="filter() === f.id"
@@ -48,10 +48,10 @@
 
   <!-- ── Feed (scrollable) ──────────────────────────────────────────────── -->
   <div *ngIf="groups.length; else noItems" class="inbox-feed scroll-box">
-    <section *ngFor="let group of groups" class="inbox-group">
+    <section *ngFor="let group of groups; trackBy: trackGroup" class="inbox-group">
       <h3 class="inbox-group-title">{{ group.labelKey | t }}</h3>
 
-      <ng-container *ngFor="let row of group.rows">
+      <ng-container *ngFor="let row of group.rows; trackBy: trackRow">
 
         <!-- Single item row -->
         <article
@@ -74,7 +74,7 @@
 
           <div class="inbox-item-actions" (click)="$event.stopPropagation()">
             <button
-              *ngFor="let action of row.item.actions"
+              *ngFor="let action of row.item.actions; trackBy: trackAction"
               type="button"
               [class.primary-action]="action.variant === 'primary'"
               [class.ghost-action]="action.variant === 'ghost'"
@@ -130,7 +130,7 @@
 
           <div class="inbox-group-items" *ngIf="isExpanded(row.key)">
             <div
-              *ngFor="let item of row.items"
+              *ngFor="let item of row.items; trackBy: trackItem"
               class="inbox-subitem"
               [class.unread]="workspace.isInboxUnread(item.id)"
             >
@@ -140,7 +140,7 @@
                 <p class="inbox-item-primary">{{ item.primaryText }}</p>
               </div>
               <div class="inbox-item-actions">
-                <ng-container *ngFor="let action of item.actions">
+                <ng-container *ngFor="let action of item.actions; trackBy: trackAction">
                   <button
                     *ngIf="action.id !== 'view-meeting'"
                     type="button"

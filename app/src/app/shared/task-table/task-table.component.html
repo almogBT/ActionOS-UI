@@ -3,7 +3,7 @@
   <div class="group-switch" role="tablist" [attr.aria-label]="'tasks.groupBy.label' | t">
     <span class="group-switch-label">{{ 'tasks.groupBy.label' | t }}</span>
     <button
-      *ngFor="let m of groupModes"
+      *ngFor="let m of groupModes; trackBy: trackMode"
       type="button"
       role="tab"
       [class.active]="groupBy === m.id"
@@ -98,6 +98,7 @@
         <!-- ── Main row ──────────────────────────────────────────────────── -->
         <article
           class="task-row"
+          [attr.data-status]="workspace.statusClass(task.status)"
           [ngClass]="[isOverdue(task) ? 'task-overdue' : '', workspace.selectedTaskId === task.id ? 'task-selected' : '', expandedTaskId === task.id ? 'task-expanded' : '', isSelected(task) ? 'task-checked' : '']"
           (click)="toggleExpand(task, $event)"
           (dblclick)="openTaskFromRow(task, $event)"
@@ -124,7 +125,7 @@
               <!-- Status options -->
               <div class="status-menu" *ngIf="statusMenuTaskId === task.id" (click)="$event.stopPropagation()">
                 <button
-                  *ngFor="let s of allowedStatuses(task)"
+                  *ngFor="let s of allowedStatuses(task); trackBy: trackStatus"
                   type="button"
                   class="status-opt"
                   [ngClass]="workspace.statusClass(s)"
@@ -297,7 +298,7 @@
                   autocomplete="off"
                 />
                 <button
-                  *ngFor="let opt of filteredAssigneeOptions"
+                  *ngFor="let opt of filteredAssigneeOptions; trackBy: trackOption"
                   type="button"
                   class="assignee-opt"
                   [class.is-current]="opt.value === task.assignedToEmployeeId"
@@ -322,11 +323,17 @@
         <!-- ── Expanded panel: interactive checklist + open button ─────────── -->
         <div *ngIf="expandable && expandedTaskId === task.id" class="task-expand-panel" (click)="$event.stopPropagation()">
           <div class="expand-checklist">
-            <span class="expand-section-label">{{ 'tasks.expand.checklist' | t }}</span>
+            <div class="expand-checklist-head">
+              <span class="expand-section-label">{{ 'tasks.expand.checklist' | t }}</span>
+              <ng-container *ngIf="checklistProgress(task) as cl">
+                <div class="expand-progress-bar"><span [style.width.%]="cl.pct"></span></div>
+                <span class="expand-progress-count">{{ cl.done }}/{{ cl.total }}</span>
+              </ng-container>
+            </div>
 
             <div class="checklist-items" *ngIf="task.checklist?.length; else noChecklist">
               <button
-                *ngFor="let item of task.checklist"
+                *ngFor="let item of task.checklist; trackBy: trackChecklistItem"
                 type="button"
                 class="checklist-item"
                 [class.item-done]="item.done"

@@ -12,7 +12,7 @@
     <div class="board-header-row">
       <!-- Client picker: initials avatar combined with the client select -->
       <div class="identity-picker">
-        <span class="hero-avatar client">{{ selectedClient ? selectedClient.name.charAt(0) : '?' }}</span>
+        <span class="hero-avatar client">{{ selectedClientInitial }}</span>
         <app-searchable-select
           [(ngModel)]="selectedClientId"
           [options]="clientSelectOptions"
@@ -25,7 +25,7 @@
       </label>
 
       <button type="button" class="primary-action new-meeting-btn"
-        *ngIf="selectedClient"
+        *ngIf="selectedClientName"
         (click)="workspace.openNewMeetingModal(selectedClientId)">
         <app-icon name="plus" [size]="14"></app-icon>
         <span>{{ 'boards.hero.newMeeting' | t }}</span>
@@ -42,7 +42,7 @@
   </section>
 
   <!-- ════════════════════════ CLIENT BOARD ════════════════════════════════ -->
-  <ng-container *ngIf="selectedClient as client; else noClientSelected">
+  <ng-container *ngIf="selectedClientName as clientName; else noClientSelected">
 
     <!-- Calendar + stat tiles (shared seamless card) -->
     <app-calendar-stats
@@ -99,7 +99,7 @@
             [class.carousel-track]="!meetingsExpanded"
             [class.meeting-grid-expanded]="meetingsExpanded"
             (wheel)="onRailWheel($event, railTrack)">
-            <app-meeting-card *ngFor="let m of clientMeetings"
+            <app-meeting-card *ngFor="let m of clientMeetings; trackBy: trackMeeting"
               [meeting]="m" [variant]="meetingsExpanded ? 'grid' : 'rail'"></app-meeting-card>
           </div>
           <div class="empty-state" *ngIf="!clientMeetings.length">
@@ -116,7 +116,7 @@
             </div>
             <div class="board-toolbar-inline">
               <div class="filter-strip">
-                <button *ngFor="let f of taskLensOptions" type="button"
+                <button *ngFor="let f of taskLensOptions; trackBy: trackTaskLens" type="button"
                   [class.active]="taskLens === f.id" (click)="taskLens = f.id">{{ f.labelKey | t }}</button>
               </div>
               <span class="count-badge" [class.badge-danger]="taskLens === 'overdue' && clientTasksForTab.length">{{ clientTasksForTab.length }}</span>
@@ -134,7 +134,7 @@
 
       <!-- Recap rail: the meeting-form prep brief (summary for this client), on the side -->
       <aside class="board-recap panel">
-        <h5 class="recap-title">{{ 'meetingPrep.summaryFor' | t }} {{ client.name }}</h5>
+        <h5 class="recap-title">{{ 'meetingPrep.summaryFor' | t }} {{ clientName }}</h5>
         <app-meeting-prep-brief
           variant="compact"
           [customerId]="selectedClientId"

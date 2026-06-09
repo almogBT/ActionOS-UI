@@ -66,7 +66,7 @@
       </div>
     </div>
     <div class="carousel-track" #railTrack (wheel)="onRailWheel($event, railTrack)">
-      <app-meeting-card *ngFor="let m of attentionMeetings" [meeting]="m" variant="rail"></app-meeting-card>
+      <app-meeting-card *ngFor="let m of attentionMeetings; trackBy: trackMeeting" [meeting]="m" variant="rail"></app-meeting-card>
     </div>
   </section>
 
@@ -86,7 +86,7 @@
       ></app-searchable-select>
       <div class="filter-strip">
         <button
-          *ngFor="let f of quickFilterOptions"
+          *ngFor="let f of quickFilterOptions; trackBy: trackQuickFilter"
           type="button"
           [class.active]="quickFilter === f.id"
           (click)="quickFilter = f.id"
@@ -95,7 +95,7 @@
     </div>
 
     <!-- ── Meeting lanes (card grids) ─────────────────────────────────────── -->
-    <div *ngFor="let bucket of buckets" class="lane-section" [class.collapsed]="isLaneCollapsed(bucket.lane)">
+    <div *ngFor="let bucket of buckets; trackBy: trackBucket" class="lane-section" [class.collapsed]="isLaneCollapsed(bucket.lane)">
       <button
         type="button"
         class="lane-header"
@@ -103,7 +103,7 @@
         [attr.aria-expanded]="!isLaneCollapsed(bucket.lane)"
       >
         <app-icon class="lane-chevron" name="chevron-down" [size]="14"></app-icon>
-        <span class="lane-label">{{ ('meetingsOverview.' + bucket.lane) | t }}</span>
+        <span class="lane-label">{{ bucket.labelKey | t }}</span>
         <span class="lane-count">{{ bucket.meetings.length }}</span>
       </button>
 
@@ -120,7 +120,7 @@
         </div>
 
         <div *ngIf="bucket.meetings.length" class="card-grid">
-          <app-meeting-card *ngFor="let m of bucket.meetings" [meeting]="m"></app-meeting-card>
+          <app-meeting-card *ngFor="let m of bucket.meetings; trackBy: trackMeeting" [meeting]="m"></app-meeting-card>
         </div>
       </div>
     </div>

@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 export type SortKey = 'group' | 'status' | 'title' | 'due' | 'priority';
 import { ActionosI18nService } from '../../core/i18n/actionos-i18n.service';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
-import { CreateTaskInput, Employee, Priority, Task, TaskStatus } from '../../core/models/actionos.models';
+import { ChecklistItem, CreateTaskInput, Employee, Priority, Task, TaskStatus } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
 import { AppDatePipe } from '../pipes/app-date.pipe';
 import { SearchableSelectComponent, SelectOption } from '../searchable-select/searchable-select.component';
@@ -107,6 +107,38 @@ export class TaskTableComponent {
   readonly priorities: Priority[] = ['Low', 'Medium', 'High', 'Critical'];
   private assigneeOptionEmployees: Employee[] | null = null;
   private assigneeOptionCache: SelectOption[] = [];
+  private readonly groupedTasksCache: {
+    groupBy: GroupMode | null;
+    language: string;
+    sortDir: 'asc' | 'desc' | null;
+    sortKey: SortKey | null;
+    tasks: Task[] | null;
+    today: string;
+    value: TaskGroup[];
+    weekEnd: string;
+  } = {
+    groupBy: null,
+    language: '',
+    sortDir: null,
+    sortKey: null,
+    tasks: null,
+    today: '',
+    value: [],
+    weekEnd: ''
+  };
+  private readonly priorityOptionsCache: { language: string; value: SelectOption[] } = { language: '', value: [] };
+  private readonly customerOptionsCache: { source: Array<{ id: string; name: string }> | null; value: SelectOption[] } = {
+    source: null,
+    value: []
+  };
+  private readonly bulkStatusOptionsCache: { key: string; language: string; value: SelectOption[] } = {
+    key: '',
+    language: '',
+    value: []
+  };
+  private readonly checklistProgressCache = new WeakMap<Task, { done: number; total: number; pct: number } | null>();
+  private readonly initialsCache = new Map<string, string>();
+  private readonly avatarToneCache = new Map<string, number>();
 
   readonly groupModes: { id: GroupMode; labelKey: string }[] = [
     { id: 'due',      labelKey: 'tasks.groupBy.due' },
@@ -135,9 +167,34 @@ export class TaskTableComponent {
   constructor() { this.loadPrefs(); }
 
   get groupedTasks(): TaskGroup[] {
+    const today = this.workspace.todayIso;
+    const weekEnd = this.workspace.dateAfter(7);
+    if (
+      this.groupedTasksCache.tasks === this.tasks &&
+      this.groupedTasksCache.groupBy === this.groupBy &&
+      this.groupedTasksCache.sortKey === this.sortKey &&
+      this.groupedTasksCache.sortDir === this.sortDir &&
+      this.groupedTasksCache.language === this.i18n.language &&
+      this.groupedTasksCache.today === today &&
+      this.groupedTasksCache.weekEnd === weekEnd
+    ) {
+      return this.groupedTasksCache.value;
+    }
+
     const groups = this.buildGroups();
-    if (this.sortKey === 'group') return groups;
-    return groups.map(g => ({ ...g, tasks: this.applySort(g.tasks) }));
+    const value = this.sortKey === 'group'
+      ? groups
+      : groups.map(g => ({ ...g, tasks: this.applySort(g.tasks) }));
+
+    this.groupedTasksCache.tasks = this.tasks;
+    this.groupedTasksCache.groupBy = this.groupBy;
+    this.groupedTasksCache.sortKey = this.sortKey;
+    this.groupedTasksCache.sortDir = this.sortDir;
+    this.groupedTasksCache.language = this.i18n.language;
+    this.groupedTasksCache.today = today;
+    this.groupedTasksCache.weekEnd = weekEnd;
+    this.groupedTasksCache.value = value;
+    return value;
   }
 
   private buildGroups(): TaskGroup[] {
@@ -288,6 +345,14 @@ export class TaskTableComponent {
 
   trackTask(_index: number, task: Task): string { return task.id; }
 
+  trackMode(_index: number, mode: { id: GroupMode }): GroupMode { return mode.id; }
+
+  trackStatus(_index: number, status: TaskStatus): TaskStatus { return status; }
+
+  trackOption(_index: number, option: SelectOption): string { return String(option.value); }
+
+  trackChecklistItem(index: number, item: ChecklistItem): string { return `${item.label}:${index}`; }
+
   toggleCollapse(groupId: string): void {
     if (this.collapsedGroups.has(groupId)) this.collapsedGroups.delete(groupId);
     else this.collapsedGroups.add(groupId);
@@ -301,9 +366,13 @@ export class TaskTableComponent {
   // ── Inline-edit option lists ──────────────────────────────────────────────
 
   get priorityOptions(): SelectOption[] {
-    return this.priorities.map(p => ({
-      value: p, label: this.t('priority.' + this.workspace.statusClass(p))
-    }));
+    if (this.priorityOptionsCache.language !== this.i18n.language) {
+      this.priorityOptionsCache.language = this.i18n.language;
+      this.priorityOptionsCache.value = this.priorities.map(p => ({
+        value: p, label: this.t('priority.' + this.workspace.statusClass(p))
+      }));
+    }
+    return this.priorityOptionsCache.value;
   }
 
   get assigneeOptions(): SelectOption[] {
@@ -316,10 +385,15 @@ export class TaskTableComponent {
   }
 
   get customerOptions(): SelectOption[] {
-    return this.workspace.taskClientOptions.map(client => ({
-      value: client.id,
-      label: client.name
-    }));
+    const source = this.workspace.clientOptions;
+    if (this.customerOptionsCache.source !== source) {
+      this.customerOptionsCache.source = source;
+      this.customerOptionsCache.value = source.map(client => ({
+        value: client.id,
+        label: client.name
+      }));
+    }
+    return this.customerOptionsCache.value;
   }
 
   get shouldPickCustomerForNewTask(): boolean {
@@ -528,7 +602,14 @@ export class TaskTableComponent {
   }
 
   get bulkStatusOptions(): SelectOption[] {
-    return this.workspace.statuses.map(s => ({ value: s, label: this.statusLabel(s) }));
+    const statuses = this.workspace.statuses;
+    const key = statuses.join('|');
+    if (this.bulkStatusOptionsCache.key !== key || this.bulkStatusOptionsCache.language !== this.i18n.language) {
+      this.bulkStatusOptionsCache.key = key;
+      this.bulkStatusOptionsCache.language = this.i18n.language;
+      this.bulkStatusOptionsCache.value = statuses.map(s => ({ value: s, label: this.statusLabel(s) }));
+    }
+    return this.bulkStatusOptionsCache.value;
   }
 
   applyBulkPriority(priority: Priority): void {
@@ -664,10 +745,15 @@ export class TaskTableComponent {
 
   /** Checklist completion fraction — returns null when there is no checklist. */
   checklistProgress(task: Task): { done: number; total: number; pct: number } | null {
+    if (this.checklistProgressCache.has(task)) {
+      return this.checklistProgressCache.get(task) ?? null;
+    }
     if (!task.checklist?.length) return null;
     const done  = task.checklist.filter(i => i.done).length;
     const total = task.checklist.length;
-    return { done, total, pct: Math.round((done / total) * 100) };
+    const progress = { done, total, pct: Math.round((done / total) * 100) };
+    this.checklistProgressCache.set(task, progress);
+    return progress;
   }
 
   /** Meeting subject for meeting-born tasks, null for board tasks. */
@@ -684,14 +770,26 @@ export class TaskTableComponent {
   }
 
   getInitials(name: string): string {
-    return name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+    const cached = this.initialsCache.get(name);
+    if (cached !== undefined) {
+      return cached;
+    }
+    const initials = name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+    this.initialsCache.set(name, initials);
+    return initials;
   }
 
   /** Deterministic avatar colour index (0-5) from a name. */
   avatarTone(name: string): number {
+    const cached = this.avatarToneCache.get(name);
+    if (cached !== undefined) {
+      return cached;
+    }
     let hash = 0;
     for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) | 0;
-    return Math.abs(hash) % 6;
+    const tone = Math.abs(hash) % 6;
+    this.avatarToneCache.set(name, tone);
+    return tone;
   }
 
   /** First click expands the row inline (when expandable); double-click opens the drawer. */

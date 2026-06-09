@@ -123,8 +123,8 @@
     "openMeetingTasks": "Open tasks",
     "noMeetingsInLane": "Nothing here.",
     "backToList": "All meetings",
-    "needsAttention": "Needs your attention",
-    "needsAttentionHint": "Follow-ups to convert or meetings to wrap up",
+    "needsAttention": "Tasks created",
+    "needsAttentionHint": "Meetings with open tasks",
     "ledBadge": "Led",
     "searchPlaceholder": "Search meetings...",
     "filterAll": "All",
@@ -140,7 +140,12 @@
     "openTasksMetric": "Open tasks",
     "openActionsMetric": "Open follow-ups",
     "blockersMetric": "Blockers",
-    "noSummary": "No summary yet."
+    "noSummary": "No summary yet.",
+    "prep": "Prep",
+    "wrapUp": "Wrap up",
+    "needsWrapUp": "Needs wrap-up",
+    "tasksCreatedLane": "Tasks created",
+    "completedLane": "Completed"
   },
   "home": {
     "meetingsLead": "What's next",
@@ -192,6 +197,7 @@
     "teamLoadEyebrow": "Team load",
     "pipelineEyebrow": "Customers",
     "ownersAndBlockers": "Who's on what",
+    "teamSearchPlaceholder": "Search team members…",
     "metWithMe": "Met with me",
     "openShort": "open",
     "blockedShort": "blocked",
@@ -438,6 +444,7 @@
     },
     "groupBy": {
       "label": "Group by",
+      "none": "All",
       "due": "Due date",
       "status": "Status",
       "priority": "Priority"
@@ -643,6 +650,7 @@
     "saveSummary": "Save",
     "saveAndContinue": "Save Draft",
     "saveAndClose": "Save & Close",
+    "finish": "Finish",
     "completePlanToStart": "Complete the plan section to unlock this area.",
     "actionNeedsOwnerDue": "Action items require both an owner and a due date.",
     "createTaskFromNote": "Turn into a task",
@@ -726,6 +734,7 @@
   },
   "meetingTask": {
     "title": "Task",
+    "details": "Details",
     "taskTitle": "What needs to happen",
     "taskTitlePlaceholder": "One clear action...",
     "description": "Details",
@@ -832,6 +841,7 @@
     "decisions": "Decisions",
     "tasksCreated": "Tasks created",
     "due": "due",
+    "followups": "Open follow-ups",
     "blockers": "Blockers",
     "notes": "Notes",
     "nextMeeting": "Next meeting",

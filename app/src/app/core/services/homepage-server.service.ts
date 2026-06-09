@@ -4,8 +4,18 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface HomePageUserDto {
-  id: string;
-  displayName: string;
+  id?: string;
+  displayName?: string;
+  email?: string | null;
+  mail?: string | null;
+  userPrincipalName?: string | null;
+  isActive?: boolean | null;
+  Id?: string;
+  DisplayName?: string;
+  Email?: string | null;
+  Mail?: string | null;
+  UserPrincipalName?: string | null;
+  IsActive?: boolean | null;
 }
 
 export interface HomePageOrgDto {

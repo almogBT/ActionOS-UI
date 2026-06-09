@@ -325,6 +325,14 @@ export class ActionosRepositoryService {
     );
   }
 
+  async getOrgUsers(orgGroupId: string): Promise<ActionosApiUserDto[]> {
+    return await firstValueFrom(
+      this.http.get<ActionosApiUserDto[]>(
+        `${this.base}/api/actionos/orgs/${encodeURIComponent(orgGroupId)}/users`
+      )
+    );
+  }
+
   async createCustomer(request: CreateActionosCustomerRequest): Promise<ActionosApiCustomerDto> {
     return await firstValueFrom(
       this.http.post<ActionosApiCustomerDto>(`${this.base}/api/actionos/customers`, request)

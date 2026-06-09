@@ -23,27 +23,37 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
   imports: [CommonModule, FormsModule, TranslatePipe, MeetingTaskCreationComponent],
   template: `
     <app-meeting-task-creation
-      *ngIf="creatingTaskForNote && meeting.customerId"
+      *ngIf="(creatingTaskForNote || creatingBlankTask) && meeting.customerId"
       [meetingId]="meeting.id"
       [customerId]="meeting.customerId"
       [sourceNote]="creatingTaskForNote"
-      (created)="taskCreated.emit()"
-      (cancelled)="cancelCreate.emit()"
+      (created)="onCreated()"
+      (cancelled)="onCancelCreate()"
     />
 
     <div class="task-filter-row">
-      <button type="button" class="ghost-action" [class.active]="taskFilter === 'open'" (click)="taskFilter = 'open'">
-        {{ 'customerMeeting.taskFilterOpen' | t }} ({{ countTasksByFilter('open') }})
-      </button>
-      <button type="button" class="ghost-action" [class.active]="taskFilter === 'blocked'" (click)="taskFilter = 'blocked'">
-        {{ 'customerMeeting.taskFilterBlocked' | t }} ({{ countTasksByFilter('blocked') }})
-      </button>
-      <button type="button" class="ghost-action" [class.active]="taskFilter === 'done'" (click)="taskFilter = 'done'">
-        {{ 'customerMeeting.taskFilterDone' | t }} ({{ countTasksByFilter('done') }})
-      </button>
-      <button type="button" class="ghost-action" [class.active]="taskFilter === 'all'" (click)="taskFilter = 'all'">
-        {{ 'customerMeeting.taskFilterAll' | t }}
-      </button>
+      <div class="filter-toggle" role="tablist">
+        <button type="button" role="tab" [class.active]="taskFilter === 'open'" (click)="taskFilter = 'open'">
+          {{ 'customerMeeting.taskFilterOpen' | t }} ({{ countTasksByFilter('open') }})
+        </button>
+        <button type="button" role="tab" [class.active]="taskFilter === 'blocked'" (click)="taskFilter = 'blocked'">
+          {{ 'customerMeeting.taskFilterBlocked' | t }} ({{ countTasksByFilter('blocked') }})
+        </button>
+        <button type="button" role="tab" [class.active]="taskFilter === 'done'" (click)="taskFilter = 'done'">
+          {{ 'customerMeeting.taskFilterDone' | t }} ({{ countTasksByFilter('done') }})
+        </button>
+        <button type="button" role="tab" [class.active]="taskFilter === 'all'" (click)="taskFilter = 'all'">
+          {{ 'customerMeeting.taskFilterAll' | t }}
+        </button>
+      </div>
+      <button
+        *ngIf="!creatingTaskForNote && !creatingBlankTask"
+        type="button"
+        class="add-task-fab"
+        (click)="startBlankTask()"
+        [title]="'meetingTask.createTask' | t"
+        aria-label="Create task"
+      >+</button>
     </div>
 
     <div class="linked-task-list" *ngIf="filteredMeetingTasks.length; else noLinkedTasks">
@@ -106,7 +116,53 @@ type MeetingTaskFilter = 'open' | 'blocked' | 'done' | 'all';
       </div>
     </ng-template>
   `,
-  styles: [MEETING_FORM_STYLES]
+  styles: [MEETING_FORM_STYLES, `
+    .task-filter-row { align-items: center; }
+    /* Compact segmented toggle for the task filters. */
+    .filter-toggle {
+      display: inline-flex;
+      gap: 2px;
+      padding: 3px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--bg-canvas);
+    }
+    .filter-toggle button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      padding: 4px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: background 150ms ease, color 150ms ease;
+    }
+    .filter-toggle button.active {
+      background: var(--bg-elevated);
+      color: var(--ink);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+    }
+    /* Create-task is now just a round "+" button. */
+    .add-task-fab {
+      margin-inline-start: auto;
+      flex-shrink: 0;
+      width: 30px;
+      height: 30px;
+      display: inline-grid;
+      place-items: center;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      transition: background 150ms ease, color 150ms ease;
+    }
+    .add-task-fab:hover { background: var(--accent); color: #fff; }
+  `]
 })
 export class MeetingTasksSectionComponent {
   @Input() meeting!: CustomerMeeting;
@@ -115,11 +171,28 @@ export class MeetingTasksSectionComponent {
   @Output() taskCreated = new EventEmitter<void>();
   @Output() cancelCreate = new EventEmitter<void>();
 
-  taskFilter: MeetingTaskFilter = 'open';
+  taskFilter: MeetingTaskFilter = 'all';
   expandedTaskId: string | null = null;
   newProgressionNoteByTask: Record<string, string | undefined> = {};
+  /** Standalone task creation (not converted from a note). */
+  creatingBlankTask = false;
 
   constructor(public workspace: ActionosWorkspaceService) {}
+
+  /** Open the inline creation panel for a brand-new task tied to this meeting. */
+  startBlankTask(): void {
+    this.creatingBlankTask = true;
+  }
+
+  onCreated(): void {
+    this.creatingBlankTask = false;
+    this.taskCreated.emit();
+  }
+
+  onCancelCreate(): void {
+    this.creatingBlankTask = false;
+    this.cancelCreate.emit();
+  }
 
   get meetingTasks(): Task[] {
     if (!this.meeting) {

@@ -318,7 +318,7 @@ export class CatchUpDrawerComponent {
 
   get customerName(): string {
     const id = this.customerId;
-    return (id && this.workspace.customer(id)?.name) || '';
+    return (id && this.workspace.clientName(id)) || '';
   }
 
   close(): void {

@@ -73,21 +73,92 @@ export class MyWorkComponent {
     { id: 'delegated',    labelKey: 'myWork.tasks.delegated' },
     { id: 'all-involved', labelKey: 'myWork.tasks.allInvolved' }
   ];
+  private readonly myMeetingsCache: {
+    employeeId: string;
+    filter: MeetingFilter | null;
+    source: CustomerMeeting[] | null;
+    value: CustomerMeeting[];
+  } = { employeeId: '', filter: null, source: null, value: [] };
+  private readonly myFilteredTasksCache: {
+    employeeId: string;
+    filter: TaskFilter | null;
+    source: Task[] | null;
+    value: Task[];
+  } = { employeeId: '', filter: null, source: null, value: [] };
+  private readonly myActiveTasksCache: { employeeId: string; source: Task[] | null; value: Task[] } = {
+    employeeId: '',
+    source: null,
+    value: []
+  };
+  private readonly overdueTasksCache: { activeTasks: Task[] | null; today: string; value: Task[] } = {
+    activeTasks: null,
+    today: '',
+    value: []
+  };
+  private readonly todayTasksCache: { activeTasks: Task[] | null; today: string; value: Task[] } = {
+    activeTasks: null,
+    today: '',
+    value: []
+  };
+  private readonly meetingsTodayCache: {
+    employeeId: string;
+    source: CustomerMeeting[] | null;
+    today: string;
+    value: CustomerMeeting[];
+  } = { employeeId: '', source: null, today: '', value: [] };
+  private readonly railWorkloadCache: {
+    search: string;
+    source: ActionosWorkspaceService['teamWorkload'] | null;
+    value: ActionosWorkspaceService['teamWorkload'];
+  } = { search: '', source: null, value: [] };
+  private readonly railClientsCache: {
+    search: string;
+    source: { id: string; name: string }[] | null;
+    value: { id: string; name: string }[];
+  } = { search: '', source: null, value: [] };
+  private readonly todayLabelCache: { language: string; today: string; value: string } = {
+    language: '',
+    today: '',
+    value: ''
+  };
+  private readonly avatarHueCache = new Map<string, number>();
+  private readonly initialsCache = new Map<string, string>();
 
   // ── Meetings ────────────────────────────────────────────────────────────────
 
   get myMeetings(): CustomerMeeting[] {
     const empId = this.workspace.currentEmployeeId;
     const all = this.workspace.customerMeetings;
+    if (
+      this.myMeetingsCache.source === all &&
+      this.myMeetingsCache.employeeId === empId &&
+      this.myMeetingsCache.filter === this.meetingFilter
+    ) {
+      return this.myMeetingsCache.value;
+    }
+
     const isMine = (m: CustomerMeeting) =>
       m.meetingLeaderEmployeeId === empId || m.internalParticipantEmployeeIds.includes(empId);
 
+    let value: CustomerMeeting[];
     switch (this.meetingFilter) {
-      case 'upcoming': return all.filter(m => isMine(m) && m.status !== 'Closed');
-      case 'led':      return all.filter(m => m.meetingLeaderEmployeeId === empId && m.status !== 'Closed');
-      case 'past':     return all.filter(m => isMine(m) && m.status === 'Closed');
-      default:         return [];
+      case 'upcoming':
+        value = all.filter(m => isMine(m) && m.status !== 'Closed');
+        break;
+      case 'led':
+        value = all.filter(m => m.meetingLeaderEmployeeId === empId && m.status !== 'Closed');
+        break;
+      case 'past':
+        value = all.filter(m => isMine(m) && m.status === 'Closed');
+        break;
+      default:
+        value = [];
     }
+    this.myMeetingsCache.source = all;
+    this.myMeetingsCache.employeeId = empId;
+    this.myMeetingsCache.filter = this.meetingFilter;
+    this.myMeetingsCache.value = value;
+    return value;
   }
 
   isMeetingLed(m: CustomerMeeting): boolean {
@@ -106,20 +177,36 @@ export class MyWorkComponent {
 
   get myFilteredTasks(): Task[] {
     const empId = this.workspace.currentEmployeeId;
-    const active = this.workspace.meetingTasks.filter(
-      t => t.status !== 'Done' && t.status !== 'Cancelled'
-    );
+    const source = this.workspace.meetingTasks;
+    if (
+      this.myFilteredTasksCache.source === source &&
+      this.myFilteredTasksCache.employeeId === empId &&
+      this.myFilteredTasksCache.filter === this.taskFilter
+    ) {
+      return this.myFilteredTasksCache.value;
+    }
 
+    const active = source.filter(t => t.status !== 'Done' && t.status !== 'Cancelled');
+
+    let value: Task[];
     switch (this.taskFilter) {
       case 'mine':
-        return active.filter(t => t.assignedToEmployeeId === empId);
+        value = active.filter(t => t.assignedToEmployeeId === empId);
+        break;
       case 'delegated':
-        return active.filter(t => t.openedByEmployeeId === empId && t.assignedToEmployeeId !== empId);
+        value = active.filter(t => t.openedByEmployeeId === empId && t.assignedToEmployeeId !== empId);
+        break;
       case 'all-involved':
-        return active.filter(t => t.assignedToEmployeeId === empId || t.openedByEmployeeId === empId);
+        value = active.filter(t => t.assignedToEmployeeId === empId || t.openedByEmployeeId === empId);
+        break;
       default:
-        return [];
+        value = [];
     }
+    this.myFilteredTasksCache.source = source;
+    this.myFilteredTasksCache.employeeId = empId;
+    this.myFilteredTasksCache.filter = this.taskFilter;
+    this.myFilteredTasksCache.value = value;
+    return value;
   }
 
   /** Drives the overdue (danger) accent on the tasks tab count. */
@@ -144,9 +231,17 @@ export class MyWorkComponent {
   }
 
   get todayLabel(): string {
-    return new Intl.DateTimeFormat(this.i18n.language === 'he' ? 'he-IL' : 'en-US', {
+    const today = this.workspace.todayIso;
+    if (this.todayLabelCache.language === this.i18n.language && this.todayLabelCache.today === today) {
+      return this.todayLabelCache.value;
+    }
+
+    this.todayLabelCache.language = this.i18n.language;
+    this.todayLabelCache.today = today;
+    this.todayLabelCache.value = new Intl.DateTimeFormat(this.i18n.language === 'he' ? 'he-IL' : 'en-US', {
       weekday: 'long', month: 'long', day: 'numeric'
     }).format(new Date());
+    return this.todayLabelCache.value;
   }
 
   // ── Calendar / Next up ──────────────────────────────────────────────────────
@@ -192,26 +287,66 @@ export class MyWorkComponent {
 
   private get myActiveTasks(): Task[] {
     const empId = this.workspace.currentEmployeeId;
-    return this.workspace.meetingTasks.filter(
+    const source = this.workspace.meetingTasks;
+    if (this.myActiveTasksCache.source === source && this.myActiveTasksCache.employeeId === empId) {
+      return this.myActiveTasksCache.value;
+    }
+
+    const value = source.filter(
       t => t.status !== 'Done' && t.status !== 'Cancelled' && t.assignedToEmployeeId === empId
     );
+    this.myActiveTasksCache.source = source;
+    this.myActiveTasksCache.employeeId = empId;
+    this.myActiveTasksCache.value = value;
+    return value;
   }
 
   get overdueTasksList(): Task[] {
     const today = this.workspace.todayIso;
-    return this.myActiveTasks.filter(t => !!t.dueDate && t.dueDate < today);
+    const activeTasks = this.myActiveTasks;
+    if (this.overdueTasksCache.activeTasks === activeTasks && this.overdueTasksCache.today === today) {
+      return this.overdueTasksCache.value;
+    }
+    const value = activeTasks.filter(t => !!t.dueDate && t.dueDate < today);
+    this.overdueTasksCache.activeTasks = activeTasks;
+    this.overdueTasksCache.today = today;
+    this.overdueTasksCache.value = value;
+    return value;
   }
 
   get todayTasksList(): Task[] {
     const today = this.workspace.todayIso;
-    return this.myActiveTasks.filter(t => !!t.dueDate && t.dueDate === today);
+    const activeTasks = this.myActiveTasks;
+    if (this.todayTasksCache.activeTasks === activeTasks && this.todayTasksCache.today === today) {
+      return this.todayTasksCache.value;
+    }
+    const value = activeTasks.filter(t => !!t.dueDate && t.dueDate === today);
+    this.todayTasksCache.activeTasks = activeTasks;
+    this.todayTasksCache.today = today;
+    this.todayTasksCache.value = value;
+    return value;
   }
 
   get meetingsTodayList(): CustomerMeeting[] {
     const empId = this.workspace.currentEmployeeId;
-    return this.workspace.meetingsToday.filter(
-      m => m.meetingLeaderEmployeeId === empId || m.internalParticipantEmployeeIds.includes(empId)
+    const source = this.workspace.customerMeetings;
+    const today = this.workspace.todayIso;
+    if (
+      this.meetingsTodayCache.source === source &&
+      this.meetingsTodayCache.employeeId === empId &&
+      this.meetingsTodayCache.today === today
+    ) {
+      return this.meetingsTodayCache.value;
+    }
+    const value = source.filter(
+      m => m.meetingDate.slice(0, 10) === today &&
+        (m.meetingLeaderEmployeeId === empId || m.internalParticipantEmployeeIds.includes(empId))
     );
+    this.meetingsTodayCache.source = source;
+    this.meetingsTodayCache.employeeId = empId;
+    this.meetingsTodayCache.today = today;
+    this.meetingsTodayCache.value = value;
+    return value;
   }
 
   /** Unconverted meeting action items assigned to me ({ note, meeting } pairs). */
@@ -277,15 +412,35 @@ export class MyWorkComponent {
   // A condensed version of the old Home "owners & blockers" panel. Shows the
   // whole team, sorted by total load (busiest first), and scrolls inside the
   // card so every employee is reachable.
+  /** Free-text filter for the team-load rail (matches member name). */
+  railWorkloadSearch = '';
+
   get railWorkload(): ActionosWorkspaceService['teamWorkload'] {
-    return [...this.workspace.teamWorkload]
+    const source = this.workspace.teamWorkload;
+    const term = this.railWorkloadSearch.trim().toLowerCase();
+    if (this.railWorkloadCache.source === source && this.railWorkloadCache.search === term) {
+      return this.railWorkloadCache.value;
+    }
+    const sorted = [...source]
       .sort((a, b) => this.loadTotal(b) - this.loadTotal(a));
+    const value = term
+      ? sorted.filter(w => w.member.name.toLowerCase().includes(term))
+      : sorted;
+    this.railWorkloadCache.source = source;
+    this.railWorkloadCache.search = term;
+    this.railWorkloadCache.value = value;
+    return value;
   }
 
   /** Deterministic accent hue (0–360) derived from a name, for avatar tints. */
   avatarHue(name: string): number {
+    const cached = this.avatarHueCache.get(name);
+    if (cached !== undefined) {
+      return cached;
+    }
     let hash = 0;
     for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) % 360;
+    this.avatarHueCache.set(name, hash);
     return hash;
   }
 
@@ -302,9 +457,10 @@ export class MyWorkComponent {
     return w.openCount + w.meetingOpenCount;
   }
 
-  /** Highest single load in the rail list — used to scale the bars. */
+  /** Highest single load across the whole team — used to scale the bars.
+   *  Based on the unfiltered list so bar widths stay stable while searching. */
   get maxLoad(): number {
-    return this.railWorkload.reduce((max, w) => Math.max(max, this.loadTotal(w)), 0) || 1;
+    return this.workspace.teamWorkload.reduce((max, w) => Math.max(max, this.loadTotal(w)), 0) || 1;
   }
 
   // ── Right rail: clients (from the allowed external customer groups) ───────
@@ -314,20 +470,44 @@ export class MyWorkComponent {
 
   get railClients(): { id: string; name: string }[] {
     const term = this.railClientSearch.trim().toLowerCase();
-    const groups = [...this.workspace.externalCustomerGroups]
+    const source = this.workspace.externalCustomerGroups;
+    if (this.railClientsCache.source === source && this.railClientsCache.search === term) {
+      return this.railClientsCache.value;
+    }
+    const groups = [...source]
       .sort((a, b) => a.name.localeCompare(b.name));
-    if (!term) return groups;
-    return groups.filter(g => g.name.toLowerCase().includes(term));
+    const value = term ? groups.filter(g => g.name.toLowerCase().includes(term)) : groups;
+    this.railClientsCache.source = source;
+    this.railClientsCache.search = term;
+    this.railClientsCache.value = value;
+    return value;
   }
 
   /** Initials for a group name (groups have no member id to look up). */
   nameInitials(name: string): string {
-    return name
+    const cached = this.initialsCache.get(name);
+    if (cached !== undefined) {
+      return cached;
+    }
+    const initials = name
       .split(/\s+/)
       .map(part => part[0] ?? '')
       .join('')
       .slice(0, 2)
       .toUpperCase();
+    this.initialsCache.set(name, initials);
+    return initials;
+  }
+
+  trackMeetingFilter(_index: number, filter: { id: MeetingFilter }): MeetingFilter { return filter.id; }
+  trackTaskFilter(_index: number, filter: { id: TaskFilter }): TaskFilter { return filter.id; }
+  trackMeeting(_index: number, meeting: CustomerMeeting): string { return meeting.id; }
+  trackRailClient(_index: number, group: { id: string }): string { return group.id; }
+  trackWorkload(_index: number, workload: ActionosWorkspaceService['teamWorkload'][number]): string {
+    return workload.member.id;
+  }
+  trackFollowup(_index: number, item: { note: MeetingNote; meeting: CustomerMeeting }): string {
+    return `${item.meeting.id}:${item.note.id}`;
   }
 
   /** Open a client group's board preview, resolving it to a customer if one
@@ -362,21 +542,17 @@ export class MyWorkComponent {
 
   onPrepareMeeting(): void {
     if (!this.boardPreview || this.boardPreview.type !== 'client') return;
-    const customer = this.workspace.customer(this.boardPreview.id);
-    if (customer) {
-      this.boardPreview = null;
-      this.prepareCustomerMeeting.emit(customer);
-    }
+    const customerId = this.boardPreview.id;
+    this.boardPreview = null;
+    this.workspace.openCatchUpDrawer(customerId);
   }
 
   onNewMeeting(): void {
     if (!this.boardPreview) return;
     if (this.boardPreview.type === 'client') {
-      const customer = this.workspace.customer(this.boardPreview.id);
-      if (customer) {
-        this.boardPreview = null;
-        this.newCustomerMeeting.emit(customer);
-      }
+      const customerId = this.boardPreview.id;
+      this.boardPreview = null;
+      this.workspace.openNewMeetingModal(customerId);
     } else {
       this.boardPreview = null;
       this.viewChange.emit('meetings');

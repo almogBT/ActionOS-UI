@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 import { ActionosLanguage } from '../i18n/actionos-i18n.service';
@@ -73,7 +73,7 @@ export class HostContextService {
     distinctUntilChanged()
   );
 
-  constructor() {
+  constructor(private readonly zone: NgZone) {
     this.listenForHostMessage();
   }
 
@@ -103,9 +103,9 @@ export class HostContextService {
       }
 
       if (data.type === 'actionos:auth') {
-        this.merge({
+        this.zone.run(() => this.merge({
           token: typeof data.token === 'string' ? data.token : null
-        });
+        }));
         return;
       }
 
@@ -114,13 +114,13 @@ export class HostContextService {
       }
 
       const lang = this.normalizeLanguage(data.lang);
-      this.merge({
+      this.zone.run(() => this.merge({
         token: typeof data.token === 'string' ? data.token : null,
         lang,
         selectedOrg: this.normalizeNullable(data.selectedOrg),
         moduleSlugName: this.normalizeNullable(data.moduleSlugName),
         environmentName: this.normalizeNullable(data.environmentName),
-      });
+      }));
     });
   }
 

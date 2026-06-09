@@ -28,6 +28,11 @@ interface CustomerParticipantOption extends CustomerParticipant {
   key: string;
 }
 
+interface MeetingClientOption {
+  id: string;
+  name: string;
+}
+
 /**
  * Orchestrator for the customer meeting form.
  *
@@ -66,9 +71,12 @@ interface CustomerParticipantOption extends CustomerParticipant {
 
     <section class="panel" id="plan-section">
       <div class="panel-header">
-        <div>
-          <span class="eyebrow">{{ selectedCustomerForPrep?.name || ('customerMeeting.customer' | t) }}</span>
-          <h3>{{ 'customerMeeting.title' | t }}</h3>
+        <div class="panel-header-lead">
+          <button type="button" class="section-toggle" [class.collapsed]="collapsedSections.plan" (click)="toggleSection('plan')" aria-label="Toggle section">▾</button>
+          <div>
+            <span class="eyebrow">{{ selectedClientForPrep?.name || ('customerMeeting.customer' | t) }}</span>
+            <h3>{{ 'customerMeeting.title' | t }}</h3>
+          </div>
         </div>
         <span
           *ngIf="workspace.shouldShowMeetingStatus(currentStatus())"
@@ -79,13 +87,14 @@ interface CustomerParticipantOption extends CustomerParticipant {
         </span>
       </div>
 
+      <ng-container *ngIf="!collapsedSections.plan">
       <div class="section-head section-head-row">
         <div>
           <span class="eyebrow">{{ 'customerMeeting.planSection' | t }}</span>
           <h4>{{ 'customerMeeting.planSubtitle' | t }}</h4>
         </div>
         <button
-          *ngIf="selectedCustomerForPrep as prepCustomer"
+          *ngIf="selectedClientForPrep as prepCustomer"
           type="button"
           class="ghost-action small"
           (click)="showPrepBrief = true"
@@ -308,18 +317,22 @@ interface CustomerParticipantOption extends CustomerParticipant {
           {{ editing ? ('customerMeeting.collapseSetup' | t) : ('customerMeeting.startMeeting' | t) }}
         </button>
       </div>
+      </ng-container>
     </section>
 
     <section class="panel work-panel" id="capture-section">
       <div class="panel-header work-header">
-        <div>
-          <span class="eyebrow">{{ 'customerMeeting.captureSection' | t }}</span>
-          <h3>{{ 'meetings.addMeetingOutput' | t }}</h3>
-          <small class="muted">
-            {{ (captureTab === 'notes' ? 'customerMeeting.notesTabHint' : 'customerMeeting.summaryTabHint') | t }}
-          </small>
+        <div class="panel-header-lead">
+          <button type="button" class="section-toggle" [class.collapsed]="collapsedSections.capture" (click)="toggleSection('capture')" aria-label="Toggle section">▾</button>
+          <div>
+            <span class="eyebrow">{{ 'customerMeeting.captureSection' | t }}</span>
+            <h3>{{ 'meetings.addMeetingOutput' | t }}</h3>
+            <small class="muted">
+              {{ (captureTab === 'notes' ? 'customerMeeting.notesTabHint' : 'customerMeeting.summaryTabHint') | t }}
+            </small>
+          </div>
         </div>
-        <div class="tab-toggle" *ngIf="editingMeeting" role="tablist">
+        <div class="tab-toggle" *ngIf="editingMeeting && !collapsedSections.capture" role="tablist">
           <button
             type="button"
             class="tab-btn"
@@ -342,10 +355,13 @@ interface CustomerParticipantOption extends CustomerParticipant {
         </div>
       </div>
 
+      <ng-container *ngIf="!collapsedSections.capture">
       <ng-container *ngIf="editingMeeting as meeting; else runLocked">
         <div class="capture-tab" *ngIf="captureTab === 'notes'">
           <app-meeting-notes-section
             [meeting]="meeting"
+            [nextMeetingNotes]="nextMeetingNotesText"
+            (nextMeetingNotesChange)="onNextMeetingNotesChanged($event)"
             (changed)="reloadMeeting()"
             (createTaskFromNote)="onCreateTaskFromNote($event)"
           ></app-meeting-notes-section>
@@ -369,17 +385,22 @@ interface CustomerParticipantOption extends CustomerParticipant {
           <strong>{{ 'customerMeeting.completePlanToStart' | t }}</strong>
         </div>
       </ng-template>
+      </ng-container>
     </section>
 
     <section class="panel" id="tasks-section">
       <div class="panel-header">
-        <div>
-          <span class="eyebrow">{{ 'customerMeeting.assignTasks' | t }}</span>
-          <h3>{{ meetingTasksForCurrentMeeting.length }} {{ 'customerMeeting.tasksLabel' | t }}</h3>
-          <small class="muted">{{ 'customerMeeting.assignTasksSubtitle' | t }}</small>
+        <div class="panel-header-lead">
+          <button type="button" class="section-toggle" [class.collapsed]="collapsedSections.tasks" (click)="toggleSection('tasks')" aria-label="Toggle section">▾</button>
+          <div>
+            <span class="eyebrow">{{ 'customerMeeting.assignTasks' | t }}</span>
+            <h3>{{ meetingTasksForCurrentMeeting.length }} {{ 'customerMeeting.tasksLabel' | t }}</h3>
+            <small class="muted">{{ 'customerMeeting.assignTasksSubtitle' | t }}</small>
+          </div>
         </div>
       </div>
 
+      <ng-container *ngIf="!collapsedSections.tasks">
       <ng-container *ngIf="editingMeeting as meeting; else tasksLocked">
         <app-meeting-tasks-section
           [meeting]="meeting"
@@ -394,34 +415,21 @@ interface CustomerParticipantOption extends CustomerParticipant {
           <strong>{{ 'customerMeeting.completePlanToStart' | t }}</strong>
         </div>
       </ng-template>
+      </ng-container>
     </section>
 
+    <!-- The form auto-saves on every change, so there's no draft/save action —
+         just one button to finish and close the drawer. -->
     <div class="action-bar">
-      <button type="button" class="ghost-action" (click)="cancelled.emit()">
-        {{ 'common.cancel' | t }}
-      </button>
       <span class="action-bar-spacer"></span>
-      <button
-        type="button"
-        class="ghost-action"
-        [disabled]="!canSave()"
-        (click)="save('continue')"
-      >
-        {{ 'customerMeeting.saveAndContinue' | t }}
-      </button>
-      <button
-        type="button"
-        class="primary-action"
-        [disabled]="!canSave()"
-        (click)="save('close')"
-      >
-        {{ 'customerMeeting.saveAndClose' | t }}
+      <button type="button" class="primary-action" (click)="finish()">
+        {{ 'customerMeeting.finish' | t }}
       </button>
     </div>
 
     <div
       class="modal-backdrop"
-      *ngIf="showPrepBrief && selectedCustomerForPrep as prepCustomer"
+      *ngIf="showPrepBrief && selectedClientForPrep as prepCustomer"
       role="presentation"
       (click)="showPrepBrief = false"
     >
@@ -450,6 +458,27 @@ interface CustomerParticipantOption extends CustomerParticipant {
       align-items: flex-end;
       gap: 12px;
     }
+    /* Per-section collapse toggle in each panel header. */
+    .panel-header-lead {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .section-toggle {
+      flex-shrink: 0;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 13px;
+      line-height: 1;
+      padding: 4px;
+      border-radius: 6px;
+      transition: transform 150ms ease, background 150ms ease;
+    }
+    .section-toggle:hover { background: var(--bg-hover, var(--surface-strong)); }
+    .section-toggle.collapsed { transform: rotate(-90deg); }
     /* Leader + our-side + their-side dropdowns share one row. */
     .dropdowns-row {
       grid-column: 1 / -1;
@@ -500,6 +529,7 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
    * form (used from the Meetings tab -> New meeting).
    */
   @Input() customer: Customer | null = null;
+  @Input() initialCustomerId: string | null = null;
   @Input() existingMeetingId: string | null = null;
   @Output() saved = new EventEmitter<MeetingFormSavedEvent>();
   @Output() cancelled = new EventEmitter<void>();
@@ -510,7 +540,9 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
   };
   pickedCustomerId = '';
   meetingDateLocal = '';
-  summaryDraft: MeetingSummaryDraft = { summary: '', nextMeetingDateLocal: '', nextMeetingNotes: '' };
+  summaryDraft: MeetingSummaryDraft = { summary: '' };
+  /** Notes for the next meeting — edited in the Notes tab, persisted with the meeting. */
+  nextMeetingNotesText = '';
 
   customCustomerParticipant: CustomerParticipant = { name: '', email: '', phone: '', role: '' };
   private customParticipantPool: CustomerParticipantOption[] = [];
@@ -519,6 +551,12 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
   setupCollapsed = false;
   showAddParticipantRow = false;
   showPrepBrief = false;
+  /** Per-section collapse state for the drawer (each panel can fold to its header). */
+  collapsedSections: { plan: boolean; capture: boolean; tasks: boolean } = {
+    plan: false,
+    capture: false,
+    tasks: false
+  };
   /**
    * True when the form opened with a customer already decided (Customer 360 entry,
    * or editing an existing meeting). When false (new meeting from the FAB/Meetings),
@@ -547,7 +585,7 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
   get customerSelectOptions(): SelectOption[] {
     return [
       { value: '', label: this.i18n.translate('customerMeeting.selectCustomer') },
-      ...this.workspace.customers.map((c) => ({ value: c.id, label: c.name }))
+      ...this.workspace.clientOptions.map((c) => ({ value: c.id, label: c.name }))
     ];
   }
 
@@ -593,7 +631,7 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
   // ── Stepper / tab helpers ──────────────────────────────────────────────────
 
   get setupSummaryLine(): string {
-    const customerName = this.selectedCustomerForPrep?.name ?? 'No customer';
+    const customerName = this.selectedClientForPrep?.name ?? 'No customer';
     const when = this.meetingDateLocal ? this.meetingDateLocal.replace('T', ' ') : 'No date';
     const participants = this.form.internalParticipantEmployeeIds.length + this.form.customerParticipants.length;
     return `${customerName} · ${when} · ${participants} participants`;
@@ -625,6 +663,14 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
     return this.workspace.customer(this.pickedCustomerId) ?? null;
   }
 
+  get selectedClientForPrep(): MeetingClientOption | null {
+    const id = this.customer?.id || this.pickedCustomerId || this.initialCustomerId || '';
+    if (!id) {
+      return null;
+    }
+    return { id, name: this.workspace.clientName(id) ?? id };
+  }
+
   // ── Lifecycle ───────────────────────────────────────────────────────────────
 
   ngOnInit(): void {
@@ -642,6 +688,18 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
       this.pickedCustomerId = this.customer.id;
       this.startedWithCustomer = true;
     }
+
+    if (
+      changes['initialCustomerId'] &&
+      this.form &&
+      !this.editing &&
+      !this.customer &&
+      this.initialCustomerId
+    ) {
+      this.form.customerId = this.initialCustomerId;
+      this.pickedCustomerId = this.initialCustomerId;
+      this.startedWithCustomer = true;
+    }
   }
 
   currentStatus(): CustomerMeetingStatus {
@@ -652,16 +710,16 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  toggleSection(key: 'plan' | 'capture' | 'tasks'): void {
+    this.collapsedSections[key] = !this.collapsedSections[key];
+  }
+
   goToNotes(): void {
     this.captureTab = 'notes';
     setTimeout(() => document.getElementById('notes-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0);
   }
 
-  // ── Save / start ─────────────────────────────────────────────────────────────
-
-  canSave(): boolean {
-    return this.canCreateDraft();
-  }
+  // ── Finish / start ─────────────────────────────────────────────────────────────
 
   canStartMeeting(): boolean {
     return this.canCreateDraft();
@@ -681,23 +739,19 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
     }
   }
 
-  save(intent: MeetingFormSaveIntent): void {
-    if (!this.canSave()) {
-      return;
+  /**
+   * Finish editing and close the drawer. The form already auto-saves on every change,
+   * so this just flushes any last edit and emits `saved` (intent 'close'); publishing the
+   * recap is a separate, explicit action in the Summary tab. If no draft was ever created
+   * (incomplete form), there's nothing to save — just close.
+   */
+  finish(): void {
+    if (this.editingMeeting) {
+      const updated = this.persistMeeting(false) ?? this.editingMeeting;
+      this.saved.emit({ meetingId: updated.id, intent: 'close' });
+    } else {
+      this.cancelled.emit();
     }
-    const updated = this.persistMeeting(true);
-    if (!updated) {
-      return;
-    }
-    if (intent === 'close' && updated.status !== 'Closed') {
-      const hasContent = updated.notes.length > 0 ||
-        this.workspace.meetingTasksByMeeting(updated.id).length > 0 ||
-        !!updated.summary?.trim();
-      if (hasContent) {
-        this.publishRecap();
-      }
-    }
-    this.saved.emit({ meetingId: updated.id, intent });
   }
 
   // ── Plan field changes ───────────────────────────────────────────────────────
@@ -712,6 +766,13 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
   }
 
   onSummaryChanged(): void {
+    if (this.editingMeeting) {
+      this.persistMeeting(false);
+    }
+  }
+
+  onNextMeetingNotesChanged(value: string): void {
+    this.nextMeetingNotesText = value;
     if (this.editingMeeting) {
       this.persistMeeting(false);
     }
@@ -865,7 +926,8 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
     const now = new Date();
     now.setMinutes(0, 0, 0);
     this.meetingDateLocal = this.toLocalInput(now);
-    this.summaryDraft = { summary: '', nextMeetingDateLocal: '', nextMeetingNotes: '' };
+    this.summaryDraft = { summary: '' };
+    this.nextMeetingNotesText = '';
     this.captureTab = 'summary';
     this.lastRecap = '';
     this.setupCollapsed = false;
@@ -878,8 +940,8 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
     this.showAddParticipantRow = false;
     this.showPrepBrief = false;
     this.newProspect = { name: '', contactName: '', contactEmail: '', contactPhone: '' };
-    this.pickedCustomerId = this.customer?.id ?? '';
-    this.startedWithCustomer = !!this.customer;
+    this.pickedCustomerId = this.customer?.id ?? this.initialCustomerId ?? '';
+    this.startedWithCustomer = !!(this.customer || this.initialCustomerId);
 
     if (this.existingMeetingId) {
       this.loadExistingMeeting(this.existingMeetingId);
@@ -893,6 +955,8 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
       }
       if (this.customer) {
         this.form.customerId = this.customer.id;
+      } else if (this.initialCustomerId) {
+        this.form.customerId = this.initialCustomerId;
       }
     }
   }
@@ -903,7 +967,7 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
   }
 
   private resolveCustomerId(): string {
-    return this.customer?.id ?? this.pickedCustomerId;
+    return this.customer?.id || this.pickedCustomerId || this.initialCustomerId || '';
   }
 
   private tryCreateDraftMeeting(): CustomerMeeting | null {
@@ -952,8 +1016,7 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
       customerParticipants: this.form.customerParticipants.filter((p) => p.name.trim()),
       goal: this.form.goal,
       summary: this.summaryDraft.summary,
-      nextMeetingDate: this.fromLocalInput(this.summaryDraft.nextMeetingDateLocal) || undefined,
-      nextMeetingNotes: this.summaryDraft.nextMeetingNotes || undefined
+      nextMeetingNotes: this.nextMeetingNotesText || undefined
     });
 
     if (!updated) {
@@ -982,13 +1045,12 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
       goal: meeting.goal ?? ''
     };
     this.pickedCustomerId = meeting.customerId;
-    this.summaryDraft = {
-      summary: meeting.summary ?? '',
-      nextMeetingDateLocal: meeting.nextMeetingDate ? this.toLocalInput(new Date(meeting.nextMeetingDate)) : '',
-      nextMeetingNotes: meeting.nextMeetingNotes ?? ''
-    };
+    this.summaryDraft = { summary: meeting.summary ?? '' };
+    this.nextMeetingNotesText = meeting.nextMeetingNotes ?? '';
     this.meetingDateLocal = this.toLocalInput(new Date(meeting.meetingDate));
-    this.setupCollapsed = meeting.notes.length > 0 || meeting.status !== 'Planned';
+    // Existing meetings open with the settings collapsed by default — the user is
+    // here to capture/review, not re-edit the setup. They can expand it if needed.
+    this.setupCollapsed = true;
     if (meeting.publishedRecap) {
       this.lastRecap = meeting.publishedRecap;
     }
@@ -1006,6 +1068,7 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
   private customerParticipantOptions(): CustomerParticipantOption[] {
     const byKey = new Map<string, CustomerParticipantOption>();
     const customer = this.selectedCustomerForPrep;
+    const client = this.selectedClientForPrep;
     if (customer?.primaryContactName?.trim()) {
       const seed: CustomerParticipant = {
         name: customer.primaryContactName.trim(),
@@ -1015,8 +1078,8 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
       byKey.set(this.customerParticipantKey(seed), { ...seed, key: this.customerParticipantKey(seed) });
     }
 
-    if (customer) {
-      for (const meeting of this.workspace.customerMeetingsByCustomer(customer.id)) {
+    if (client) {
+      for (const meeting of this.workspace.customerMeetingsByCustomer(client.id)) {
         for (const participant of meeting.customerParticipants) {
           if (!participant.name?.trim()) {
             continue;

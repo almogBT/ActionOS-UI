@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { Customer } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
 import { DrawerShellComponent } from '../shared/drawer-shell/drawer-shell.component';
 import { CustomerMeetingFormComponent, MeetingFormSavedEvent } from '../customers/customer-meeting-form.component';
@@ -25,7 +24,7 @@ import { CustomerMeetingFormComponent, MeetingFormSavedEvent } from '../customer
 
       <app-customer-meeting-form
         *ngIf="workspace.openNewMeetingCustomerId !== null && !workspace.openMeetingId"
-        [customer]="preselectedCustomer"
+        [initialCustomerId]="workspace.openNewMeetingCustomerId"
         (saved)="onSaved($event)"
         (cancelled)="workspace.closeMeetingDrawer()"
       />
@@ -35,12 +34,6 @@ import { CustomerMeetingFormComponent, MeetingFormSavedEvent } from '../customer
 })
 export class MeetingDrawerComponent {
   constructor(public workspace: ActionosWorkspaceService) {}
-
-  get preselectedCustomer(): Customer | null {
-    const id = this.workspace.openNewMeetingCustomerId;
-    if (!id) return null;
-    return this.workspace.customer(id) ?? null;
-  }
 
   onSaved(event: MeetingFormSavedEvent): void {
     if (event.intent === 'close') {

@@ -1,4 +1,5 @@
 import { inject, Injectable, signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { ActionosI18nService } from '../i18n/actionos-i18n.service';
 import { ActionosAuthService } from './auth.service';
 import {
@@ -12,11 +13,7 @@ import {
   CustomerMeetingRepositoryPort,
   InMemoryCustomerMeetingRepository
 } from './meeting-repository.port';
-import {
-  EmployeeDirectoryPort,
-  InMemoryEmployeeDirectory,
-  hasFritzDomain
-} from './employee-directory.port';
+import { hasFritzDomain } from './employee-directory.port';
 import {
   AttachmentStoragePort,
   InMemoryAttachmentStorage
@@ -32,6 +29,7 @@ import {
   ActionosRepositoryService
 } from './actionos-repository.service';
 import { HostContextService } from './host-context.service';
+import { HomePageServerService, HomePageUserDto } from './homepage-server.service';
 
 interface TeamWorkload {
   member: Member;
@@ -39,6 +37,11 @@ interface TeamWorkload {
   blockedCount: number;
   meetingOpenCount: number;
   meetingBlockedCount: number;
+}
+
+interface RevisionCache<T> {
+  revision: number;
+  value: T;
 }
 
 interface ActionosBackendIssue {
@@ -50,6 +53,14 @@ interface ActionosBackendIssue {
 interface PendingCustomerMutation {
   operation: (customerId: string) => Promise<unknown>;
   failureMessage?: string;
+}
+
+interface DirectoryUserMergeInput {
+  id?: string | null;
+  azureObjectId?: string | null;
+  displayName?: string | null;
+  email?: string | null;
+  isActive?: boolean | null;
 }
 
 interface BackendMutationOptions<TResult> {
@@ -76,6 +87,7 @@ export class ActionosWorkspaceService {
   private readonly i18n = inject(ActionosI18nService);
   private readonly actionosApi = inject(ActionosRepositoryService);
   private readonly hostContext = inject(HostContextService);
+  private readonly homePageServer = inject(HomePageServerService);
   private currentOrgGroupId: string | null = null;
   private initScheduled = false;
   private bootstrapInFlight: Promise<void> | null = null;
@@ -97,6 +109,53 @@ export class ActionosWorkspaceService {
   private readonly customerIdAliases = new Map<string, string>();
   private readonly pendingCustomerIds = new Set<string>();
   private readonly pendingCustomerMutations = new Map<string, PendingCustomerMutation[]>();
+  private readonly dataRevisionState = signal(0);
+  private get dataRevision(): number {
+    return this.dataRevisionState();
+  }
+  private readonly emptyTasks: Task[] = [];
+  private readonly emptyMeetings: CustomerMeeting[] = [];
+  private readonly allTasksCache: RevisionCache<Task[]> = { revision: -1, value: [] };
+  private readonly openTasksCache: RevisionCache<Task[]> = { revision: -1, value: [] };
+  private readonly archivedTasksCache: RevisionCache<Task[]> = { revision: -1, value: [] };
+  private readonly customersCache: RevisionCache<Customer[]> = { revision: -1, value: [] };
+  private readonly customerByIdCache: RevisionCache<Map<string, Customer>> = { revision: -1, value: new Map() };
+  private readonly customerByExternalGroupCache: RevisionCache<Map<string, Customer>> = { revision: -1, value: new Map() };
+  private readonly taskClientOptionsCache: RevisionCache<Array<{ id: string; name: string }>> = { revision: -1, value: [] };
+  private readonly customerMeetingsCache: RevisionCache<CustomerMeeting[]> = { revision: -1, value: [] };
+  private readonly customerMeetingsByCustomerCache: RevisionCache<Map<string, CustomerMeeting[]>> = { revision: -1, value: new Map() };
+  private readonly meetingTasksByCustomerCache: RevisionCache<Map<string, Task[]>> = { revision: -1, value: new Map() };
+  private readonly meetingTasksByMeetingCache: RevisionCache<Map<string, Task[]>> = { revision: -1, value: new Map() };
+  private readonly employeeByIdCache: RevisionCache<Map<string, Employee>> = { revision: -1, value: new Map() };
+  private readonly memberByIdCache: RevisionCache<Map<string, Member>> = { revision: -1, value: new Map() };
+  private readonly teamWorkloadCache: RevisionCache<TeamWorkload[]> = { revision: -1, value: [] };
+  private readonly myUnconvertedActionItemsCache: RevisionCache<Array<{ note: MeetingNote; meeting: CustomerMeeting }>> & { currentEmployeeId: string } = {
+    revision: -1,
+    currentEmployeeId: '',
+    value: []
+  };
+  private readonly inboxFeedCache: RevisionCache<InboxFeedItem[]> & {
+    currentEmployeeId: string;
+    currentUserId: string;
+    dismissedKey: string;
+    language: string;
+    today: string;
+  } = {
+    revision: -1,
+    currentEmployeeId: '',
+    currentUserId: '',
+    dismissedKey: '',
+    language: '',
+    today: '',
+    value: []
+  };
+  private readonly calendarEventsCache: RevisionCache<CalendarEvent[]> = { revision: -1, value: [] };
+  private readonly myCalendarEventsCache: RevisionCache<CalendarEvent[]> & { currentEmployeeId: string; currentUserId: string } = {
+    revision: -1,
+    currentEmployeeId: '',
+    currentUserId: '',
+    value: []
+  };
 
   currentUserId = '';
   currentEmployeeId = '';
@@ -300,6 +359,8 @@ export class ActionosWorkspaceService {
   selectedTaskId = '';
   drawerOpen = false;
   selectedTaskKind: 'board-task' | 'meeting-task' = 'meeting-task';
+  private quickCaptureTaskDraft: Task | null = null;
+  private quickCaptureDraftNumber = 0;
 
   private membersState: Member[] = [];
   private tasksState: Task[] = [];
@@ -334,9 +395,6 @@ export class ActionosWorkspaceService {
     () => this.saveToStorage(),
     () => `local-${this.nextCustomerNumber++}`,
     () => new Date().toISOString()
-  );
-  private readonly employeeDirectory: EmployeeDirectoryPort = new InMemoryEmployeeDirectory(
-    this.employeeStore
   );
   private readonly customerMeetingRepo: CustomerMeetingRepositoryPort =
     new InMemoryCustomerMeetingRepository(
@@ -400,7 +458,33 @@ export class ActionosWorkspaceService {
       return;
     }
 
+    // Never let a background poll / window-focus refresh overwrite optimistic
+    // state while the user has unsaved (in-flight or queued) writes — doing so
+    // is what made just-entered values briefly revert or disappear entirely.
+    // The post-mutation refresh (scheduleBackendRefresh) re-pulls authoritative
+    // data once every pending write settles.
+    if (this.hasPendingWrites) {
+      return;
+    }
+
     void this.refreshFromBackend();
+  }
+
+  /**
+   * True when the client holds optimistic changes the backend has not confirmed
+   * yet: an HTTP mutation in flight, a queued mutation waiting on a parent's
+   * server id, or a locally-created entity not yet promoted. While this is true
+   * we must not apply a server snapshot, or we would clobber the user's edit.
+   */
+  private get hasPendingWrites(): boolean {
+    return (
+      this.pendingMutationCount > 0 ||
+      this.pendingTaskMutations.size > 0 ||
+      this.pendingMeetingMutations.size > 0 ||
+      this.pendingMeetingNoteMutations.size > 0 ||
+      this.pendingCustomerMutations.size > 0 ||
+      this.pendingCustomerIds.size > 0
+    );
   }
 
   private scheduleInitialize(): void {
@@ -439,6 +523,7 @@ export class ActionosWorkspaceService {
       try {
         const bootstrap = await this.actionosApi.bootstrap(selectedOrg);
         this.applyBootstrap(bootstrap);
+        await this.refreshDirectoryUsers(selectedOrg);
         this.lastBootstrapKey = bootstrapKey;
       } catch (error) {
         // eslint-disable-next-line no-console
@@ -461,7 +546,11 @@ export class ActionosWorkspaceService {
   }
 
   get allTasks(): Task[] {
-    return this.tasksState.filter(task => !task.archivedAt);
+    if (this.allTasksCache.revision !== this.dataRevision) {
+      this.allTasksCache.revision = this.dataRevision;
+      this.allTasksCache.value = this.tasksState.filter(task => !task.archivedAt);
+    }
+    return this.allTasksCache.value;
   }
 
   get tasks(): Task[] {
@@ -469,7 +558,11 @@ export class ActionosWorkspaceService {
   }
 
   get archivedTasks(): Task[] {
-    return this.tasksState.filter(task => !!task.archivedAt);
+    if (this.archivedTasksCache.revision !== this.dataRevision) {
+      this.archivedTasksCache.revision = this.dataRevision;
+      this.archivedTasksCache.value = this.tasksState.filter(task => !!task.archivedAt);
+    }
+    return this.archivedTasksCache.value;
   }
 
   get meeting(): Meeting {
@@ -485,7 +578,11 @@ export class ActionosWorkspaceService {
   }
 
   get openTasks(): Task[] {
-    return this.tasks.filter(task => this.isTaskOpen(task.status));
+    if (this.openTasksCache.revision !== this.dataRevision) {
+      this.openTasksCache.revision = this.dataRevision;
+      this.openTasksCache.value = this.allTasks.filter(task => this.isTaskOpen(task.status));
+    }
+    return this.openTasksCache.value;
   }
 
   get myTasks(): Task[] {
@@ -593,8 +690,15 @@ export class ActionosWorkspaceService {
 
   /** Unconverted action notes from meetings the current user was part of (leader or participant). */
   get myUnconvertedActionItems(): Array<{ note: MeetingNote; meeting: CustomerMeeting }> {
+    if (
+      this.myUnconvertedActionItemsCache.revision === this.dataRevision &&
+      this.myUnconvertedActionItemsCache.currentEmployeeId === this.currentEmployeeId
+    ) {
+      return this.myUnconvertedActionItemsCache.value;
+    }
+
     const empId = this.currentEmployeeId;
-    return this.customerMeetings
+    const value = this.customerMeetings
       .filter(m =>
         m.meetingLeaderEmployeeId === empId ||
         m.internalParticipantEmployeeIds.includes(empId)
@@ -604,6 +708,11 @@ export class ActionosWorkspaceService {
           .filter(note => note.type === 'action' && !note.convertedTaskId)
           .map(note => ({ note, meeting }))
       );
+
+    this.myUnconvertedActionItemsCache.revision = this.dataRevision;
+    this.myUnconvertedActionItemsCache.currentEmployeeId = this.currentEmployeeId;
+    this.myUnconvertedActionItemsCache.value = value;
+    return value;
   }
 
   // ── Inbox feed assembly ─────────────────────────────────────────────────
@@ -623,7 +732,21 @@ export class ActionosWorkspaceService {
     const uid = this.currentUserId;
     const empId = this.currentEmployeeId;
     const today = this.todayIso;
-    const dismissed = new Set(this.inboxStateSig().dismissed);
+    const dismissedIds = this.inboxStateSig().dismissed;
+    const dismissedKey = dismissedIds.join('|');
+    const language = this.i18n.language;
+    if (
+      this.inboxFeedCache.revision === this.dataRevision &&
+      this.inboxFeedCache.currentEmployeeId === empId &&
+      this.inboxFeedCache.currentUserId === uid &&
+      this.inboxFeedCache.dismissedKey === dismissedKey &&
+      this.inboxFeedCache.language === language &&
+      this.inboxFeedCache.today === today
+    ) {
+      return this.inboxFeedCache.value;
+    }
+
+    const dismissed = new Set(dismissedIds);
     const fallbackTs = `${today}T00:00:00`;
     const newStatuses: TaskStatus[] = ['Inbox', 'New', 'Sent To Owner'];
     const items: InboxFeedItem[] = [];
@@ -764,9 +887,18 @@ export class ActionosWorkspaceService {
       });
     }
 
-    return items
+    const value = items
       .filter(item => !dismissed.has(item.id))
       .sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+
+    this.inboxFeedCache.revision = this.dataRevision;
+    this.inboxFeedCache.currentEmployeeId = empId;
+    this.inboxFeedCache.currentUserId = uid;
+    this.inboxFeedCache.dismissedKey = dismissedKey;
+    this.inboxFeedCache.language = language;
+    this.inboxFeedCache.today = today;
+    this.inboxFeedCache.value = value;
+    return value;
   }
 
   /**
@@ -805,7 +937,7 @@ export class ActionosWorkspaceService {
   /** Secondary line for a meeting feed item: "Acme · Quarterly review". */
   private inboxMeetingContext(meeting: CustomerMeeting, note?: MeetingNote): string {
     const parts: string[] = [];
-    const customerName = this.customer(meeting.customerId)?.name;
+    const customerName = this.clientName(meeting.customerId);
     if (customerName) {
       parts.push(customerName);
     }
@@ -827,7 +959,7 @@ export class ActionosWorkspaceService {
     const note = meeting.notes.find(n => n.id === resolvedNoteId);
     if (!note || note.type !== 'action' || note.convertedTaskId) return false;
 
-    const assignee = note.createdByEmployeeId && this.employeeDirectory.isAssignable(note.createdByEmployeeId)
+    const assignee = note.createdByEmployeeId && this.isAssignable(note.createdByEmployeeId)
       ? note.createdByEmployeeId
       : this.currentEmployeeId;
 
@@ -858,6 +990,10 @@ export class ActionosWorkspaceService {
   }
 
   get selectedTask(): Task | undefined {
+    const draft = this.quickCaptureTaskDraft;
+    if (draft?.id === this.selectedTaskId) {
+      return draft;
+    }
     const resolvedTaskId = this.resolveTaskId(this.selectedTaskId);
     return this.tasksState.find(task => task.id === resolvedTaskId && !task.archivedAt);
   }
@@ -867,25 +1003,58 @@ export class ActionosWorkspaceService {
   }
 
   get teamWorkload(): TeamWorkload[] {
-    return this.membersState.map(member => {
-      const assigned = this.openTasks.filter(
-        task => task.source !== 'meeting' && task.assigneeIds.includes(member.id)
-      );
-      const employeeId = this.employeeIdForMember(member);
-      const meetingAssigned = employeeId
-        ? this.openMeetingTasks.filter(task => task.assignedToEmployeeId === employeeId)
-        : [];
+    if (this.teamWorkloadCache.revision === this.dataRevision) {
+      return this.teamWorkloadCache.value;
+    }
 
-      return {
-        member,
-        openCount: assigned.length,
-        blockedCount: assigned.filter(task => !!task.blockedBy || task.status === 'Waiting').length,
-        meetingOpenCount: meetingAssigned.length,
-        meetingBlockedCount: meetingAssigned.filter(
-          task => task.status === 'Waiting For Customer' || task.status === 'Waiting For Internal'
-        ).length
-      };
-    });
+    const workloads = this.membersState.map(member => ({
+      member,
+      openCount: 0,
+      blockedCount: 0,
+      meetingOpenCount: 0,
+      meetingBlockedCount: 0
+    }));
+    const byMemberId = new Map(workloads.map(workload => [workload.member.id, workload]));
+    const memberIdByEmployeeId = new Map<string, string>();
+
+    for (const member of this.membersState) {
+      const employeeId = this.employeeIdForMember(member);
+      if (employeeId) {
+        memberIdByEmployeeId.set(employeeId, member.id);
+      }
+    }
+
+    for (const task of this.openTasks) {
+      if (task.source === 'meeting') {
+        continue;
+      }
+      for (const memberId of task.assigneeIds) {
+        const workload = byMemberId.get(memberId);
+        if (!workload) {
+          continue;
+        }
+        workload.openCount += 1;
+        if (!!task.blockedBy || task.status === 'Waiting') {
+          workload.blockedCount += 1;
+        }
+      }
+    }
+
+    for (const task of this.openMeetingTasks) {
+      const memberId = memberIdByEmployeeId.get(task.assignedToEmployeeId);
+      const workload = memberId ? byMemberId.get(memberId) : undefined;
+      if (!workload) {
+        continue;
+      }
+      workload.meetingOpenCount += 1;
+      if (task.status === 'Waiting For Customer' || task.status === 'Waiting For Internal') {
+        workload.meetingBlockedCount += 1;
+      }
+    }
+
+    this.teamWorkloadCache.revision = this.dataRevision;
+    this.teamWorkloadCache.value = workloads;
+    return workloads;
   }
 
   tasksByStatus(status: TaskStatus): Task[] {
@@ -915,7 +1084,9 @@ export class ActionosWorkspaceService {
     this.selectedTaskId = task.id;
     this.selectedTaskKind = 'meeting-task';
     this.drawerOpen = openDrawer;
-    this.saveToStorage();
+    if (this.quickCaptureTaskDraft?.id !== task.id) {
+      this.saveToStorage();
+    }
   }
 
   openTaskDrawer(task?: Task): void {
@@ -954,6 +1125,11 @@ export class ActionosWorkspaceService {
   }
 
   closeTaskDrawer(): void {
+    if (this.quickCaptureTaskDraft?.id === this.selectedTaskId) {
+      this.quickCaptureTaskDraft = null;
+      this.selectedTaskId = '';
+      this.selectedTaskKind = 'meeting-task';
+    }
     this.drawerOpen = false;
   }
 
@@ -971,7 +1147,7 @@ export class ActionosWorkspaceService {
 
     const nextStatus = changes.status ? this.toUnifiedStatus(changes.status) : undefined;
     const nextCustomerId = changes.customerId !== undefined ? this.resolveCustomerId(changes.customerId).trim() : undefined;
-    const nextCustomerName = nextCustomerId ? this.customer(nextCustomerId)?.name : undefined;
+    const nextCustomerName = nextCustomerId ? this.clientName(nextCustomerId) : undefined;
     const nextAssigneeIds = changes.assigneeIds ? [...changes.assigneeIds] : task.assigneeIds;
     const nextAssignedToEmployeeId = changes.assigneeIds
       ? (nextAssigneeIds[0] ? this.employeeIdForMember(nextAssigneeIds[0]) ?? '' : '')
@@ -1065,24 +1241,28 @@ export class ActionosWorkspaceService {
       source,
       board: input.board?.trim() || customerName || 'Fritz Meetings',
       customerId,
-      status: 'New',
+      status: input.status ?? 'New',
       priority: input.priority,
       dueDate: input.dueDate || this.todayIso,
       assigneeIds: [resolvedAssigneeMemberId],
       sourceMeetingId: input.sourceMeetingId ?? '',
       openedByEmployeeId,
       assignedToEmployeeId,
-      watcherIds: [this.currentUserId],
-      watcherEmployeeIds: Array.from(
-        new Set([openedByEmployeeId, assignedToEmployeeId].filter((id): id is string => !!id))
-      ),
+      watcherIds: input.watcherIds?.length ? input.watcherIds : [this.currentUserId],
+      watcherEmployeeIds: input.watcherEmployeeIds?.length
+        ? input.watcherEmployeeIds
+        : Array.from(
+            new Set([openedByEmployeeId, assignedToEmployeeId].filter((id): id is string => !!id))
+          ),
       attachmentIds: [],
       notifications: [],
-      treatmentNotes: '',
+      treatmentNotes: input.treatmentNotes ?? '',
+      waitingReason: input.waitingReason,
+      completedAt: input.completedAt,
       createdByUserId: this.currentUserId,
       createdAt: now,
       updatedAt: now,
-      checklist: []
+      checklist: input.checklist?.map(item => ({ ...item })) ?? []
     };
 
     this.tasksState = [task, ...this.tasksState];
@@ -1101,10 +1281,10 @@ export class ActionosWorkspaceService {
         customerId: task.customerId || null,
         title: task.title,
         description: task.description,
-        status: 'New',
+        status: task.status,
         priority: task.priority,
         sourceType: task.source,
-        waitingReason: null,
+        waitingReason: task.waitingReason ?? null,
         treatmentNotes: task.treatmentNotes ?? null,
         assignedUserId: task.assignedToEmployeeId || null,
         dueDateUtc: task.dueDate ? new Date(`${task.dueDate}T12:00:00.000Z`).toISOString() : null,
@@ -1121,6 +1301,9 @@ export class ActionosWorkspaceService {
         }).then((created) => {
           this.promoteTaskId(localTaskId, created.id.toString());
           return created;
+        }).catch((error) => {
+          this.abandonLocalTask(localTaskId);
+          throw error;
         });
 
       const sourceMeetingNumeric = this.parseNumericId(resolvedSourceMeetingId);
@@ -1144,14 +1327,8 @@ export class ActionosWorkspaceService {
     }
 
     if (kind === 'task') {
-      return this.addTask({
-        title: trimmedContent,
-        description: '',
-        board: 'Fritz Meetings',
-        priority: 'Medium',
-        dueDate: this.addDays(this.todayIso, 2),
-        assigneeId: this.currentUserId
-      });
+      this.quickCaptureTaskDraft = this.createQuickCaptureTaskDraft(trimmedContent);
+      return this.quickCaptureTaskDraft;
     }
 
     return this.addMeetingNote({
@@ -1160,6 +1337,44 @@ export class ActionosWorkspaceService {
       ownerId: kind === 'action' || kind === 'blocker' ? this.currentUserId : undefined,
       dueDate: kind === 'action' ? this.addDays(this.todayIso, 2) : undefined
     });
+  }
+
+  private createQuickCaptureTaskDraft(title: string): Task {
+    const assigneeId = this.currentUserId;
+    const assignedToEmployeeId =
+      this.employeeIdForMember(assigneeId) ||
+      this.employee(assigneeId)?.id ||
+      this.currentEmployeeId;
+    const resolvedAssigneeMemberId = this.memberIdForEmployee(assignedToEmployeeId) || assigneeId;
+    const openedByEmployeeId = this.currentEmployeeId;
+    const now = new Date().toISOString();
+
+    return {
+      id: `draft-task-${++this.quickCaptureDraftNumber}`,
+      title,
+      description: '',
+      source: 'board',
+      board: 'Fritz Meetings',
+      customerId: '',
+      status: 'New',
+      priority: 'Medium',
+      dueDate: this.addDays(this.todayIso, 2),
+      assigneeIds: [resolvedAssigneeMemberId],
+      sourceMeetingId: '',
+      openedByEmployeeId,
+      assignedToEmployeeId,
+      watcherIds: [this.currentUserId],
+      watcherEmployeeIds: Array.from(
+        new Set([openedByEmployeeId, assignedToEmployeeId].filter((id): id is string => !!id))
+      ),
+      attachmentIds: [],
+      notifications: [],
+      treatmentNotes: '',
+      createdByUserId: this.currentUserId,
+      createdAt: now,
+      updatedAt: now,
+      checklist: []
+    };
   }
 
   archiveTask(task: Task): void {
@@ -1428,7 +1643,7 @@ export class ActionosWorkspaceService {
   }
 
   memberName(memberId: string): string {
-    return this.membersState.find(member => member.id === memberId)?.name ?? 'Unknown';
+    return this.memberById().get(memberId)?.name ?? 'Unknown';
   }
 
   initials(memberId: string): string {
@@ -1436,11 +1651,19 @@ export class ActionosWorkspaceService {
     return name.split(' ').map(part => part[0]).join('').slice(0, 2).toUpperCase();
   }
 
+  private memberById(): Map<string, Member> {
+    if (this.memberByIdCache.revision !== this.dataRevision) {
+      this.memberByIdCache.revision = this.dataRevision;
+      this.memberByIdCache.value = new Map(this.membersState.map(member => [member.id, member]));
+    }
+    return this.memberByIdCache.value;
+  }
+
   employeeIdForMember(memberOrId: Member | string): string | undefined {
     const members = this.membersState;
     const employees = this.employeeStore.employees;
     const member = typeof memberOrId === 'string'
-      ? members.find(m => m.id === memberOrId)
+      ? this.memberById().get(memberOrId)
       : memberOrId;
     if (!member) {
       return undefined;
@@ -1457,8 +1680,7 @@ export class ActionosWorkspaceService {
 
   memberIdForEmployee(employeeId: string): string | undefined {
     const members = this.membersState;
-    const employees = this.employeeStore.employees;
-    const employee = employees.find(e => e.id === employeeId);
+    const employee = this.employeeById().get(employeeId);
     if (!employee) {
       return undefined;
     }
@@ -1657,6 +1879,7 @@ export class ActionosWorkspaceService {
     this.drawerOpen = false;
     this.currentUserId = '';
     this.currentEmployeeId = '';
+    this.bumpDataRevision();
   }
 
   private applyBootstrap(bootstrap: ActionosBootstrapDto): void {
@@ -1715,13 +1938,31 @@ export class ActionosWorkspaceService {
     this.nextCustomerMeetingNumber = this.customerMeetingStore.customerMeetings.length + 1;
     this.nextAttachmentNumber = this.attachmentStore.attachments.length + 1;
 
-    if (!this.tasksState.some((task) => task.id === this.selectedTaskId)) {
-      this.selectedTaskId = this.tasksState[0]?.id ?? '';
-      this.drawerOpen = false;
+    // An unsaved quick-capture draft (footer "new task") lives only in memory
+    // via quickCaptureTaskDraft — it is never part of tasksState until it is
+    // persisted. A background refresh must NOT touch the selection/drawer in
+    // that case, otherwise the not-in-tasksState branch below force-closes the
+    // drawer the moment any refresh lands (e.g. the same cycle that fires the
+    // directory-users call), making the drawer vanish after a second or two.
+    const draftIsOpen =
+      !!this.quickCaptureTaskDraft && this.quickCaptureTaskDraft.id === this.selectedTaskId;
+    if (!draftIsOpen) {
+      // Resolve through id aliases so a just-created task whose local id was
+      // promoted to a server id is still recognised after the post-mutation
+      // refresh — otherwise the open drawer would be force-closed because the
+      // raw local id no longer matches.
+      const resolvedSelectedTaskId = this.resolveTaskId(this.selectedTaskId);
+      if (this.tasksState.some((task) => task.id === resolvedSelectedTaskId)) {
+        this.selectedTaskId = resolvedSelectedTaskId;
+      } else {
+        this.selectedTaskId = this.tasksState[0]?.id ?? '';
+        this.drawerOpen = false;
+      }
     }
 
     this.currentEmployeeId = this.resolveCurrentEmployeeId();
     this.currentUserId = this.resolveCurrentMemberId();
+    this.bumpDataRevision();
   }
 
   private mapEmployeeFromApi(user: ActionosApiUserDto): Employee {
@@ -1745,6 +1986,222 @@ export class ActionosWorkspaceService {
       team: 'Fritz',
       availability: 'Available'
     };
+  }
+
+  private async refreshDirectoryUsers(orgGroupId: string): Promise<void> {
+    try {
+      const users = await this.actionosApi.getOrgUsers(orgGroupId);
+      this.mergeDirectoryUsersFromApi(users ?? []);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('[ActionOS] Failed to refresh ActionOS combined users directory.', error);
+    }
+
+    await this.mergeHomePageDirectoryUsers();
+  }
+
+  private async mergeHomePageDirectoryUsers(): Promise<void> {
+    try {
+      const users = await firstValueFrom(this.homePageServer.getUsers());
+      this.mergeDirectoryUsersFromHomePage(users ?? []);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('[ActionOS] Failed to merge HomePage/Azure users into ActionOS directory.', error);
+    }
+  }
+
+  private mergeDirectoryUsersFromApi(users: ActionosApiUserDto[]): void {
+    this.mergeDirectoryUsers(users.map(user => ({
+      id: user.userId,
+      azureObjectId: user.azureObjectId,
+      displayName: user.displayName,
+      email: user.email,
+      isActive: user.isActive ?? true
+    })));
+  }
+
+  private mergeDirectoryUsersFromHomePage(users: HomePageUserDto[]): void {
+    this.mergeDirectoryUsers(users.map(user => ({
+      id: this.firstDirectoryValue(user.id, user.Id),
+      azureObjectId: this.firstDirectoryValue(user.id, user.Id),
+      displayName: this.firstDirectoryValue(user.displayName, user.DisplayName),
+      email: this.firstDirectoryValue(
+        user.email,
+        user.Email,
+        user.mail,
+        user.Mail,
+        user.userPrincipalName,
+        user.UserPrincipalName
+      ),
+      isActive: user.isActive ?? user.IsActive ?? true
+    })));
+  }
+
+  private mergeDirectoryUsers(users: DirectoryUserMergeInput[]): void {
+    const normalizedUsers = users
+      .map(user => ({
+        id: user.id?.trim() || user.azureObjectId?.trim() || user.email?.trim() || '',
+        azureObjectId: user.azureObjectId?.trim() ?? '',
+        displayName: user.displayName?.trim() ?? '',
+        email: user.email?.trim() ?? '',
+        isActive: user.isActive ?? true
+      }))
+      .filter(user => !!user.id);
+
+    if (!normalizedUsers.length) {
+      return;
+    }
+
+    const employees = [...this.employeeStore.employees];
+    const members = [...this.membersState];
+    const employeeByKey = new Map<string, number>();
+    const memberById = new Map<string, number>();
+
+    const addEmployeeKey = (
+      kind: 'id' | 'oid' | 'email',
+      value: string | undefined | null,
+      index: number
+    ): void => {
+      const key = this.directoryKey(value);
+      if (key) {
+        employeeByKey.set(`${kind}:${key}`, index);
+      }
+    };
+
+    const employeeKeysForUser = (user: DirectoryUserMergeInput): string[] => {
+      const keys: string[] = [];
+      const addKey = (kind: 'id' | 'oid' | 'email', value: string | undefined | null): void => {
+        const key = this.directoryKey(value);
+        if (!key) {
+          return;
+        }
+        keys.push(`${kind}:${key}`);
+        if (kind === 'id' && key.includes('@')) {
+          keys.push(`email:${key}`);
+        }
+      };
+
+      addKey('id', user.id);
+      addKey('oid', user.azureObjectId);
+      addKey('email', user.email);
+      return keys;
+    };
+
+    const indexEmployee = (employee: Employee, index: number): void => {
+      addEmployeeKey('id', employee.id, index);
+      addEmployeeKey('oid', employee.externalEmployeeId, index);
+      addEmployeeKey('id', employee.externalEmployeeId, index);
+      addEmployeeKey('email', employee.email, index);
+      if (employee.id.includes('@')) {
+        addEmployeeKey('email', employee.id, index);
+      }
+    };
+
+    const indexMember = (member: Member, index: number): void => {
+      memberById.set(this.directoryKey(member.id), index);
+    };
+
+    employees.forEach(indexEmployee);
+    members.forEach(indexMember);
+
+    let changed = false;
+    for (const user of normalizedUsers) {
+      const name = user.displayName || user.id;
+      const idKey = this.directoryKey(user.id);
+      const employeeIndex = employeeKeysForUser(user)
+        .map(key => employeeByKey.get(key))
+        .find(index => index !== undefined);
+
+      if (employeeIndex === undefined) {
+        const employee: Employee = {
+          id: user.id,
+          externalEmployeeId: user.azureObjectId || user.id,
+          fullName: name,
+          email: user.email,
+          team: '',
+          role: '',
+          isActive: user.isActive,
+          sourceSystem: 'Fritz'
+        };
+        const index = employees.length;
+        employees.push(employee);
+        indexEmployee(employee, index);
+        changed = true;
+      } else {
+        const employee = employees[employeeIndex];
+        const nextEmployee = {
+          ...employee,
+          externalEmployeeId: employee.externalEmployeeId || user.azureObjectId || user.id,
+          fullName: this.shouldReplaceDirectoryName(employee.fullName, employee.id, name) ? name : employee.fullName,
+          email: employee.email || user.email,
+          isActive: employee.isActive || user.isActive
+        };
+        if (
+          nextEmployee.externalEmployeeId !== employee.externalEmployeeId ||
+          nextEmployee.fullName !== employee.fullName ||
+          nextEmployee.email !== employee.email ||
+          nextEmployee.isActive !== employee.isActive
+        ) {
+          employees[employeeIndex] = nextEmployee;
+          indexEmployee(employees[employeeIndex], employeeIndex);
+          changed = true;
+        }
+      }
+
+      const memberId = employeeIndex === undefined ? user.id : employees[employeeIndex].id;
+      const memberKey = this.directoryKey(memberId);
+      const memberIndex = memberById.get(idKey) ?? memberById.get(memberKey);
+      if (memberIndex === undefined) {
+        const member: Member = {
+          id: memberId,
+          name,
+          role: 'Member',
+          team: 'Fritz',
+          availability: 'Available'
+        };
+        const index = members.length;
+        members.push(member);
+        indexMember(member, index);
+        changed = true;
+      } else {
+        const member = members[memberIndex];
+        if (this.shouldReplaceDirectoryName(member.name, member.id, name)) {
+          members[memberIndex] = { ...member, name };
+          indexMember(members[memberIndex], memberIndex);
+          changed = true;
+        }
+      }
+    }
+
+    if (!changed) {
+      return;
+    }
+
+    this.employeeStore.employees = employees;
+    this.membersState = members;
+    this.nextMemberNumber = this.membersState.length + 1;
+    this.currentEmployeeId = this.resolveCurrentEmployeeId();
+    this.currentUserId = this.resolveCurrentMemberId();
+    this.bumpDataRevision();
+  }
+
+  private shouldReplaceDirectoryName(currentName: string | undefined, id: string, nextName: string): boolean {
+    const current = currentName?.trim() ?? '';
+    const next = nextName.trim();
+    if (!next || next.toLowerCase() === 'unknown') {
+      return false;
+    }
+    return !current || current === id || current.toLowerCase() === 'unknown';
+  }
+
+  private directoryKey(value: string | undefined | null): string {
+    return (value ?? '').trim().toLowerCase();
+  }
+
+  private firstDirectoryValue(...values: Array<string | null | undefined>): string {
+    return values
+      .map(value => value?.trim() ?? '')
+      .find(value => !!value) ?? '';
   }
 
   private mapCustomerFromApi(row: ActionosApiCustomerDto, nowIso: string): Customer {
@@ -1940,9 +2397,20 @@ export class ActionosWorkspaceService {
       return this.bootstrapInFlight;
     }
 
+    // Don't start a refresh while writes are pending — the post-mutation
+    // refresh will run once they settle. Applying a snapshot now would revert
+    // the user's optimistic edit.
+    if (this.hasPendingWrites) {
+      return;
+    }
+
     const orgGroupId = this.currentOrgGroupId;
     const token = this.auth.getToken() ?? '';
     this.lastRefreshStartedAt = Date.now();
+    // Snapshot the data revision before fetching. If any optimistic write lands
+    // while the snapshot is in flight, the revision changes and we must discard
+    // the now-stale snapshot rather than overwrite the fresh local edit.
+    const revisionAtStart = this.dataRevision;
 
     this.refreshInFlight = (async () => {
       try {
@@ -1950,7 +2418,15 @@ export class ActionosWorkspaceService {
         if (this.currentOrgGroupId !== orgGroupId) {
           return;
         }
+        if (this.hasPendingWrites || this.dataRevision !== revisionAtStart) {
+          // Local optimistic state changed (a new edit or a queued write) while
+          // we were fetching. Applying this snapshot would clobber it, so drop
+          // it. The write that changed the revision schedules its own refresh on
+          // settle, guaranteeing eventual reconciliation.
+          return;
+        }
         this.applyBootstrap(bootstrap);
+        await this.refreshDirectoryUsers(orgGroupId);
         this.lastBootstrapKey = `${orgGroupId}|${token}`;
       } catch (error) {
         // eslint-disable-next-line no-console
@@ -1992,7 +2468,12 @@ export class ActionosWorkspaceService {
       });
   }
 
+  private bumpDataRevision(): void {
+    this.dataRevisionState.update(revision => revision + 1);
+  }
+
   private saveToStorage(): void {
+    this.bumpDataRevision();
     // Real backend mode: keep state in memory and backend only.
   }
 
@@ -2119,6 +2600,7 @@ export class ActionosWorkspaceService {
       if (this.catchUpCustomerId === local) {
         this.catchUpCustomerId = canonical;
       }
+      this.bumpDataRevision();
     }
 
     this.flushPendingCustomerMutations(canonical);
@@ -2142,6 +2624,84 @@ export class ActionosWorkspaceService {
       current = this.meetingNoteIdAliases.get(current) as string;
     }
     return current;
+  }
+
+  // ── Failed-create rollback ───────────────────────────────────────────────
+  // When a create call rejects, the optimistic entity never gets a server id.
+  // We must drop it from the store (so the user sees the change roll back) AND
+  // clear its pending-mutation queue / id sets — otherwise the queue strands and
+  // `hasPendingWrites` stays true forever, permanently blocking refresh.
+
+  private abandonLocalTask(localTaskId: string): void {
+    const local = localTaskId.trim();
+    if (!local) {
+      return;
+    }
+    this.taskIdAliases.delete(local);
+    this.pendingTaskMutations.delete(local);
+    this.tasksState = this.tasksState.filter((task) => task.id !== local);
+    if (this.selectedTaskId === local) {
+      this.selectedTaskId = this.tasksState[0]?.id ?? '';
+      this.drawerOpen = false;
+    }
+    this.bumpDataRevision();
+  }
+
+  private abandonLocalMeeting(localMeetingId: string): void {
+    const local = localMeetingId.trim();
+    if (!local) {
+      return;
+    }
+    this.meetingIdAliases.delete(local);
+    this.pendingMeetingMutations.delete(local);
+    // Cascade: any task or note created against this not-yet-saved meeting can
+    // never persist either, so roll them back too (and clear their queues).
+    for (const task of this.tasksState.filter((item) => item.sourceMeetingId === local)) {
+      this.abandonLocalTask(task.id);
+    }
+    const meeting = this.customerMeetingStore.customerMeetings.find((item) => item.id === local);
+    if (meeting) {
+      for (const note of [...meeting.notes]) {
+        this.pendingMeetingNoteMutations.delete(note.id);
+        this.meetingNoteIdAliases.delete(note.id);
+      }
+    }
+    this.customerMeetingStore.customerMeetings = this.customerMeetingStore.customerMeetings.filter(
+      (item) => item.id !== local
+    );
+    if (this.openMeetingId === local) {
+      this.openMeetingId = null;
+    }
+    if (this.pendingOpenMeetingId === local) {
+      this.pendingOpenMeetingId = null;
+    }
+    this.bumpDataRevision();
+  }
+
+  private abandonLocalMeetingNote(meetingId: string, localNoteId: string): void {
+    const local = localNoteId.trim();
+    if (!local) {
+      return;
+    }
+    this.meetingNoteIdAliases.delete(local);
+    this.pendingMeetingNoteMutations.delete(local);
+    const meeting = this.customerMeetingRepo.get(this.resolveMeetingId(meetingId));
+    if (meeting) {
+      meeting.notes = meeting.notes.filter((note) => note.id !== local);
+    }
+    this.bumpDataRevision();
+  }
+
+  private abandonLocalCustomer(localCustomerId: string): void {
+    const local = localCustomerId.trim();
+    if (!local) {
+      return;
+    }
+    this.customerIdAliases.delete(local);
+    this.pendingCustomerIds.delete(local);
+    this.pendingCustomerMutations.delete(local);
+    this.customerStore.customers = this.customerStore.customers.filter((customer) => customer.id !== local);
+    this.bumpDataRevision();
   }
 
   private runMeetingMutation(
@@ -2332,6 +2892,7 @@ export class ActionosWorkspaceService {
     if (this.selectedTaskId === local) {
       this.selectedTaskId = canonical;
     }
+    this.bumpDataRevision();
   }
 
   private promoteMeetingId(localMeetingId: string, canonicalMeetingId: string): void {
@@ -2367,6 +2928,7 @@ export class ActionosWorkspaceService {
     if (this.meetingState.id === local) {
       this.meetingState = { ...this.meetingState, id: canonical };
     }
+    this.bumpDataRevision();
   }
 
   private promoteMeetingNoteId(
@@ -2399,6 +2961,7 @@ export class ActionosWorkspaceService {
         ? { ...attachment, linkedEntityId: canonicalNoteId }
         : attachment
     );
+    this.bumpDataRevision();
   }
 
   private parseNumericId(value: string | undefined | null): number | null {
@@ -2658,10 +3221,20 @@ export class ActionosWorkspaceService {
   // ─────────────────────────────────────────────────────────────────────
 
   get customers(): Customer[] {
-    return this.customerRepo.list().sort((a, b) => a.name.localeCompare(b.name));
+    if (this.customersCache.revision !== this.dataRevision) {
+      this.customersCache.revision = this.dataRevision;
+      this.customersCache.value = this.customerStore.customers
+        .slice()
+        .sort((a, b) => a.name.localeCompare(b.name));
+    }
+    return this.customersCache.value;
   }
 
-  get taskClientOptions(): { id: string; name: string }[] {
+  get clientOptions(): { id: string; name: string }[] {
+    if (this.taskClientOptionsCache.revision === this.dataRevision) {
+      return this.taskClientOptionsCache.value;
+    }
+
     const byId = new Map<string, { id: string; name: string }>();
     const add = (id: string | null | undefined, name: string | null | undefined): void => {
       const trimmedId = id?.trim();
@@ -2677,11 +3250,40 @@ export class ActionosWorkspaceService {
       add(customer.externalGroupId, customer.name);
     });
 
-    return Array.from(byId.values()).sort((a, b) => a.name.localeCompare(b.name));
+    const value = Array.from(byId.values()).sort((a, b) => a.name.localeCompare(b.name));
+    this.taskClientOptionsCache.revision = this.dataRevision;
+    this.taskClientOptionsCache.value = value;
+    return value;
+  }
+
+  get taskClientOptions(): { id: string; name: string }[] {
+    return this.clientOptions;
+  }
+
+  private customerById(): Map<string, Customer> {
+    if (this.customerByIdCache.revision !== this.dataRevision) {
+      this.customerByIdCache.revision = this.dataRevision;
+      this.customerByIdCache.value = new Map(this.customerStore.customers.map(customer => [customer.id, customer]));
+    }
+    return this.customerByIdCache.value;
+  }
+
+  private customerByExternalGroupId(): Map<string, Customer> {
+    if (this.customerByExternalGroupCache.revision !== this.dataRevision) {
+      const byExternalGroupId = new Map<string, Customer>();
+      for (const customer of this.customerStore.customers) {
+        if (customer.externalGroupId) {
+          byExternalGroupId.set(customer.externalGroupId, customer);
+        }
+      }
+      this.customerByExternalGroupCache.revision = this.dataRevision;
+      this.customerByExternalGroupCache.value = byExternalGroupId;
+    }
+    return this.customerByExternalGroupCache.value;
   }
 
   customer(id: string): Customer | undefined {
-    return this.customerRepo.get(this.resolveCustomerId(id));
+    return this.customerById().get(this.resolveCustomerId(id));
   }
 
   clientName(id: string): string | undefined {
@@ -2690,13 +3292,32 @@ export class ActionosWorkspaceService {
       return undefined;
     }
 
-    const customer = this.customerRepo.get(resolvedId)
-      ?? this.customerRepo.list().find(c => c.externalGroupId === resolvedId);
+    const customer = this.customerById().get(resolvedId)
+      ?? this.customerByExternalGroupId().get(resolvedId);
     if (customer) {
       return customer.name;
     }
 
     return this.externalCustomerGroups.find(group => group.id === resolvedId)?.name;
+  }
+
+  private clientLookupIds(id: string | undefined | null): string[] {
+    const resolvedId = this.resolveCustomerId(id ?? '').trim();
+    if (!resolvedId) {
+      return [];
+    }
+
+    const ids = new Set<string>([resolvedId]);
+    const customer = this.customerById().get(resolvedId)
+      ?? this.customerByExternalGroupId().get(resolvedId);
+    if (customer) {
+      ids.add(customer.id);
+      if (customer.externalGroupId?.trim()) {
+        ids.add(customer.externalGroupId.trim());
+      }
+    }
+
+    return [...ids];
   }
 
   customersByStatus(status: 'all' | Customer['status'] | Customer['type']): Customer[] {
@@ -2730,10 +3351,7 @@ export class ActionosWorkspaceService {
     }), {
       failureMessage: `Customer "${customer.name}" was not saved to ActionOS.`,
       onSuccess: (created) => this.promoteCustomerId(customer.id, created.id),
-      onFailure: () => {
-        this.pendingCustomerIds.delete(customer.id);
-        this.pendingCustomerMutations.delete(customer.id);
-      }
+      onFailure: () => this.abandonLocalCustomer(customer.id)
     });
     return customer;
   }
@@ -2780,10 +3398,12 @@ export class ActionosWorkspaceService {
   // Employees — read-only Fritz directory
 
   get employees(): Employee[] {
-    // Returns only active fritz/critilog employees (the assignable set)
+    // Returns only active users from the combined assignable directory.
     if (this.sortedEmployeeSource !== this.employeeStore.employees) {
       this.sortedEmployeeSource = this.employeeStore.employees;
-      this.sortedEmployees = this.employeeDirectory.list().sort((a, b) => a.fullName.localeCompare(b.fullName));
+      this.sortedEmployees = this.employeeStore.employees
+        .filter((employee) => employee.isActive)
+        .sort((a, b) => a.fullName.localeCompare(b.fullName));
     }
     return this.sortedEmployees;
   }
@@ -2794,24 +3414,38 @@ export class ActionosWorkspaceService {
   }
 
   employee(id: string): Employee | undefined {
-    return this.employeeDirectory.get(id);
+    return this.employeeById().get(id);
   }
 
   employeeName(id: string | undefined): string {
     if (!id) {
       return '—';
     }
-    return this.employeeDirectory.get(id)?.fullName ?? '—';
+    return this.employeeById().get(id)?.fullName ?? '—';
   }
 
   isAssignable(id: string): boolean {
-    return this.employeeDirectory.isAssignable(id);
+    return this.employeeById().get(id)?.isActive ?? false;
+  }
+
+  private employeeById(): Map<string, Employee> {
+    if (this.employeeByIdCache.revision !== this.dataRevision) {
+      this.employeeByIdCache.revision = this.dataRevision;
+      this.employeeByIdCache.value = new Map(this.employeeStore.employees.map(employee => [employee.id, employee]));
+    }
+    return this.employeeByIdCache.value;
   }
 
   // Customer meetings
 
   get customerMeetings(): CustomerMeeting[] {
-    return this.customerMeetingRepo.list();
+    if (this.customerMeetingsCache.revision !== this.dataRevision) {
+      this.customerMeetingsCache.revision = this.dataRevision;
+      this.customerMeetingsCache.value = this.customerMeetingStore.customerMeetings
+        .slice()
+        .sort((a, b) => b.meetingDate.localeCompare(a.meetingDate));
+    }
+    return this.customerMeetingsCache.value;
   }
 
   customerMeeting(id: string): CustomerMeeting | undefined {
@@ -2819,7 +3453,30 @@ export class ActionosWorkspaceService {
   }
 
   customerMeetingsByCustomer(customerId: string): CustomerMeeting[] {
-    return this.customerMeetingRepo.listByCustomer(this.resolveCustomerId(customerId));
+    const ids = this.clientLookupIds(customerId);
+    if (!ids.length) {
+      return this.emptyMeetings;
+    }
+    const map = this.customerMeetingsByCustomerMap();
+    const byId = new Map<string, CustomerMeeting>();
+    ids.forEach(id => (map.get(id) ?? []).forEach(meeting => byId.set(meeting.id, meeting)));
+    return byId.size ? [...byId.values()] : this.emptyMeetings;
+  }
+
+  private customerMeetingsByCustomerMap(): Map<string, CustomerMeeting[]> {
+    if (this.customerMeetingsByCustomerCache.revision !== this.dataRevision) {
+      const byCustomerId = new Map<string, CustomerMeeting[]>();
+      for (const meeting of this.customerMeetings) {
+        for (const clientId of this.clientLookupIds(meeting.customerId)) {
+          const list = byCustomerId.get(clientId) ?? [];
+          list.push(meeting);
+          byCustomerId.set(clientId, list);
+        }
+      }
+      this.customerMeetingsByCustomerCache.revision = this.dataRevision;
+      this.customerMeetingsByCustomerCache.value = byCustomerId;
+    }
+    return this.customerMeetingsByCustomerCache.value;
   }
 
   /**
@@ -2880,6 +3537,9 @@ export class ActionosWorkspaceService {
       }).then((created) => {
         this.promoteMeetingId(localMeetingId, created.id.toString());
         return created;
+      }).catch((error) => {
+        this.abandonLocalMeeting(localMeetingId);
+        throw error;
       });
 
     this.runCustomerMutation(
@@ -2964,6 +3624,9 @@ export class ActionosWorkspaceService {
         }).then((created) => {
           this.promoteMeetingNoteId(resolvedMeetingId, noteId, created);
           return created;
+        }).catch((error) => {
+          this.abandonLocalMeetingNote(resolvedMeetingId, noteId);
+          throw error;
         })
       );
     }
@@ -3026,6 +3689,9 @@ export class ActionosWorkspaceService {
     const decisions = meeting.notes.filter((n) => n.type === 'decision');
     const blockers = meeting.notes.filter((n) => n.type === 'blocker');
     const otherNotes = meeting.notes.filter((n) => n.type === 'note');
+    // Action notes not yet promoted to a task — the pre-publish checklist flags these,
+    // so the recap must list them too (otherwise they vanish on publish).
+    const openActions = meeting.notes.filter((n) => n.type === 'action' && !n.convertedTaskId);
     const tasksFromMeeting = this.meetingTasksByMeeting(meeting.id);
 
     const t = (key: string, params?: Record<string, string | number>) => this.i18n.translate(key, params);
@@ -3072,6 +3738,15 @@ export class ActionosWorkspaceService {
         }
       }
     }
+    if (openActions.length) {
+      lines.push('');
+      lines.push(`${t('recap.followups')}:`);
+      for (const a of openActions) {
+        const owner = a.ownerId ? ` — ${this.employeeName(a.ownerId)}` : '';
+        const due = a.dueDate ? ` · ${t('recap.due')} ${a.dueDate}` : '';
+        lines.push(`• ${a.content}${owner}${due}`);
+      }
+    }
     if (blockers.length) {
       lines.push('');
       lines.push(`${t('recap.blockers')}:`);
@@ -3097,18 +3772,12 @@ export class ActionosWorkspaceService {
     }
     const recap = lines.join('\n');
 
+    // Publishing the recap ONLY saves the recap — it never changes the meeting's
+    // status. Status is derived from the meeting's tasks (see syncMeetingStatusFromTasks):
+    // a meeting is "Closed/Done" only once every task born from it is Done.
     this.customerMeetingRepo.update(resolvedMeetingId, { publishedRecap: recap });
-    if (this.canCloseMeeting(resolvedMeetingId)) {
-      this.customerMeetingRepo.setStatus(resolvedMeetingId, 'Closed');
-    } else {
-      const current = this.customerMeetingRepo.get(resolvedMeetingId);
-      if (current && current.status !== 'Tasks Created' && current.status !== 'Closed') {
-        this.customerMeetingRepo.setStatus(resolvedMeetingId, 'Tasks Created');
-      }
-    }
     this.recordActivity('meeting', resolvedMeetingId, 'Recap published', meeting.subject);
 
-    const status = this.canCloseMeeting(resolvedMeetingId) ? 'Closed' : 'Tasks Created';
     this.runMeetingMutation(resolvedMeetingId, (meetingIdNumeric) =>
       this.actionosApi.updateCustomerMeeting(meetingIdNumeric, {
         subject: null,
@@ -3119,7 +3788,7 @@ export class ActionosWorkspaceService {
         publishedRecap: recap,
         nextMeetingDateUtc: meeting.nextMeetingDate ? new Date(`${meeting.nextMeetingDate}T12:00:00.000Z`).toISOString() : null,
         nextMeetingNotes: meeting.nextMeetingNotes ?? null,
-        status,
+        status: null,
         participants: null
       })
     );
@@ -3133,18 +3802,63 @@ export class ActionosWorkspaceService {
   }
 
   Task(id: string): Task | undefined {
+    if (this.quickCaptureTaskDraft?.id === id) {
+      return this.quickCaptureTaskDraft;
+    }
     const resolvedTaskId = this.resolveTaskId(id);
     return this.allTasks.find(task => task.id === resolvedTaskId);
   }
 
   meetingTasksByCustomer(customerId: string): Task[] {
-    const resolvedCustomerId = this.resolveCustomerId(customerId);
-    return this.meetingTasks.filter(task => task.customerId === resolvedCustomerId);
+    const ids = this.clientLookupIds(customerId);
+    if (!ids.length) {
+      return this.emptyTasks;
+    }
+    const map = this.meetingTasksByCustomerMap();
+    const byId = new Map<string, Task>();
+    ids.forEach(id => (map.get(id) ?? []).forEach(task => byId.set(task.id, task)));
+    return byId.size ? [...byId.values()] : this.emptyTasks;
   }
 
   meetingTasksByMeeting(meetingId: string): Task[] {
     const resolvedMeetingId = this.resolveMeetingId(meetingId);
-    return this.meetingTasks.filter(task => task.sourceMeetingId === resolvedMeetingId);
+    return this.meetingTasksByMeetingMap().get(resolvedMeetingId) ?? this.emptyTasks;
+  }
+
+  private meetingTasksByCustomerMap(): Map<string, Task[]> {
+    if (this.meetingTasksByCustomerCache.revision !== this.dataRevision) {
+      const byCustomerId = new Map<string, Task[]>();
+      for (const task of this.meetingTasks) {
+        if (!task.customerId) {
+          continue;
+        }
+        for (const clientId of this.clientLookupIds(task.customerId)) {
+          const list = byCustomerId.get(clientId) ?? [];
+          list.push(task);
+          byCustomerId.set(clientId, list);
+        }
+      }
+      this.meetingTasksByCustomerCache.revision = this.dataRevision;
+      this.meetingTasksByCustomerCache.value = byCustomerId;
+    }
+    return this.meetingTasksByCustomerCache.value;
+  }
+
+  private meetingTasksByMeetingMap(): Map<string, Task[]> {
+    if (this.meetingTasksByMeetingCache.revision !== this.dataRevision) {
+      const byMeetingId = new Map<string, Task[]>();
+      for (const task of this.meetingTasks) {
+        if (!task.sourceMeetingId) {
+          continue;
+        }
+        const list = byMeetingId.get(task.sourceMeetingId) ?? [];
+        list.push(task);
+        byMeetingId.set(task.sourceMeetingId, list);
+      }
+      this.meetingTasksByMeetingCache.revision = this.dataRevision;
+      this.meetingTasksByMeetingCache.value = byMeetingId;
+    }
+    return this.meetingTasksByMeetingCache.value;
   }
 
   meetingTasksAssignedToMe(): Task[] {
@@ -3157,7 +3871,7 @@ export class ActionosWorkspaceService {
 
   /**
    * Convert a meeting note (or anonymous task input) into a meeting task.
-   * Validates the assignee is in the fritz/critilog active directory.
+   * Validates the assignee is in the active combined directory.
    * Fires the "task assigned" notification automatically.
    */
   createTaskFromMeeting(
@@ -3170,9 +3884,9 @@ export class ActionosWorkspaceService {
     if (!meeting) {
       return null;
     }
-    if (!this.employeeDirectory.isAssignable(input.assignedToEmployeeId)) {
+    if (!this.isAssignable(input.assignedToEmployeeId)) {
       // eslint-disable-next-line no-console
-      console.warn('[ActionOS] Refused to assign task to non-fritz/inactive employee:', input.assignedToEmployeeId);
+      console.warn('[ActionOS] Refused to assign task to inactive or unknown directory user:', input.assignedToEmployeeId);
       return null;
     }
 
@@ -3184,7 +3898,7 @@ export class ActionosWorkspaceService {
       source: 'meeting',
       title: input.title.trim(),
       description: input.description?.trim() ?? '',
-      board: this.customer(meeting.customerId)?.name ?? 'Customer meeting',
+      board: this.clientName(meeting.customerId) ?? 'Customer meeting',
       customerId: meeting.customerId,
       sourceMeetingId: resolvedMeetingId,
       openedByEmployeeId: this.currentEmployeeId,
@@ -3213,7 +3927,9 @@ export class ActionosWorkspaceService {
       this.cloneNoteAttachmentsToTask(resolvedMeetingId, resolvedSourceNoteId, task.id);
     }
 
-    if (meeting.status === 'Planned' || meeting.status === 'Draft Summary') {
+    // A newly created task is open, so the meeting now has open work → "Tasks Created"
+    // (this also reopens a meeting that had been Closed once all prior tasks were done).
+    if (meeting.status !== 'Tasks Created') {
       this.customerMeetingRepo.setStatus(meeting.id, 'Tasks Created');
     }
 
@@ -3234,6 +3950,9 @@ export class ActionosWorkspaceService {
           }).then((created) => {
             this.promoteTaskId(localTaskId, created.id.toString());
             return created;
+          }).catch((error) => {
+            this.abandonLocalTask(localTaskId);
+            throw error;
           })
         );
       } else {
@@ -3260,6 +3979,9 @@ export class ActionosWorkspaceService {
           }).then((created) => {
             this.promoteTaskId(localTaskId, created.id.toString());
             return created;
+          }).catch((error) => {
+            this.abandonLocalTask(localTaskId);
+            throw error;
           })
         );
       }
@@ -3300,16 +4022,36 @@ export class ActionosWorkspaceService {
     return tasks.every(t => t.status === 'Done' || t.status === 'Cancelled');
   }
 
-  private tryAutoCloseMeeting(meetingId: string): void {
+  /**
+   * Keeps a meeting's status in lock-step with the tasks born from it:
+   *   has tasks, all Done/Cancelled → Closed
+   *   has tasks, at least one open  → Tasks Created
+   *   no tasks                      → left as-is (Planned / Draft Summary)
+   * So a meeting is "done" ONLY when every one of its tasks is done, and reopening
+   * a task automatically reverts the meeting from Closed back to Tasks Created.
+   */
+  private syncMeetingStatusFromTasks(meetingId: string): void {
     const resolvedMeetingId = this.resolveMeetingId(meetingId);
     const meeting = this.customerMeetingRepo.get(resolvedMeetingId);
-    if (!meeting || meeting.status === 'Closed') {
+    if (!meeting) {
       return;
     }
-    if (meeting.publishedRecap && this.canCloseMeeting(resolvedMeetingId)) {
-      this.customerMeetingRepo.setStatus(resolvedMeetingId, 'Closed');
-      this.recordActivity('meeting', resolvedMeetingId, 'Meeting closed - all tasks done', meeting.subject);
+    const tasks = this.meetingTasksByMeeting(resolvedMeetingId);
+    if (!tasks.length) {
+      return;
     }
+    const allDone = tasks.every(t => t.status === 'Done' || t.status === 'Cancelled');
+    const desired: CustomerMeetingStatus = allDone ? 'Closed' : 'Tasks Created';
+    if (meeting.status === desired) {
+      return;
+    }
+    this.customerMeetingRepo.setStatus(resolvedMeetingId, desired);
+    this.recordActivity(
+      'meeting',
+      resolvedMeetingId,
+      allDone ? 'Meeting closed - all tasks done' : 'Meeting reopened - task still open',
+      meeting.subject
+    );
   }
 
   updateMeetingTask(id: string, changes: UpdateMeetingTaskInput, statusChangeReason?: string): Task | null {
@@ -3326,9 +4068,9 @@ export class ActionosWorkspaceService {
       next.customerId = this.resolveCustomerId(next.customerId).trim();
     }
 
-    if (next.assignedToEmployeeId && !this.employeeDirectory.isAssignable(next.assignedToEmployeeId)) {
+    if (next.assignedToEmployeeId && !this.isAssignable(next.assignedToEmployeeId)) {
       // eslint-disable-next-line no-console
-      console.warn('[ActionOS] Refused to reassign task to non-fritz/inactive employee:', next.assignedToEmployeeId);
+      console.warn('[ActionOS] Refused to reassign task to inactive or unknown directory user:', next.assignedToEmployeeId);
       delete next.assignedToEmployeeId;
     }
 
@@ -3366,6 +4108,9 @@ export class ActionosWorkspaceService {
 
     if (next.treatmentNotes !== undefined) {
       next.treatmentNotes = next.treatmentNotes.trim();
+    }
+    if (this.quickCaptureTaskDraft?.id === resolvedTaskId) {
+      return this.updateQuickCaptureTaskDraft(next);
     }
     const index = this.tasksState.findIndex(task => task.id === resolvedTaskId);
     if (index < 0) {
@@ -3413,10 +4158,83 @@ export class ActionosWorkspaceService {
     }
 
     if (next.status && next.status !== previousStatus && updated.sourceMeetingId) {
-      this.tryAutoCloseMeeting(updated.sourceMeetingId);
+      this.syncMeetingStatusFromTasks(updated.sourceMeetingId);
     }
 
     return updated;
+  }
+
+  private updateQuickCaptureTaskDraft(changes: UpdateMeetingTaskInput): Task | null {
+    const draft = this.quickCaptureTaskDraft;
+    if (!draft) {
+      return null;
+    }
+
+    const updated = this.applyQuickCaptureDraftChanges(draft, changes);
+    if (changes.customerId !== undefined && updated.customerId) {
+      this.quickCaptureTaskDraft = null;
+      const saved = this.addTask({
+        title: updated.title,
+        description: updated.description,
+        board: this.clientName(updated.customerId) ?? updated.board,
+        source: updated.source,
+        customerId: updated.customerId,
+        sourceMeetingId: updated.sourceMeetingId || undefined,
+        openedByEmployeeId: updated.openedByEmployeeId,
+        assignedToEmployeeId: updated.assignedToEmployeeId,
+        priority: updated.priority,
+        status: updated.status,
+        dueDate: updated.dueDate,
+        assigneeId: updated.assigneeIds[0] || this.currentUserId,
+        checklist: updated.checklist,
+        watcherIds: updated.watcherIds,
+        watcherEmployeeIds: updated.watcherEmployeeIds,
+        waitingReason: updated.waitingReason,
+        treatmentNotes: updated.treatmentNotes,
+        completedAt: updated.completedAt
+      });
+      this.drawerOpen = true;
+      return saved;
+    }
+
+    this.quickCaptureTaskDraft = updated;
+    return updated;
+  }
+
+  private applyQuickCaptureDraftChanges(task: Task, changes: UpdateMeetingTaskInput): Task {
+    const assignedToEmployeeId = changes.assignedToEmployeeId !== undefined
+      ? changes.assignedToEmployeeId
+      : task.assignedToEmployeeId;
+    const assigneeMemberId = this.memberIdForEmployee(assignedToEmployeeId) || task.assigneeIds[0] || this.currentUserId;
+    const customerId = changes.customerId !== undefined ? changes.customerId : task.customerId;
+    const customerName = customerId ? this.clientName(customerId) : undefined;
+    const hasWaitingReason = Object.prototype.hasOwnProperty.call(changes, 'waitingReason');
+    const hasTreatmentNotes = Object.prototype.hasOwnProperty.call(changes, 'treatmentNotes');
+    const hasCompletedAt = Object.prototype.hasOwnProperty.call(changes, 'completedAt');
+    const hasProgressionNotes = Object.prototype.hasOwnProperty.call(changes, 'progressionNotes');
+    const hasChecklist = Object.prototype.hasOwnProperty.call(changes, 'checklist');
+
+    return {
+      ...task,
+      title: changes.title !== undefined ? (changes.title.trim() || task.title) : task.title,
+      description: changes.description !== undefined ? changes.description : task.description,
+      board: customerName ?? task.board,
+      customerId,
+      status: changes.status ?? task.status,
+      priority: changes.priority ?? task.priority,
+      dueDate: changes.dueDate !== undefined ? changes.dueDate : task.dueDate,
+      assignedToEmployeeId,
+      assigneeIds: changes.assignedToEmployeeId !== undefined ? [assigneeMemberId] : task.assigneeIds,
+      watcherEmployeeIds: Array.from(
+        new Set([task.openedByEmployeeId, assignedToEmployeeId, ...task.watcherEmployeeIds].filter((id): id is string => !!id))
+      ),
+      waitingReason: hasWaitingReason ? changes.waitingReason : task.waitingReason,
+      treatmentNotes: hasTreatmentNotes ? changes.treatmentNotes : task.treatmentNotes,
+      completedAt: hasCompletedAt ? changes.completedAt : task.completedAt,
+      progressionNotes: hasProgressionNotes ? changes.progressionNotes : task.progressionNotes,
+      checklist: hasChecklist ? changes.checklist ?? [] : task.checklist,
+      updatedAt: new Date().toISOString()
+    };
   }
 
   meetingTaskChecklistProgress(task: Task): number {
@@ -3462,7 +4280,7 @@ export class ActionosWorkspaceService {
   }
 
   toggleMeetingTaskWatcher(task: Task, employeeId: string, checked: boolean): void {
-    if (!this.employeeDirectory.isAssignable(employeeId)) {
+    if (!this.isAssignable(employeeId)) {
       return;
     }
     const watcherEmployeeIds = checked
@@ -3880,6 +4698,10 @@ export class ActionosWorkspaceService {
    * Used by the home calendar and the meetings page.
    */
   get calendarEvents(): CalendarEvent[] {
+    if (this.calendarEventsCache.revision === this.dataRevision) {
+      return this.calendarEventsCache.value;
+    }
+
     const internal: CalendarEvent = {
       id: `internal-${this.meetingState.id}`,
       title: this.meetingState.title,
@@ -3897,7 +4719,7 @@ export class ActionosWorkspaceService {
       startsAt: meeting.meetingDate,
       durationMinutes: 60,
       kind: 'customer',
-      customerName: this.customer(meeting.customerId)?.name,
+      customerName: this.clientName(meeting.customerId),
       attendeeCount:
         meeting.internalParticipantEmployeeIds.length + meeting.customerParticipants.length + 1,
       sourceId: meeting.id
@@ -3912,7 +4734,7 @@ export class ActionosWorkspaceService {
         startsAt: meeting.nextMeetingDate as string,
         durationMinutes: 60,
         kind: 'customer',
-        customerName: this.customer(meeting.customerId)?.name,
+        customerName: this.clientName(meeting.customerId),
         attendeeCount: meeting.internalParticipantEmployeeIds.length + 1,
         sourceId: meeting.id
       }));
@@ -3930,15 +4752,25 @@ export class ActionosWorkspaceService {
         sourceId: t.id
       }));
 
-    return [internal, ...customers, ...followUps, ...tasks].sort((left, right) =>
+    const value = [internal, ...customers, ...followUps, ...tasks].sort((left, right) =>
       left.startsAt.localeCompare(right.startsAt)
     );
+    this.calendarEventsCache.revision = this.dataRevision;
+    this.calendarEventsCache.value = value;
+    return value;
   }
 
   /** Same shape as calendarEvents but scoped to the current user's meetings and tasks. */
   get myCalendarEvents(): CalendarEvent[] {
     const empId = this.currentEmployeeId;
     const uid   = this.currentUserId;
+    if (
+      this.myCalendarEventsCache.revision === this.dataRevision &&
+      this.myCalendarEventsCache.currentEmployeeId === empId &&
+      this.myCalendarEventsCache.currentUserId === uid
+    ) {
+      return this.myCalendarEventsCache.value;
+    }
 
     // Only surface the internal meeting on "My Work" when the current user is
     // actually one of its attendees (attendeeIds hold member ids, e.g. "u1").
@@ -3967,7 +4799,7 @@ export class ActionosWorkspaceService {
       startsAt: meeting.meetingDate,
       durationMinutes: 60,
       kind: 'customer' as const,
-      customerName: this.customer(meeting.customerId)?.name,
+      customerName: this.clientName(meeting.customerId),
       attendeeCount:
         meeting.internalParticipantEmployeeIds.length + meeting.customerParticipants.length + 1,
       sourceId: meeting.id
@@ -3981,7 +4813,7 @@ export class ActionosWorkspaceService {
         startsAt: meeting.nextMeetingDate as string,
         durationMinutes: 60,
         kind: 'customer' as const,
-        customerName: this.customer(meeting.customerId)?.name,
+        customerName: this.clientName(meeting.customerId),
         attendeeCount: meeting.internalParticipantEmployeeIds.length + 1,
         sourceId: meeting.id
       }));
@@ -4000,9 +4832,14 @@ export class ActionosWorkspaceService {
         sourceId: t.id
       }));
 
-    return [...internal, ...customers, ...followUps, ...tasks].sort((a, b) =>
+    const value = [...internal, ...customers, ...followUps, ...tasks].sort((a, b) =>
       a.startsAt.localeCompare(b.startsAt)
     );
+    this.myCalendarEventsCache.revision = this.dataRevision;
+    this.myCalendarEventsCache.currentEmployeeId = empId;
+    this.myCalendarEventsCache.currentUserId = uid;
+    this.myCalendarEventsCache.value = value;
+    return value;
   }
 
   // ── Filtered calendar event builders ────────────────────────────────────────
@@ -4018,7 +4855,7 @@ export class ActionosWorkspaceService {
       startsAt: m.meetingDate,
       durationMinutes: 60,
       kind: 'customer' as const,
-      customerName: this.customer(m.customerId)?.name,
+      customerName: this.clientName(m.customerId),
       attendeeCount: m.internalParticipantEmployeeIds.length + m.customerParticipants.length + 1,
       sourceId: m.id
     }));
@@ -4030,7 +4867,7 @@ export class ActionosWorkspaceService {
         startsAt: m.nextMeetingDate as string,
         durationMinutes: 60,
         kind: 'customer' as const,
-        customerName: this.customer(m.customerId)?.name,
+        customerName: this.clientName(m.customerId),
         attendeeCount: m.internalParticipantEmployeeIds.length + 1,
         sourceId: m.id
       }));

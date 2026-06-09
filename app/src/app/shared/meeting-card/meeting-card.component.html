@@ -1,39 +1,65 @@
-<article class="meeting-card" (click)="onOpen()">
+<article class="meeting-card" [ngClass]="spineClass" (click)="onOpen()">
   <div class="card-top">
-    <span
-      *ngIf="workspace.shouldShowMeetingStatus(meeting.status)"
-      class="status-chip"
-      [ngClass]="workspace.statusClass(meeting.status)"
-    >
-      {{ ('customerMeeting.statusValues.' + meeting.status) | t }}
+    <span class="card-eyebrow" [title]="customerName">{{ customerName }}</span>
+    <span class="card-top-meta">
+      <span
+        *ngIf="workspace.shouldShowMeetingStatus(meeting.status)"
+        class="status-chip"
+        [ngClass]="workspace.statusClass(meeting.status)"
+      >
+        {{ ('customerMeeting.statusValues.' + meeting.status) | t }}
+      </span>
+      <span class="card-date">{{ meeting.meetingDate | appDate }}</span>
     </span>
-    <span *ngIf="isLed" class="led-badge">{{ 'meetingsOverview.ledBadge' | t }}</span>
-    <span class="card-date">{{ meeting.meetingDate | appDate }}</span>
   </div>
 
   <div class="card-body">
-    <strong class="card-customer">{{ customerName }}</strong>
-    <p class="card-subject">{{ meeting.subject }}</p>
-    <p class="card-summary" *ngIf="summaryText; else noSummaryTpl">{{ summaryText }}</p>
-    <ng-template #noSummaryTpl>
-      <p class="card-summary card-summary-empty">{{ 'meetingsOverview.noSummary' | t }}</p>
-    </ng-template>
+    <strong class="card-title" [title]="meeting.subject">{{ meeting.subject }}</strong>
+
+    <!-- Lead line adapts to the meeting's lifecycle stage. -->
+    <p class="card-lead lead-goal" *ngIf="mode === 'upcoming' && goalText" [title]="goalText">
+      {{ goalText }}
+    </p>
+    <p class="card-lead lead-wrapup" *ngIf="mode === 'wrapup'">
+      <app-icon name="alert-triangle" [size]="13"></app-icon>
+      <span>{{ 'meetingsOverview.needsWrapUp' | t }}</span>
+    </p>
+    <ng-container *ngIf="mode === 'done'">
+      <p class="card-summary" *ngIf="summaryText; else noSummaryTpl">{{ summaryText }}</p>
+      <ng-template #noSummaryTpl>
+        <p class="card-summary card-summary-empty">{{ 'meetingsOverview.noSummary' | t }}</p>
+      </ng-template>
+    </ng-container>
+
+    <!-- Who you met / will meet (customer side). -->
+    <p class="card-attendees" *ngIf="customerAttendees" [title]="customerAttendees">
+      <app-icon name="users" [size]="13"></app-icon>
+      <span class="attendee-names">{{ customerAttendees }}</span>
+    </p>
   </div>
 
-  <!-- Outcome counts: open tasks · unresolved follow-ups · blockers -->
-  <div class="card-metrics">
-    <span class="metric" [class.metric-zero]="openTaskCount === 0"
-      [title]="'meetingsOverview.openTasksMetric' | t">
-      <app-icon name="check-square" [size]="13"></app-icon>{{ openTaskCount }}
-    </span>
-    <span class="metric" [class.metric-zero]="unresolvedActionCount === 0"
-      [title]="'meetingsOverview.openActionsMetric' | t">
-      <app-icon name="zap" [size]="13"></app-icon>{{ unresolvedActionCount }}
-    </span>
-    <span class="metric metric-danger" [class.metric-zero]="blockerCount === 0"
-      [title]="'meetingsOverview.blockersMetric' | t">
-      <app-icon name="alert-triangle" [size]="13"></app-icon>{{ blockerCount }}
-    </span>
+  <!-- Outcome counts: open tasks · unresolved follow-ups · blockers. Hidden for
+       upcoming meetings (nothing has happened yet); only non-zero metrics render. -->
+  <div class="card-metrics" *ngIf="mode !== 'upcoming'">
+    <ng-container *ngIf="hasSignals; else allClear">
+      <span class="metric metric-tasks" *ngIf="openTaskCount"
+        [title]="'meetingsOverview.openTasksMetric' | t">
+        <app-icon name="check-square" [size]="13"></app-icon>{{ openTaskCount }}
+      </span>
+      <span class="metric metric-actions" *ngIf="unresolvedActionCount"
+        [title]="'meetingsOverview.openActionsMetric' | t">
+        <app-icon name="zap" [size]="13"></app-icon>{{ unresolvedActionCount }}
+      </span>
+      <span class="metric metric-danger" *ngIf="blockerCount"
+        [title]="'meetingsOverview.blockersMetric' | t">
+        <app-icon name="alert-triangle" [size]="13"></app-icon>{{ blockerCount }}
+      </span>
+    </ng-container>
+    <ng-template #allClear>
+      <span class="metric metric-clear" [title]="'meetingsOverview.openTasksMetric' | t">
+        <app-icon name="check-square" [size]="13"></app-icon>
+      </span>
+    </ng-template>
   </div>
 
   <div class="card-footer">
@@ -41,9 +67,9 @@
       <span class="avatar">{{ leaderInitials }}</span>
       <span *ngIf="participantCount" class="people-count">+{{ participantCount }}</span>
     </div>
-    <button type="button" class="recap-btn" (click)="openRecap($event)">
-      <app-icon name="file-text" [size]="13"></app-icon>
-      <span>{{ 'meetingsOverview.recap' | t }}</span>
+    <button type="button" class="recap-btn" (click)="onAction($event)" [title]="actionLabelKey | t">
+      <app-icon [name]="actionIcon" [size]="14"></app-icon>
+      <span class="recap-label">{{ actionLabelKey | t }}</span>
     </button>
   </div>
 </article>
@@ -74,20 +100,20 @@
     <section class="recap-section" *ngIf="notesOfType('decision').length">
       <h4>{{ 'recap.decisions' | t }}</h4>
       <ul>
-        <li *ngFor="let d of notesOfType('decision')">{{ d.content }}</li>
+        <li *ngFor="let d of notesOfType('decision'); trackBy: trackNote">{{ d.content }}</li>
       </ul>
     </section>
 
     <section class="recap-section" *ngIf="blockerCount">
       <h4>{{ 'recap.blockers' | t }} <span class="recap-count danger">{{ blockerCount }}</span></h4>
       <ul>
-        <li *ngFor="let b of notesOfType('blocker')" class="recap-blocker">{{ b.content }}</li>
+        <li *ngFor="let b of notesOfType('blocker'); trackBy: trackNote" class="recap-blocker">{{ b.content }}</li>
       </ul>
     </section>
 
     <section class="recap-section" *ngIf="meetingActionItems().length">
       <h4>{{ 'meetingsOverview.followups' | t }} <span class="recap-count">{{ meetingActionItems().length }}</span></h4>
-      <div *ngFor="let a of meetingActionItems()" class="recap-action">
+      <div *ngFor="let a of meetingActionItems(); trackBy: trackNote" class="recap-action">
         <span>{{ a.content }}</span>
         <button type="button" class="convert-btn ghost-action" (click)="convertAction(a.id, $event)">
           {{ 'meetingsOverview.convertBtn' | t }}
@@ -98,7 +124,7 @@
     <section class="recap-section" *ngIf="tasksFromMeeting().length">
       <h4>{{ 'recap.tasksCreated' | t }} <span class="recap-count">{{ tasksFromMeeting().length }}</span></h4>
       <ul>
-        <li *ngFor="let t of tasksFromMeeting()" [class.recap-done]="isTaskDone(t)">{{ t.title }}</li>
+        <li *ngFor="let t of tasksFromMeeting(); trackBy: trackTask" [class.recap-done]="isTaskDone(t)">{{ t.title }}</li>
       </ul>
     </section>
   </div>

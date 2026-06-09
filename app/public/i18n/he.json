@@ -123,8 +123,8 @@
     "openMeetingTasks": "משימות פתוחות",
     "noMeetingsInLane": "אין כלום כאן.",
     "backToList": "כל הפגישות",
-    "needsAttention": "דורש את תשומת לבך",
-    "needsAttentionHint": "מעקבים להמיר או פגישות לסגירה",
+    "needsAttention": "משימות בעבודה",
+    "needsAttentionHint": "פגישות עם משימות פתוחות",
     "ledBadge": "הובל",
     "searchPlaceholder": "חיפוש פגישות...",
     "filterAll": "הכל",
@@ -140,7 +140,12 @@
     "openTasksMetric": "משימות פתוחות",
     "openActionsMetric": "מעקבים פתוחים",
     "blockersMetric": "חסמים",
-    "noSummary": "אין סיכום עדיין."
+    "noSummary": "אין סיכום עדיין.",
+    "prep": "הכנה",
+    "wrapUp": "סכמו",
+    "needsWrapUp": "דרוש סיכום",
+    "tasksCreatedLane": "משימות בעבודה",
+    "completedLane": "הושלמו"
   },
   "home": {
     "meetingsLead": "מה הבא",
@@ -192,6 +197,7 @@
     "teamLoadEyebrow": "עומס צוות",
     "pipelineEyebrow": "צבר לקוחות",
     "ownersAndBlockers": "מי על מה",
+    "teamSearchPlaceholder": "חיפוש אנשי צוות…",
     "metWithMe": "שנפגשו איתי",
     "openShort": "פתוחות",
     "blockedShort": "תקועות",
@@ -438,6 +444,7 @@
     },
     "groupBy": {
       "label": "קבץ לפי",
+      "none": "הכל",
       "due": "תאריך יעד",
       "status": "סטטוס",
       "priority": "עדיפות"
@@ -654,6 +661,7 @@
     "recentDecisions": "החלטות אחרונות",
     "saveAndContinue": "שמור טיוטה",
     "saveAndClose": "שמור וסגור",
+    "finish": "סיום",
     "completePlanToStart": "השלם את חלק התכנון כדי לפתוח אזור זה.",
     "actionNeedsOwnerDue": "פעולות דורשות גם אחראי וגם תאריך יעד.",
     "statusCriteria": {
@@ -726,6 +734,7 @@
   },
   "meetingTask": {
     "title": "משימה",
+    "details": "פרטים",
     "taskTitle": "מה צריך לקרות",
     "taskTitlePlaceholder": "פעולה אחת ברורה...",
     "description": "פרטים",
@@ -832,6 +841,7 @@
     "decisions": "החלטות",
     "tasksCreated": "משימות שנוצרו",
     "due": "יעד",
+    "followups": "מעקבים פתוחים",
     "blockers": "חסמים",
     "notes": "הערות",
     "nextMeeting": "פגישה הבאה",
