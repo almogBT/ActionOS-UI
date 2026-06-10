@@ -3,7 +3,7 @@ import { Component, Inject, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActionosI18nService } from './core/i18n/actionos-i18n.service';
 import { Customer, NavItem, Task, ViewId } from './core/models/actionos.models';
-import { ACTIONOS_NAV_ITEMS } from './core/config/actionos-ui.config';
+import { ACTIONOS_FEATURES, DEFAULT_VIEW, VISIBLE_NAV_ITEMS, isViewEnabled } from './core/config/actionos-ui.config';
 import { TranslatePipe } from './core/i18n/translate.pipe';
 import { IconComponent, IconName } from './shared/icons/icon.component';
 import { SearchableSelectComponent, SelectOption } from './shared/searchable-select/searchable-select.component';
@@ -50,9 +50,10 @@ export class AppComponent implements OnInit {
   readonly i18n = inject(ActionosI18nService);
   readonly theme = inject(ThemeService);
 
-  readonly navItems: NavItem[] = ACTIONOS_NAV_ITEMS;
-  // My Work is the landing view — the former Home page was merged into it.
-  readonly activeView = signal<ViewId>('my-work');
+  readonly navItems: NavItem[] = VISIBLE_NAV_ITEMS;
+  readonly features = ACTIONOS_FEATURES;
+  // Landing view is the first feature-enabled nav item (My Work when enabled).
+  readonly activeView = signal<ViewId>(DEFAULT_VIEW);
   readonly meetingNewTick = signal(0);
 
   // ── Bottom action bar: quick capture ──
@@ -76,7 +77,9 @@ export class AppComponent implements OnInit {
   }
 
   setView(view: ViewId): void {
-    this.activeView.set(view);
+    // Never strand the user on a feature-hidden view: redirect to the landing view.
+    // This one chokepoint covers every child `viewChange` emit too.
+    this.activeView.set(isViewEnabled(view) ? view : DEFAULT_VIEW);
   }
 
   /** Home list → open a customer's 360 detail. */
@@ -109,8 +112,9 @@ export class AppComponent implements OnInit {
   }
 
   onCaptured(): void {
-    // Header capture returns to the work view after saving.
-    this.activeView.set('my-work');
+    // Header capture returns to the work view after saving (or the landing
+    // view when My Work is hidden — setView guards the redirect).
+    this.setView('my-work');
   }
 
   // ── Bottom bar: capture helpers ──

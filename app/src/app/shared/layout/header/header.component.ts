@@ -6,7 +6,7 @@ import {
 import { ActionosI18nService, ActionosLanguage } from '../../../core/i18n/actionos-i18n.service';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { MailNotificationPrefs, NavItem, QuickCaptureType, Task, ViewId } from '../../../core/models/actionos.models';
-import { ACTIONOS_NAV_ITEMS } from '../../../core/config/actionos-ui.config';
+import { ACTIONOS_FEATURES, VISIBLE_NAV_ITEMS } from '../../../core/config/actionos-ui.config';
 import { ActionosWorkspaceService } from '../../../core/services/actionos-workspace.service';
 import { ThemeService } from '../../../core/services/theme.service';
 import { IconComponent, IconName } from '../../icons/icon.component';
@@ -30,7 +30,9 @@ export class HeaderComponent {
   private readonly host = inject(ElementRef<HTMLElement>);
 
   // Primary navigation now lives in the header (the dropdown sidebar was removed).
-  readonly navItems: NavItem[] = ACTIONOS_NAV_ITEMS;
+  // Only feature-enabled items are shown; hidden ones stay defined in config.
+  readonly navItems: NavItem[] = VISIBLE_NAV_ITEMS;
+  readonly features = ACTIONOS_FEATURES;
 
   readonly quickCaptureTypes: QuickCaptureType[] = ['task', 'action', 'decision', 'blocker', 'note'];
   readonly mailNotifKeys: (keyof MailNotificationPrefs)[] = ['newTasks', 'overdueTasks', 'dueTodayTasks', 'meetingSummaries'];
@@ -41,6 +43,8 @@ export class HeaderComponent {
   readonly userMenuOpen = signal(false);
   readonly settingsOpen = signal(false);
   readonly typeMenuOpen = signal(false);
+  readonly testMailSending = signal(false);
+  readonly testMailStatus = signal<{ kind: 'success' | 'error'; message: string } | null>(null);
 
   readonly currentMember = computed(() =>
     this.workspace.members.find(member => member.id === this.workspace.currentUserId)
@@ -206,6 +210,42 @@ export class HeaderComponent {
     this.navigate.emit(view);
     this.userMenuOpen.set(false);
     this.settingsOpen.set(false);
+  }
+
+  async sendTestMail(): Promise<void> {
+    if (this.testMailSending()) {
+      return;
+    }
+
+    this.testMailSending.set(true);
+    this.testMailStatus.set(null);
+    try {
+      const response = await this.workspace.sendTestEmail();
+      this.testMailStatus.set({
+        kind: 'success',
+        message: this.i18n.translate('settings.mailTestSuccess', { email: response.recipientEmail })
+      });
+    } catch (error) {
+      this.testMailStatus.set({
+        kind: 'error',
+        message: this.readErrorMessage(error) ?? this.i18n.translate('settings.mailTestFailed')
+      });
+    } finally {
+      this.testMailSending.set(false);
+    }
+  }
+
+  private readErrorMessage(error: unknown): string | null {
+    if (!error || typeof error !== 'object') {
+      return null;
+    }
+
+    const maybeHttpError = error as { error?: { message?: unknown }; message?: unknown };
+    if (typeof maybeHttpError.error?.message === 'string') {
+      return maybeHttpError.error.message;
+    }
+
+    return typeof maybeHttpError.message === 'string' ? maybeHttpError.message : null;
   }
 
   @HostListener('document:click', ['$event.target'])

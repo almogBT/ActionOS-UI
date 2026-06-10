@@ -8,23 +8,6 @@
       <p class="screen-subtitle">{{ 'meetingsOverview.subtitle' | t }}</p>
     </div>
     <div class="topbar-actions">
-      <ng-container *ngIf="showPrepPicker; else planBtn">
-        <app-searchable-select
-          class="filter-select"
-          [(ngModel)]="prepPickerCustomerId"
-          (ngModelChange)="onPrepCustomerSelected($event)"
-          [options]="prepPickerOptions"
-          [placeholder]="'meetingsOverview.selectCustomer' | t"
-        ></app-searchable-select>
-        <button type="button" class="ghost-action" (click)="showPrepPicker = false; prepPickerCustomerId = ''">
-          {{ 'common.cancel' | t }}
-        </button>
-      </ng-container>
-      <ng-template #planBtn>
-        <button type="button" class="ghost-action" (click)="showPrepPicker = true">
-          {{ 'meetingsOverview.planMeeting' | t }}
-        </button>
-      </ng-template>
       <button type="button" class="primary-action" (click)="newMeeting()">
         + {{ 'meetingsOverview.newMeeting' | t }}
       </button>
@@ -52,7 +35,7 @@
   </app-calendar-stats>
 
   <!-- ── Needs-your-attention carousel ───────────────────────────────────── -->
-  <section *ngIf="attentionMeetings.length" class="attention-rail">
+  <section *ngIf="features.meetingsAttentionRail && attentionMeetings.length" class="attention-rail">
     <div class="rail-header">
       <app-icon name="alert-triangle" [size]="15"></app-icon>
       <span class="rail-title">{{ 'meetingsOverview.needsAttention' | t }}</span>

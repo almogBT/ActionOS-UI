@@ -11,7 +11,9 @@
   inset-inline-end: 16px;
   z-index: 15;
   display: grid;
-  grid-template-columns: minmax(0, auto) 1fr auto;
+  /* Equal flexible side columns so the centre nav (auto-sized) is truly
+     centred in the bar regardless of how wide the title / right icons are. */
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 16px;
   height: 60px;
@@ -25,6 +27,7 @@
 }
 
 .header-left {
+  grid-column: 1;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -33,6 +36,9 @@
 
 /* ── Primary navigation (in-header tabs) ── */
 .header-nav {
+  /* Pinned to the centre column so it stays centred even when the left title
+     is hidden on small screens (the empty 1fr side tracks keep it balanced). */
+  grid-column: 2;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -219,8 +225,10 @@
 }
 
 .header-right {
+  grid-column: 3;
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
 }
 
@@ -469,11 +477,11 @@
 .popover-row.danger { color: var(--danger); }
 .popover-row.danger:hover { background: var(--danger-soft); }
 
-/* Tablet: drop the left title block so the nav tabs get the room. */
+/* Tablet: drop the left title block so the nav tabs get the room. The grid
+   keeps its 1fr / auto / 1fr tracks, so the (explicitly column-2) nav stays
+   centred — the now-empty left track balances the right icons. */
 @media (max-width: 1024px) {
-  .app-header { grid-template-columns: 1fr auto; }
   .header-left { display: none; }
-  .header-nav { justify-content: flex-start; }
 }
 
 @media (max-width: 768px) {
@@ -705,4 +713,50 @@
   border-top: 0;
   border-inline-start: 0;
   transform: rotate(45deg) translateY(-1px);
+}
+
+.mail-test-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 32px;
+  margin-top: 6px;
+  padding: 7px 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-sunken);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.mail-test-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.mail-test-btn:disabled {
+  cursor: default;
+  opacity: 0.62;
+}
+
+.mail-test-status {
+  margin: 2px 0 0;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--text-tertiary);
+}
+
+.mail-test-status.success {
+  color: var(--success);
+}
+
+.mail-test-status.error {
+  color: var(--danger);
 }

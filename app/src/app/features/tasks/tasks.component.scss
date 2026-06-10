@@ -19,6 +19,14 @@
   max-width: 60ch;
 }
 
+/* Right-aligned header actions (matches the Meetings page header). */
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 /* ── Stat tiles ────────────────────────────────────────────────────────── */
 .tasks-metrics {
   display: grid;

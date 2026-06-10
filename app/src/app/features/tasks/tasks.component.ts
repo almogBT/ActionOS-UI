@@ -5,6 +5,7 @@ import { ActionosI18nService } from '../../core/i18n/actionos-i18n.service';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { CalendarEvent, Task, ViewId } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
+import { ACTIONOS_FEATURES } from '../../core/config/actionos-ui.config';
 import { CalendarStatsComponent } from '../../shared/calendar-stats/calendar-stats.component';
 import { StatTileComponent } from '../../shared/stat-tile/stat-tile.component';
 import { GroupMode, TaskTableComponent } from '../../shared/task-table/task-table.component';
@@ -38,6 +39,7 @@ export class TasksComponent {
 
   readonly workspace = inject(ActionosWorkspaceService);
   readonly i18n      = inject(ActionosI18nService);
+  readonly features  = ACTIONOS_FEATURES;
 
   audience: TaskAudience = 'all';
   origin: TaskOrigin     = 'all';
@@ -296,6 +298,9 @@ export class TasksComponent {
   }
 
   openView(view: ViewId): void { this.viewChange.emit(view); }
+
+  /** Open the task drawer on a fresh draft — matches the Meetings page "New meeting" button. */
+  newTask(): void { this.workspace.openNewTaskDraft(); }
 
   trackAudience(_index: number, option: { id: TaskAudience }): TaskAudience { return option.id; }
   trackOrigin(_index: number, option: { id: TaskOrigin }): TaskOrigin { return option.id; }

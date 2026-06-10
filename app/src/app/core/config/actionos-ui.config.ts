@@ -1,4 +1,31 @@
-import { BoardTemplate, NavItem } from '../models/actionos.models';
+import { BoardTemplate, NavItem, ViewId } from '../models/actionos.models';
+
+/**
+ * Feature visibility switches — the single source of truth for hiding a feature
+ * WITHOUT deleting it. Flip a flag to `false` to hide the feature everywhere; flip
+ * it back to `true` to fully restore it. The components, views and data paths stay
+ * intact, so there is no regression risk and nothing to re-implement.
+ *
+ * Gate UI off these flags (via `VISIBLE_NAV_ITEMS` / `isViewEnabled()` / a template
+ * `*ngIf`) rather than commenting code out.
+ */
+export const ACTIONOS_FEATURES = {
+  /** "My Work" landing page and its nav tab. */
+  myWork: false,
+  /** "Boards" — the client board page — and its nav tab. */
+  boards: false,
+  /** Bottom quick-action bar (Plan meeting · Quick capture · New meeting). */
+  quickActionBar: false,
+  /** "Needs your attention" carousel on the Meetings page. */
+  meetingsAttentionRail: false,
+  /** Header theme (light/dark) toggle button. */
+  headerThemeButton: false,
+  /** Header notifications (bell) button + popover. */
+  headerNotifications: false,
+  /** Header user chip (avatar + name + menu). The Settings gear stays, and the
+   *  signed-in user is visible in the unified system, so this is redundant here. */
+  headerUserMenu: false
+} as const;
 
 export const ACTIONOS_NAV_ITEMS: NavItem[] = [
   // My Work is the landing view (the former Home page was merged into it).
@@ -7,6 +34,24 @@ export const ACTIONOS_NAV_ITEMS: NavItem[] = [
   { id: 'tasks', label: 'Tasks', shortcut: 'K', section: 'main' },
   { id: 'boards', label: 'Boards', shortcut: 'B', section: 'work' }
 ];
+
+/** Maps a view to the feature flag that governs it (views absent here always show). */
+const NAV_FEATURE_GATE: Partial<Record<ViewId, keyof typeof ACTIONOS_FEATURES>> = {
+  'my-work': 'myWork',
+  boards: 'boards'
+};
+
+/** True when a view is currently allowed to be shown (its flag is on, or ungated). */
+export function isViewEnabled(view: ViewId): boolean {
+  const gate = NAV_FEATURE_GATE[view];
+  return gate ? ACTIONOS_FEATURES[gate] : true;
+}
+
+/** Nav items the current feature flags allow — what the header should render. */
+export const VISIBLE_NAV_ITEMS: NavItem[] = ACTIONOS_NAV_ITEMS.filter(item => isViewEnabled(item.id));
+
+/** Landing / fallback view: the first visible primary nav item. */
+export const DEFAULT_VIEW: ViewId = VISIBLE_NAV_ITEMS[0]?.id ?? 'meetings';
 
 export const ACTIONOS_BOARD_TEMPLATES: BoardTemplate[] = [
   {

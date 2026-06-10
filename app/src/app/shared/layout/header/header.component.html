@@ -32,6 +32,7 @@
   <!-- Right: theme · notifications · settings · user -->
   <div class="header-right">
     <button
+      *ngIf="features.headerThemeButton"
       type="button"
       class="icon-btn"
       (click)="cycleTheme()"
@@ -42,7 +43,7 @@
     </button>
 
     <!-- Notifications -->
-    <div class="popover-host">
+    <div class="popover-host" *ngIf="features.headerNotifications">
       <button
         type="button"
         class="icon-btn"
@@ -154,12 +155,29 @@
               </button>
             </li>
           </ul>
+          <button
+            type="button"
+            class="mail-test-btn"
+            (click)="sendTestMail()"
+            [disabled]="testMailSending()"
+          >
+            <app-icon name="zap" [size]="14"></app-icon>
+            <span>{{ (testMailSending() ? 'settings.mailTestSending' : 'settings.mailTestButton') | t }}</span>
+          </button>
+          <p
+            class="mail-test-status"
+            *ngIf="testMailStatus() as status"
+            [class.success]="status.kind === 'success'"
+            [class.error]="status.kind === 'error'"
+          >
+            {{ status.message }}
+          </p>
         </div>
       </div>
     </div>
 
     <!-- User menu -->
-    <div class="popover-host">
+    <div class="popover-host" *ngIf="features.headerUserMenu">
       <button
         type="button"
         class="user-chip"
@@ -183,7 +201,7 @@
           </div>
         </div>
         <div class="popover-divider"></div>
-        <button class="popover-row" (click)="go('my-work')">
+        <button class="popover-row" *ngIf="features.myWork" (click)="go('my-work')">
           <app-icon name="check-square" [size]="16"></app-icon>
           <span>My Work</span>
         </button>

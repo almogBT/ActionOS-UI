@@ -5,6 +5,7 @@ import { ActionosI18nService } from '../../core/i18n/actionos-i18n.service';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { InboxActionId, InboxCategory, InboxFeedItem, Task, ViewId } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
+import { ACTIONOS_FEATURES } from '../../core/config/actionos-ui.config';
 
 type InboxFilter = 'all' | InboxCategory;
 
@@ -57,6 +58,7 @@ export class InboxComponent {
 
   readonly workspace = inject(ActionosWorkspaceService);
   private readonly i18n = inject(ActionosI18nService);
+  readonly features = ACTIONOS_FEATURES;
 
   readonly filter = signal<InboxFilter>('all');
   readonly search = signal('');

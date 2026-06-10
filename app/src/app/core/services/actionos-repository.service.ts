@@ -305,6 +305,17 @@ export interface UploadActionosAttachmentRequest {
   file: File;
 }
 
+export interface ActionosTestEmailRequest {
+  orgGroupId?: string | null;
+}
+
+export interface ActionosTestEmailResponse {
+  delivered: boolean;
+  recipientEmail: string;
+  deliveredAtUtc: string;
+  message: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ActionosRepositoryService {
   private readonly http = inject(HttpClient);
@@ -429,6 +440,15 @@ export class ActionosRepositoryService {
   async updateTask(taskId: number, request: UpdateActionosTaskRequest): Promise<ActionosApiTaskDto> {
     return await firstValueFrom(
       this.http.patch<ActionosApiTaskDto>(`${this.base}/api/actionos/tasks/${taskId}`, request)
+    );
+  }
+
+  async sendTestEmail(request: ActionosTestEmailRequest): Promise<ActionosTestEmailResponse> {
+    return await firstValueFrom(
+      this.http.post<ActionosTestEmailResponse>(
+        `${this.base}/api/actionos/notifications/test-email`,
+        request
+      )
     );
   }
 

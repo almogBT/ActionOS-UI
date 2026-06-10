@@ -399,6 +399,7 @@
     "title": "Tasks",
     "subtitle": "Every open task across the team — from meetings and from boards — in one place.",
     "openMyWork": "Open My Work",
+    "newTask": "New task",
     "tiles": {
       "open": "Open tasks",
       "openHint": "Everything still in flight",
@@ -849,6 +850,10 @@
   },
   "settings": {
     "mailNotifications": "Mail notifications",
+    "mailTestButton": "Send test email",
+    "mailTestSending": "Sending test email...",
+    "mailTestSuccess": "Test email sent to {{email}}",
+    "mailTestFailed": "Could not send test email",
     "mailNotif": {
       "newTasks": "Email notification for new tasks",
       "overdueTasks": "Overdue task alerts",

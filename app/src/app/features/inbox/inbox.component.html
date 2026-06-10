@@ -180,7 +180,7 @@
         <span>{{ 'inbox.clearText' | t }}</span>
         <div class="inbox-empty-actions">
           <button type="button" class="ghost-action" (click)="openView('meetings')">{{ 'inbox.reviewMeeting' | t }}</button>
-          <button type="button" class="primary-action" (click)="openView('boards')">{{ 'inbox.openBoard' | t }}</button>
+          <button type="button" class="primary-action" *ngIf="features.boards" (click)="openView('boards')">{{ 'inbox.openBoard' | t }}</button>
         </div>
       </div>
     </ng-template>

@@ -124,7 +124,7 @@ interface MeetingClientOption {
 
       <div *ngIf="!setupCollapsed">
         <div class="form-grid">
-          <div class="field-control wide" *ngIf="!startedWithCustomer">
+          <div class="field-control wide" *ngIf="!startedWithCustomer && !pickedCustomerId">
               {{ 'customerMeeting.customer' | t }}
               <app-searchable-select
                 name="formCustomer"
@@ -219,16 +219,6 @@ interface MeetingClientOption {
             </label>
 
             <div class="dropdowns-row">
-            <label class="field-control">
-              {{ 'customerMeeting.meetingLeader' | t }}
-              <app-searchable-select
-                name="leader"
-                [(ngModel)]="form.meetingLeaderEmployeeId"
-                (ngModelChange)="onPlanChanged()"
-                [options]="leaderSelectOptions"
-              ></app-searchable-select>
-            </label>
-
             <div class="field-control">
               {{ 'customerMeeting.internalParticipants' | t }}
               <app-participant-picker
@@ -479,11 +469,12 @@ interface MeetingClientOption {
     }
     .section-toggle:hover { background: var(--bg-hover, var(--surface-strong)); }
     .section-toggle.collapsed { transform: rotate(-90deg); }
-    /* Leader + our-side + their-side dropdowns share one row. */
+    /* Our-side + their-side participant dropdowns share one row. The meeting
+       leader is resolved to the current user automatically, so it has no field. */
     .dropdowns-row {
       grid-column: 1 / -1;
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 1rem;
       align-items: start;
     }
@@ -586,13 +577,6 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
     return [
       { value: '', label: this.i18n.translate('customerMeeting.selectCustomer') },
       ...this.workspace.clientOptions.map((c) => ({ value: c.id, label: c.name }))
-    ];
-  }
-
-  get leaderSelectOptions(): SelectOption[] {
-    return [
-      { value: '', label: this.i18n.translate('customerMeeting.selectLeader') },
-      ...this.workspace.employees.map((e) => ({ value: e.id, label: e.fullName }))
     ];
   }
 
@@ -1109,12 +1093,15 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
   }
 
   private emptyForm() {
+    // The meeting leader is always the current user (no field shown), and that
+    // user is also pre-selected on our side so they don't have to add themselves.
+    const me = this.workspace?.currentEmployeeId ?? '';
     return {
       customerId: this.customer?.id ?? '',
       subject: '',
       meetingDate: new Date().toISOString(),
-      meetingLeaderEmployeeId: this.workspace?.currentEmployeeId ?? '',
-      internalParticipantEmployeeIds: [] as string[],
+      meetingLeaderEmployeeId: me,
+      internalParticipantEmployeeIds: me ? [me] : [],
       customerParticipants: [] as CustomerParticipant[],
       goal: ''
     };

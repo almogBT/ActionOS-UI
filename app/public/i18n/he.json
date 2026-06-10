@@ -399,6 +399,7 @@
     "title": "משימות",
     "subtitle": "כל המשימות הפתוחות של הצוות — מפגישות ומלוחות — במקום אחד.",
     "openMyWork": "פתח את העבודה שלי",
+    "newTask": "משימה חדשה",
     "tiles": {
       "open": "משימות פתוחות",
       "openHint": "כל מה שעוד פעיל",
@@ -849,6 +850,10 @@
   },
   "settings": {
     "mailNotifications": "התראות מייל",
+    "mailTestButton": "שלח מייל בדיקה",
+    "mailTestSending": "שולח מייל בדיקה...",
+    "mailTestSuccess": "מייל בדיקה נשלח אל {{email}}",
+    "mailTestFailed": "לא ניתן לשלוח מייל בדיקה",
     "mailNotif": {
       "newTasks": "התראה במייל על משימות חדשות",
       "overdueTasks": "על משימות באיחור",

@@ -44,7 +44,7 @@
   <app-catch-up-drawer />
 
   <!-- ── Bottom action bar: Plan Meeting · Quick Capture · New Meeting ── -->
-  <div class="bottom-action-bar" (click)="closeBarPopovers()">
+  <div class="bottom-action-bar" *ngIf="features.quickActionBar" (click)="closeBarPopovers()">
 
     <!-- Plan meeting -->
     <div class="bar-plan-host" (click)="$event.stopPropagation()">

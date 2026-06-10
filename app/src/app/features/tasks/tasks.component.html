@@ -3,7 +3,12 @@
   <!-- ── Header ──────────────────────────────────────────────────────────── -->
   <div class="screen-title">
     <p class="screen-sub">{{ 'tasks.subtitle' | t }}</p>
-    <button type="button" class="ghost-action" (click)="openView('my-work')">{{ 'tasks.openMyWork' | t }}</button>
+    <div class="topbar-actions">
+      <button type="button" class="ghost-action" *ngIf="features.myWork" (click)="openView('my-work')">{{ 'tasks.openMyWork' | t }}</button>
+      <button type="button" class="primary-action" (click)="newTask()">
+        + {{ 'tasks.newTask' | t }}
+      </button>
+    </div>
   </div>
 
   <!-- ── Calendar + stat tiles (shared seamless card) ────────────────────── -->

@@ -7,6 +7,7 @@ import {
   CalendarEvent, Customer, CustomerMeeting, CustomerMeetingStatus, MeetingNote, Task, ViewId
 } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
+import { ACTIONOS_FEATURES } from '../../core/config/actionos-ui.config';
 import { CalendarStatsComponent } from '../../shared/calendar-stats/calendar-stats.component';
 import { IconComponent } from '../../shared/icons/icon.component';
 import { MeetingCardComponent } from '../../shared/meeting-card/meeting-card.component';
@@ -45,6 +46,8 @@ export class MeetingsComponent implements OnInit, OnChanges {
   @Input() openNewTick = 0;
   @Output() viewChange = new EventEmitter<ViewId>();
   @Output() prepareMeeting = new EventEmitter<Customer>();
+
+  readonly features = ACTIONOS_FEATURES;
 
   customerFilter: 'all' | string = 'all';
   showPrepPicker = false;

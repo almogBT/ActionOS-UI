@@ -25,16 +25,16 @@ export interface MeetingSummaryDraft {
   imports: [CommonModule, FormsModule, TranslatePipe],
   template: `
     <section class="summary-card">
-      <label class="field-control wide">
-        {{ 'customerMeeting.summary' | t }}
+      <div class="field-control wide">
         <textarea
           name="summary"
           rows="5"
           [(ngModel)]="draft.summary"
           (ngModelChange)="changed.emit()"
+          [attr.aria-label]="'customerMeeting.summary' | t"
           [placeholder]="'customerMeeting.summaryPlaceholder' | t"
         ></textarea>
-      </label>
+      </div>
 
       <div class="meeting-review-checklist" *ngIf="hasChecklistItems">
         <strong>{{ 'customerMeeting.beforePublishing' | t }}</strong>
@@ -74,15 +74,15 @@ export interface MeetingSummaryDraft {
     <pre class="recap-preview" *ngIf="recap">{{ recap }}</pre>
   `,
   styles: [MEETING_FORM_STYLES, `
+    /* The parent capture panel already provides the card chrome, so this section
+       is just a spacing container — no nested border/background (avoids the
+       "box inside a box" look). */
     .summary-card {
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: var(--bg-elevated);
-      padding: 14px;
       display: grid;
       gap: 12px;
     }
-    /* Checklist now lives inside the summary card — drop its own card chrome. */
+    /* Checklist sits directly under the summary field, separated by a divider
+       rather than its own card. */
     .summary-card .meeting-review-checklist {
       margin-top: 0;
       border: none;

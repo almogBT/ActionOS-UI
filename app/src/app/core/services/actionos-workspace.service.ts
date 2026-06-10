@@ -23,6 +23,7 @@ import {
   ActionosApiCustomerDto,
   ActionosApiCustomerMeetingDto,
   ActionosApiMeetingNoteDto,
+  ActionosTestEmailResponse,
   ActionosApiTaskDto,
   ActionosApiUserDto,
   ActionosBootstrapDto,
@@ -1096,6 +1097,17 @@ export class ActionosWorkspaceService {
     }
 
     this.drawerOpen = !!this.selectedTask;
+  }
+
+  /**
+   * Open the task drawer on a fresh, unsaved task draft — the Tasks page
+   * "New task" button. Mirrors the footer quick-capture flow: the draft lives
+   * only in memory (quickCaptureTaskDraft) and is persisted into tasksState the
+   * moment the user assigns it a client (see updateQuickCaptureTaskDraft).
+   */
+  openNewTaskDraft(): void {
+    this.quickCaptureTaskDraft = this.createQuickCaptureTaskDraft('');
+    this.selectTask(this.quickCaptureTaskDraft, true);
   }
 
   /**
@@ -2514,6 +2526,22 @@ export class ActionosWorkspaceService {
     }
 
     return detail ?? httpError.message;
+  }
+
+  async sendTestEmail(): Promise<ActionosTestEmailResponse> {
+    const orgGroupId = this.getOrgGroupForMutation();
+    if (!orgGroupId) {
+      const message = 'ActionOS could not send a test email because no organization is selected.';
+      this.reportBackendIssue(message);
+      throw new Error(message);
+    }
+
+    try {
+      return await this.actionosApi.sendTestEmail({ orgGroupId });
+    } catch (error) {
+      this.reportBackendIssue('ActionOS could not send a test email.', error);
+      throw error;
+    }
   }
 
   private resolveCustomerId(customerId: string): string {
