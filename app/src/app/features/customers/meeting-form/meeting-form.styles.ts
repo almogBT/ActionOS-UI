@@ -13,8 +13,6 @@ export const MEETING_FORM_STYLES = `
     :host {
       display: block;
       min-width: 0;
-      /* room so the sticky action bar never covers the last section */
-      padding-bottom: 84px;
     }
     .panel-header h3 { margin: 0; }
     .panel-header small.muted { display: block; margin-top: 4px; }

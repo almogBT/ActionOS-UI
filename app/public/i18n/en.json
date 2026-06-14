@@ -108,6 +108,7 @@
     "title": "Meetings",
     "subtitle": "Every meeting and the work it kicks off — all your customers in one view.",
     "newMeeting": "New meeting",
+    "editMeeting": "Meeting",
     "planMeeting": "Plan meeting",
     "selectCustomer": "Select a customer...",
     "filters": "Filter",
@@ -400,6 +401,7 @@
     "subtitle": "Every open task across the team — from meetings and from boards — in one place.",
     "openMyWork": "Open My Work",
     "newTask": "New task",
+    "editTask": "Task",
     "tiles": {
       "open": "Open tasks",
       "openHint": "Everything still in flight",
@@ -449,6 +451,11 @@
       "due": "Due date",
       "status": "Status",
       "priority": "Priority"
+    },
+    "dueOrder": {
+      "label": "Order",
+      "earliestFirst": "Earliest first",
+      "latestFirst": "Latest first"
     },
     "status": {
       "reasonPlaceholder": "Why is the status changing? (at least 3 words)",
@@ -537,7 +544,8 @@
     "commentPlaceholder": "Comment, handoff, or status update...",
     "noComments": "No comments yet.",
     "start": "Start",
-    "markDone": "Done"
+    "markDone": "Done",
+    "sendReminder": "Send reminder"
   },
   "placeholders": {
     "optionalBlocker": "What's blocking? (optional)"
@@ -736,6 +744,14 @@
   "meetingTask": {
     "title": "Task",
     "details": "Details",
+    "stepSetup": "Set up",
+    "stepDetails": "Details",
+    "stepDone": "Done",
+    "stepActivity": "Activity",
+    "setupSubtitle": "Define the task before you assign it",
+    "selectClientToUnlock": "Select a client to unlock this area.",
+    "selectMeeting": "Link a meeting (optional)",
+    "noMeeting": "No meeting",
     "taskTitle": "What needs to happen",
     "taskTitlePlaceholder": "One clear action...",
     "description": "Details",
@@ -850,10 +866,6 @@
   },
   "settings": {
     "mailNotifications": "Mail notifications",
-    "mailTestButton": "Send test email",
-    "mailTestSending": "Sending test email...",
-    "mailTestSuccess": "Test email sent to {{email}}",
-    "mailTestFailed": "Could not send test email",
     "mailNotif": {
       "newTasks": "Email notification for new tasks",
       "overdueTasks": "Overdue task alerts",

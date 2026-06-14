@@ -36,50 +36,21 @@ export interface MeetingSummaryDraft {
         ></textarea>
       </div>
 
-      <div class="meeting-review-checklist" *ngIf="hasChecklistItems">
-        <strong>{{ 'customerMeeting.beforePublishing' | t }}</strong>
-        <ul>
-          <li *ngIf="actionsWithoutTaskCount > 0" class="warn checklist-link" (click)="goToNotes.emit()">
-            {{ 'customerMeeting.reviewActionsWithoutTask' | t }}: {{ actionsWithoutTaskCount }}
-            <span class="checklist-hint">→ review</span>
-          </li>
-          <li *ngIf="openBlockerTaskCount > 0" class="warn checklist-link" (click)="goToNotes.emit()">
-            {{ 'customerMeeting.reviewBlockersOpen' | t }}: {{ openBlockerTaskCount }}
-            <span class="checklist-hint">→ review</span>
-          </li>
-          <li *ngIf="capturedNotes.length > 0">
-            {{ 'customerMeeting.reviewNotesCaptured' | t }}: {{ capturedNotes.length }}
-            <ul class="checklist-notes">
-              <li *ngFor="let n of capturedNotes">
-                <span class="checklist-note-type">{{ ('noteType.' + n.type) | t }}</span>
-                {{ n.content }}
-              </li>
-            </ul>
-          </li>
-          <li *ngIf="openMeetingTasksCount > 0" class="blocking checklist-link" (click)="goToTasks.emit()">
-            {{ 'customerMeeting.reviewOpenTasks' | t }}: {{ openMeetingTasksCount }}
-            <span class="blocking-note">— {{ 'customerMeeting.reviewOpenTasksNote' | t }}</span>
-            <span class="checklist-hint">→ review</span>
-          </li>
-        </ul>
-      </div>
-
-      <div class="summary-actions">
-        <small class="muted">{{ 'customerMeeting.publishRecapHint' | t }}</small>
-        <button type="button" class="primary-action small" (click)="publish.emit()">
-          {{ 'customerMeeting.publishRecap' | t }}
-        </button>
-      </div>
     </section>
     <pre class="recap-preview" *ngIf="recap">{{ recap }}</pre>
   `,
   styles: [MEETING_FORM_STYLES, `
     /* The parent capture panel already provides the card chrome, so this section
        is just a spacing container — no nested border/background (avoids the
-       "box inside a box" look). */
+       "box inside a box" look). The global .summary-card rule (styles.scss) adds a
+       border/padding/background card; this scoped rule has higher specificity and
+       strips it so only the textarea keeps its border. */
     .summary-card {
       display: grid;
       gap: 12px;
+      border: 0;
+      padding: 0;
+      background: transparent;
     }
     /* Checklist sits directly under the summary field, separated by a divider
        rather than its own card. */

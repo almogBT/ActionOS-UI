@@ -5211,3 +5211,2915 @@
          ╵                                  [32m~~~~~~~~~~~~~~~~~~[0m
 
 [39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Unexpected closing tag "section". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:122:0:
+[37m      122 │ [32m</section>[37m
+          ╵ [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS-991010: 'imports' must be an array of components, directives, pipes, or NgModules.
+  Value is of type '[CommonModule, FormsModule, TranslatePipe, MeetingCardComponent, SearchableSelectComponent, (not statically analyzable), IconComponent, (not statically analyzable), (not statically analyzable), (not statically analyzable), (not statically analyzable), CustomerMeetingFormComponent]'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.ts:37:11:
+[37m      37 │   imports: [32m[CommonModule, FormsModule, TranslatePipe, MeetingCardC[37m...
+         ╵            [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS-991010: 'imports' must be an array of components, directives, pipes, or NgModules.
+  Value is of type '[CommonModule, FormsModule, TranslatePipe, MeetingCardComponent, SearchableSelectComponent, (not statically analyzable), IconComponent, (not statically analyzable), (not statically analyzable), (not statically analyzable), (not statically analyzable), CustomerMeetingFormComponent]'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.ts:37:11:
+[37m      37 │   imports: [32m[CommonModule, FormsModule, TranslatePipe, MeetingCardC[37m...
+         ╵            [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS-991010: 'imports' must be an array of components, directives, pipes, or NgModules.
+  Value is of type '[CommonModule, FormsModule, TranslatePipe, MeetingCardComponent, SearchableSelectComponent, (not statically analyzable), IconComponent, (not statically analyzable), (not statically analyzable), (not statically analyzable), (not statically analyzable), CustomerMeetingFormComponent]'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.ts:37:11:
+[37m      37 │   imports: [32m[CommonModule, FormsModule, TranslatePipe, MeetingCardC[37m...
+         ╵            [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS-991010: 'imports' must be an array of components, directives, pipes, or NgModules.
+  Value is of type '[CommonModule, FormsModule, TranslatePipe, MeetingCardComponent, SearchableSelectComponent, (not statically analyzable), IconComponent, (not statically analyzable), (not statically analyzable), (not statically analyzable), (not statically analyzable), CustomerMeetingFormComponent]'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.ts:37:11:
+[37m      37 │   imports: [32m[CommonModule, FormsModule, TranslatePipe, MeetingCardC[37m...
+         ╵            [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS-991010: 'imports' must be an array of components, directives, pipes, or NgModules.
+  Value is of type '[CommonModule, FormsModule, TranslatePipe, MeetingCardComponent, SearchableSelectComponent, (not statically analyzable), IconComponent, (not statically analyzable), (not statically analyzable), (not statically analyzable), (not statically analyzable), CustomerMeetingFormComponent]'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.ts:37:11:
+[37m      37 │   imports: [32m[CommonModule, FormsModule, TranslatePipe, MeetingCardC[37m...
+         ╵            [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'CalendarStatsComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.ts:37:103:
+[37m      37 │ ...ableSelectComponent, [32mCalendarStatsComponent[37m, IconComponent, Sta...
+         ╵                         [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'StatModalComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.ts:37:142:
+[37m      37 │ ...ponent, IconComponent, [32mStatModalComponent[37m, StatMeetingsViewComp...
+         ╵                           [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2552: Cannot find name 'StatMeetingsViewComponent'. Did you mean 'MeetingsComponent'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.ts:37:162:
+[37m      37 │ ...tatModalComponent, [32mStatMeetingsViewComponent[37m, StatTasksViewComp...
+         ╵                       [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'StatTasksViewComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.ts:37:189:
+[37m      37 │ ...etingsViewComponent, [32mStatTasksViewComponent[37m, StatTileComponent,...
+         ╵                         [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2304: Cannot find name 'StatTileComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.ts:37:213:
+[37m      37 │ ...tatTasksViewComponent, [32mStatTileComponent[37m, CustomerMeetingFormCo...
+         ╵                           [32m~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Unexpected closing tag "section". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:142:0:
+[37m      142 │ [32m</section>[37m
+          ╵ [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-calendar-stats' is not a known element:
+1. If 'app-calendar-stats' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-calendar-stats' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:45:2:
+[37m      45 │   [32m<app-calendar-stats[37m
+         ╵   [32m~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'events' since it isn't a known property of 'app-calendar-stats'.
+1. If 'app-calendar-stats' is an Angular component and it has 'events' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-calendar-stats' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:46:4:
+[37m      46 │     [32m[events]="meetingCalendarEvents"[37m
+         ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type 'Event' is not assignable to parameter of type 'CalendarEvent'.
+  Type 'Event' is missing the following properties from type 'CalendarEvent': id, title, startsAt, durationMinutes, and 3 more.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:47:41:
+[37m      47 │     (eventOpened)="onCalendarEventOpened([32m$event[37m)"
+         ╵                                          [32m~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type 'Event' is not assignable to parameter of type 'Date'.
+  Type 'Event' is missing the following properties from type 'Date': toDateString, toTimeString, toLocaleDateString, toLocaleTimeString, and 37 more.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:48:43:
+[37m      48 │     (slotSelected)="onCalendarSlotSelected([32m$event[37m)"
+         ╵                                            [32m~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-stat-tile' is not a known element:
+1. If 'app-stat-tile' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:50:4:
+[37m      50 │     [32m<app-stat-tile[37m
+         ╵     [32m~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'value' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'value' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:51:22:
+[37m      51 │ ...on="calendar" [32m[value]="getLane('upcoming').length"[37m [label]="'me...
+         ╵                  [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'label' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'label' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:51:59:
+[37m      51 │ ...Lane('upcoming').length" [32m[label]="'meetingsOverview.upcoming' | t"[37m
+         ╵                             [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'zero' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'zero' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:52:6:
+[37m      52 │       [32m[zero]="getLane('upcoming').length === 0"[37m (tileClick)="openT...
+         ╵       [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-stat-tile' is not a known element:
+1. If 'app-stat-tile' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:54:4:
+[37m      54 │     [32m<app-stat-tile[37m
+         ╵     [32m~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'value' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'value' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:55:26:
+[37m      55 │ ...eck-circle" [32m[value]="getLane('in-progress').length"[37m [label]="'m...
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'label' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'label' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:55:66:
+[37m      55 │ ...'in-progress').length" [32m[label]="'meetingsOverview.inProgress' | t"[37m
+         ╵                           [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'zero' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'zero' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:56:6:
+[37m      56 │       [32m[zero]="getLane('in-progress').length === 0"[37m (tileClick)="op...
+         ╵       [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-stat-tile' is not a known element:
+1. If 'app-stat-tile' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:58:4:
+[37m      58 │     [32m<app-stat-tile[37m
+         ╵     [32m~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'value' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'value' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:59:26:
+[37m      59 │ ...="check-square" [32m[value]="openMeetingTasksCount"[37m [label]="'meeti...
+         ╵                    [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'label' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'label' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:59:58:
+[37m      59 │ ...etingTasksCount" [32m[label]="'meetingsOverview.openMeetingTasks' | t"[37m
+         ╵                     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'zero' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'zero' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:60:6:
+[37m      60 │       [32m[zero]="openMeetingTasksCount === 0"[37m (tileClick)="openTile('...
+         ╵       [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-stat-modal' is not a known element:
+1. If 'app-stat-modal' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-modal' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:146:2:
+[37m      146 │   [32m<app-stat-modal[37m
+          ╵   [32m~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'eyebrow' since it isn't a known property of 'app-stat-modal'.
+1. If 'app-stat-modal' is an Angular component and it has 'eyebrow' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-modal' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:148:4:
+[37m      148 │     [32m[eyebrow]="'meetingsOverview.eyebrow' | t"[37m
+          ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'closeLabel' since it isn't a known property of 'app-stat-modal'.
+1. If 'app-stat-modal' is an Angular component and it has 'closeLabel' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-modal' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:150:4:
+[37m      150 │     [32m[closeLabel]="'common.close' | t"[37m
+          ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-stat-tasks-view' is not a known element:
+1. If 'app-stat-tasks-view' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tasks-view' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:154:4:
+[37m      154 │     [32m<app-stat-tasks-view[37m
+          ╵     [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'tasks' since it isn't a known property of 'app-stat-tasks-view'.
+1. If 'app-stat-tasks-view' is an Angular component and it has 'tasks' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tasks-view' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:156:6:
+[37m      156 │       [32m[tasks]="openMeetingTasks"[37m
+          ╵       [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'emptyText' since it isn't a known property of 'app-stat-tasks-view'.
+1. If 'app-stat-tasks-view' is an Angular component and it has 'emptyText' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tasks-view' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:157:6:
+[37m      157 │       [32m[emptyText]="'home.noMatches' | t"[37m
+          ╵       [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-stat-meetings-view' is not a known element:
+1. If 'app-stat-meetings-view' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-meetings-view' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:162:4:
+[37m      162 │     [32m<app-stat-meetings-view[37m
+          ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'meetings' since it isn't a known property of 'app-stat-meetings-view'.
+1. If 'app-stat-meetings-view' is an Angular component and it has 'meetings' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-meetings-view' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:164:6:
+[37m      164 │       [32m[meetings]="lensMeetings"[37m
+          ╵       [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'emptyText' since it isn't a known property of 'app-stat-meetings-view'.
+1. If 'app-stat-meetings-view' is an Angular component and it has 'emptyText' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-meetings-view' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:165:6:
+[37m      165 │       [32m[emptyText]="'home.noMatches' | t"[37m
+          ╵       [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-calendar-stats' is not a known element:
+1. If 'app-calendar-stats' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-calendar-stats' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:15:2:
+[37m      15 │   [32m<app-calendar-stats[37m
+         ╵   [32m~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'events' since it isn't a known property of 'app-calendar-stats'.
+1. If 'app-calendar-stats' is an Angular component and it has 'events' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-calendar-stats' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:16:4:
+[37m      16 │     [32m[events]="meetingCalendarEvents"[37m
+         ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type 'Event' is not assignable to parameter of type 'CalendarEvent'.
+  Type 'Event' is missing the following properties from type 'CalendarEvent': id, title, startsAt, durationMinutes, and 3 more.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:17:41:
+[37m      17 │     (eventOpened)="onCalendarEventOpened([32m$event[37m)"
+         ╵                                          [32m~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type 'Event' is not assignable to parameter of type 'Date'.
+  Type 'Event' is missing the following properties from type 'Date': toDateString, toTimeString, toLocaleDateString, toLocaleTimeString, and 37 more.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:18:43:
+[37m      18 │     (slotSelected)="onCalendarSlotSelected([32m$event[37m)"
+         ╵                                            [32m~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-stat-tile' is not a known element:
+1. If 'app-stat-tile' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:20:4:
+[37m      20 │     [32m<app-stat-tile[37m
+         ╵     [32m~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'value' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'value' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:21:22:
+[37m      21 │ ...on="calendar" [32m[value]="getLane('upcoming').length"[37m [label]="'me...
+         ╵                  [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'label' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'label' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:21:59:
+[37m      21 │ ...Lane('upcoming').length" [32m[label]="'meetingsOverview.upcoming' | t"[37m
+         ╵                             [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'zero' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'zero' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:22:6:
+[37m      22 │       [32m[zero]="getLane('upcoming').length === 0"[37m (tileClick)="openT...
+         ╵       [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-stat-tile' is not a known element:
+1. If 'app-stat-tile' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:24:4:
+[37m      24 │     [32m<app-stat-tile[37m
+         ╵     [32m~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'value' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'value' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:25:26:
+[37m      25 │ ...eck-circle" [32m[value]="getLane('in-progress').length"[37m [label]="'m...
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'label' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'label' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:25:66:
+[37m      25 │ ...'in-progress').length" [32m[label]="'meetingsOverview.inProgress' | t"[37m
+         ╵                           [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'zero' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'zero' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:26:6:
+[37m      26 │       [32m[zero]="getLane('in-progress').length === 0"[37m (tileClick)="op...
+         ╵       [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-stat-tile' is not a known element:
+1. If 'app-stat-tile' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:28:4:
+[37m      28 │     [32m<app-stat-tile[37m
+         ╵     [32m~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'value' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'value' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:29:26:
+[37m      29 │ ...="check-square" [32m[value]="openMeetingTasksCount"[37m [label]="'meeti...
+         ╵                    [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'label' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'label' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:29:58:
+[37m      29 │ ...etingTasksCount" [32m[label]="'meetingsOverview.openMeetingTasks' | t"[37m
+         ╵                     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'zero' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'zero' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:30:6:
+[37m      30 │       [32m[zero]="openMeetingTasksCount === 0"[37m (tileClick)="openTile('...
+         ╵       [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-stat-modal' is not a known element:
+1. If 'app-stat-modal' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-modal' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:140:2:
+[37m      140 │   [32m<app-stat-modal[37m
+          ╵   [32m~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'eyebrow' since it isn't a known property of 'app-stat-modal'.
+1. If 'app-stat-modal' is an Angular component and it has 'eyebrow' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-modal' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:142:4:
+[37m      142 │     [32m[eyebrow]="'meetingsOverview.eyebrow' | t"[37m
+          ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'closeLabel' since it isn't a known property of 'app-stat-modal'.
+1. If 'app-stat-modal' is an Angular component and it has 'closeLabel' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-modal' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:144:4:
+[37m      144 │     [32m[closeLabel]="'common.close' | t"[37m
+          ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-stat-tasks-view' is not a known element:
+1. If 'app-stat-tasks-view' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tasks-view' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:148:4:
+[37m      148 │     [32m<app-stat-tasks-view[37m
+          ╵     [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'tasks' since it isn't a known property of 'app-stat-tasks-view'.
+1. If 'app-stat-tasks-view' is an Angular component and it has 'tasks' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tasks-view' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:150:6:
+[37m      150 │       [32m[tasks]="openMeetingTasks"[37m
+          ╵       [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'emptyText' since it isn't a known property of 'app-stat-tasks-view'.
+1. If 'app-stat-tasks-view' is an Angular component and it has 'emptyText' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tasks-view' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:151:6:
+[37m      151 │       [32m[emptyText]="'home.noMatches' | t"[37m
+          ╵       [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-stat-meetings-view' is not a known element:
+1. If 'app-stat-meetings-view' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-meetings-view' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:156:4:
+[37m      156 │     [32m<app-stat-meetings-view[37m
+          ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'meetings' since it isn't a known property of 'app-stat-meetings-view'.
+1. If 'app-stat-meetings-view' is an Angular component and it has 'meetings' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-meetings-view' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:158:6:
+[37m      158 │       [32m[meetings]="lensMeetings"[37m
+          ╵       [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'emptyText' since it isn't a known property of 'app-stat-meetings-view'.
+1. If 'app-stat-meetings-view' is an Angular component and it has 'emptyText' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-meetings-view' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:159:6:
+[37m      159 │       [32m[emptyText]="'home.noMatches' | t"[37m
+          ╵       [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:38:15:
+[37m      38 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-calendar-stats' is not a known element:
+1. If 'app-calendar-stats' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-calendar-stats' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:15:2:
+[37m      15 │   [32m<app-calendar-stats[37m
+         ╵   [32m~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'events' since it isn't a known property of 'app-calendar-stats'.
+1. If 'app-calendar-stats' is an Angular component and it has 'events' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-calendar-stats' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:16:4:
+[37m      16 │     [32m[events]="meetingCalendarEvents"[37m
+         ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type 'Event' is not assignable to parameter of type 'CalendarEvent'.
+  Type 'Event' is missing the following properties from type 'CalendarEvent': id, title, startsAt, durationMinutes, and 3 more.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:17:41:
+[37m      17 │     (eventOpened)="onCalendarEventOpened([32m$event[37m)"
+         ╵                                          [32m~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type 'Event' is not assignable to parameter of type 'Date'.
+  Type 'Event' is missing the following properties from type 'Date': toDateString, toTimeString, toLocaleDateString, toLocaleTimeString, and 37 more.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:18:43:
+[37m      18 │     (slotSelected)="onCalendarSlotSelected([32m$event[37m)"
+         ╵                                            [32m~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-stat-tile' is not a known element:
+1. If 'app-stat-tile' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:20:4:
+[37m      20 │     [32m<app-stat-tile[37m
+         ╵     [32m~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'value' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'value' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:21:22:
+[37m      21 │ ...on="calendar" [32m[value]="getLane('upcoming').length"[37m [label]="'me...
+         ╵                  [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'label' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'label' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:21:59:
+[37m      21 │ ...Lane('upcoming').length" [32m[label]="'meetingsOverview.upcoming' | t"[37m
+         ╵                             [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'zero' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'zero' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:22:6:
+[37m      22 │       [32m[zero]="getLane('upcoming').length === 0"[37m (tileClick)="openT...
+         ╵       [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-stat-tile' is not a known element:
+1. If 'app-stat-tile' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:24:4:
+[37m      24 │     [32m<app-stat-tile[37m
+         ╵     [32m~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'value' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'value' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:25:26:
+[37m      25 │ ...eck-circle" [32m[value]="getLane('in-progress').length"[37m [label]="'m...
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'label' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'label' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:25:66:
+[37m      25 │ ...'in-progress').length" [32m[label]="'meetingsOverview.inProgress' | t"[37m
+         ╵                           [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'zero' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'zero' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:26:6:
+[37m      26 │       [32m[zero]="getLane('in-progress').length === 0"[37m (tileClick)="op...
+         ╵       [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-stat-tile' is not a known element:
+1. If 'app-stat-tile' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:28:4:
+[37m      28 │     [32m<app-stat-tile[37m
+         ╵     [32m~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'value' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'value' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:29:26:
+[37m      29 │ ...="check-square" [32m[value]="openMeetingTasksCount"[37m [label]="'meeti...
+         ╵                    [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'label' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'label' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:29:58:
+[37m      29 │ ...etingTasksCount" [32m[label]="'meetingsOverview.openMeetingTasks' | t"[37m
+         ╵                     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'zero' since it isn't a known property of 'app-stat-tile'.
+1. If 'app-stat-tile' is an Angular component and it has 'zero' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tile' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:30:6:
+[37m      30 │       [32m[zero]="openMeetingTasksCount === 0"[37m (tileClick)="openTile('...
+         ╵       [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-stat-modal' is not a known element:
+1. If 'app-stat-modal' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-modal' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:140:2:
+[37m      140 │   [32m<app-stat-modal[37m
+          ╵   [32m~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'eyebrow' since it isn't a known property of 'app-stat-modal'.
+1. If 'app-stat-modal' is an Angular component and it has 'eyebrow' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-modal' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:142:4:
+[37m      142 │     [32m[eyebrow]="'meetingsOverview.eyebrow' | t"[37m
+          ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'closeLabel' since it isn't a known property of 'app-stat-modal'.
+1. If 'app-stat-modal' is an Angular component and it has 'closeLabel' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-modal' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:144:4:
+[37m      144 │     [32m[closeLabel]="'common.close' | t"[37m
+          ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-stat-tasks-view' is not a known element:
+1. If 'app-stat-tasks-view' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tasks-view' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:148:4:
+[37m      148 │     [32m<app-stat-tasks-view[37m
+          ╵     [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'tasks' since it isn't a known property of 'app-stat-tasks-view'.
+1. If 'app-stat-tasks-view' is an Angular component and it has 'tasks' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tasks-view' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:150:6:
+[37m      150 │       [32m[tasks]="openMeetingTasks"[37m
+          ╵       [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'emptyText' since it isn't a known property of 'app-stat-tasks-view'.
+1. If 'app-stat-tasks-view' is an Angular component and it has 'emptyText' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-tasks-view' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:151:6:
+[37m      151 │       [32m[emptyText]="'home.noMatches' | t"[37m
+          ╵       [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8001: 'app-stat-meetings-view' is not a known element:
+1. If 'app-stat-meetings-view' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-meetings-view' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:156:4:
+[37m      156 │     [32m<app-stat-meetings-view[37m
+          ╵     [32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'meetings' since it isn't a known property of 'app-stat-meetings-view'.
+1. If 'app-stat-meetings-view' is an Angular component and it has 'meetings' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-meetings-view' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:158:6:
+[37m      158 │       [32m[meetings]="lensMeetings"[37m
+          ╵       [32m~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to 'emptyText' since it isn't a known property of 'app-stat-meetings-view'.
+1. If 'app-stat-meetings-view' is an Angular component and it has 'emptyText' input, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-stat-meetings-view' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@Component.schemas' of this component.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/meetings/meetings.component.html:159:6:
+[37m      159 │       [32m[emptyText]="'home.noMatches' | t"[37m
+          ╵       [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component MeetingsComponent.
+
+    src/app/features/meetings/meetings.component.ts:43:15:
+[37m      43 │   templateUrl: [32m'./meetings.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'updateEmbeddedTaskDraft' does not exist on type 'ActionosWorkspaceService'. Did you mean 'embeddedTaskDraft'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:4156:18:
+[37m      4156 │       return this.[32mupdateEmbeddedTaskDraft[37m(next);
+           ╵                   [32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  'embeddedTaskDraft' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:373:10:
+[37m      373 │   private [32membeddedTaskDraft[37m: Task | null = null;
+          ╵           [32m~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'updateEmbeddedTaskDraft' does not exist on type 'ActionosWorkspaceService'. Did you mean 'embeddedTaskDraft'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/actionos-workspace.service.ts:4172:18:
+[37m      4172 │       return this.[32mupdateEmbeddedTaskDraft[37m(next);
+           ╵                   [32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  'embeddedTaskDraft' is declared here.
+
+    src/app/core/services/actionos-workspace.service.ts:373:10:
+[37m      373 │   private [32membeddedTaskDraft[37m: Task | null = null;
+          ╵           [32m~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2420: Class 'TasksComponent' incorrectly implements interface 'OnInit'.
+  Property 'ngOnInit' is missing in type 'TasksComponent' but required in type 'OnInit'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/tasks/tasks.component.ts:39:13:
+[37m      39 │ export class [32mTasksComponent[37m implements OnInit {
+         ╵              [32m~~~~~~~~~~~~~~[0m
+
+  'ngOnInit' is declared here.
+
+    node_modules/@angular/core/index.d.ts:7940:4:
+[37m      7940 │     [32mngOnInit(): void;[37m
+           ╵     [32m~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'embeddedIsNew' does not exist on type 'TasksComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/tasks/tasks.component.html:46:16:
+[37m      46 │         <h2>{{ ([32membeddedIsNew[37m ? 'tasks.newTask' : 'tasks.editTask'...
+         ╵                 [32m~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component TasksComponent.
+
+    src/app/features/tasks/tasks.component.ts:36:15:
+[37m      36 │   templateUrl: [32m'./tasks.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'noNotesYet' does not exist on type 'MeetingNotesSectionComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-notes-section.component.ts:86:83:
+[37m      86 │ ...ap" id="notes-list" *ngIf="capturedNotes.length; else [32mnoNotesYet[37m">
+         ╵                                                          [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'notesCollapsed' does not exist on type 'MeetingNotesSectionComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-notes-section.component.ts:87:63:
+[37m      87 │ ...ss="notes-list-toggle" (click)="[32mnotesCollapsed[37m = !notesCollapsed">
+         ╵                                    [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'notesCollapsed' does not exist on type 'MeetingNotesSectionComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-notes-section.component.ts:87:81:
+[37m      87 │ ...ss="notes-list-toggle" (click)="notesCollapsed = ![32mnotesCollapsed[37m">
+         ╵                                                      [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'notesCollapsed' does not exist on type 'MeetingNotesSectionComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-notes-section.component.ts:88:60:
+[37m      88 │ ..."notes-toggle-caret" [class.collapsed]="[32mnotesCollapsed[37m">▾</span>
+         ╵                                            [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'notesCollapsed' does not exist on type 'MeetingNotesSectionComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-notes-section.component.ts:91:38:
+[37m      91 │       <div class="notes-list" *ngIf="![32mnotesCollapsed[37m">
+         ╵                                       [32m~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'notesCollapsed' does not exist on type 'MeetingNotesSectionComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-notes-section.component.ts:87:63:
+[37m      87 │ ...ss="notes-list-toggle" (click)="[32mnotesCollapsed[37m = !notesCollapsed">
+         ╵                                    [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'notesCollapsed' does not exist on type 'MeetingNotesSectionComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-notes-section.component.ts:87:81:
+[37m      87 │ ...ss="notes-list-toggle" (click)="notesCollapsed = ![32mnotesCollapsed[37m">
+         ╵                                                      [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'notesCollapsed' does not exist on type 'MeetingNotesSectionComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-notes-section.component.ts:88:60:
+[37m      88 │ ..."notes-toggle-caret" [class.collapsed]="[32mnotesCollapsed[37m">▾</span>
+         ╵                                            [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'notesCollapsed' does not exist on type 'MeetingNotesSectionComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-notes-section.component.ts:91:38:
+[37m      91 │       <div class="notes-list" *ngIf="![32mnotesCollapsed[37m">
+         ╵                                       [32m~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG1: Property 'showNextMeetingNotes' does not exist on type 'MeetingNotesSectionComponent'. Did you mean 'nextMeetingNotes'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-form/meeting-notes-section.component.ts:238:64:
+[37m      238 │ ...ld-control wide next-meeting-notes" *ngIf="[32mshowNextMeetingNotes[37m">
+          ╵                                               [32m~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/tasks/tasks.component.ts:76:11:
+[37m      76 │   readonly [32mgroupByOptions[37m: { id: GroupMode; labelKey: string }[] = [
+         ╵            [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/tasks/tasks.component.ts:76:11:
+[37m      76 │   readonly [32mgroupByOptions[37m: { id: GroupMode; labelKey: string }[] = [
+         ╵            [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'features' does not exist on type 'Customer360Component'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/customer-360.component.ts:170:27:
+[37m      170 │               <span *ngIf="[32mfeatures[37m.taskPriority">{{ ('priority.'...
+          ╵                            [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/tasks/tasks.component.ts:76:11:
+[37m      76 │   readonly [32mgroupByOptions[37m: { id: GroupMode; labelKey: string }[] = [
+         ╵            [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/tasks/tasks.component.ts:76:11:
+[37m      76 │   readonly [32mgroupByOptions[37m: { id: GroupMode; labelKey: string }[] = [
+         ╵            [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/tasks/tasks.component.ts:76:11:
+[37m      76 │   readonly [32mgroupByOptions[37m: { id: GroupMode; labelKey: string }[] = [
+         ╵            [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'features' does not exist on type 'MeetingTaskCreationComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/customers/meeting-task-creation.component.ts:59:46:
+[37m      59 │           <label class="field-control" *ngIf="[32mfeatures[37m.taskPriority">
+         ╵                                               [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/tasks/tasks.component.ts:76:11:
+[37m      76 │   readonly [32mgroupByOptions[37m: { id: GroupMode; labelKey: string }[] = [
+         ╵            [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/tasks/tasks.component.ts:76:11:
+[37m      76 │   readonly [32mgroupByOptions[37m: { id: GroupMode; labelKey: string }[] = [
+         ╵            [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/tasks/tasks.component.ts:76:11:
+[37m      76 │   readonly [32mgroupByOptions[37m: { id: GroupMode; labelKey: string }[] = [
+         ╵            [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/tasks/tasks.component.ts:76:11:
+[37m      76 │   readonly [32mgroupByOptions[37m: { id: GroupMode; labelKey: string }[] = [
+         ╵            [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/tasks/tasks.component.ts:76:11:
+[37m      76 │   readonly [32mgroupByOptions[37m: { id: GroupMode; labelKey: string }[] = [
+         ╵            [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/tasks/tasks.component.ts:76:11:
+[37m      76 │   readonly [32mgroupByOptions[37m: { id: GroupMode; labelKey: string }[] = [
+         ╵            [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/tasks/tasks.component.ts:76:11:
+[37m      76 │   readonly [32mgroupByOptions[37m: { id: GroupMode; labelKey: string }[] = [
+         ╵            [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/tasks/tasks.component.ts:76:11:
+[37m      76 │   readonly [32mgroupByOptions[37m: { id: GroupMode; labelKey: string }[] = [
+         ╵            [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/tasks/tasks.component.ts:76:11:
+[37m      76 │   readonly [32mgroupByOptions[37m: { id: GroupMode; labelKey: string }[] = [
+         ╵            [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/tasks/tasks.component.ts:76:11:
+[37m      76 │   readonly [32mgroupByOptions[37m: { id: GroupMode; labelKey: string }[] = [
+         ╵            [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/tasks/tasks.component.ts:76:11:
+[37m      76 │   readonly [32mgroupByOptions[37m: { id: GroupMode; labelKey: string }[] = [
+         ╵            [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'pct' does not exist on type 'never'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.html:230:66:
+[37m      230 │ ...      <div class="checklist-fill" [style.width.%]="cl.[32mpct[37m"></div>
+          ╵                                                          [32m~~~[0m
+
+  Error occurs in the template of component TaskTableComponent.
+
+    src/app/shared/task-table/task-table.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./task-table.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'done' does not exist on type 'never'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.html:232:55:
+[37m      232 │ ...an class="checklist-fraction">{{ cl.[32mdone[37m }}/{{ cl.total }}</span>
+          ╵                                        [32m~~~~[0m
+
+  Error occurs in the template of component TaskTableComponent.
+
+    src/app/shared/task-table/task-table.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./task-table.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'total' does not exist on type 'never'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.html:232:69:
+[37m      232 │ ...an class="checklist-fraction">{{ cl.done }}/{{ cl.[32mtotal[37m }}</span>
+          ╵                                                      [32m~~~~~[0m
+
+  Error occurs in the template of component TaskTableComponent.
+
+    src/app/shared/task-table/task-table.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./task-table.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/tasks/tasks.component.ts:76:11:
+[37m      76 │   readonly [32mgroupByOptions[37m: { id: GroupMode; labelKey: string }[] = [
+         ╵            [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'pct' does not exist on type 'never'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.html:230:66:
+[37m      230 │ ...      <div class="checklist-fill" [style.width.%]="cl.[32mpct[37m"></div>
+          ╵                                                          [32m~~~[0m
+
+  Error occurs in the template of component TaskTableComponent.
+
+    src/app/shared/task-table/task-table.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./task-table.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'done' does not exist on type 'never'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.html:232:55:
+[37m      232 │ ...an class="checklist-fraction">{{ cl.[32mdone[37m }}/{{ cl.total }}</span>
+          ╵                                        [32m~~~~[0m
+
+  Error occurs in the template of component TaskTableComponent.
+
+    src/app/shared/task-table/task-table.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./task-table.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'total' does not exist on type 'never'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.html:232:69:
+[37m      232 │ ...an class="checklist-fraction">{{ cl.done }}/{{ cl.[32mtotal[37m }}</span>
+          ╵                                                      [32m~~~~~[0m
+
+  Error occurs in the template of component TaskTableComponent.
+
+    src/app/shared/task-table/task-table.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./task-table.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/tasks/tasks.component.ts:76:11:
+[37m      76 │   readonly [32mgroupByOptions[37m: { id: GroupMode; labelKey: string }[] = [
+         ╵            [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'pct' does not exist on type 'never'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.html:230:66:
+[37m      230 │ ...      <div class="checklist-fill" [style.width.%]="cl.[32mpct[37m"></div>
+          ╵                                                          [32m~~~[0m
+
+  Error occurs in the template of component TaskTableComponent.
+
+    src/app/shared/task-table/task-table.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./task-table.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'done' does not exist on type 'never'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.html:232:55:
+[37m      232 │ ...an class="checklist-fraction">{{ cl.[32mdone[37m }}/{{ cl.total }}</span>
+          ╵                                        [32m~~~~[0m
+
+  Error occurs in the template of component TaskTableComponent.
+
+    src/app/shared/task-table/task-table.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./task-table.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'total' does not exist on type 'never'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.html:232:69:
+[37m      232 │ ...an class="checklist-fraction">{{ cl.done }}/{{ cl.[32mtotal[37m }}</span>
+          ╵                                                      [32m~~~~~[0m
+
+  Error occurs in the template of component TaskTableComponent.
+
+    src/app/shared/task-table/task-table.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./task-table.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/tasks/tasks.component.ts:76:11:
+[37m      76 │   readonly [32mgroupByOptions[37m: { id: GroupMode; labelKey: string }[] = [
+         ╵            [32m~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'pct' does not exist on type 'never'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.html:230:66:
+[37m      230 │ ...      <div class="checklist-fill" [style.width.%]="cl.[32mpct[37m"></div>
+          ╵                                                          [32m~~~[0m
+
+  Error occurs in the template of component TaskTableComponent.
+
+    src/app/shared/task-table/task-table.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./task-table.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'done' does not exist on type 'never'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.html:232:55:
+[37m      232 │ ...an class="checklist-fraction">{{ cl.[32mdone[37m }}/{{ cl.total }}</span>
+          ╵                                        [32m~~~~[0m
+
+  Error occurs in the template of component TaskTableComponent.
+
+    src/app/shared/task-table/task-table.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./task-table.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'total' does not exist on type 'never'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.html:232:69:
+[37m      232 │ ...an class="checklist-fraction">{{ cl.done }}/{{ cl.[32mtotal[37m }}</span>
+          ╵                                                      [32m~~~~~[0m
+
+  Error occurs in the template of component TaskTableComponent.
+
+    src/app/shared/task-table/task-table.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./task-table.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'pct' does not exist on type 'never'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.html:230:66:
+[37m      230 │ ...      <div class="checklist-fill" [style.width.%]="cl.[32mpct[37m"></div>
+          ╵                                                          [32m~~~[0m
+
+  Error occurs in the template of component TaskTableComponent.
+
+    src/app/shared/task-table/task-table.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./task-table.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'done' does not exist on type 'never'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.html:232:55:
+[37m      232 │ ...an class="checklist-fraction">{{ cl.[32mdone[37m }}/{{ cl.total }}</span>
+          ╵                                        [32m~~~~[0m
+
+  Error occurs in the template of component TaskTableComponent.
+
+    src/app/shared/task-table/task-table.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./task-table.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'total' does not exist on type 'never'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.html:232:69:
+[37m      232 │ ...an class="checklist-fraction">{{ cl.done }}/{{ cl.[32mtotal[37m }}</span>
+          ╵                                                      [32m~~~~~[0m
+
+  Error occurs in the template of component TaskTableComponent.
+
+    src/app/shared/task-table/task-table.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./task-table.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2322: Type '{ id: string; labelKey: string; }[]' is not assignable to type '{ id: GroupMode; labelKey: string; }[]'.
+  Type '{ id: string; labelKey: string; }' is not assignable to type '{ id: GroupMode; labelKey: string; }'.
+    Types of property 'id' are incompatible.
+      Type 'string' is not assignable to type 'GroupMode'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.ts:146:11:
+[37m      146 │   readonly [32mgroupModes[37m: { id: GroupMode; labelKey: string }[] = [
+          ╵            [32m~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'pct' does not exist on type 'never'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.html:230:66:
+[37m      230 │ ...      <div class="checklist-fill" [style.width.%]="cl.[32mpct[37m"></div>
+          ╵                                                          [32m~~~[0m
+
+  Error occurs in the template of component TaskTableComponent.
+
+    src/app/shared/task-table/task-table.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./task-table.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'done' does not exist on type 'never'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.html:232:55:
+[37m      232 │ ...an class="checklist-fraction">{{ cl.[32mdone[37m }}/{{ cl.total }}</span>
+          ╵                                        [32m~~~~[0m
+
+  Error occurs in the template of component TaskTableComponent.
+
+    src/app/shared/task-table/task-table.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./task-table.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'total' does not exist on type 'never'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/shared/task-table/task-table.component.html:232:69:
+[37m      232 │ ...an class="checklist-fraction">{{ cl.done }}/{{ cl.[32mtotal[37m }}</span>
+          ╵                                                      [32m~~~~~[0m
+
+  Error occurs in the template of component TaskTableComponent.
+
+    src/app/shared/task-table/task-table.component.ts:41:15:
+[37m      41 │   templateUrl: [32m'./task-table.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:8:63:
+[37m      8 │ ...ass="phase-step active" (click)="[32mscrollToId[37m('task-setup-section')">
+        ╵                                     [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:31:15:
+[37m      31 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:18:17:
+[37m      18 │         (click)="[32mscrollToId[37m('task-details-section')"
+         ╵                  [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:31:15:
+[37m      31 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'hasDetails' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:23:47:
+[37m      23 │ ...<span class="phase-line" [class.filled]="[32mhasDetails[37m(task)"></span>
+         ╵                                             [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:31:15:
+[37m      31 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'hasActivity' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:27:24:
+[37m      27 │         [class.active]="[32mhasActivity[37m(task)"
+         ╵                         [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:31:15:
+[37m      31 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:29:17:
+[37m      29 │         (click)="[32mscrollToId[37m('task-activity-section')"
+         ╵                  [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:31:15:
+[37m      31 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type '"setup"' is not assignable to parameter of type 'TaskSectionId'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:40:93:
+[37m      40 │ ...lapsed]="isSectionCollapsed([32m'setup'[37m)" (click)="toggleSection('s...
+         ╵                                [32m~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:31:15:
+[37m      31 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type '"setup"' is not assignable to parameter of type 'TaskSectionId'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:40:126:
+[37m      40 │ ...p')" (click)="toggleSection([32m'setup'[37m)" aria-label="Toggle sectio...
+         ╵                                [32m~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:31:15:
+[37m      31 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type '"setup"' is not assignable to parameter of type 'TaskSectionId'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:49:47:
+[37m      49 │       <ng-container *ngIf="!isSectionCollapsed([32m'setup'[37m)">
+         ╵                                                [32m~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:31:15:
+[37m      31 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type '"activity"' is not assignable to parameter of type 'TaskSectionId'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:270:93:
+[37m      270 │ ...psed]="isSectionCollapsed([32m'activity'[37m)" (click)="toggleSection(...
+          ╵                              [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:31:15:
+[37m      31 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type '"activity"' is not assignable to parameter of type 'TaskSectionId'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:270:129:
+[37m      270 │ ...)" (click)="toggleSection([32m'activity'[37m)" aria-label="Toggle sect...
+          ╵                              [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:31:15:
+[37m      31 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5: Argument of type '"activity"' is not assignable to parameter of type 'TaskSectionId'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:278:47:
+[37m      278 │       <ng-container *ngIf="!isSectionCollapsed([32m'activity'[37m)">
+          ╵                                                [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:31:15:
+[37m      31 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:8:63:
+[37m      8 │ ...ass="phase-step active" (click)="[32mscrollToId[37m('task-setup-section')">
+        ╵                                     [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:18:17:
+[37m      18 │         (click)="[32mscrollToId[37m('task-details-section')"
+         ╵                  [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'hasDetails' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:23:47:
+[37m      23 │ ...<span class="phase-line" [class.filled]="[32mhasDetails[37m(task)"></span>
+         ╵                                             [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'hasActivity' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:27:24:
+[37m      27 │         [class.active]="[32mhasActivity[37m(task)"
+         ╵                         [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:29:17:
+[37m      29 │         (click)="[32mscrollToId[37m('task-activity-section')"
+         ╵                  [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'attachments' does not exist in type 'Record<TaskSectionId, boolean>'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.ts:257:4:
+[37m      257 │     [32mattachments[37m: false,
+          ╵     [32m~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:8:63:
+[37m      8 │ ...ass="phase-step active" (click)="[32mscrollToId[37m('task-setup-section')">
+        ╵                                     [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:18:17:
+[37m      18 │         (click)="[32mscrollToId[37m('task-details-section')"
+         ╵                  [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'hasDetails' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:23:47:
+[37m      23 │ ...<span class="phase-line" [class.filled]="[32mhasDetails[37m(task)"></span>
+         ╵                                             [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'hasActivity' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:27:24:
+[37m      27 │         [class.active]="[32mhasActivity[37m(task)"
+         ╵                         [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:29:17:
+[37m      29 │         (click)="[32mscrollToId[37m('task-activity-section')"
+         ╵                  [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'attachments' does not exist in type 'Record<TaskSectionId, boolean>'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.ts:269:4:
+[37m      269 │     [32mattachments[37m: false,
+          ╵     [32m~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:8:63:
+[37m      8 │ ...ass="phase-step active" (click)="[32mscrollToId[37m('task-setup-section')">
+        ╵                                     [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:18:17:
+[37m      18 │         (click)="[32mscrollToId[37m('task-details-section')"
+         ╵                  [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'hasDetails' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:23:47:
+[37m      23 │ ...<span class="phase-line" [class.filled]="[32mhasDetails[37m(task)"></span>
+         ╵                                             [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'hasActivity' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:27:24:
+[37m      27 │         [class.active]="[32mhasActivity[37m(task)"
+         ╵                         [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:29:17:
+[37m      29 │         (click)="[32mscrollToId[37m('task-activity-section')"
+         ╵                  [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'attachments' does not exist in type 'Record<TaskSectionId, boolean>'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.ts:263:4:
+[37m      263 │     [32mattachments[37m: false,
+          ╵     [32m~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:8:63:
+[37m      8 │ ...ass="phase-step active" (click)="[32mscrollToId[37m('task-setup-section')">
+        ╵                                     [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:18:17:
+[37m      18 │         (click)="[32mscrollToId[37m('task-details-section')"
+         ╵                  [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'hasDetails' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:23:47:
+[37m      23 │ ...<span class="phase-line" [class.filled]="[32mhasDetails[37m(task)"></span>
+         ╵                                             [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'hasActivity' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:27:24:
+[37m      27 │         [class.active]="[32mhasActivity[37m(task)"
+         ╵                         [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:29:17:
+[37m      29 │         (click)="[32mscrollToId[37m('task-activity-section')"
+         ╵                  [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'attachments' does not exist in type 'Record<TaskSectionId, boolean>'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.ts:262:4:
+[37m      262 │     [32mattachments[37m: false,
+          ╵     [32m~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:8:63:
+[37m      8 │ ...ass="phase-step active" (click)="[32mscrollToId[37m('task-setup-section')">
+        ╵                                     [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:18:17:
+[37m      18 │         (click)="[32mscrollToId[37m('task-details-section')"
+         ╵                  [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'hasDetails' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:23:47:
+[37m      23 │ ...<span class="phase-line" [class.filled]="[32mhasDetails[37m(task)"></span>
+         ╵                                             [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'hasActivity' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:27:24:
+[37m      27 │         [class.active]="[32mhasActivity[37m(task)"
+         ╵                         [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:29:17:
+[37m      29 │         (click)="[32mscrollToId[37m('task-activity-section')"
+         ╵                  [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'attachments' does not exist in type 'Record<TaskSectionId, boolean>'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.ts:248:4:
+[37m      248 │     [32mattachments[37m: false,
+          ╵     [32m~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:8:63:
+[37m      8 │ ...ass="phase-step active" (click)="[32mscrollToId[37m('task-setup-section')">
+        ╵                                     [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:18:17:
+[37m      18 │         (click)="[32mscrollToId[37m('task-details-section')"
+         ╵                  [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'hasDetails' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:23:47:
+[37m      23 │ ...<span class="phase-line" [class.filled]="[32mhasDetails[37m(task)"></span>
+         ╵                                             [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'hasActivity' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:27:24:
+[37m      27 │         [class.active]="[32mhasActivity[37m(task)"
+         ╵                         [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:29:17:
+[37m      29 │         (click)="[32mscrollToId[37m('task-activity-section')"
+         ╵                  [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'attachments' does not exist in type 'Record<TaskSectionId, boolean>'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.ts:243:4:
+[37m      243 │     [32mattachments[37m: false,
+          ╵     [32m~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:8:63:
+[37m      8 │ ...ass="phase-step active" (click)="[32mscrollToId[37m('task-setup-section')">
+        ╵                                     [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:18:17:
+[37m      18 │         (click)="[32mscrollToId[37m('task-details-section')"
+         ╵                  [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'hasDetails' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:23:47:
+[37m      23 │ ...<span class="phase-line" [class.filled]="[32mhasDetails[37m(task)"></span>
+         ╵                                             [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'hasActivity' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:27:24:
+[37m      27 │         [class.active]="[32mhasActivity[37m(task)"
+         ╵                         [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:29:17:
+[37m      29 │         (click)="[32mscrollToId[37m('task-activity-section')"
+         ╵                  [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'attachments' does not exist in type 'Record<TaskSectionId, boolean>'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.ts:240:4:
+[37m      240 │     [32mattachments[37m: false,
+          ╵     [32m~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:8:63:
+[37m      8 │ ...ass="phase-step active" (click)="[32mscrollToId[37m('task-setup-section')">
+        ╵                                     [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:18:17:
+[37m      18 │         (click)="[32mscrollToId[37m('task-details-section')"
+         ╵                  [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'hasDetails' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:23:47:
+[37m      23 │ ...<span class="phase-line" [class.filled]="[32mhasDetails[37m(task)"></span>
+         ╵                                             [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'hasActivity' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:27:24:
+[37m      27 │         [class.active]="[32mhasActivity[37m(task)"
+         ╵                         [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'scrollToId' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:29:17:
+[37m      29 │         (click)="[32mscrollToId[37m('task-activity-section')"
+         ╵                  [32m~~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2353: Object literal may only specify known properties, and 'details' does not exist in type 'Record<TaskSectionId, boolean>'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.ts:240:4:
+[37m      240 │     [32mdetails[37m: false,
+          ╵     [32m~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'taskStage' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:11:63:
+[37m      11 │ ...hase-step" [class.active]="[32mtaskStage[37m(task) === 1" (click)="scro...
+         ╵                               [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'taskStage' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:15:47:
+[37m      15 │ ...n class="phase-line" [class.filled]="[32mtaskStage[37m(task) >= 2"></span>
+         ╵                                         [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'taskStage' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:19:24:
+[37m      19 │         [class.active]="[32mtaskStage[37m(task) === 2"
+         ╵                         [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'taskStage' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:20:20:
+[37m      20 │         [disabled]="[32mtaskStage[37m(task) < 2"
+         ╵                     [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'taskStage' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:26:47:
+[37m      26 │ ...n class="phase-line" [class.filled]="[32mtaskStage[37m(task) >= 3"></span>
+         ╵                                         [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'taskStage' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:30:24:
+[37m      30 │         [class.active]="[32mtaskStage[37m(task) === 3"
+         ╵                         [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG9: Property 'taskStage' does not exist on type 'TaskFormComponent'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:31:20:
+[37m      31 │         [disabled]="[32mtaskStage[37m(task) < 2"
+         ╵                     [32m~~~~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG5002: Unexpected closing tag "div". It may happen when the tag has already been closed by another tag. For more info see https://www.w3.org/TR/html5/syntax.html#closing-elements-that-have-implied-end-tags[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/task-drawer/task-form.component.html:264:8:
+[37m      264 │         [32m</div>[37m
+          ╵         [32m~~~~~~[0m
+
+  Error occurs in the template of component TaskFormComponent.
+
+    src/app/features/task-drawer/task-form.component.ts:32:15:
+[37m      32 │   templateUrl: [32m'./task-form.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m

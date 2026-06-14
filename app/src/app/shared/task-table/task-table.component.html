@@ -18,7 +18,7 @@
 <div *ngIf="selectable && selectedCount" class="bulk-bar">
   <span class="bulk-count">{{ selectedCount }} {{ 'tasks.bulk.selected' | t }}</span>
 
-  <div class="bulk-group">
+  <div class="bulk-group" *ngIf="features.taskPriority">
     <label>{{ 'common.priority' | t }}</label>
     <app-searchable-select
       [ngModel]="''"
@@ -51,6 +51,15 @@
   <button type="button" class="bulk-clear" (click)="clearSelection()">{{ 'tasks.bulk.clear' | t }}</button>
 </div>
 
+<!-- ── Date-bucket order toggle (only when grouped by date) ────────────────── -->
+<div class="due-order-bar" *ngIf="groupBy === 'due' && hasTasks">
+  <button type="button" class="due-order-toggle" (click)="toggleDueGroupOrder()">
+    <span class="due-order-label">{{ 'tasks.dueOrder.label' | t }}:</span>
+    {{ (dueGroupDir === 'asc' ? 'tasks.dueOrder.earliestFirst' : 'tasks.dueOrder.latestFirst') | t }}
+    <span class="due-order-caret">{{ dueGroupDir === 'asc' ? '↑' : '↓' }}</span>
+  </button>
+</div>
+
 <!-- ── Task table (grouped) ────────────────────────────────────────────────── -->
 <div *ngIf="hasTasks; else noTasks" class="task-groups">
   <div *ngFor="let group of groupedTasks; trackBy: trackGroup" class="task-group" [ngClass]="'tone-' + group.tone">
@@ -67,7 +76,7 @@
       </label>
     </div>
 
-    <div class="task-table" [class.with-select]="selectable" *ngIf="!isCollapsed(group.id)">
+    <div class="task-table" [class.with-select]="selectable" [class.priority-hidden]="!features.taskPriority" *ngIf="!isCollapsed(group.id)">
       <div class="task-table-header">
         <span class="th-select" *ngIf="selectable"></span>
         <span>
@@ -85,7 +94,7 @@
             {{ 'common.due' | t }}<span class="th-caret">{{ sortIndicator('due') }}</span>
           </button>
         </span>
-        <span class="col-hide-sm">
+        <span class="col-hide-sm" *ngIf="features.taskPriority">
           <button type="button" class="th-sort" (click)="sortBy('priority')">
             {{ 'common.priority' | t }}<span class="th-caret">{{ sortIndicator('priority') }}</span>
           </button>
@@ -93,7 +102,7 @@
         <span class="col-hide-sm">{{ 'tasks.col.assignee' | t }}</span>
       </div>
 
-      <div *ngFor="let task of group.tasks; trackBy: trackTask" class="task-row-wrapper">
+      <div *ngFor="let task of group.tasks; trackBy: trackTask" class="task-row-wrapper" [class.menu-open]="isRowMenuOpen(task)">
 
         <!-- ── Main row ──────────────────────────────────────────────────── -->
         <article
@@ -188,15 +197,9 @@
             </ng-template>
           </div>
 
-          <!-- Title + origin + checklist progress -->
+          <!-- Title + checklist progress -->
           <div class="cell cell-title">
             <div class="title-main">
-              <span
-                class="origin-badge"
-                [class.origin-meeting]="isMeetingTask(task)"
-                [class.origin-board]="!isMeetingTask(task)"
-              >{{ (isMeetingTask(task) ? 'tasks.badge.meeting' : 'tasks.badge.board') | t }}</span>
-
               <!-- Inline-editable title -->
               <input
                 *ngIf="editable && editingTitleId === task.id; else titleDisplay"
@@ -224,13 +227,15 @@
               <span class="sub-context">{{ taskContext(task) || '—' }}</span>
               <span *ngIf="sourceMeetingName(task) as mtg" class="sub-meeting">· {{ mtg }}</span>
             </div>
-            <ng-container *ngIf="checklistProgress(task) as cl">
-              <div class="checklist-row">
-                <div class="checklist-bar">
-                  <div class="checklist-fill" [style.width.%]="cl.pct"></div>
+            <ng-container *ngIf="features.taskChecklist">
+              <ng-container *ngIf="checklistProgress(task) as cl">
+                <div class="checklist-row">
+                  <div class="checklist-bar">
+                    <div class="checklist-fill" [style.width.%]="cl.pct"></div>
+                  </div>
+                  <span class="checklist-fraction">{{ cl.done }}/{{ cl.total }}</span>
                 </div>
-                <span class="checklist-fraction">{{ cl.done }}/{{ cl.total }}</span>
-              </div>
+              </ng-container>
             </ng-container>
             <span *ngIf="showWaitingReason(task)" class="waiting-reason" [title]="task.waitingReason">
               ⏳ {{ task.waitingReason }}
@@ -253,7 +258,7 @@
           </div>
 
           <!-- Priority -->
-          <div class="cell cell-priority col-hide-sm" (click)="$event.stopPropagation()">
+          <div class="cell cell-priority col-hide-sm" *ngIf="features.taskPriority" (click)="$event.stopPropagation()">
             <app-searchable-select
               *ngIf="editable; else priorityReadonly"
               class="priority-select"
@@ -322,7 +327,7 @@
 
         <!-- ── Expanded panel: interactive checklist + open button ─────────── -->
         <div *ngIf="expandable && expandedTaskId === task.id" class="task-expand-panel" (click)="$event.stopPropagation()">
-          <div class="expand-checklist">
+          <div class="expand-checklist" *ngIf="features.taskChecklist">
             <div class="expand-checklist-head">
               <span class="expand-section-label">{{ 'tasks.expand.checklist' | t }}</span>
               <ng-container *ngIf="checklistProgress(task) as cl">

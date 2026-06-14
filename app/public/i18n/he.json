@@ -108,6 +108,7 @@
     "title": "פגישות",
     "subtitle": "כל פגישה והעבודה שנולדה ממנה — כל הלקוחות, מסך אחד.",
     "newMeeting": "פגישה חדשה",
+    "editMeeting": "פגישה",
     "planMeeting": "תכנן פגישה",
     "selectCustomer": "בחר לקוח...",
     "filters": "סינון",
@@ -400,6 +401,7 @@
     "subtitle": "כל המשימות הפתוחות של הצוות — מפגישות ומלוחות — במקום אחד.",
     "openMyWork": "פתח את העבודה שלי",
     "newTask": "משימה חדשה",
+    "editTask": "משימה",
     "tiles": {
       "open": "משימות פתוחות",
       "openHint": "כל מה שעוד פעיל",
@@ -444,11 +446,16 @@
       "addStepPlaceholder": "הוסף שלב…"
     },
     "groupBy": {
-      "label": "קבץ לפי",
+      "label": "מיין לפי",
       "none": "הכל",
       "due": "תאריך יעד",
       "status": "סטטוס",
       "priority": "עדיפות"
+    },
+    "dueOrder": {
+      "label": "סדר",
+      "earliestFirst": "מהמוקדם למאוחר",
+      "latestFirst": "מהמאוחר למוקדם"
     },
     "status": {
       "reasonPlaceholder": "מדוע הסטטוס משתנה? (לפחות 3 מילים)",
@@ -537,7 +544,8 @@
     "commentPlaceholder": "תגובה, העברה או עדכון סטטוס...",
     "noComments": "אין תגובות עדיין.",
     "start": "התחל",
-    "markDone": "בוצע"
+    "markDone": "בוצע",
+    "sendReminder": "שלח תזכורת"
   },
   "placeholders": {
     "optionalBlocker": "מה חוסם? (לא חובה)"
@@ -634,7 +642,7 @@
     "summary": "מה היה",
     "summaryPlaceholder": "סיכום קצר של השיחה...",
     "notes": "מה תפסנו תוך כדי",
-    "noteContentPlaceholder": "כתוב החלטה, חסם, פעולה או הערה...",
+    "noteContentPlaceholder": "כתוב הערה",
     "addNote": "הוסף",
     "nextMeetingDate": "פגישה הבאה",
     "attachmentsPlaceholder": "צירוף קבצים יגיע בגרסה הבאה.",
@@ -650,7 +658,7 @@
       "Closed": "נסגרה"
     },
     "wrapUp": "סיכום",
-    "publishRecap": "פרסם סיכום מלא",
+    "publishRecap": "שלח סיכום במייל",
     "publishRecapHint": "בונה סיכום מלא מהתוכן, ההחלטות, המשימות, החסמים ותאריך הפגישה הבאה.",
     "planSection": "תכנון",
     "planSubtitle": "הכן את ההקשר לפני שמנהלים את הפגישה",
@@ -736,6 +744,14 @@
   "meetingTask": {
     "title": "משימה",
     "details": "פרטים",
+    "stepSetup": "הגדרה",
+    "stepDetails": "פרטים",
+    "stepDone": "בוצע",
+    "stepActivity": "מעקב",
+    "setupSubtitle": "הגדר את המשימה לפני שמקצים אותה",
+    "selectClientToUnlock": "בחר לקוח כדי לפתוח אזור זה.",
+    "selectMeeting": "שייך פגישה (אופציונלי)",
+    "noMeeting": "ללא פגישה",
     "taskTitle": "מה צריך לקרות",
     "taskTitlePlaceholder": "פעולה אחת ברורה...",
     "description": "פרטים",
@@ -850,15 +866,11 @@
   },
   "settings": {
     "mailNotifications": "התראות מייל",
-    "mailTestButton": "שלח מייל בדיקה",
-    "mailTestSending": "שולח מייל בדיקה...",
-    "mailTestSuccess": "מייל בדיקה נשלח אל {{email}}",
-    "mailTestFailed": "לא ניתן לשלוח מייל בדיקה",
     "mailNotif": {
       "newTasks": "התראה במייל על משימות חדשות",
       "overdueTasks": "על משימות באיחור",
       "dueTodayTasks": "משימות להיום",
-      "meetingSummaries": "כל סיכום פגישה + אופציה למאוחר יותר"
+      "meetingSummaries": "כל סיכום פגישה"
     }
   }
 }

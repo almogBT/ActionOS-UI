@@ -7,7 +7,7 @@ import { IconComponent, IconName } from '../icons/icon.component';
 import { AppDatePipe } from '../pipes/app-date.pipe';
 import { StatModalComponent } from '../stat-modal/stat-modal.component';
 
-export type MeetingCardVariant = 'grid' | 'rail';
+export type MeetingCardVariant = 'grid' | 'rail' | 'row';
 
 /**
  * The ONE way ActionOS renders a meeting — the meeting equivalent of the shared
@@ -23,6 +23,7 @@ export type MeetingCardVariant = 'grid' | 'rail';
  *
  *   variant="grid"  full tile, fixed height (lanes, lists, popups)
  *   variant="rail"  compact tile for the horizontal attention carousel
+ *   variant="row"   single-line horizontal row for the meetings lanes list
  */
 @Component({
   selector: 'app-meeting-card',
@@ -60,6 +61,7 @@ export class MeetingCardComponent {
 
   @HostBinding('class.mc-grid') get isGrid(): boolean { return this.variant === 'grid'; }
   @HostBinding('class.mc-rail') get isRail(): boolean { return this.variant === 'rail'; }
+  @HostBinding('class.mc-row')  get isRow(): boolean { return this.variant === 'row'; }
   @HostBinding('class.card-led') get isLed(): boolean {
     return this.meeting.meetingLeaderEmployeeId === this.workspace.currentEmployeeId;
   }

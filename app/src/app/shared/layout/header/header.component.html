@@ -69,7 +69,7 @@
                 <button type="button" class="popover-item" (click)="jumpToTask(task.id)">
                   <span class="popover-item-title">{{ task.title }}</span>
                   <span class="popover-item-meta">
-                    <span class="priority-dot" [ngClass]="'dot-' + task.priority.toLowerCase()" aria-hidden="true"></span>
+                    <span class="priority-dot" *ngIf="features.taskPriority" [ngClass]="'dot-' + task.priority.toLowerCase()" aria-hidden="true"></span>
                     {{ task.board }}
                   </span>
                 </button>
@@ -83,7 +83,7 @@
                 <button type="button" class="popover-item" (click)="jumpToTask(task.id)">
                   <span class="popover-item-title">{{ task.title }}</span>
                   <span class="popover-item-meta">
-                    <span class="priority-dot" [ngClass]="'dot-' + task.priority.toLowerCase()" aria-hidden="true"></span>
+                    <span class="priority-dot" *ngIf="features.taskPriority" [ngClass]="'dot-' + task.priority.toLowerCase()" aria-hidden="true"></span>
                     {{ task.board }}
                   </span>
                 </button>
@@ -155,23 +155,6 @@
               </button>
             </li>
           </ul>
-          <button
-            type="button"
-            class="mail-test-btn"
-            (click)="sendTestMail()"
-            [disabled]="testMailSending()"
-          >
-            <app-icon name="zap" [size]="14"></app-icon>
-            <span>{{ (testMailSending() ? 'settings.mailTestSending' : 'settings.mailTestButton') | t }}</span>
-          </button>
-          <p
-            class="mail-test-status"
-            *ngIf="testMailStatus() as status"
-            [class.success]="status.kind === 'success'"
-            [class.error]="status.kind === 'error'"
-          >
-            {{ status.message }}
-          </p>
         </div>
       </div>
     </div>

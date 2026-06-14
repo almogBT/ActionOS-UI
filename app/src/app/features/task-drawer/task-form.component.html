@@ -1,0 +1,359 @@
+<div class="task-form-content" *ngIf="task as task">
+
+    <!-- ── Progress stepper: Set up → Details → Done ──────────────────────────
+         A 3-stage lifecycle indicator (mirrors the meeting form's stepper look):
+           1 Set up   — client + title chosen
+           2 Details  — adding details / files / status
+           3 Done     — task moved to the Done status
+         taskStage(task) returns the current stage; earlier stages read as passed
+         (filled connectors) and later stages stay locked until set-up is done. -->
+    <nav class="phase-stepper" aria-label="Task progress">
+      <button type="button" class="phase-step" [class.active]="taskStage(task) === 1" (click)="scrollToId('task-setup-section')">
+        <span class="phase-dot">1</span>
+        <span class="phase-label">{{ 'meetingTask.stepSetup' | t }}</span>
+      </button>
+      <span class="phase-line" [class.filled]="taskStage(task) >= 2"></span>
+      <button
+        type="button"
+        class="phase-step"
+        [class.active]="taskStage(task) === 2"
+        [disabled]="taskStage(task) < 2"
+        (click)="scrollToId('task-setup-section')"
+      >
+        <span class="phase-dot">2</span>
+        <span class="phase-label">{{ 'meetingTask.stepDetails' | t }}</span>
+      </button>
+      <span class="phase-line" [class.filled]="taskStage(task) >= 3"></span>
+      <button
+        type="button"
+        class="phase-step"
+        [class.active]="taskStage(task) === 3"
+        [disabled]="taskStage(task) < 2"
+        (click)="scrollToId('task-setup-section')"
+      >
+        <span class="phase-dot">3</span>
+        <span class="phase-label">{{ 'meetingTask.stepDone' | t }}</span>
+      </button>
+    </nav>
+
+    <!-- ── 1. Set up: client (gate) · title · status/priority/assignee · due · description ── -->
+    <section class="panel" id="task-setup-section">
+      <div class="panel-header">
+        <div class="panel-header-lead">
+          <button type="button" class="section-toggle" [class.collapsed]="isSectionCollapsed('setup')" (click)="toggleSection('setup')" aria-label="Toggle section">▾</button>
+          <div>
+            <span class="eyebrow">{{ (task.customerId && workspace.clientName(task.customerId)) || ('meetingTask.customer' | t) }}</span>
+            <h3>{{ 'meetingTask.title' | t }}</h3>
+            <small class="muted">{{ 'meetingTask.setupSubtitle' | t }}</small>
+          </div>
+        </div>
+      </div>
+
+      <ng-container *ngIf="!isSectionCollapsed('setup')">
+
+        <div class="section-body">
+
+          <!-- New task: pick the client and (one of its) meetings in one row. The
+               meeting field appears once a client is chosen. Existing tasks can't
+               change either (the backend sets the meeting link only at creation),
+               so they show a read-only summary line instead. -->
+          <div class="form-grid" *ngIf="workspace.isUnsavedDraft(task.id); else existingMeta">
+            <label class="field-control" [class.field-missing]="isMissingCustomer(task)" [class.wide]="!task.customerId">
+              <span>{{ 'meetingTask.customer' | t }}<span class="req"> *</span></span>
+              <app-searchable-select
+                [ngModel]="task.customerId"
+                (ngModelChange)="changeTaskCustomer(task, $event)"
+                [options]="customerSelectOptions"
+                [placeholder]="'tasks.addTask.customerPlaceholder' | t"
+                [crossLanguageMatch]="true"
+              ></app-searchable-select>
+              <small class="muted customer-hint" *ngIf="isMissingCustomer(task)">{{ 'tasks.addTask.customerRequired' | t }}</small>
+            </label>
+
+            <label class="field-control" *ngIf="task.customerId">
+              {{ 'meetingTask.sourceMeeting' | t }}
+              <app-searchable-select
+                [ngModel]="task.sourceMeetingId"
+                (ngModelChange)="updateMeetingTaskField(task, 'sourceMeetingId', $event)"
+                [options]="meetingSelectOptions(task)"
+                [placeholder]="'meetingTask.selectMeeting' | t"
+                [crossLanguageMatch]="true"
+              ></app-searchable-select>
+            </label>
+          </div>
+
+          <ng-template #existingMeta>
+            <p class="dh-meta-line">
+              <span class="eyebrow">{{ 'meetingTask.openedBy' | t }}: {{ workspace.employeeName(task.openedByEmployeeId) || '-' }}</span>
+              <span *ngIf="task.source === 'meeting' && workspace.customerMeeting(task.sourceMeetingId) as meeting">· {{ 'meetingTask.sourceMeeting' | t }}: {{ meeting.subject || '-' }}</span>
+              <span *ngIf="isCompletedStatus(task.status) && task.completedAt">· {{ 'common.done' | t }}: {{ task.completedAt | appDate:'datetime':'-' }}</span>
+            </p>
+          </ng-template>
+
+          <!-- The rest of the task definition — unlocked once a client is chosen. -->
+          <ng-container *ngIf="!isMissingCustomer(task)">
+
+          <div class="form-grid">
+            <label class="field-control">
+              {{ 'meetingTask.taskTitle' | t }}
+              <input
+                type="text"
+                [ngModel]="task.title"
+                (ngModelChange)="updateMeetingTaskField(task, 'title', $event)"
+                [placeholder]="'meetingTask.taskTitlePlaceholder' | t"
+              />
+            </label>
+
+            <label class="field-control">
+              {{ 'meetingTask.dueDate' | t }}
+              <input
+                type="date"
+                [class.overdue]="task.dueDate && task.dueDate < workspace.todayIso && !isCompletedStatus(task.status)"
+                [ngModel]="task.dueDate"
+                (ngModelChange)="updateMeetingTaskField(task, 'dueDate', $event)"
+              />
+            </label>
+          </div>
+
+          <!-- Status · Priority · Assigned to — labeled chips, one row -->
+          <div class="dh-fields" [class.no-priority]="!features.taskPriority">
+            <label class="dh-field">
+              <span class="dh-field-label">{{ 'meetingTask.status' | t }}</span>
+              <app-searchable-select
+                class="chip-select status-chip-select"
+                [ngClass]="workspace.statusClass(task.status)"
+                [ngModel]="task.status"
+                (ngModelChange)="updateMeetingTaskStatus(task, $event)"
+                [options]="meetingTaskStatusOptions"
+                [createNewLabel]="'+ ' + ('tasks.status.addStatus' | t)"
+                (createNew)="startAddStatus()"
+              ></app-searchable-select>
+            </label>
+
+            <label class="dh-field" *ngIf="features.taskPriority">
+              <span class="dh-field-label">{{ 'meetingTask.priority' | t }}</span>
+              <app-searchable-select
+                class="chip-select priority-chip-select"
+                [ngClass]="workspace.statusClass(task.priority)"
+                [ngModel]="task.priority"
+                (ngModelChange)="updateMeetingTaskField(task, 'priority', $event)"
+                [options]="taskPriorityOptions"
+              ></app-searchable-select>
+            </label>
+
+            <label class="dh-field">
+              <span class="dh-field-label">{{ 'meetingTask.assignedTo' | t }}</span>
+              <app-searchable-select
+                class="chip-select assignee-chip-select"
+                [ngModel]="task.assignedToEmployeeId"
+                (ngModelChange)="updateMeetingTaskField(task, 'assignedToEmployeeId', $event)"
+                [options]="employeeSelectOptions"
+                [placeholder]="'common.unassigned' | t"
+              ></app-searchable-select>
+            </label>
+          </div>
+
+          <!-- Add a custom status (inline) -->
+          <div class="add-status-row" *ngIf="addingStatus">
+            <input
+              type="text"
+              [(ngModel)]="newStatusDraft"
+              [placeholder]="'tasks.status.addStatusPlaceholder' | t"
+              (keydown.enter)="confirmAddStatus(task)"
+              (keydown.escape)="cancelAddStatus()"
+            />
+            <button type="button" class="add-confirm" (click)="confirmAddStatus(task)">{{ 'common.add' | t }}</button>
+            <button type="button" class="add-cancel" (click)="cancelAddStatus()">{{ 'common.cancel' | t }}</button>
+          </div>
+
+          <!-- Status-change reason (staged change → reason → confirm) -->
+          <div class="dh-reason" *ngIf="shouldShowStatusReason(task)">
+            <label class="field-control">
+              Status update note
+              <textarea
+                rows="2"
+                [ngModel]="statusChangeReason"
+                (ngModelChange)="statusChangeReason = $event; onStatusReasonChanged()"
+                placeholder="Required when changing status (at least 3 words)."
+              ></textarea>
+              <small class="muted status-reason-hint">Words: {{ statusReasonWordCount }}/3 minimum</small>
+            </label>
+
+            <label class="field-control" *ngIf="showWaitingReason(task)">
+              Waiting reason
+              <input
+                [ngModel]="task.waitingReason || ''"
+                (ngModelChange)="updateMeetingTaskField(task, 'waitingReason', $event)"
+                placeholder="Required for waiting statuses"
+              />
+            </label>
+
+            <p *ngIf="statusValidationMessage" class="status-validation">{{ statusValidationMessage }}</p>
+            <button type="button" class="primary-action small" (click)="confirmStatusChange(task)">
+              {{ 'tasks.status.confirm' | t }}
+            </button>
+          </div>
+
+          <label class="field-control">
+            {{ 'meetingTask.description' | t }}
+            <textarea
+              rows="3"
+              [ngModel]="task.description"
+              (ngModelChange)="updateMeetingTaskField(task, 'description', $event)"
+              [placeholder]="'meetingTask.descriptionPlaceholder' | t"
+            ></textarea>
+          </label>
+
+          <!-- Files (attachments) — live right here in the Set up notes area -->
+          <div class="details-block">
+            <div class="details-block-head">
+              <span class="eyebrow">{{ 'customerMeeting.attachments' | t }}</span>
+              <button type="button" class="ghost-action small" [disabled]="uploadingAttachment" (click)="triggerFileInput()">
+                {{ uploadingAttachment ? ('customerMeeting.uploading' | t) : ('customerMeeting.addFile' | t) }}
+              </button>
+              <input #drawerFileInput type="file" multiple style="display:none" (change)="onFileSelected($event, task)" />
+            </div>
+            <div *ngIf="workspace.attachmentsFor('meeting-task', task.id).length" class="task-attach-list">
+              <div class="task-attach-row" *ngFor="let att of workspace.attachmentsFor('meeting-task', task.id)">
+                <span class="task-attach-name">{{ att.fileName }}</span>
+                <small class="muted">{{ att.uploadedAt | appDate }}</small>
+                <div class="task-attach-actions">
+                  <button
+                    type="button"
+                    class="ghost-action small"
+                    [disabled]="!workspace.canDownloadAttachment(att)"
+                    (click)="workspace.downloadAttachment(att)"
+                  >
+                    {{ 'customerMeeting.download' | t }}
+                  </button>
+                  <button type="button" class="ghost-action small danger" (click)="workspace.removeAttachment(att.id)">x</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Steps (checklist) — feature-flagged; shown only when it has steps (or you're adding one) -->
+          <div class="details-block" *ngIf="features.taskChecklist && (task.checklist?.length || addingStep)">
+            <div class="details-block-head">
+              <span class="eyebrow">{{ 'common.checklist' | t }}</span>
+              <span class="muted" *ngIf="task.checklist?.length">{{ 'myWork.checklistComplete' | t: { progress: workspace.meetingTaskChecklistProgress(task) } }}</span>
+            </div>
+            <div class="progress-track" *ngIf="task.checklist?.length">
+              <span [style.width.%]="workspace.meetingTaskChecklistProgress(task)"></span>
+            </div>
+            <div class="checklist">
+              <label *ngFor="let item of task.checklist">
+                <input
+                  type="checkbox"
+                  [ngModel]="item.done"
+                  (ngModelChange)="workspace.updateMeetingTaskChecklistItem(task, item, $event)"
+                />
+                <span>{{ item.label }}</span>
+              </label>
+            </div>
+            <form class="inline-create" (ngSubmit)="addMeetingChecklistItem(task)">
+              <input name="meetingChecklistText" [(ngModel)]="meetingChecklistText" [placeholder]="'drawer.addChecklistPlaceholder' | t" />
+              <button type="submit" class="ghost-action" [disabled]="!meetingChecklistText.trim()">{{ 'common.add' | t }}</button>
+            </form>
+          </div>
+
+          <!-- Add step — feature-flagged; only until the task has a checklist -->
+          <div class="details-actions" *ngIf="features.taskChecklist && !task.checklist?.length && !addingStep">
+            <button type="button" class="ghost-action small" (click)="addingStep = true">+ {{ 'tasks.expand.addStep' | t }}</button>
+          </div>
+          </ng-container>
+        </div>
+      </ng-container>
+    </section>
+
+    <!-- ── 2. Activity: comments · watchers (feature-flagged) ─────────────── -->
+    <section class="panel" id="task-activity-section" *ngIf="features.taskActivity">
+      <div class="panel-header">
+        <div class="panel-header-lead">
+          <button type="button" class="section-toggle" [class.collapsed]="isSectionCollapsed('activity')" (click)="toggleSection('activity')" aria-label="Toggle section">▾</button>
+          <div>
+            <span class="eyebrow">{{ 'drawer.discussion' | t }}</span>
+            <h3>{{ 'common.comments' | t }}</h3>
+          </div>
+        </div>
+      </div>
+
+      <ng-container *ngIf="!isSectionCollapsed('activity')">
+        <div class="empty-state compact-empty" *ngIf="isMissingCustomer(task)">
+          <strong>{{ 'meetingTask.selectClientToUnlock' | t }}</strong>
+        </div>
+
+        <div class="section-body" *ngIf="!isMissingCustomer(task)">
+          <form class="comment-form" (ngSubmit)="addMeetingComment(task)">
+            <textarea name="meetingCommentText" rows="3" [(ngModel)]="meetingCommentText" [placeholder]="'drawer.commentPlaceholder' | t"></textarea>
+            <button type="submit" class="primary-action" [disabled]="!meetingCommentText.trim()">{{ 'common.comment' | t }}</button>
+          </form>
+
+          <div *ngIf="workspace.commentsForMeetingTask(task.id).length; else noMeetingDrawerComments" class="comment-list">
+            <article
+              *ngFor="let comment of workspace.commentsForMeetingTask(task.id)"
+              class="comment"
+              [class.is-system]="isStatusComment(comment.body)"
+            >
+              <div class="comment-head">
+                <strong>{{ workspace.memberName(comment.createdByUserId) }}</strong>
+                <small>{{ comment.createdAt | appDate:'datetime' }}</small>
+              </div>
+              <p>{{ comment.body }}</p>
+            </article>
+          </div>
+
+          <ng-template #noMeetingDrawerComments>
+            <div class="empty-state compact-empty">{{ 'drawer.noComments' | t }}</div>
+          </ng-template>
+
+          <!-- Watchers -->
+          <div class="dh-watchers">
+            <span class="dh-watchers-label">{{ 'common.watchers' | t }}</span>
+            <div *ngIf="task.watcherEmployeeIds.length" class="watcher-chips">
+              <div *ngFor="let empId of task.watcherEmployeeIds" class="watcher-chip">
+                <span>{{ workspace.employeeName(empId) }}</span>
+                <button type="button" class="ghost-action small" (click)="workspace.toggleMeetingTaskWatcher(task, empId, false)">x</button>
+              </div>
+            </div>
+            <app-searchable-select
+              class="watcher-add"
+              [options]="watcherCandidateOptions(task)"
+              [ngModel]="watcherSelectModel"
+              (ngModelChange)="onWatcherSelect(task, $event)"
+              placeholder="+"
+            ></app-searchable-select>
+          </div>
+        </div>
+      </ng-container>
+    </section>
+
+    <!-- ── Sticky action bar: Done · Send reminder · Close ────────────────────
+         Always visible (even while gated). Done & Send reminder need a client
+         (a real task), so they're disabled until one is chosen; Close always
+         works. -->
+    <div class="action-bar">
+      <button
+        type="button"
+        class="primary-action"
+        [disabled]="isMissingCustomer(task)"
+        [title]="isMissingCustomer(task) ? ('tasks.addTask.customerRequired' | t) : ''"
+        (click)="updateMeetingTaskStatus(task, 'Done')"
+      >
+        {{ 'drawer.markDone' | t }}
+      </button>
+      <span class="action-bar-spacer"></span>
+      <button
+        type="button"
+        class="ghost-action"
+        [disabled]="isMissingCustomer(task)"
+        (click)="workspace.nudgeMeetingTaskOwner(task)"
+      >
+        {{ 'drawer.sendReminder' | t }}
+      </button>
+      <span class="action-bar-spacer"></span>
+      <button type="button" class="ghost-action" (click)="close()">
+        {{ 'common.close' | t }}
+      </button>
+    </div>
+</div>

@@ -23,7 +23,6 @@ import {
   ActionosApiCustomerDto,
   ActionosApiCustomerMeetingDto,
   ActionosApiMeetingNoteDto,
-  ActionosTestEmailResponse,
   ActionosApiTaskDto,
   ActionosApiUserDto,
   ActionosBootstrapDto,
@@ -362,6 +361,15 @@ export class ActionosWorkspaceService {
   selectedTaskKind: 'board-task' | 'meeting-task' = 'meeting-task';
   private quickCaptureTaskDraft: Task | null = null;
   private quickCaptureDraftNumber = 0;
+  /**
+   * A second, independent new-task draft used by the embedded task form on the
+   * Tasks page (the right-pane form). It is deliberately separate from
+   * `quickCaptureTaskDraft` (which is owned by the drawer / quick-capture flow)
+   * so the always-present page form never collides with selecting/editing an
+   * existing task in the drawer. Like the quick-capture draft it lives only in
+   * memory until the user assigns a client, at which point it is persisted.
+   */
+  private embeddedTaskDraft: Task | null = null;
 
   private membersState: Member[] = [];
   private tasksState: Task[] = [];
@@ -1143,6 +1151,22 @@ export class ActionosWorkspaceService {
       this.selectedTaskKind = 'meeting-task';
     }
     this.drawerOpen = false;
+  }
+
+  /**
+   * Create (and return) a fresh in-memory draft for the embedded Tasks-page
+   * form. Independent of the drawer: it does NOT touch selectedTaskId/drawerOpen.
+   * The caller binds to it by id via `Task(id)` so the form always reads the
+   * live draft object.
+   */
+  newEmbeddedTaskDraft(): Task {
+    this.embeddedTaskDraft = this.createQuickCaptureTaskDraft('');
+    return this.embeddedTaskDraft;
+  }
+
+  /** Discard the embedded draft (used when the page form is reset/closed). */
+  clearEmbeddedTaskDraft(): void {
+    this.embeddedTaskDraft = null;
   }
 
   updateStatus(task: Task, status: TaskStatus): void {
@@ -2528,22 +2552,6 @@ export class ActionosWorkspaceService {
     return detail ?? httpError.message;
   }
 
-  async sendTestEmail(): Promise<ActionosTestEmailResponse> {
-    const orgGroupId = this.getOrgGroupForMutation();
-    if (!orgGroupId) {
-      const message = 'ActionOS could not send a test email because no organization is selected.';
-      this.reportBackendIssue(message);
-      throw new Error(message);
-    }
-
-    try {
-      return await this.actionosApi.sendTestEmail({ orgGroupId });
-    } catch (error) {
-      this.reportBackendIssue('ActionOS could not send a test email.', error);
-      throw error;
-    }
-  }
-
   private resolveCustomerId(customerId: string): string {
     let current = customerId;
     const seen = new Set<string>();
@@ -3829,9 +3837,19 @@ export class ActionosWorkspaceService {
     return this.allTasks;
   }
 
+  /** True while a task is still an in-memory draft (not yet persisted to the
+   *  backend). The meeting link can only be set at creation, so the task form
+   *  offers the meeting picker only for unsaved drafts. */
+  isUnsavedDraft(id: string): boolean {
+    return this.quickCaptureTaskDraft?.id === id || this.embeddedTaskDraft?.id === id;
+  }
+
   Task(id: string): Task | undefined {
     if (this.quickCaptureTaskDraft?.id === id) {
       return this.quickCaptureTaskDraft;
+    }
+    if (this.embeddedTaskDraft?.id === id) {
+      return this.embeddedTaskDraft;
     }
     const resolvedTaskId = this.resolveTaskId(id);
     return this.allTasks.find(task => task.id === resolvedTaskId);
@@ -4140,6 +4158,9 @@ export class ActionosWorkspaceService {
     if (this.quickCaptureTaskDraft?.id === resolvedTaskId) {
       return this.updateQuickCaptureTaskDraft(next);
     }
+    if (this.embeddedTaskDraft?.id === resolvedTaskId) {
+      return this.updateEmbeddedTaskDraft(next);
+    }
     const index = this.tasksState.findIndex(task => task.id === resolvedTaskId);
     if (index < 0) {
       return null;
@@ -4199,7 +4220,9 @@ export class ActionosWorkspaceService {
     }
 
     const updated = this.applyQuickCaptureDraftChanges(draft, changes);
-    if (changes.customerId !== undefined && updated.customerId) {
+    // Persist only once the draft has BOTH a client and a title (the backend
+    // requires a title) — keeps the client-first gate from saving a titleless task.
+    if (updated.customerId && updated.title.trim()) {
       this.quickCaptureTaskDraft = null;
       const saved = this.addTask({
         title: updated.title,
@@ -4229,6 +4252,51 @@ export class ActionosWorkspaceService {
     return updated;
   }
 
+  /**
+   * Embedded Tasks-page draft counterpart of `updateQuickCaptureTaskDraft`.
+   * Same persist-on-client-assign rule, but it never opens the drawer — the
+   * form is already on the page. Returns the saved task (with its new id) so the
+   * page can rebind the form to keep editing it inline.
+   */
+  private updateEmbeddedTaskDraft(changes: UpdateMeetingTaskInput): Task | null {
+    const draft = this.embeddedTaskDraft;
+    if (!draft) {
+      return null;
+    }
+
+    const updated = this.applyQuickCaptureDraftChanges(draft, changes);
+    // Persist into a real task only once it has BOTH a client and a title — the
+    // backend rejects a task with no title. The client-first gate sets the client
+    // before the title is entered, so we keep editing in memory until the title
+    // arrives (mirrors the meeting form, which needs subject+customer+date first).
+    if (updated.customerId && updated.title.trim()) {
+      this.embeddedTaskDraft = null;
+      return this.addTask({
+        title: updated.title,
+        description: updated.description,
+        board: this.clientName(updated.customerId) ?? updated.board,
+        source: updated.source,
+        customerId: updated.customerId,
+        sourceMeetingId: updated.sourceMeetingId || undefined,
+        openedByEmployeeId: updated.openedByEmployeeId,
+        assignedToEmployeeId: updated.assignedToEmployeeId,
+        priority: updated.priority,
+        status: updated.status,
+        dueDate: updated.dueDate,
+        assigneeId: updated.assigneeIds[0] || this.currentUserId,
+        checklist: updated.checklist,
+        watcherIds: updated.watcherIds,
+        watcherEmployeeIds: updated.watcherEmployeeIds,
+        waitingReason: updated.waitingReason,
+        treatmentNotes: updated.treatmentNotes,
+        completedAt: updated.completedAt
+      });
+    }
+
+    this.embeddedTaskDraft = updated;
+    return updated;
+  }
+
   private applyQuickCaptureDraftChanges(task: Task, changes: UpdateMeetingTaskInput): Task {
     const assignedToEmployeeId = changes.assignedToEmployeeId !== undefined
       ? changes.assignedToEmployeeId
@@ -4236,6 +4304,10 @@ export class ActionosWorkspaceService {
     const assigneeMemberId = this.memberIdForEmployee(assignedToEmployeeId) || task.assigneeIds[0] || this.currentUserId;
     const customerId = changes.customerId !== undefined ? changes.customerId : task.customerId;
     const customerName = customerId ? this.clientName(customerId) : undefined;
+    // A draft can be linked to one of the client's meetings before it's saved; the
+    // link is sent to the backend as part of createTask. A linked draft is a meeting
+    // task, otherwise a board task.
+    const sourceMeetingId = changes.sourceMeetingId !== undefined ? changes.sourceMeetingId.trim() : task.sourceMeetingId;
     const hasWaitingReason = Object.prototype.hasOwnProperty.call(changes, 'waitingReason');
     const hasTreatmentNotes = Object.prototype.hasOwnProperty.call(changes, 'treatmentNotes');
     const hasCompletedAt = Object.prototype.hasOwnProperty.call(changes, 'completedAt');
@@ -4248,6 +4320,8 @@ export class ActionosWorkspaceService {
       description: changes.description !== undefined ? changes.description : task.description,
       board: customerName ?? task.board,
       customerId,
+      sourceMeetingId,
+      source: sourceMeetingId ? 'meeting' : 'board',
       status: changes.status ?? task.status,
       priority: changes.priority ?? task.priority,
       dueDate: changes.dueDate !== undefined ? changes.dueDate : task.dueDate,

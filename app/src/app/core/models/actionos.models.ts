@@ -334,6 +334,7 @@ export interface UpdateMeetingTaskInput {
   title?: string;
   description?: string;
   customerId?: string;
+  sourceMeetingId?: string;
   assignedToEmployeeId?: string;
   dueDate?: string;
   priority?: Priority;

@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ACTIONOS_FEATURES } from '../../core/config/actionos-ui.config';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import {
   Customer, CustomerMeeting, Task } from '../../core/models/actionos.models';
@@ -166,7 +167,7 @@ type Customer360Tab = 'meetings' | 'openTasks' | 'closedTasks' | 'attachments';
               <span *ngIf="task.dueDate" [class.overdue]="workspace.isMeetingTaskOverdue(task)">
                 {{ 'common.due' | t }} {{ task.dueDate }}
               </span>
-              <span>{{ ('priority.' + task.priority.toLowerCase()) | t }}</span>
+              <span *ngIf="features.taskPriority">{{ ('priority.' + task.priority.toLowerCase()) | t }}</span>
             </div>
           </div>
         </div>
@@ -270,6 +271,7 @@ type Customer360Tab = 'meetings' | 'openTasks' | 'closedTasks' | 'attachments';
   `]
 })
 export class Customer360Component {
+  readonly features = ACTIONOS_FEATURES;
   @Input({ required: true }) customer!: Customer;
   @Output() newMeeting = new EventEmitter<Customer>();
   @Output() prepareMeeting = new EventEmitter<Customer>();

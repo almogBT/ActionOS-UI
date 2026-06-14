@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output, inject } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActionosI18nService } from '../../core/i18n/actionos-i18n.service';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
@@ -7,9 +7,11 @@ import { CalendarEvent, Task, ViewId } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
 import { ACTIONOS_FEATURES } from '../../core/config/actionos-ui.config';
 import { CalendarStatsComponent } from '../../shared/calendar-stats/calendar-stats.component';
+import { IconComponent } from '../../shared/icons/icon.component';
 import { StatTileComponent } from '../../shared/stat-tile/stat-tile.component';
 import { GroupMode, TaskTableComponent } from '../../shared/task-table/task-table.component';
 import { MetricTasksModalComponent } from '../workspace-home/metric-tasks-modal.component';
+import { TaskFormComponent } from '../task-drawer/task-form.component';
 
 export type TaskAudience = 'all' | 'mine' | 'assigned-others';
 export type TaskOrigin   = 'all' | 'meeting' | 'standalone';
@@ -27,19 +29,37 @@ export type TaskLens     = 'open' | 'overdue' | 'today' | 'blocked';
     FormsModule,
     TranslatePipe,
     CalendarStatsComponent,
+    IconComponent,
     StatTileComponent,
     TaskTableComponent,
     MetricTasksModalComponent,
+    TaskFormComponent,
   ],
   templateUrl: './tasks.component.html',
   styleUrl: './tasks.component.scss'
 })
-export class TasksComponent {
+export class TasksComponent implements OnInit {
   @Output() viewChange = new EventEmitter<ViewId>();
 
   readonly workspace = inject(ActionosWorkspaceService);
   readonly i18n      = inject(ActionosI18nService);
   readonly features  = ACTIONOS_FEATURES;
+
+  /**
+   * The always-present right-pane new-task form edits an embedded draft (kept on
+   * the workspace, independent of the drawer). We track it by id and look it up
+   * live via `workspace.Task(id)` so the form always reads the current object —
+   * even after the draft is persisted into a real task (its id changes then).
+   */
+  embeddedTaskId = '';
+  /** True while the embedded form is a brand-new draft (drives the pane title);
+   *  flips to false once the draft is persisted into a real task. */
+  embeddedIsNew = true;
+  /** Bump to force a clean re-instantiation of the blank new-task form. */
+  formResetKey = 0;
+  trackFormKey = (_: number, k: number): number => k;
+  /** Collapsible right-pane form — open by default; clicking the title toggles it. */
+  formOpen = true;
 
   audience: TaskAudience = 'all';
   origin: TaskOrigin     = 'all';
@@ -53,12 +73,12 @@ export class TasksComponent {
     { id: 'assigned-others', labelKey: 'tasks.audience.assignedOthers' },
   ];
 
-  readonly groupByOptions: { id: GroupMode; labelKey: string }[] = [
+  readonly groupByOptions: { id: GroupMode; labelKey: string }[] = ([
     { id: 'none',     labelKey: 'tasks.groupBy.none' },
     { id: 'due',      labelKey: 'tasks.groupBy.due' },
     { id: 'status',   labelKey: 'tasks.groupBy.status' },
     { id: 'priority', labelKey: 'tasks.groupBy.priority' },
-  ];
+  ] as { id: GroupMode; labelKey: string }[]).filter(o => o.id !== 'priority' || this.features.taskPriority);
 
   readonly originOptions: { id: TaskOrigin; labelKey: string }[] = [
     { id: 'all',        labelKey: 'tasks.origin.all' },
@@ -299,8 +319,36 @@ export class TasksComponent {
 
   openView(view: ViewId): void { this.viewChange.emit(view); }
 
-  /** Open the task drawer on a fresh draft — matches the Meetings page "New meeting" button. */
-  newTask(): void { this.workspace.openNewTaskDraft(); }
+  ngOnInit(): void {
+    this.ensureEmbeddedDraft();
+  }
+
+  /** The task currently shown in the embedded right-pane form (draft or, once a
+   *  client is assigned, the persisted task). Looked up live so edits reflect. */
+  get embeddedTask(): Task | undefined {
+    return this.embeddedTaskId ? this.workspace.Task(this.embeddedTaskId) : undefined;
+  }
+
+  private ensureEmbeddedDraft(): void {
+    this.embeddedTaskId = this.workspace.newEmbeddedTaskDraft().id;
+    this.embeddedIsNew = true;
+  }
+
+  /** A new draft was persisted into a real task — keep editing it inline. */
+  onEmbeddedPersisted(task: Task): void {
+    this.embeddedTaskId = task.id;
+    this.embeddedIsNew = false;
+  }
+
+  /** Return the right pane to a fresh, blank new-task form. */
+  resetEmbeddedForm(): void {
+    this.workspace.clearEmbeddedTaskDraft();
+    this.ensureEmbeddedDraft();
+    this.formResetKey++;
+  }
+
+  /** The form is always on the page now; "new task" intents just reset it. */
+  newTask(): void { this.resetEmbeddedForm(); }
 
   trackAudience(_index: number, option: { id: TaskAudience }): TaskAudience { return option.id; }
   trackOrigin(_index: number, option: { id: TaskOrigin }): TaskOrigin { return option.id; }

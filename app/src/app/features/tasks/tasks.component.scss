@@ -27,6 +27,120 @@
   flex-shrink: 0;
 }
 
+/* ── Two-column workbench: new-task form + task table ─────────────────────────
+   Column 1 (form pane) is first in the DOM, so under RTL it renders on the
+   RIGHT at ~1/3 width; the task table fills the LEFT at ~2/3. Mirrors the
+   Meetings page `.meetings-layout`. */
+.tasks-layout {
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) minmax(0, 2fr);
+  gap: 18px;
+  align-items: start;
+}
+
+/* Pin the table column to the viewport and let the LIST scroll inside its own
+   box (mirrors the sticky form pane) instead of growing the whole page. The
+   controls stay fixed at the top of the column; only the task list scrolls. */
+.tasks-main {
+  min-width: 0;
+  position: sticky;
+  top: 0;
+  max-height: calc(100vh - 140px);
+  display: flex;
+  flex-direction: column;
+}
+
+.tasks-controls { flex-shrink: 0; }
+
+.tasks-table-scroll {
+  flex: 1 1 auto;
+  min-height: 0;            /* let the flex child shrink so overflow can kick in */
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 2px 2px 4px;     /* room so the row hover-lift/shadow isn't clipped */
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+
+  &::-webkit-scrollbar { width: 8px; }
+  &::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+}
+
+.pane-title {
+  margin: 0 0 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+/* Collapsed: the title is the whole pane, so drop the divider/spacing. */
+.pane-title.collapsed {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+/* Whole title row is the clickable toggle. */
+.pane-title-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+  text-align: start;
+}
+.pane-title-text {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+.pane-chevron {
+  flex-shrink: 0;
+  color: var(--muted);
+  transition: transform var(--duration-fast, 0.15s) ease;
+}
+.pane-title.collapsed .pane-chevron { transform: rotate(-90deg); }
+
+.new-task-pane {
+  min-width: 0;
+  /* Size to the form's own content instead of stretching to the (tall) task-table
+     column — otherwise a short form leaves a big empty gap and the sticky action
+     bar floats mid-pane. */
+  align-self: start;
+  /* Keep the form visible while the table scrolls; the form's own action footer
+     scrolls with it inside this box. */
+  position: sticky;
+  top: 0;
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  padding: 14px 16px;
+}
+
+/* Narrow / mobile: collapse to a single column. The form pane is the first DOM
+   child, so it naturally stacks on TOP of the task table. */
+@media (max-width: 900px) {
+  .tasks-layout { grid-template-columns: 1fr; }
+  .new-task-pane {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+  /* On a stacked single column, let the page scroll normally (no inner table box). */
+  .tasks-main {
+    position: static;
+    max-height: none;
+    display: block;
+  }
+  .tasks-table-scroll {
+    overflow: visible;
+    padding: 0;
+  }
+}
+
 /* ── Stat tiles ────────────────────────────────────────────────────────── */
 .tasks-metrics {
   display: grid;

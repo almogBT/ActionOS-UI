@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ACTIONOS_FEATURES } from '../../core/config/actionos-ui.config';
 import { ActionosI18nService } from '../../core/i18n/actionos-i18n.service';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import {
@@ -39,7 +40,7 @@ import { SearchableSelectComponent, SelectOption } from '../../shared/searchable
           ></textarea>
         </label>
 
-        <div class="task-meta-row">
+        <div class="task-meta-row" [class.no-priority]="!features.taskPriority">
           <label class="field-control">
             {{ 'meetingTask.assignedTo' | t }}
             <app-searchable-select
@@ -55,7 +56,7 @@ import { SearchableSelectComponent, SelectOption } from '../../shared/searchable
             <input type="date" name="taskDue" [(ngModel)]="form.dueDate" />
           </label>
 
-          <label class="field-control">
+          <label class="field-control" *ngIf="features.taskPriority">
             {{ 'meetingTask.priority' | t }}
             <app-searchable-select
               name="taskPriority"
@@ -102,6 +103,8 @@ import { SearchableSelectComponent, SelectOption } from '../../shared/searchable
       gap: 1rem;
       align-items: start;
     }
+    /* Priority hidden — assigned-to · due date fill the row. */
+    .task-meta-row.no-priority { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     small.muted { display: block; margin-top: 0.25rem; opacity: 0.7; }
     /* Cancel / Create pinned to the bottom corner of the panel. */
     .create-actions {
@@ -117,6 +120,7 @@ import { SearchableSelectComponent, SelectOption } from '../../shared/searchable
   `]
 })
 export class MeetingTaskCreationComponent {
+  readonly features = ACTIONOS_FEATURES;
   @Input({ required: true }) meetingId!: string;
   @Input({ required: true }) customerId!: string;
   @Input() sourceNote: MeetingNote | null = null;

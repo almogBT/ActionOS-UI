@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 export type SortKey = 'group' | 'status' | 'title' | 'due' | 'priority';
+import { ACTIONOS_FEATURES } from '../../core/config/actionos-ui.config';
 import { ActionosI18nService } from '../../core/i18n/actionos-i18n.service';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { ChecklistItem, CreateTaskInput, Employee, Priority, Task, TaskStatus } from '../../core/models/actionos.models';
@@ -102,6 +103,8 @@ export class TaskTableComponent {
   // ── Sorting (within each group) ───────────────────────────────────────────
   sortKey: SortKey = 'group';
   sortDir: 'asc' | 'desc' = 'asc';
+  /** Order of the date buckets when grouped by due (asc = earliest bucket first). */
+  dueGroupDir: 'asc' | 'desc' = 'asc';
   private readonly PREFS_KEY = 'actionos.taskTable.prefs';
 
   readonly priorities: Priority[] = ['Low', 'Medium', 'High', 'Critical'];
@@ -109,6 +112,7 @@ export class TaskTableComponent {
   private assigneeOptionCache: SelectOption[] = [];
   private readonly groupedTasksCache: {
     groupBy: GroupMode | null;
+    dueGroupDir: 'asc' | 'desc' | null;
     language: string;
     sortDir: 'asc' | 'desc' | null;
     sortKey: SortKey | null;
@@ -118,6 +122,7 @@ export class TaskTableComponent {
     weekEnd: string;
   } = {
     groupBy: null,
+    dueGroupDir: null,
     language: '',
     sortDir: null,
     sortKey: null,
@@ -140,11 +145,13 @@ export class TaskTableComponent {
   private readonly initialsCache = new Map<string, string>();
   private readonly avatarToneCache = new Map<string, number>();
 
-  readonly groupModes: { id: GroupMode; labelKey: string }[] = [
+  readonly features = ACTIONOS_FEATURES;
+
+  readonly groupModes: { id: GroupMode; labelKey: string }[] = ([
     { id: 'due',      labelKey: 'tasks.groupBy.due' },
     { id: 'status',   labelKey: 'tasks.groupBy.status' },
     { id: 'priority', labelKey: 'tasks.groupBy.priority' },
-  ];
+  ] as { id: GroupMode; labelKey: string }[]).filter(m => m.id !== 'priority' || ACTIONOS_FEATURES.taskPriority);
 
   /** Display order for the status grouping (open statuses only). */
   private readonly statusOrder: TaskStatus[] = [
@@ -172,6 +179,7 @@ export class TaskTableComponent {
     if (
       this.groupedTasksCache.tasks === this.tasks &&
       this.groupedTasksCache.groupBy === this.groupBy &&
+      this.groupedTasksCache.dueGroupDir === this.dueGroupDir &&
       this.groupedTasksCache.sortKey === this.sortKey &&
       this.groupedTasksCache.sortDir === this.sortDir &&
       this.groupedTasksCache.language === this.i18n.language &&
@@ -188,6 +196,7 @@ export class TaskTableComponent {
 
     this.groupedTasksCache.tasks = this.tasks;
     this.groupedTasksCache.groupBy = this.groupBy;
+    this.groupedTasksCache.dueGroupDir = this.dueGroupDir;
     this.groupedTasksCache.sortKey = this.sortKey;
     this.groupedTasksCache.sortDir = this.sortDir;
     this.groupedTasksCache.language = this.i18n.language;
@@ -249,12 +258,13 @@ export class TaskTableComponent {
       const p = JSON.parse(raw);
       if (p.sortKey) this.sortKey = p.sortKey;
       if (p.sortDir) this.sortDir = p.sortDir;
+      if (p.dueGroupDir) this.dueGroupDir = p.dueGroupDir;
     } catch { /* ignore malformed prefs */ }
   }
 
   private persistPrefs(): void {
     try {
-      localStorage.setItem(this.PREFS_KEY, JSON.stringify({ sortKey: this.sortKey, sortDir: this.sortDir }));
+      localStorage.setItem(this.PREFS_KEY, JSON.stringify({ sortKey: this.sortKey, sortDir: this.sortDir, dueGroupDir: this.dueGroupDir }));
     } catch { /* storage unavailable — ignore */ }
   }
 
@@ -300,7 +310,15 @@ export class TaskTableComponent {
     if (dueToday.length) groups.push({ id: 'due:today',    label: this.t('myWork.groups.today'),    tasks: dueToday, isDanger: false, tone: 'warn'   });
     if (thisWeek.length) groups.push({ id: 'due:thisWeek', label: this.t('myWork.groups.thisWeek'), tasks: thisWeek, isDanger: false, tone: 'accent' });
     if (later.length)    groups.push({ id: 'due:later',    label: this.t('myWork.groups.later'),    tasks: later,    isDanger: false, tone: 'muted'  });
-    return groups;
+    // Buckets are built earliest→latest; flip the whole order when the user
+    // chooses "latest first" (Later on top, Overdue at the bottom).
+    return this.dueGroupDir === 'desc' ? groups.reverse() : groups;
+  }
+
+  /** Flip the date-bucket order (earliest-first ⇄ latest-first). */
+  toggleDueGroupOrder(): void {
+    this.dueGroupDir = this.dueGroupDir === 'asc' ? 'desc' : 'asc';
+    this.persistPrefs();
   }
 
   private groupByStatus(): TaskGroup[] {
@@ -548,6 +566,16 @@ export class TaskTableComponent {
     return !!this.statusMenuTaskId || !!this.statusEditTaskId || !!this.assigneeMenuTaskId;
   }
 
+  /**
+   * True while THIS row owns an open inline menu/popover. Used to freeze the
+   * card's hover lift so the absolutely-positioned dropdown can't jitter.
+   */
+  isRowMenuOpen(task: Task): boolean {
+    return this.statusMenuTaskId === task.id
+        || this.statusEditTaskId === task.id
+        || this.assigneeMenuTaskId === task.id;
+  }
+
   /** Backdrop click — close every inline menu/popover. */
   closeOverlays(): void {
     this.assigneeMenuTaskId = null;
@@ -792,10 +820,13 @@ export class TaskTableComponent {
     return tone;
   }
 
-  /** First click expands the row inline (when expandable); double-click opens the drawer. */
+  /** First click expands the row inline (when expandable); double-click opens the drawer.
+   *  With the checklist feature off the expand panel has no content (it only held the
+   *  checklist), so a single click just opens the task instead of expanding to a lone
+   *  "open" button. */
   toggleExpand(task: Task, event: MouseEvent): void {
     event.stopPropagation();
-    if (!this.expandable) { this.openTask(task); return; }
+    if (!this.expandable || !this.features.taskChecklist) { this.openTask(task); return; }
     this.expandedTaskId = this.expandedTaskId === task.id ? null : task.id;
   }
 

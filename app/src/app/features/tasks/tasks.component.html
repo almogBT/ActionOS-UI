@@ -1,17 +1,18 @@
 <section class="screen tasks-screen">
 
-  <!-- ── Header ──────────────────────────────────────────────────────────── -->
-  <div class="screen-title">
-    <p class="screen-sub">{{ 'tasks.subtitle' | t }}</p>
+  <!-- ── Header ──────────────────────────────────────────────────────────────
+       Only renders when there's something to show. The subtitle was removed and
+       the "+ New Task" button is gone (the new-task form is always present in the
+       right pane), so the sole content is the feature-gated "Open my work" button.
+       Gating the whole block on `myWork` drops the header's margin gap when the
+       flag is off — matching the Meetings page, which has no header block. -->
+  <div class="screen-title" *ngIf="features.myWork">
     <div class="topbar-actions">
-      <button type="button" class="ghost-action" *ngIf="features.myWork" (click)="openView('my-work')">{{ 'tasks.openMyWork' | t }}</button>
-      <button type="button" class="primary-action" (click)="newTask()">
-        + {{ 'tasks.newTask' | t }}
-      </button>
+      <button type="button" class="ghost-action" (click)="openView('my-work')">{{ 'tasks.openMyWork' | t }}</button>
     </div>
   </div>
 
-  <!-- ── Calendar + stat tiles (shared seamless card) ────────────────────── -->
+  <!-- ── Calendar + stat tiles (shared seamless card) — full width, on top ── -->
   <app-calendar-stats
     [events]="taskCalendarEvents"
     (eventOpened)="onCalendarEventOpened($event)"
@@ -35,55 +36,95 @@
     ></app-stat-tile>
   </app-calendar-stats>
 
-  <!-- ── Controls: audience · group-by · count · origin · search (one row) ─── -->
-  <div class="tasks-controls">
-    <div class="controls-filters">
-      <div class="filter-strip" role="tablist" [attr.aria-label]="'tasks.audience.all' | t">
-        <button
-          *ngFor="let f of audienceOptions; trackBy: trackAudience"
-          type="button"
-          [class.active]="audience === f.id"
-          (click)="audience = f.id"
-        >{{ f.labelKey | t }}</button>
+  <!-- ── Two-column workbench (the split, below the full-width stats) ──────────
+       Form pane is FIRST in the DOM so that under RTL it renders on the right
+       (~1/3) and, when the layout collapses to one column on narrow screens,
+       it naturally stacks on TOP. The task table sits on the left (~2/3). -->
+  <div class="tasks-layout">
+
+    <!-- Right (RTL start) / top on mobile: always-on new-task form -->
+    <aside class="new-task-pane" [class.collapsed]="!formOpen">
+      <!-- Collapsible: clicking the title toggles the form (open by default). -->
+      <header class="pane-title" [class.collapsed]="!formOpen">
+        <button type="button" class="pane-title-toggle" (click)="formOpen = !formOpen" [attr.aria-expanded]="formOpen">
+          <span class="pane-title-text">{{ (embeddedIsNew ? 'tasks.newTask' : 'tasks.editTask') | t }}</span>
+          <app-icon class="pane-chevron" name="chevron-down" [size]="16"></app-icon>
+        </button>
+      </header>
+      <!-- *ngFor + trackBy on formResetKey forces a clean re-instantiation
+           whenever we reset the form (after close). -->
+      <div class="pane-body" *ngIf="formOpen">
+        <ng-container *ngIf="embeddedTask as task">
+          <app-task-form
+            *ngFor="let k of [formResetKey]; trackBy: trackFormKey"
+            [task]="task"
+            (persisted)="onEmbeddedPersisted($event)"
+            (closed)="resetEmbeddedForm()"
+          ></app-task-form>
+        </ng-container>
+      </div>
+    </aside>
+
+    <!-- Left (RTL end) / bottom on mobile: filters + shared task table -->
+    <div class="tasks-main">
+
+      <!-- ── Controls: audience · group-by · count · origin · search (one row) ─── -->
+      <div class="tasks-controls">
+        <div class="controls-filters">
+          <div class="filter-strip" role="tablist" [attr.aria-label]="'tasks.audience.all' | t">
+            <button
+              *ngFor="let f of audienceOptions; trackBy: trackAudience"
+              type="button"
+              [class.active]="audience === f.id"
+              (click)="audience = f.id"
+            >{{ f.labelKey | t }}</button>
+          </div>
+
+          <span class="controls-divider" aria-hidden="true"></span>
+
+          <span class="filter-strip-label">{{ 'tasks.groupBy.label' | t }}</span>
+          <div class="filter-strip" role="tablist" [attr.aria-label]="'tasks.groupBy.label' | t">
+            <button
+              *ngFor="let g of groupByOptions; trackBy: trackGroupBy"
+              type="button"
+              [class.active]="groupBy === g.id"
+              (click)="groupBy = g.id"
+            >{{ g.labelKey | t }}</button>
+          </div>
+
+          <span class="controls-count">{{ filteredTasks.length }}</span>
+        </div>
+
+        <div class="controls-right">
+          <select class="origin-select" [(ngModel)]="origin" [attr.aria-label]="'tasks.origin.label' | t">
+            <option *ngFor="let o of originOptions; trackBy: trackOrigin" [value]="o.id">{{ o.labelKey | t }}</option>
+          </select>
+          <input
+            type="search"
+            class="tasks-search"
+            [(ngModel)]="search"
+            [placeholder]="'tasks.searchPlaceholder' | t"
+          />
+        </div>
       </div>
 
-      <span class="controls-divider" aria-hidden="true"></span>
-
-      <span class="filter-strip-label">{{ 'tasks.groupBy.label' | t }}</span>
-      <div class="filter-strip" role="tablist" [attr.aria-label]="'tasks.groupBy.label' | t">
-        <button
-          *ngFor="let g of groupByOptions; trackBy: trackGroupBy"
-          type="button"
-          [class.active]="groupBy === g.id"
-          (click)="groupBy = g.id"
-        >{{ g.labelKey | t }}</button>
+      <!-- ── The one shared task table — scrolls inside its own box (below) ───── -->
+      <div class="tasks-table-scroll">
+        <app-task-table
+          [tasks]="filteredTasks"
+          [groupBy]="groupBy"
+          [showGroupSwitch]="false"
+          [allowAddTask]="false"
+        ></app-task-table>
       </div>
 
-      <span class="controls-count">{{ filteredTasks.length }}</span>
     </div>
+    <!-- /.tasks-main -->
 
-    <div class="controls-right">
-      <select class="origin-select" [(ngModel)]="origin" [attr.aria-label]="'tasks.origin.label' | t">
-        <option *ngFor="let o of originOptions; trackBy: trackOrigin" [value]="o.id">{{ o.labelKey | t }}</option>
-      </select>
-      <input
-        type="search"
-        class="tasks-search"
-        [(ngModel)]="search"
-        [placeholder]="'tasks.searchPlaceholder' | t"
-      />
-    </div>
   </div>
+  <!-- /.tasks-layout -->
 
-  <!-- ── The one shared task table (group switch lives in the row above) ───── -->
-  <app-task-table
-    [tasks]="filteredTasks"
-    [groupBy]="groupBy"
-    [showGroupSwitch]="false"
-    [allowAddTask]="origin !== 'meeting'"
-  ></app-task-table>
-
-  <!-- ── Stat tile popup ─────────────────────────────────────────────────── -->
+  <!-- ── Stat tile popup (overlay) ───────────────────────────────────────── -->
   <app-metric-tasks-modal
     *ngIf="openLens"
     [title]="lensTitleKey"

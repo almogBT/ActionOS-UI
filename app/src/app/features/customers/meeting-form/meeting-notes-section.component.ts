@@ -30,18 +30,9 @@ import { MEETING_FORM_STYLES } from './meeting-form.styles';
   imports: [CommonModule, FormsModule, TranslatePipe, SearchableSelectComponent, NoteDetailModalComponent],
   template: `
     <form class="capture-shell" (ngSubmit)="captureNote()">
-      <div class="capture-type-row">
-        <button
-          type="button"
-          class="capture-chip"
-          *ngFor="let option of captureTypeOptions"
-          [class.active]="newNote.type === option"
-          (click)="setNoteType(option)"
-        >
-          <span>{{ ('noteType.' + option) | t }}</span>
-        </button>
-      </div>
-
+      <!-- The Note/Action type chips are intentionally hidden: every captured entry
+           is now a plain note. The action-only fields/buttons below remain in the
+           template but are gated on type === 'action', so they never render. -->
       <label class="field-control wide composer-control">
         <input
           #noteComposerInput
@@ -92,8 +83,13 @@ import { MEETING_FORM_STYLES } from './meeting-form.styles';
       </p>
     </form>
 
-    <div class="notes-list" id="notes-list" *ngIf="capturedNotes.length; else noNotesYet">
-      <div *ngFor="let n of capturedNotes; trackBy: trackNote" class="note-row">
+    <div class="notes-list-wrap" id="notes-list" *ngIf="capturedNotes.length; else noNotesYet">
+      <button type="button" class="notes-list-toggle" (click)="notesCollapsed = !notesCollapsed">
+        <span class="notes-toggle-caret" [class.collapsed]="notesCollapsed">▾</span>
+        <span>{{ 'customerMeeting.reviewNotesCaptured' | t }} ({{ capturedNotes.length }})</span>
+      </button>
+      <div class="notes-list" *ngIf="!notesCollapsed">
+        <div *ngFor="let n of capturedNotes; trackBy: trackNote" class="note-row">
         <span class="status-chip" [ngClass]="n.type">
           {{ ('noteType.' + n.type) | t }}
         </span>
@@ -228,6 +224,7 @@ import { MEETING_FORM_STYLES } from './meeting-form.styles';
             <button type="button" (click)="removeAttachment(att.id)" title="Remove">×</button>
           </div>
         </div>
+        </div>
       </div>
     </div>
     <ng-template #noNotesYet>
@@ -236,7 +233,9 @@ import { MEETING_FORM_STYLES } from './meeting-form.styles';
       </div>
     </ng-template>
 
-    <label class="field-control wide next-meeting-notes">
+    <!-- "Notes for the next meeting" — hidden for now (not removed). Flip
+         showNextMeetingNotes back to true to restore it; all bindings are intact. -->
+    <label class="field-control wide next-meeting-notes" *ngIf="showNextMeetingNotes">
       {{ 'customerMeeting.nextMeetingNotes' | t }}
       <textarea
         name="nextMeetingNotes"
@@ -255,7 +254,40 @@ import { MEETING_FORM_STYLES } from './meeting-form.styles';
       (close)="openedNote = null"
     />
   `,
-  styles: [MEETING_FORM_STYLES, `.next-meeting-notes { margin-top: 14px; }`]
+  styles: [MEETING_FORM_STYLES, `
+    .next-meeting-notes { margin-top: 14px; }
+    /* Collapsible + scrollable captured-notes list: a long meeting no longer makes the
+       whole form unreadable. The header button folds the list; when open it scrolls
+       within a capped height. */
+    .notes-list-wrap { margin-top: 12px; }
+    .notes-list-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      background: transparent;
+      border: 0;
+      padding: 6px 0;
+      color: var(--ink);
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .notes-toggle-caret {
+      font-size: 11px;
+      color: var(--muted);
+      transition: transform 150ms ease;
+    }
+    .notes-toggle-caret.collapsed { transform: rotate(-90deg); }
+    /* Two-class selector overrides the base .notes-list margin from MEETING_FORM_STYLES. */
+    .notes-list-wrap .notes-list {
+      margin-top: 8px;
+      max-height: 360px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-inline-end: 4px;
+    }
+  `]
 })
 export class MeetingNotesSectionComponent implements OnInit {
   @Input() meeting!: CustomerMeeting;
@@ -269,6 +301,10 @@ export class MeetingNotesSectionComponent implements OnInit {
   @Input() nextMeetingNotes = '';
   @Output() nextMeetingNotesChange = new EventEmitter<string>();
 
+  /** Hides the "notes for the next meeting" field without removing it. The input/
+   *  output and persistence stay wired — set this back to true to show it again. */
+  showNextMeetingNotes = false;
+
   /** Only Note + Action are offered when creating; legacy types stay editable. */
   readonly captureTypeOptions: NoteType[] = ['note', 'action'];
 
@@ -281,6 +317,8 @@ export class MeetingNotesSectionComponent implements OnInit {
     dueDate: undefined
   };
   pendingAttachmentFile: File | null = null;
+  /** Folds the captured-notes list to its header so a long meeting stays readable. */
+  notesCollapsed = false;
   openedNote: MeetingNote | null = null;
 
   @ViewChild('noteComposerInput') noteComposerInput?: ElementRef<HTMLInputElement>;
@@ -497,6 +535,8 @@ export class MeetingNotesSectionComponent implements OnInit {
     if (!created) {
       return null;
     }
+    // Re-open the list if it was folded so the user sees the note they just added.
+    this.notesCollapsed = false;
     if (this.pendingAttachmentFile) {
       const meetingId = this.meeting.id;
       const noteId = created.id;

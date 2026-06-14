@@ -16,6 +16,7 @@ import { StatMeetingsViewComponent } from '../../shared/stat-modal/stat-meetings
 import { StatModalComponent } from '../../shared/stat-modal/stat-modal.component';
 import { StatTasksViewComponent } from '../../shared/stat-modal/stat-tasks-view.component';
 import { StatTileComponent } from '../../shared/stat-tile/stat-tile.component';
+import { CustomerMeetingFormComponent, MeetingFormSavedEvent } from '../customers/customer-meeting-form.component';
 
 type MeetingLane = 'upcoming' | 'in-progress' | 'closed';
 /** The two list sections: open (Tasks Created) vs Completed (Closed). */
@@ -38,7 +39,7 @@ interface MeetingLaneCache {
 @Component({
   selector: 'app-meetings',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe, MeetingCardComponent, SearchableSelectComponent, CalendarStatsComponent, IconComponent, StatModalComponent, StatMeetingsViewComponent, StatTasksViewComponent, StatTileComponent],
+  imports: [CommonModule, FormsModule, TranslatePipe, MeetingCardComponent, SearchableSelectComponent, CalendarStatsComponent, IconComponent, StatModalComponent, StatMeetingsViewComponent, StatTasksViewComponent, StatTileComponent, CustomerMeetingFormComponent],
   templateUrl: './meetings.component.html',
   styleUrl: './meetings.component.scss'
 })
@@ -53,6 +54,14 @@ export class MeetingsComponent implements OnInit, OnChanges {
   showPrepPicker = false;
   prepPickerCustomerId = '';
   openLens: MeetingTileLens | null = null;
+
+  /** Set while continuing a just-created meeting inline in the embedded right pane. */
+  embeddedMeetingId: string | null = null;
+  /** Bump to force a clean re-instantiation of the blank new-meeting form. */
+  formResetKey = 0;
+  trackFormKey = (_: number, k: number): number => k;
+  /** Collapsible right-pane form — open by default; clicking the title toggles it. */
+  formOpen = true;
 
   /** Free-text search across subject / customer / goal. */
   search = '';
@@ -372,7 +381,25 @@ export class MeetingsComponent implements OnInit, OnChanges {
   }
 
   newMeeting(): void {
-    this.workspace.openNewMeetingModal();
+    // The new-meeting form is now embedded in the page (right pane), not a drawer.
+    // External "start a new meeting" intents (openNewTick) just reset that form.
+    this.resetEmbeddedForm();
+  }
+
+  /** Mirrors the drawer's onSaved, but keeps the form embedded in the right pane. */
+  onEmbeddedSaved(event: MeetingFormSavedEvent): void {
+    if (event.intent === 'close') {
+      this.resetEmbeddedForm();
+    } else {
+      // 'continue': keep editing the just-created meeting inline (notes / tasks).
+      this.embeddedMeetingId = event.meetingId;
+    }
+  }
+
+  /** Return the right pane to a fresh, blank new-meeting form. */
+  resetEmbeddedForm(): void {
+    this.embeddedMeetingId = null;
+    this.formResetKey++;
   }
 
   openMeeting(m: CustomerMeeting): void {

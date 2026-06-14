@@ -314,40 +314,31 @@ interface MeetingClientOption {
       <div class="panel-header work-header">
         <div class="panel-header-lead">
           <button type="button" class="section-toggle" [class.collapsed]="collapsedSections.capture" (click)="toggleSection('capture')" aria-label="Toggle section">▾</button>
-          <div>
-            <span class="eyebrow">{{ 'customerMeeting.captureSection' | t }}</span>
-            <h3>{{ 'meetings.addMeetingOutput' | t }}</h3>
-            <small class="muted">
-              {{ (captureTab === 'notes' ? 'customerMeeting.notesTabHint' : 'customerMeeting.summaryTabHint') | t }}
-            </small>
-          </div>
-        </div>
-        <div class="tab-toggle" *ngIf="editingMeeting && !collapsedSections.capture" role="tablist">
-          <button
-            type="button"
-            class="tab-btn"
-            role="tab"
-            [class.active]="captureTab === 'notes'"
-            (click)="captureTab = 'notes'"
-          >
-            {{ 'customerMeeting.tabNotes' | t }}
-            <span class="tab-count" *ngIf="capturedNotesCount">{{ capturedNotesCount }}</span>
-          </button>
-          <button
-            type="button"
-            class="tab-btn"
-            role="tab"
-            [class.active]="captureTab === 'summary'"
-            (click)="captureTab = 'summary'"
-          >
-            {{ 'customerMeeting.tabSummary' | t }}
-          </button>
         </div>
       </div>
 
       <ng-container *ngIf="!collapsedSections.capture">
       <ng-container *ngIf="editingMeeting as meeting; else runLocked">
-        <div class="capture-tab" *ngIf="captureTab === 'notes'">
+        <!-- Summary sits on top; Notes below. The old notes/summary tab toggle was
+             replaced by this vertical stack so both are visible at once. -->
+        <div class="capture-block">
+          <div class="section-head">
+            <h4>{{ 'customerMeeting.tabSummary' | t }}</h4>
+          </div>
+          <app-meeting-summary-section
+            [meeting]="meeting"
+            [draft]="summaryDraft"
+            [recap]="lastRecap"
+            (changed)="onSummaryChanged()"
+            (goToNotes)="goToNotes()"
+            (goToTasks)="scrollToId('tasks-section')"
+          ></app-meeting-summary-section>
+        </div>
+
+        <div class="capture-block">
+          <div class="section-head">
+            <h4>{{ 'customerMeeting.tabNotes' | t }}</h4>
+          </div>
           <app-meeting-notes-section
             [meeting]="meeting"
             [nextMeetingNotes]="nextMeetingNotesText"
@@ -355,18 +346,6 @@ interface MeetingClientOption {
             (changed)="reloadMeeting()"
             (createTaskFromNote)="onCreateTaskFromNote($event)"
           ></app-meeting-notes-section>
-        </div>
-
-        <div class="capture-tab summary-tab" *ngIf="captureTab === 'summary'">
-          <app-meeting-summary-section
-            [meeting]="meeting"
-            [draft]="summaryDraft"
-            [recap]="lastRecap"
-            (changed)="onSummaryChanged()"
-            (publish)="publishRecap()"
-            (goToNotes)="goToNotes()"
-            (goToTasks)="scrollToId('tasks-section')"
-          ></app-meeting-summary-section>
         </div>
       </ng-container>
 
@@ -411,6 +390,14 @@ interface MeetingClientOption {
     <!-- The form auto-saves on every change, so there's no draft/save action —
          just one button to finish and close the drawer. -->
     <div class="action-bar">
+      <button
+        type="button"
+        class="primary-action"
+        *ngIf="editingMeeting"
+        (click)="publishRecap()"
+      >
+        {{ 'customerMeeting.publishRecap' | t }}
+      </button>
       <span class="action-bar-spacer"></span>
       <button type="button" class="primary-action" (click)="finish()">
         {{ 'customerMeeting.finish' | t }}
@@ -442,11 +429,27 @@ interface MeetingClientOption {
     </div>
   `,
   styles: [MEETING_FORM_STYLES, `
+    /* Clearance so the sticky action bar never covers the last section. This lives on
+       the form host only — it used to be in the shared MEETING_FORM_STYLES :host, which
+       wrongly applied 84px to every child component's host too (the summary section's
+       padding then showed as a big gap above Notes once the two were stacked). */
+    :host { padding-bottom: 84px; }
     .section-head-row {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
       gap: 12px;
+    }
+    /* Capture section now stacks Summary (top) then Notes (bottom) instead of
+       toggling tabs, so each block gets its own titled head and a divider keeps
+       them visually separate. Spacing is kept tight so the two blocks read as one
+       continuous panel, not two far-apart cards. */
+    .capture-block .section-head { margin: 0 0 8px; }
+    .capture-block .section-head small.muted { display: block; margin-top: 2px; }
+    .capture-block + .capture-block {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
     }
     /* Per-section collapse toggle in each panel header. */
     .panel-header-lead {

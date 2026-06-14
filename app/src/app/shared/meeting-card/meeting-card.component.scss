@@ -17,32 +17,36 @@
   gap: 8px;
   height: 100%;
   padding: 12px;
-  padding-inline-start: 16px;     /* room for the state spine */
+  padding-inline-start: 14px;     /* room for the state spine */
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--bg-elevated);
   box-shadow: var(--shadow-sm);
   cursor: pointer;
   overflow: hidden;
-  --spine-color: var(--accent);
+  --spine-color: var(--border-strong);
   transition:
     transform var(--duration-fast) var(--ease-out),
     border-color var(--duration-fast) var(--ease-out),
     box-shadow var(--duration-fast) var(--ease-out);
 
-  /* Colored left spine encodes meeting state at a glance. */
+  /* Colored left spine encodes meeting state at a glance — an inset rounded pill
+     that mirrors the task table row's spine (.task-row::before). */
   &::before {
     content: '';
     position: absolute;
-    inset-block: 0;
     inset-inline-start: 0;
-    width: 4px;
+    top: 10px;
+    bottom: 10px;
+    width: 3px;
+    border-radius: var(--radius-pill);
     background: var(--spine-color);
+    transition: background var(--duration-fast) var(--ease-out);
   }
 
   &:hover {
     transform: translateY(-2px);
-    border-color: var(--accent);
+    border-color: var(--border-strong);
     box-shadow: var(--shadow-md);
   }
 
@@ -52,10 +56,14 @@
   &.state-closed    { --spine-color: var(--olive); }
 }
 
-/* Bolder accent border when the current rep led the meeting. */
-:host(.card-led) .meeting-card {
-  border-width: 2px;
-  border-color: var(--accent);
+/* "Led by the current rep" cue. Kept deliberately subtle so the card still reads
+   as the same family as a task-table row (subtle 1px border + colored spine) — a
+   full accent box made every led card look heavily outlined. Instead the spine
+   thickens slightly to a stronger accent, mirroring how the task row uses its
+   spine (not a full border) to carry signal. */
+:host(.card-led) .meeting-card::before {
+  width: 4px;
+  background: var(--accent);
 }
 
 .card-top {
@@ -90,6 +98,22 @@
   font-weight: 700;
   color: var(--muted);
   white-space: nowrap;
+}
+
+/* Leading colored dot on the status chip, matching the task table's status cell
+   (.status-cell::before). The global .status-chip already sets display:inline-flex
+   + align-items:center and exposes the status color via `color`. */
+.status-chip {
+  gap: 7px;
+
+  &::before {
+    content: '';
+    flex-shrink: 0;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+  }
 }
 
 .card-body {
@@ -243,17 +267,21 @@
   gap: 5px;
 }
 
+/* Leader avatar — solid fill with a ring + shadow, matching the task table's
+   assignee avatar (.assignee-avatar). 28px keeps it proportionate on the denser
+   meeting tiles while reading as the same component. */
 .avatar {
   display: inline-grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-size: 10px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
   font-weight: 800;
-  border: 1px solid var(--accent-soft);
+  border: 2px solid var(--bg-elevated);
+  box-shadow: var(--shadow-sm);
 }
 
 .people-count {
@@ -287,13 +315,103 @@
 
 /* ── Rail variant: trim to the essentials so tiles stay tiny ───────────── */
 :host(.mc-rail) {
-  .meeting-card { padding: 10px; padding-inline-start: 13px; gap: 6px; }
+  .meeting-card { padding: 10px; padding-inline-start: 12px; gap: 6px; }
   .card-date,
   .card-summary,
   .card-lead,
   .card-attendees,
   .recap-btn { display: none; }
   .card-title { font-size: 14px; -webkit-line-clamp: 2; }
+}
+
+/* ── Row variant: one-line horizontal row for the meetings lanes ─────────── */
+/* Re-flows the exact same card elements left-to-right (like a task-table row)
+   instead of the stacked tile. `.card-top` is flattened with display:contents so
+   its children (customer eyebrow, status chip + date) become direct flex items of
+   the card and can be ordered independently: customer + subject lead on the start
+   side, then status/date · metrics · people/action are pushed to the end. The
+   colored state spine (::before) carries over and reads like a task row's spine. */
+:host(.mc-row) {
+  height: auto;
+
+  .meeting-card {
+    flex-direction: row;
+    flex-wrap: wrap;            /* subject on line 1, customer name on line 2 */
+    align-items: center;
+    align-content: center;
+    row-gap: 3px;
+    column-gap: 12px;
+    height: auto;
+    /* Two-line layout (subject over customer) mirrors the task row's title +
+       sub-context, so both size from the SAME box model — same floor + two text
+       lines — and render at the same height with no eyeballed pixel value. */
+    min-height: 64px;
+    padding: 12px 14px;
+    padding-inline-start: 14px;
+
+    &:hover { transform: none; box-shadow: var(--shadow-md); }
+  }
+
+  /* Flatten card-top so eyebrow + meta join the row's flex flow directly. */
+  .card-top { display: contents; }
+
+  /* Customer name → second line: the muted sub-context under the subject,
+     mirroring the task row's `.title-sub`. flex-basis:100% forces it onto its own
+     line below the subject; an empty name collapses to nothing (row stays 1 line). */
+  .card-eyebrow {
+    order: 5;
+    flex: 0 0 100%;
+    max-width: 100%;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0;
+    color: var(--muted);
+  }
+
+  /* Subject — line 1; grows to absorb the leftover width so the meta/metrics/footer
+     cluster sits at the row's end and the customer name wraps beneath. */
+  .card-body {
+    order: 1;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .card-title {
+    font-size: 15.5px;
+    line-height: 1.3;
+    -webkit-line-clamp: 1;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Trim the multi-line tile-only content — the row stays a single line. */
+  .card-summary,
+  .card-lead,
+  .card-attendees { display: none; }
+
+  /* Status chip + date, pushed to the end alongside the metrics. Bumped a notch
+     for readability, matching the larger task-table text. */
+  .card-top-meta { order: 2; flex: 0 0 auto; }
+  .card-date { font-size: 12.5px; }
+  .status-chip { font-size: 13px; }
+
+  .card-metrics {
+    order: 3;
+    flex: 0 0 auto;
+    min-height: 0;
+
+    .metric { font-size: 13px; }
+  }
+
+  .card-footer {
+    order: 4;
+    flex: 0 0 auto;
+    border-top: none;
+    padding-top: 0;
+    gap: 10px;
+  }
 }
 
 /* ── Recap popup (read-only recap sections) ────────────────────────────── */

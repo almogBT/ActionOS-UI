@@ -10,6 +10,21 @@ import { BoardTemplate, NavItem, ViewId } from '../models/actionos.models';
  * `*ngIf`) rather than commenting code out.
  */
 export const ACTIONOS_FEATURES = {
+  /** Task priority — the priority chip/column and every priority-driven
+   *  control (sort-by-priority, bulk set-priority, group-by-priority, the
+   *  creation-form selector). Flip to `false` to hide priority everywhere;
+   *  the `Task.priority` data and code paths stay intact. */
+  taskPriority: false,
+  /** Task checklist / steps — the checklist progress bar, the expandable
+   *  interactive step list and the add-step controls, in the task form and the
+   *  shared task table. Flip to `false` to hide checklists everywhere; the
+   *  `Task.checklist` data and code paths stay intact. */
+  taskChecklist: false,
+  /** Task "Activity" panel in the task form — the comments box + comment list
+   *  and the watchers block, plus its step in the progress stepper. Flip to
+   *  `false` to hide the whole panel; comments/watchers data and code paths
+   *  stay intact. */
+  taskActivity: false,
   /** "My Work" landing page and its nav tab. */
   myWork: false,
   /** "Boards" — the client board page — and its nav tab. */

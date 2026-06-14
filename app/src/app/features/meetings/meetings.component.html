@@ -1,20 +1,9 @@
 <section class="screen meetings-screen">
 
-  <!-- ── Header ──────────────────────────────────────────────────────────── -->
-  <div class="screen-title">
-    <div>
-      <!-- Page title lives in the top navbar already; only the descriptive
-           subtitle remains here to avoid three stacked "פגישות" headings. -->
-      <p class="screen-subtitle">{{ 'meetingsOverview.subtitle' | t }}</p>
-    </div>
-    <div class="topbar-actions">
-      <button type="button" class="primary-action" (click)="newMeeting()">
-        + {{ 'meetingsOverview.newMeeting' | t }}
-      </button>
-    </div>
-  </div>
+  <!-- ── Header removed: the page title lives in the top navbar, and the
+       descriptive subtitle was removed per request, so no header block here. -->
 
-  <!-- ── Calendar + KPI tiles (shared seamless card) ──────────────────────── -->
+  <!-- ── Calendar + KPI tiles (shared seamless card) — full width, on top ─── -->
   <app-calendar-stats
     [events]="meetingCalendarEvents"
     (eventOpened)="onCalendarEventOpened($event)"
@@ -34,82 +23,104 @@
     ></app-stat-tile>
   </app-calendar-stats>
 
-  <!-- ── Needs-your-attention carousel ───────────────────────────────────── -->
-  <section *ngIf="features.meetingsAttentionRail && attentionMeetings.length" class="attention-rail">
-    <div class="rail-header">
-      <app-icon name="alert-triangle" [size]="15"></app-icon>
-      <span class="rail-title">{{ 'meetingsOverview.needsAttention' | t }}</span>
-      <span class="rail-count">{{ attentionMeetings.length }}</span>
-      <span class="rail-hint">{{ 'meetingsOverview.needsAttentionHint' | t }}</span>
-      <div class="rail-nav" *ngIf="attentionMeetings.length > 1">
-        <button type="button" class="rail-arrow" (click)="scrollRail(railTrack, -1)"
-          [attr.aria-label]="'meetingsOverview.scrollPrev' | t">‹</button>
-        <button type="button" class="rail-arrow" (click)="scrollRail(railTrack, 1)"
-          [attr.aria-label]="'meetingsOverview.scrollNext' | t">›</button>
+  <!-- Needs-your-attention rail intentionally hidden on this page (per request). -->
+
+  <!-- ── Two-column workbench (the split, below the full-width stats) ──────────
+       Form pane is FIRST in the DOM so that under RTL it renders on the right
+       (~1/3) and, when the layout collapses to one column on narrow screens,
+       it naturally stacks on TOP. The meetings table sits on the left (~2/3). -->
+  <div class="meetings-layout">
+
+    <!-- Right (RTL start) / top on mobile: always-on new-meeting form -->
+    <aside class="new-meeting-pane" [class.collapsed]="!formOpen">
+      <!-- Collapsible: clicking the title toggles the form (open by default). -->
+      <header class="pane-title" [class.collapsed]="!formOpen">
+        <button type="button" class="pane-title-toggle" (click)="formOpen = !formOpen" [attr.aria-expanded]="formOpen">
+          <span class="pane-title-text">{{ (embeddedMeetingId ? 'meetingsOverview.editMeeting' : 'meetingsOverview.newMeeting') | t }}</span>
+          <app-icon class="pane-chevron" name="chevron-down" [size]="16"></app-icon>
+        </button>
+      </header>
+      <div class="pane-body" *ngIf="formOpen">
+        <!-- Fresh new-meeting form. *ngFor + trackBy on formResetKey forces a
+             clean re-instantiation whenever we reset (after cancel / close). -->
+        <ng-container *ngIf="!embeddedMeetingId">
+          <app-customer-meeting-form
+            *ngFor="let k of [formResetKey]; trackBy: trackFormKey"
+            [initialCustomerId]="''"
+            (saved)="onEmbeddedSaved($event)"
+            (cancelled)="resetEmbeddedForm()"
+          ></app-customer-meeting-form>
+        </ng-container>
+        <!-- After "start meeting" (saved:'continue') we keep editing inline. -->
+        <app-customer-meeting-form
+          *ngIf="embeddedMeetingId"
+          [existingMeetingId]="embeddedMeetingId"
+          (saved)="onEmbeddedSaved($event)"
+          (cancelled)="resetEmbeddedForm()"
+        ></app-customer-meeting-form>
       </div>
-    </div>
-    <div class="carousel-track" #railTrack (wheel)="onRailWheel($event, railTrack)">
-      <app-meeting-card *ngFor="let m of attentionMeetings; trackBy: trackMeeting" [meeting]="m" variant="rail"></app-meeting-card>
-    </div>
-  </section>
+    </aside>
 
-  <!-- ── Filter + search controls (single row) ────────────────────────────── -->
-  <section class="panel">
-    <div class="meetings-controls">
-      <input
-        type="search"
-        class="meetings-search"
-        [(ngModel)]="search"
-        [placeholder]="'meetingsOverview.searchPlaceholder' | t"
-      />
-      <app-searchable-select
-        [(ngModel)]="customerFilter"
-        [options]="customerFilterOptions"
-        class="filter-select"
-      ></app-searchable-select>
-      <div class="filter-strip">
-        <button
-          *ngFor="let f of quickFilterOptions; trackBy: trackQuickFilter"
-          type="button"
-          [class.active]="quickFilter === f.id"
-          (click)="quickFilter = f.id"
-        >{{ f.labelKey | t }}</button>
-      </div>
-    </div>
-
-    <!-- ── Meeting lanes (card grids) ─────────────────────────────────────── -->
-    <div *ngFor="let bucket of buckets; trackBy: trackBucket" class="lane-section" [class.collapsed]="isLaneCollapsed(bucket.lane)">
-      <button
-        type="button"
-        class="lane-header"
-        (click)="toggleLane(bucket.lane)"
-        [attr.aria-expanded]="!isLaneCollapsed(bucket.lane)"
-      >
-        <app-icon class="lane-chevron" name="chevron-down" [size]="14"></app-icon>
-        <span class="lane-label">{{ bucket.labelKey | t }}</span>
-        <span class="lane-count">{{ bucket.meetings.length }}</span>
-      </button>
-
-      <!-- Body is only rendered when expanded — collapsed lanes cost nothing. -->
-      <div *ngIf="!isLaneCollapsed(bucket.lane)" class="lane-body">
-        <div *ngIf="!bucket.meetings.length" class="lane-empty">
-          <p>{{ 'meetingsOverview.noMeetingsInLane' | t }}</p>
+    <!-- Left (RTL end) / bottom on mobile: filters + meeting lanes (table) -->
+    <section class="panel">
+      <div class="meetings-controls">
+        <input
+          type="search"
+          class="meetings-search"
+          [(ngModel)]="search"
+          [placeholder]="'meetingsOverview.searchPlaceholder' | t"
+        />
+        <app-searchable-select
+          [(ngModel)]="customerFilter"
+          [options]="customerFilterOptions"
+          class="filter-select"
+        ></app-searchable-select>
+        <div class="filter-strip">
           <button
-            *ngIf="hasActiveFilters"
+            *ngFor="let f of quickFilterOptions; trackBy: trackQuickFilter"
             type="button"
-            class="ghost-action"
-            (click)="clearFilters()"
-          >{{ 'meetingsOverview.clearFilters' | t }}</button>
-        </div>
-
-        <div *ngIf="bucket.meetings.length" class="card-grid">
-          <app-meeting-card *ngFor="let m of bucket.meetings; trackBy: trackMeeting" [meeting]="m"></app-meeting-card>
+            [class.active]="quickFilter === f.id"
+            (click)="quickFilter = f.id"
+          >{{ f.labelKey | t }}</button>
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- ── Tile popup: shared stat-modal shell ─────────────────────────────── -->
+      <!-- ── Meeting lanes (card grids) ───────────────────────────────────── -->
+      <div *ngFor="let bucket of buckets; trackBy: trackBucket" class="lane-section" [class.collapsed]="isLaneCollapsed(bucket.lane)">
+        <button
+          type="button"
+          class="lane-header"
+          (click)="toggleLane(bucket.lane)"
+          [attr.aria-expanded]="!isLaneCollapsed(bucket.lane)"
+        >
+          <app-icon class="lane-chevron" name="chevron-down" [size]="14"></app-icon>
+          <span class="lane-label">{{ bucket.labelKey | t }}</span>
+          <span class="lane-count">{{ bucket.meetings.length }}</span>
+        </button>
+
+        <!-- Body is only rendered when expanded — collapsed lanes cost nothing. -->
+        <div *ngIf="!isLaneCollapsed(bucket.lane)" class="lane-body">
+          <div *ngIf="!bucket.meetings.length" class="lane-empty">
+            <p>{{ 'meetingsOverview.noMeetingsInLane' | t }}</p>
+            <button
+              *ngIf="hasActiveFilters"
+              type="button"
+              class="ghost-action"
+              (click)="clearFilters()"
+            >{{ 'meetingsOverview.clearFilters' | t }}</button>
+          </div>
+
+          <div *ngIf="bucket.meetings.length" class="row-list">
+            <app-meeting-card *ngFor="let m of bucket.meetings; trackBy: trackMeeting" [meeting]="m" variant="row"></app-meeting-card>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+  <!-- /.meetings-layout -->
+
+  <!-- ── Tile popup: shared stat-modal shell (overlay) ───────────────────── -->
   <app-stat-modal
     *ngIf="openLens"
     [eyebrow]="'meetingsOverview.eyebrow' | t"
