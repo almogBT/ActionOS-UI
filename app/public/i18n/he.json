@@ -693,7 +693,7 @@
     "openTask": "פתח משימה",
     "noteDetails": "פרטים",
     "beforePublishing": "לפני פרסום",
-    "noTasksInFilter": "אין פריטים בסינון זה.",
+    "noTasksInFilter": "אין משימות עדיין.",
     "reviewActionsWithoutTask": "פעולות ללא משימה מקושרת",
     "reviewBlockersOpen": "חסמים עדיין פתוחים",
     "reviewNotesCaptured": "הערות שנקלטו",
@@ -717,7 +717,7 @@
     "uploading": "מעלה...",
     "download": "הורדה",
     "noAttachments": "אין קבצים מצורפים.",
-    "noTasksInFilterYet": "אין משימות בסינון זה.",
+    "noTasksInFilterYet": "אין משימות עדיין.",
     "reviewOpenTasks": "משימות פתוחות מפגישה זו",
     "reviewOpenTasksNote": "הפגישה תיסגר אוטומטית כשכל המשימות יסתיימו",
     "tabNotes": "הערות",
@@ -732,7 +732,7 @@
     "stepCapture": "תיעוד",
     "stepTasks": "משימות",
     "noNotesYet": "עדיין לא נרשמו הערות. התחילו להקליד למעלה כדי לרשום את הראשונה.",
-    "emptyTasksHint": "משימות שתיצרו מההערות יופיעו כאן, מקובצות לפי סטטוס."
+    "emptyTasksHint": "צרו משימה למעלה; כל משימות הפגישה יופיעו כאן."
   },
   "noteDetail": {
     "title": "פרטי הערה",

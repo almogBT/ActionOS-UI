@@ -18,6 +18,7 @@ import { CustomerMeetingFormComponent, MeetingFormSavedEvent } from '../customer
       <app-customer-meeting-form
         *ngIf="workspace.openMeetingId"
         [existingMeetingId]="workspace.openMeetingId"
+        [inDrawer]="true"
         (saved)="onSaved($event)"
         (cancelled)="workspace.closeMeetingDrawer()"
       />
@@ -25,6 +26,7 @@ import { CustomerMeetingFormComponent, MeetingFormSavedEvent } from '../customer
       <app-customer-meeting-form
         *ngIf="workspace.openNewMeetingCustomerId !== null && !workspace.openMeetingId"
         [initialCustomerId]="workspace.openNewMeetingCustomerId"
+        [inDrawer]="true"
         (saved)="onSaved($event)"
         (cancelled)="workspace.closeMeetingDrawer()"
       />

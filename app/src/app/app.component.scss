@@ -61,11 +61,16 @@
 
 @media (max-width: 720px) {
   .workspace-body {
-    padding: 14px;
+    padding: 4px;
     padding-bottom: calc(60px + 12px + 16px);
   }
   .save-error-banner {
-    margin: 12px 14px 0;
+    margin: 12px 4px 0;
+  }
+  /* Pull the floating bottom bar in to match the 4px content gutter. */
+  .bottom-action-bar {
+    inset-inline-start: 4px;
+    inset-inline-end: 4px;
   }
   .bottom-action-bar .bar-btn span,
   .bottom-action-bar .bar-btn-primary span {

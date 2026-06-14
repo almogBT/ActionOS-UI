@@ -45,6 +45,7 @@ const DRAWER_BASE_Z = 900;
         aria-modal="true"
         [attr.aria-label]="ariaLabel"
         [style.max-width]="maxWidth"
+        [style.height]="height || null"
         [style.padding]="bodyPadding"
         (click)="$event.stopPropagation()"
       >
@@ -112,6 +113,10 @@ export class DrawerShellComponent implements OnChanges, OnDestroy {
   @Input() open = false;
   @Input() ariaLabel = '';
   @Input() maxWidth = '960px';
+  /** Optional fixed sheet height (e.g. '88vh'). Empty = size to content (default).
+   *  Used to give a drawer a consistent height regardless of how much its content
+   *  fills, instead of shrinking to short content. Still capped by max-height. */
+  @Input() height = '';
   @Input() bodyPadding = '14px 24px 24px';
   @Input() dismissable = true;
   @Output() closed = new EventEmitter<void>();

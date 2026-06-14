@@ -214,6 +214,7 @@
               />
               <ng-template #titleDisplay>
                 <span class="task-title-text">{{ task.title }}</span>
+                <span *ngIf="taskContext(task) as ctx" class="client-chip" [title]="sourceMeetingName(task) ? (ctx + ' · ' + sourceMeetingName(task)) : ctx">{{ ctx }}</span>
                 <button
                   *ngIf="editable"
                   type="button"
@@ -222,10 +223,6 @@
                   (click)="startEditTitle(task, $event)"
                 >✎</button>
               </ng-template>
-            </div>
-            <div class="title-sub">
-              <span class="sub-context">{{ taskContext(task) || '—' }}</span>
-              <span *ngIf="sourceMeetingName(task) as mtg" class="sub-meeting">· {{ mtg }}</span>
             </div>
             <ng-container *ngIf="features.taskChecklist">
               <ng-container *ngIf="checklistProgress(task) as cl">

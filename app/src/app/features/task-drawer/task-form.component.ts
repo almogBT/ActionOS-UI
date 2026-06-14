@@ -31,9 +31,12 @@ type TaskSectionId = 'setup' | 'activity';
   imports: [CommonModule, FormsModule, TranslatePipe, AppDatePipe, SearchableSelectComponent],
   templateUrl: './task-form.component.html',
   styles: [MEETING_FORM_STYLES, `
-    /* Small clearance below the sticky action bar (large values become dead space
-       when the form is short). */
-    :host { padding-bottom: 16px; }
+    /* Fill the host so, in a fixed-height drawer, the action bar sits at the very
+       bottom (action-bar margin-top:auto). In a content-sized host (the embedded
+       Tasks pane, a block parent) the flex-grow is ignored, so it's a no-op there. */
+    :host { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; padding-bottom: 16px; }
+    .task-form-content { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+    .action-bar { margin-top: auto; }
     /* Per-panel collapse toggle in each panel header (chevron rotates when collapsed). */
     .panel-header-lead { display: flex; align-items: center; gap: 8px; min-width: 0; }
     .section-toggle {
@@ -84,13 +87,13 @@ type TaskSectionId = 'setup' | 'activity';
     }
     .dh-meta-line .eyebrow { color: var(--text-tertiary); }
 
-    /* Labeled chip row — status · priority · assignee, each with a title above */
+    /* Labeled chip row — status · priority · assignee · due date, each titled. */
     .dh-fields {
-      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 12px; margin-top: 14px;
     }
-    /* Priority hidden — status · assignee fill the row evenly. */
-    .dh-fields.no-priority { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    /* Priority hidden — status · assignee · due date fill the row evenly. */
+    .dh-fields.no-priority { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .dh-field { display: grid; gap: 6px; min-width: 0; }
     .dh-field-label {
       font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
@@ -120,8 +123,16 @@ type TaskSectionId = 'setup' | 'activity';
     ::ng-deep .priority-chip-select.high .ss-trigger { color: var(--warning); background-color: var(--warning-soft); }
     ::ng-deep .priority-chip-select.critical .ss-trigger { color: var(--text-on-accent); background-color: var(--danger); }
 
-    /* Due-date field turns red once it's overdue (and not yet done). */
-    input[type="date"].overdue { border-color: var(--danger); color: var(--danger); }
+    /* Due-date chip — sits in the status/assignee row, styled to match the chips. */
+    .dh-date {
+      width: 100%; min-height: 34px; padding: 5px 14px;
+      border: 1px solid transparent; border-radius: var(--radius-pill);
+      background-color: var(--bg-sunken); color: var(--text-secondary);
+      font-size: 12px; font-weight: 800;
+    }
+    .dh-date:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    /* Turns red once it's overdue (and not yet done). */
+    .dh-date.overdue { background-color: var(--danger-soft); color: var(--danger); }
 
     .dh-reason {
       display: grid; gap: 10px; margin-top: 12px; padding: 12px 14px;
@@ -215,6 +226,8 @@ export class TaskFormComponent {
 
   /** The task to edit — an existing task or a fresh new-task draft. */
   @Input() task!: Task;
+  /** True only when hosted by the task drawer; embedded page forms hide mail actions. */
+  @Input() inDrawer = false;
   /** Raised when the user dismisses the form (the "Close" button). */
   @Output() closed = new EventEmitter<void>();
   /**

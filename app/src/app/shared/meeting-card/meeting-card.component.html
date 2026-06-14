@@ -1,6 +1,6 @@
 <article class="meeting-card" [ngClass]="spineClass" (click)="onOpen()">
   <div class="card-top">
-    <span class="card-eyebrow" [title]="customerName">{{ customerName }}</span>
+    <span class="card-eyebrow" *ngIf="customerName" [title]="customerName">{{ customerName }}</span>
     <span class="card-top-meta">
       <span
         *ngIf="workspace.shouldShowMeetingStatus(meeting.status)"

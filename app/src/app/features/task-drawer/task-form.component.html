@@ -93,29 +93,17 @@
           <!-- The rest of the task definition — unlocked once a client is chosen. -->
           <ng-container *ngIf="!isMissingCustomer(task)">
 
-          <div class="form-grid">
-            <label class="field-control">
-              {{ 'meetingTask.taskTitle' | t }}
-              <input
-                type="text"
-                [ngModel]="task.title"
-                (ngModelChange)="updateMeetingTaskField(task, 'title', $event)"
-                [placeholder]="'meetingTask.taskTitlePlaceholder' | t"
-              />
-            </label>
+          <label class="field-control">
+            {{ 'meetingTask.taskTitle' | t }}
+            <input
+              type="text"
+              [ngModel]="task.title"
+              (ngModelChange)="updateMeetingTaskField(task, 'title', $event)"
+              [placeholder]="'meetingTask.taskTitlePlaceholder' | t"
+            />
+          </label>
 
-            <label class="field-control">
-              {{ 'meetingTask.dueDate' | t }}
-              <input
-                type="date"
-                [class.overdue]="task.dueDate && task.dueDate < workspace.todayIso && !isCompletedStatus(task.status)"
-                [ngModel]="task.dueDate"
-                (ngModelChange)="updateMeetingTaskField(task, 'dueDate', $event)"
-              />
-            </label>
-          </div>
-
-          <!-- Status · Priority · Assigned to — labeled chips, one row -->
+          <!-- Status · Priority · Assigned to · Due date — labeled, one row -->
           <div class="dh-fields" [class.no-priority]="!features.taskPriority">
             <label class="dh-field">
               <span class="dh-field-label">{{ 'meetingTask.status' | t }}</span>
@@ -150,6 +138,17 @@
                 [options]="employeeSelectOptions"
                 [placeholder]="'common.unassigned' | t"
               ></app-searchable-select>
+            </label>
+
+            <label class="dh-field">
+              <span class="dh-field-label">{{ 'meetingTask.dueDate' | t }}</span>
+              <input
+                type="date"
+                class="dh-date"
+                [class.overdue]="task.dueDate && task.dueDate < workspace.todayIso && !isCompletedStatus(task.status)"
+                [ngModel]="task.dueDate"
+                (ngModelChange)="updateMeetingTaskField(task, 'dueDate', $event)"
+              />
             </label>
           </div>
 
@@ -328,30 +327,21 @@
       </ng-container>
     </section>
 
-    <!-- ── Sticky action bar: Done · Send reminder · Close ────────────────────
-         Always visible (even while gated). Done & Send reminder need a client
-         (a real task), so they're disabled until one is chosen; Close always
-         works. -->
+    <!-- ── Sticky action bar: drawer-only Send reminder · Close ────────────────
+         Always visible. Send reminder is shown only in the drawer; Close always
+         works. Status changes stay in the status field above. -->
     <div class="action-bar">
-      <button
-        type="button"
-        class="primary-action"
-        [disabled]="isMissingCustomer(task)"
-        [title]="isMissingCustomer(task) ? ('tasks.addTask.customerRequired' | t) : ''"
-        (click)="updateMeetingTaskStatus(task, 'Done')"
-      >
-        {{ 'drawer.markDone' | t }}
-      </button>
-      <span class="action-bar-spacer"></span>
-      <button
-        type="button"
-        class="ghost-action"
-        [disabled]="isMissingCustomer(task)"
-        (click)="workspace.nudgeMeetingTaskOwner(task)"
-      >
-        {{ 'drawer.sendReminder' | t }}
-      </button>
-      <span class="action-bar-spacer"></span>
+      <ng-container *ngIf="inDrawer">
+        <button
+          type="button"
+          class="ghost-action"
+          [disabled]="isMissingCustomer(task)"
+          (click)="workspace.nudgeMeetingTaskOwner(task)"
+        >
+          {{ 'drawer.sendReminder' | t }}
+        </button>
+        <span class="action-bar-spacer"></span>
+      </ng-container>
       <button type="button" class="ghost-action" (click)="close()">
         {{ 'common.close' | t }}
       </button>

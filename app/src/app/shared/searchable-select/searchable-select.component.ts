@@ -27,7 +27,16 @@ export interface SelectOption {
       >
         <span [class.ss-placeholder]="isPlaceholder">{{ displayLabel() }}</span>
       </button>
-      <div class="ss-menu" *ngIf="isOpen" (click)="$event.stopPropagation()">
+      <div
+        class="ss-menu"
+        *ngIf="isOpen"
+        [style.left.px]="menuLeft"
+        [style.width.px]="menuWidth"
+        [style.top]="openUpward ? 'auto' : menuTop + 'px'"
+        [style.bottom]="openUpward ? menuBottom + 'px' : 'auto'"
+        [style.max-height.px]="menuMaxHeight"
+        (click)="$event.stopPropagation()"
+      >
         <input
           type="search"
           class="ss-search"
@@ -90,12 +99,11 @@ export interface SelectOption {
 
     .ss-placeholder { color: var(--muted); font-weight: 400; }
 
+    /* Fixed-positioned (coordinates computed from the trigger) so the menu floats
+       above any ancestor with overflow:auto/hidden instead of being clipped. */
     .ss-menu {
-      position: absolute;
-      z-index: 200;
-      top: calc(100% + 4px);
-      left: 0;
-      right: 0;
+      position: fixed;
+      z-index: 1200;
       min-width: 180px;
       background: var(--bg-elevated);
       border: 1px solid var(--border-subtle);
@@ -107,11 +115,6 @@ export interface SelectOption {
       gap: 2px;
       max-height: 260px;
       overflow-y: auto;
-    }
-
-    .ss-up .ss-menu {
-      top: auto;
-      bottom: calc(100% + 4px);
     }
 
     .ss-search {
@@ -193,6 +196,14 @@ export class SearchableSelectComponent implements ControlValueAccessor, OnDestro
   isOpen = false;
   isDisabled = false;
 
+  // Fixed-position coordinates for the open menu (computed from the trigger rect).
+  menuLeft = 0;
+  menuWidth = 0;
+  menuTop = 0;
+  menuBottom = 0;
+  menuMaxHeight = 260;
+  openUpward = false;
+
   private onChange: (v: any) => void = () => {};
   private onTouched: () => void = () => {};
   private outsideClickListenerAttached = false;
@@ -214,10 +225,19 @@ export class SearchableSelectComponent implements ControlValueAccessor, OnDestro
     }
   };
 
+  // Keep the fixed menu glued to the trigger while the page/containers scroll.
+  private readonly repositionListener = (): void => {
+    if (this.isOpen) {
+      this.positionMenu();
+    }
+  };
+
   constructor(private readonly el: ElementRef) {}
 
   ngOnDestroy(): void {
     this.detachOutsideClickListener();
+    window.removeEventListener('scroll', this.repositionListener, true);
+    window.removeEventListener('resize', this.repositionListener);
   }
 
   writeValue(v: any): void { this.value = v; }
@@ -275,9 +295,38 @@ export class SearchableSelectComponent implements ControlValueAccessor, OnDestro
       this.close();
     } else {
       this.isOpen = true;
+      this.positionMenu();
       this.attachOutsideClickListener();
+      window.addEventListener('scroll', this.repositionListener, true);
+      window.addEventListener('resize', this.repositionListener);
     }
     this.onTouched();
+  }
+
+  /** Place the fixed-position menu under (or above) the trigger, escaping any
+   *  ancestor that clips with overflow. Re-runs on scroll/resize while open. */
+  private positionMenu(): void {
+    const trigger = this.el.nativeElement.querySelector('.ss-trigger') as HTMLElement | null;
+    if (!trigger) {
+      return;
+    }
+    const rect = trigger.getBoundingClientRect();
+    const gap = 4;
+    const desired = 260;
+    const margin = 8;
+    const spaceBelow = window.innerHeight - rect.bottom - margin;
+    const spaceAbove = rect.top - margin;
+    // Open upward only when there isn't room below and there's more room above.
+    this.openUpward = spaceBelow < Math.min(desired, 200) && spaceAbove > spaceBelow;
+    this.menuLeft = rect.left;
+    this.menuWidth = rect.width;
+    if (this.openUpward) {
+      this.menuMaxHeight = Math.max(120, Math.min(desired, spaceAbove));
+      this.menuBottom = window.innerHeight - rect.top + gap;
+    } else {
+      this.menuMaxHeight = Math.max(120, Math.min(desired, spaceBelow));
+      this.menuTop = rect.bottom + gap;
+    }
   }
 
   pick(opt: SelectOption): void {
@@ -295,6 +344,8 @@ export class SearchableSelectComponent implements ControlValueAccessor, OnDestro
     this.isOpen = false;
     this.searchText = '';
     this.detachOutsideClickListener();
+    window.removeEventListener('scroll', this.repositionListener, true);
+    window.removeEventListener('resize', this.repositionListener);
   }
 
   private attachOutsideClickListener(): void {

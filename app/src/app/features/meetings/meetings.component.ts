@@ -22,7 +22,7 @@ type MeetingLane = 'upcoming' | 'in-progress' | 'closed';
 /** The two list sections: open (Tasks Created) vs Completed (Closed). */
 type MeetingSection = 'tasks-created' | 'completed';
 export type MeetingTileLens = 'upcoming' | 'in-progress' | 'open-tasks';
-type QuickFilter = 'all' | 'week' | 'followups' | 'led';
+type QuickFilter = 'all' | 'week' | 'led';
 
 interface LaneBucket {
   lane: MeetingSection;
@@ -72,7 +72,6 @@ export class MeetingsComponent implements OnInit, OnChanges {
   readonly quickFilterOptions: { id: QuickFilter; labelKey: string }[] = [
     { id: 'all',       labelKey: 'meetingsOverview.filterAll' },
     { id: 'week',      labelKey: 'meetingsOverview.filterThisWeek' },
-    { id: 'followups', labelKey: 'meetingsOverview.filterFollowups' },
     { id: 'led',       labelKey: 'meetingsOverview.filterLed' }
   ];
 
@@ -200,7 +199,6 @@ export class MeetingsComponent implements OnInit, OnChanges {
 
     switch (this.quickFilter) {
       case 'week':      list = list.filter(m => this.isWithinWeek(m, today, weekEnd)); break;
-      case 'followups': list = list.filter(m => this.meetingActionItems(m).length > 0); break;
       case 'led':       list = list.filter(m => this.isMeetingLed(m)); break;
     }
 

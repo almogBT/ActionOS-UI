@@ -693,7 +693,7 @@
     "openTask": "Open task",
     "noteDetails": "Details",
     "beforePublishing": "Before publishing",
-    "noTasksInFilter": "Nothing in this filter yet.",
+    "noTasksInFilter": "No tasks yet.",
     "reviewActionsWithoutTask": "Actions without linked task",
     "reviewBlockersOpen": "Blockers still open",
     "reviewNotesCaptured": "Notes captured",
@@ -717,7 +717,7 @@
     "uploading": "Uploading...",
     "download": "Download",
     "noAttachments": "No attachments yet.",
-    "noTasksInFilterYet": "No tasks in this filter yet.",
+    "noTasksInFilterYet": "No tasks yet.",
     "reviewOpenTasks": "Open tasks from this meeting",
     "reviewOpenTasksNote": "meeting will close automatically once all tasks are done",
     "tabNotes": "Notes",
@@ -732,7 +732,7 @@
     "stepCapture": "Capture",
     "stepTasks": "Tasks",
     "noNotesYet": "No notes captured yet. Start typing above to capture the first one.",
-    "emptyTasksHint": "Tasks you create from notes will show up here, grouped by status."
+    "emptyTasksHint": "Create a task above; all meeting tasks will show up here."
   },
   "noteDetail": {
     "title": "Note details",

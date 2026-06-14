@@ -18,11 +18,13 @@ import { TaskFormComponent } from './task-form.component';
     <app-drawer-shell
       [open]="!!(workspace.drawerOpen && workspace.selectedTask)"
       ariaLabel="Task details"
+      height="88vh"
       (closed)="workspace.closeTaskDrawer()"
     >
       <app-task-form
         *ngIf="workspace.selectedTask as task"
         [task]="task"
+        [inDrawer]="true"
         (closed)="workspace.closeTaskDrawer()"
       ></app-task-form>
     </app-drawer-shell>

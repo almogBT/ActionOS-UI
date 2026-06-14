@@ -197,7 +197,7 @@ interface MeetingClientOption {
             </div>
 
             <ng-container *ngIf="showPlanFields">
-            <label class="field-control">
+            <label class="field-control wide">
               {{ 'customerMeeting.subject' | t }}
               <input
                 type="text"
@@ -208,7 +208,8 @@ interface MeetingClientOption {
               />
             </label>
 
-            <label class="field-control">
+            <div class="dropdowns-row">
+            <div class="field-control">
               {{ 'customerMeeting.meetingDate' | t }}
               <input
                 type="datetime-local"
@@ -216,9 +217,8 @@ interface MeetingClientOption {
                 [(ngModel)]="meetingDateLocal"
                 (ngModelChange)="onPlanChanged()"
               />
-            </label>
+            </div>
 
-            <div class="dropdowns-row">
             <div class="field-control">
               {{ 'customerMeeting.internalParticipants' | t }}
               <app-participant-picker
@@ -387,18 +387,18 @@ interface MeetingClientOption {
       </ng-container>
     </section>
 
-    <!-- The form auto-saves on every change, so there's no draft/save action —
-         just one button to finish and close the drawer. -->
+    <!-- The form auto-saves on every change. Mail publishing is drawer-only;
+         embedded page forms keep the normal finish/reset flow without mail send. -->
     <div class="action-bar">
       <button
         type="button"
         class="primary-action"
-        *ngIf="editingMeeting"
+        *ngIf="inDrawer && editingMeeting"
         (click)="publishRecap()"
       >
         {{ 'customerMeeting.publishRecap' | t }}
       </button>
-      <span class="action-bar-spacer"></span>
+      <span class="action-bar-spacer" *ngIf="inDrawer && editingMeeting"></span>
       <button type="button" class="primary-action" (click)="finish()">
         {{ 'customerMeeting.finish' | t }}
       </button>
@@ -477,11 +477,11 @@ interface MeetingClientOption {
     .dropdowns-row {
       grid-column: 1 / -1;
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 1rem;
       align-items: start;
     }
-    @media (max-width: 720px) {
+    @media (max-width: 900px) {
       .dropdowns-row { grid-template-columns: 1fr; }
     }
     .modal-backdrop {
@@ -525,6 +525,8 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
   @Input() customer: Customer | null = null;
   @Input() initialCustomerId: string | null = null;
   @Input() existingMeetingId: string | null = null;
+  /** True only when hosted by the meeting drawer; embedded page forms hide mail actions. */
+  @Input() inDrawer = false;
   @Output() saved = new EventEmitter<MeetingFormSavedEvent>();
   @Output() cancelled = new EventEmitter<void>();
 

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ACTIONOS_FEATURES } from '../../core/config/actionos-ui.config';
 import { ActionosI18nService } from '../../core/i18n/actionos-i18n.service';
@@ -68,7 +68,7 @@ import { SearchableSelectComponent, SelectOption } from '../../shared/searchable
       </div>
 
       <div class="create-actions">
-        <button type="button" class="ghost-action" (click)="cancelled.emit()">
+        <button type="button" class="ghost-action" (click)="cancel()">
           {{ 'common.cancel' | t }}
         </button>
         <button
@@ -119,7 +119,7 @@ import { SearchableSelectComponent, SelectOption } from '../../shared/searchable
     }
   `]
 })
-export class MeetingTaskCreationComponent {
+export class MeetingTaskCreationComponent implements OnInit, OnChanges {
   readonly features = ACTIONOS_FEATURES;
   @Input({ required: true }) meetingId!: string;
   @Input({ required: true }) customerId!: string;
@@ -153,7 +153,23 @@ export class MeetingTaskCreationComponent {
   }
 
   ngOnInit(): void {
-    this.form.sourceMeetingId = this.meetingId;
+    this.resetForm();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['meetingId'] || changes['sourceNote']) {
+      this.resetForm();
+    }
+  }
+
+  private resetForm(): void {
+    this.form = {
+      title: '',
+      description: '',
+      sourceMeetingId: this.meetingId,
+      assignedToEmployeeId: '',
+      priority: 'Medium'
+    };
     if (this.sourceNote) {
       this.form.title = this.sourceNote.content;
       this.form.assignedToEmployeeId = this.sourceNote.ownerId ?? '';
@@ -180,6 +196,12 @@ export class MeetingTaskCreationComponent {
     );
     if (task) {
       this.created.emit(task.id);
+      this.resetForm();
     }
+  }
+
+  cancel(): void {
+    this.resetForm();
+    this.cancelled.emit();
   }
 }

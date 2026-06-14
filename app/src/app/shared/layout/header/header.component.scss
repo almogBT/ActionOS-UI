@@ -496,7 +496,12 @@
 }
 
 @media (max-width: 720px) {
-  .app-header { gap: 8px; }
+  .app-header {
+    gap: 8px;
+    /* Pull the floating header in to match the 4px content gutter. */
+    inset-inline-start: 4px;
+    inset-inline-end: 4px;
+  }
   .user-chip { padding: 4px; }
 }
 
