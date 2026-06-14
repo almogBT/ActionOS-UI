@@ -145,8 +145,8 @@
     "prep": "Prep",
     "wrapUp": "Wrap up",
     "needsWrapUp": "Needs wrap-up",
-    "tasksCreatedLane": "Tasks created",
-    "completedLane": "Completed"
+    "tasksCreatedLane": "Meetings with completed tasks",
+    "completedLane": "Meetings where all tasks are complete"
   },
   "home": {
     "meetingsLead": "What's next",

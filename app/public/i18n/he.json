@@ -145,8 +145,8 @@
     "prep": "הכנה",
     "wrapUp": "סכמו",
     "needsWrapUp": "דרוש סיכום",
-    "tasksCreatedLane": "משימות בעבודה",
-    "completedLane": "הושלמו"
+    "tasksCreatedLane": "פגישות עם משימות שהושלמו",
+    "completedLane": "פגישות שכל המשימות הושלמו"
   },
   "home": {
     "meetingsLead": "מה הבא",
