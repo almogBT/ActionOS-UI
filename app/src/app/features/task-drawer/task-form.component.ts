@@ -19,11 +19,9 @@ type TaskSectionId = 'setup' | 'activity';
  *     task, and
  *   - embedded directly on the Tasks page (right pane) for creating a new task.
  *
- * The form edits the `task` it is given live (each field change is persisted via
- * `workspace.updateMeetingTask`). It does not own selection/drawer state. When a
- * brand-new draft task gets a client assigned it is persisted into a real task
- * with a new id; `updateMeetingTask` returns that saved task and the form emits
- * `persisted` so an embedded host can rebind and keep editing it inline.
+ * Existing tasks are edited live through `workspace.updateMeetingTask`. Brand-new
+ * drafts stay in memory while the user changes fields and are persisted only when
+ * the form Save action is clicked.
  */
 @Component({
   selector: 'app-task-form',
@@ -357,6 +355,23 @@ export class TaskFormComponent {
     this.closed.emit();
   }
 
+  canSaveTask(task: Task): boolean {
+    return !this.workspace.isUnsavedDraft(task.id) || (!!task.customerId?.trim() && !!task.title?.trim());
+  }
+
+  saveAndClose(task: Task): void {
+    if (this.workspace.isUnsavedDraft(task.id)) {
+      const saved = this.workspace.saveMeetingTaskDraft(task.id);
+      if (!saved) {
+        return;
+      }
+      if (saved.id !== task.id) {
+        this.persisted.emit(saved);
+      }
+    }
+    this.close();
+  }
+
   shouldShowStatusReason(task: Task): boolean {
     return this.pendingStatusTaskId === task.id
       && (
@@ -386,9 +401,8 @@ export class TaskFormComponent {
 
   updateMeetingTaskField<K extends keyof Task>(task: Task, field: K, value: Task[K]): void {
     const result = this.workspace.updateMeetingTask(task.id, { [field]: value } as UpdateMeetingTaskInput);
-    // A field edit can be what finally persists a draft into a real task — with the
-    // client-first gate that's the title, entered after the client. When the id
-    // changes, tell the host to rebind so editing continues on the saved task.
+    // Existing tasks can still be promoted through aliases after backend create.
+    // If an id changes, tell the host to rebind so editing continues cleanly.
     if (result && result.id !== task.id) {
       this.persisted.emit(result);
     }
@@ -403,10 +417,8 @@ export class TaskFormComponent {
     return task.source !== 'meeting' && !task.customerId?.trim();
   }
 
-  /** Assign/clear the task's client. Routed through its own handler so the
-   *  required-client rule is enforced and the change is always persisted.
-   *  Assigning a client to a new draft persists it into a real task; we surface
-   *  that via `persisted` so an embedded host can keep editing it inline. */
+  /** Assign/clear the task's client. For new drafts this stays in memory until
+   *  the user clicks Save; existing tasks still persist the change immediately. */
   changeTaskCustomer(task: Task, customerId: string): void {
     const changes: UpdateMeetingTaskInput = { customerId };
     // Meetings are client-specific, so switching the client clears any meeting

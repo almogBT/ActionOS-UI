@@ -235,7 +235,7 @@ export class BoardsComponent {
       kind: 'customer' as const,
       customerName: name,
       attendeeCount:
-        m.internalParticipantEmployeeIds.length + m.customerParticipants.length + 1,
+        m.internalParticipantEmployeeIds.length + (m.internalGuestParticipants?.length ?? 0) + m.customerParticipants.length + 1,
       sourceId: m.id
     }));
     this.clientCalendarEventsCache = { sortedMeetings: meetings, clientName: name, result };

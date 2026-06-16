@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { ActionosI18nService } from '../../../core/i18n/actionos-i18n.service';
@@ -72,7 +72,7 @@ import { MEETING_FORM_STYLES } from './meeting-form.styles';
         >
           {{ 'customerMeeting.captureAndTask' | t }}
         </button>
-        <button type="button" class="ghost-action small" (click)="triggerNoteAttachInput()">
+        <button type="button" class="ghost-action small" *ngIf="!draftMode" (click)="triggerNoteAttachInput()">
           📎 {{ pendingAttachmentFile ? pendingAttachmentFile.name : ('customerMeeting.attachFile' | t) }}
         </button>
         <input #noteAttachInput type="file" style="display:none" (change)="onPendingAttachSelected($event)" />
@@ -90,9 +90,6 @@ import { MEETING_FORM_STYLES } from './meeting-form.styles';
       </button>
       <div class="notes-list" *ngIf="!notesCollapsed">
         <div *ngFor="let n of capturedNotes; trackBy: trackNote" class="note-row">
-        <span class="status-chip" [ngClass]="n.type">
-          {{ ('noteType.' + n.type) | t }}
-        </span>
         <div class="note-content">
           <ng-container *ngIf="editingNoteId !== n.id; else editNoteForm">
             <p>{{ n.content }}</p>
@@ -138,71 +135,98 @@ import { MEETING_FORM_STYLES } from './meeting-form.styles';
           </ng-template>
         </div>
         <div class="note-actions">
-          <button
-            *ngIf="editingNoteId !== n.id"
-            type="button"
-            class="ghost-action"
-            (click)="startEditingNote(n)"
-          >
-            {{ 'common.edit' | t }}
-          </button>
-          <button
-            *ngIf="editingNoteId === n.id"
-            type="button"
-            class="primary-action"
-            [disabled]="!canSaveEditedNote()"
-            (click)="saveEditedNote(n)"
-          >
-            {{ 'common.save' | t }}
-          </button>
-          <button
-            *ngIf="editingNoteId === n.id"
-            type="button"
-            class="ghost-action"
-            (click)="cancelEditingNote()"
-          >
-            {{ 'common.cancel' | t }}
-          </button>
-          <button
-            type="button"
-            class="ghost-action danger"
-            (click)="deleteNote(n)"
-          >
-            {{ 'common.delete' | t }}
-          </button>
-          <button
-            *ngIf="canCreateTaskFromNote(n) && !n.convertedTaskId"
-            type="button"
-            class="primary-action"
-            [disabled]="n.type === 'action' && !isActionReady(n)"
-            (click)="requestTaskCreation(n)"
-          >
-            {{ 'customerMeeting.createTaskFromNote' | t }}
-          </button>
-          <button
-            *ngIf="linkedTaskForNote(n) as linked"
-            type="button"
-            class="ghost-action"
-            (click)="openMeetingTask(linked)"
-          >
-            {{ 'customerMeeting.openTask' | t }}
-          </button>
-          <button
-            *ngIf="editingNoteId !== n.id"
-            type="button"
-            class="ghost-action"
-            (click)="openNoteDetail(n)"
-          >
-            {{ 'customerMeeting.noteDetails' | t }}
-          </button>
-          <button
-            *ngIf="editingNoteId !== n.id"
-            type="button"
-            class="ghost-action small"
-            (click)="triggerNoteRowAttach(n.id)"
-          >
-            📎
-          </button>
+          <!-- While editing a note we keep Save/Cancel inline (they're the active
+               controls for the open edit form). Otherwise every row action lives in
+               a single overflow (⋮) dropdown so the row stays compact. -->
+          <ng-container *ngIf="editingNoteId === n.id">
+            <button
+              type="button"
+              class="note-icon-btn primary"
+              [disabled]="!canSaveEditedNote()"
+              (click)="saveEditedNote(n)"
+              [title]="'common.save' | t"
+              [attr.aria-label]="'common.save' | t"
+            >
+              <span aria-hidden="true">✓</span>
+            </button>
+            <button
+              type="button"
+              class="note-icon-btn"
+              (click)="cancelEditingNote()"
+              [title]="'common.cancel' | t"
+              [attr.aria-label]="'common.cancel' | t"
+            >
+              <span aria-hidden="true">✕</span>
+            </button>
+          </ng-container>
+
+          <div class="note-menu" *ngIf="editingNoteId !== n.id">
+            <button
+              type="button"
+              class="note-icon-btn note-menu-trigger"
+              [class.active]="openMenuNoteId === n.id"
+              (click)="toggleNoteMenu(n.id, $event)"
+              [title]="'common.actions' | t"
+              [attr.aria-label]="'common.actions' | t"
+              [attr.aria-haspopup]="true"
+              [attr.aria-expanded]="openMenuNoteId === n.id"
+            >
+              <span aria-hidden="true">⋮</span>
+            </button>
+            <div
+              class="note-menu-list"
+              *ngIf="openMenuNoteId === n.id"
+              role="menu"
+              [style.left.px]="noteMenuLeft"
+              [style.top]="noteMenuUpward ? 'auto' : noteMenuTop + 'px'"
+              [style.bottom]="noteMenuUpward ? noteMenuBottom + 'px' : 'auto'"
+              (click)="$event.stopPropagation()"
+            >
+              <button type="button" class="note-menu-item" role="menuitem" (click)="startEditingNote(n); closeNoteMenu()">
+                <span class="note-menu-icon" aria-hidden="true">✎</span>
+                {{ 'common.edit' | t }}
+              </button>
+              <button type="button" class="note-menu-item" role="menuitem" (click)="openNoteDetail(n); closeNoteMenu()">
+                <span class="note-menu-icon" aria-hidden="true">ⓘ</span>
+                {{ 'customerMeeting.noteDetails' | t }}
+              </button>
+              <button
+                *ngIf="!draftMode"
+                type="button"
+                class="note-menu-item"
+                role="menuitem"
+                (click)="triggerNoteRowAttach(n.id); closeNoteMenu()"
+              >
+                <span class="note-menu-icon" aria-hidden="true">📎</span>
+                {{ 'customerMeeting.attachFile' | t }}
+              </button>
+              <button
+                *ngIf="canCreateTaskFromNote(n) && !n.convertedTaskId"
+                type="button"
+                class="note-menu-item"
+                role="menuitem"
+                [disabled]="n.type === 'action' && !isActionReady(n)"
+                (click)="requestTaskCreation(n); closeNoteMenu()"
+              >
+                <span class="note-menu-icon" aria-hidden="true">✚</span>
+                {{ 'customerMeeting.createTaskFromNote' | t }}
+              </button>
+              <button
+                *ngIf="linkedTaskForNote(n) as linked"
+                type="button"
+                class="note-menu-item"
+                role="menuitem"
+                (click)="openMeetingTask(linked); closeNoteMenu()"
+              >
+                <span class="note-menu-icon" aria-hidden="true">↗</span>
+                {{ 'customerMeeting.openTask' | t }}
+              </button>
+              <button type="button" class="note-menu-item danger" role="menuitem" (click)="deleteNote(n); closeNoteMenu()">
+                <span class="note-menu-icon" aria-hidden="true">🗑</span>
+                {{ 'common.delete' | t }}
+              </button>
+            </div>
+          </div>
           <input
             [id]="'note-attach-' + n.id"
             type="file"
@@ -210,7 +234,7 @@ import { MEETING_FORM_STYLES } from './meeting-form.styles';
             (change)="onNoteRowFileSelected($event, n.id)"
           />
         </div>
-        <div class="note-attachments" *ngIf="workspace.noteAttachments(n.id).length">
+        <div class="note-attachments" *ngIf="!draftMode && workspace.noteAttachments(n.id).length">
           <div class="note-attach-chip" *ngFor="let att of workspace.noteAttachments(n.id)">
             <span>{{ att.fileName }}</span>
             <button
@@ -255,6 +279,96 @@ import { MEETING_FORM_STYLES } from './meeting-form.styles';
     />
   `,
   styles: [MEETING_FORM_STYLES, `
+    /* Icon-only note-row actions: compact, modern round buttons that reveal their
+       label as a native tooltip on hover (title) and to assistive tech (aria-label).
+       Scoped to this component so the global .ghost-action/.primary-action buttons
+       elsewhere in the form are unaffected. */
+    .note-actions { gap: 4px; }
+    .note-icon-btn {
+      display: inline-grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1;
+      cursor: pointer;
+      transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+    }
+    .note-icon-btn:hover:not(:disabled) {
+      background: var(--bg-hover, rgba(255, 255, 255, 0.06));
+      color: var(--ink);
+      border-color: var(--line);
+    }
+    .note-icon-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .note-icon-btn.primary { color: var(--accent-strong); }
+    .note-icon-btn.primary:hover:not(:disabled) {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+    }
+    .note-icon-btn.danger { color: var(--danger); }
+    .note-icon-btn.danger:hover:not(:disabled) {
+      background: rgba(192, 57, 43, 0.12);
+      border-color: rgba(192, 57, 43, 0.32);
+    }
+    .note-icon-btn.active {
+      background: var(--bg-hover, rgba(255, 255, 255, 0.06));
+      color: var(--ink);
+      border-color: var(--line);
+    }
+
+    /* Overflow (⋮) dropdown holding all row actions. The menu is position:fixed with
+       coordinates computed from the trigger (see positionNoteMenu) so it floats above
+       any ancestor with overflow:auto/hidden instead of being clipped by the scrollable
+       notes list. Dismissed by the document click handler or by selecting an item. */
+    .note-menu { position: relative; }
+    .note-menu-list {
+      position: fixed;
+      z-index: 1200;
+      min-width: 180px;
+      display: grid;
+      gap: 2px;
+      padding: 6px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--bg-elevated);
+      box-shadow: var(--shadow, 0 8px 24px rgba(0, 0, 0, 0.18));
+    }
+    .note-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 7px 10px;
+      border: 0;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 500;
+      text-align: start;
+      cursor: pointer;
+      transition: background 120ms ease, color 120ms ease;
+    }
+    .note-menu-item:hover:not(:disabled) { background: var(--bg-hover, rgba(255, 255, 255, 0.06)); }
+    .note-menu-item:disabled { opacity: 0.4; cursor: not-allowed; }
+    .note-menu-item.danger { color: var(--danger); }
+    .note-menu-item.danger:hover:not(:disabled) { background: rgba(192, 57, 43, 0.12); }
+    .note-menu-icon {
+      flex: 0 0 auto;
+      display: inline-grid;
+      place-items: center;
+      width: 18px;
+      font-size: 14px;
+      line-height: 1;
+    }
     .next-meeting-notes { margin-top: 14px; }
     /* Collapsible + scrollable captured-notes list: a long meeting no longer makes the
        whole form unreadable. The header button folds the list; when open it scrolls
@@ -289,8 +403,9 @@ import { MEETING_FORM_STYLES } from './meeting-form.styles';
     }
   `]
 })
-export class MeetingNotesSectionComponent implements OnInit {
+export class MeetingNotesSectionComponent implements OnInit, OnDestroy {
   @Input() meeting!: CustomerMeeting;
+  @Input() draftMode = false;
 
   /** Emitted whenever the meeting was mutated so the parent can reload it. */
   @Output() changed = new EventEmitter<void>();
@@ -320,6 +435,21 @@ export class MeetingNotesSectionComponent implements OnInit {
   /** Folds the captured-notes list to its header so a long meeting stays readable. */
   notesCollapsed = false;
   openedNote: MeetingNote | null = null;
+  /** Id of the note whose overflow (⋮) action menu is currently open, or null. */
+  openMenuNoteId: string | null = null;
+  /** Fixed-position coordinates for the open menu, computed from the trigger rect. */
+  noteMenuTop = 0;
+  noteMenuBottom = 0;
+  noteMenuLeft = 0;
+  noteMenuUpward = false;
+  private noteMenuTriggerEl: HTMLElement | null = null;
+  private draftNoteNumber = 1;
+  /** Keeps the open menu glued to its trigger as the page/notes list scrolls. */
+  private readonly noteMenuReposition = (): void => {
+    if (this.openMenuNoteId && this.noteMenuTriggerEl) {
+      this.positionNoteMenu(this.noteMenuTriggerEl);
+    }
+  };
 
   @ViewChild('noteComposerInput') noteComposerInput?: ElementRef<HTMLInputElement>;
   @ViewChild('noteAttachInput') noteAttachInput?: ElementRef<HTMLInputElement>;
@@ -331,6 +461,11 @@ export class MeetingNotesSectionComponent implements OnInit {
 
   ngOnInit(): void {
     this.newNote = { type: 'note', content: '', ownerId: this.workspace.currentEmployeeId };
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('scroll', this.noteMenuReposition, true);
+    window.removeEventListener('resize', this.noteMenuReposition);
   }
 
   get capturedNotes(): MeetingNote[] {
@@ -452,6 +587,22 @@ export class MeetingNotesSectionComponent implements OnInit {
     if (!this.meeting || !this.canSaveEditedNote()) {
       return;
     }
+    if (this.draftMode) {
+      const index = this.meeting.notes.findIndex((item) => item.id === note.id);
+      if (index === -1) {
+        return;
+      }
+      this.meeting.notes[index] = {
+        ...this.meeting.notes[index],
+        type: this.editingNoteDraft.type ?? this.meeting.notes[index].type,
+        content: this.editingNoteDraft.content.trim(),
+        ownerId: this.editingNoteDraft.ownerId,
+        dueDate: this.editingNoteDraft.dueDate
+      };
+      this.cancelEditingNote();
+      this.changed.emit();
+      return;
+    }
     const updated = this.workspace.updateCustomerMeetingNote(this.meeting.id, note.id, {
       type: this.editingNoteDraft.type,
       content: this.editingNoteDraft.content.trim(),
@@ -469,6 +620,14 @@ export class MeetingNotesSectionComponent implements OnInit {
     if (!this.meeting) {
       return;
     }
+    if (this.draftMode) {
+      this.meeting.notes = this.meeting.notes.filter((item) => item.id !== note.id);
+      if (this.editingNoteId === note.id) {
+        this.cancelEditingNote();
+      }
+      this.changed.emit();
+      return;
+    }
     const removed = this.workspace.removeCustomerMeetingNote(this.meeting.id, note.id);
     if (!removed) {
       return;
@@ -481,6 +640,64 @@ export class MeetingNotesSectionComponent implements OnInit {
 
   openNoteDetail(note: MeetingNote): void {
     this.openedNote = note;
+  }
+
+  /** Toggles the overflow action menu for a note row. stopPropagation keeps this
+   *  click from immediately reaching the document handler that closes the menu.
+   *  On open we capture the trigger and compute the fixed-position coordinates so
+   *  the menu floats above the scrollable notes list instead of being clipped. */
+  toggleNoteMenu(noteId: string, event: MouseEvent): void {
+    event.stopPropagation();
+    if (this.openMenuNoteId === noteId) {
+      this.closeNoteMenu();
+      return;
+    }
+    this.openMenuNoteId = noteId;
+    this.noteMenuTriggerEl = event.currentTarget as HTMLElement;
+    this.positionNoteMenu(this.noteMenuTriggerEl);
+    window.addEventListener('scroll', this.noteMenuReposition, true);
+    window.addEventListener('resize', this.noteMenuReposition);
+  }
+
+  closeNoteMenu(): void {
+    this.openMenuNoteId = null;
+    this.noteMenuTriggerEl = null;
+    window.removeEventListener('scroll', this.noteMenuReposition, true);
+    window.removeEventListener('resize', this.noteMenuReposition);
+  }
+
+  /** Place the fixed-position menu under (or above) the trigger, escaping any
+   *  ancestor that clips with overflow. Re-runs on scroll/resize while open.
+   *  Mirrors the searchable-select dropdown's positioning approach. */
+  private positionNoteMenu(trigger: HTMLElement): void {
+    const rect = trigger.getBoundingClientRect();
+    const gap = 4;
+    const desired = 240;
+    const margin = 8;
+    const spaceBelow = window.innerHeight - rect.bottom - margin;
+    const spaceAbove = rect.top - margin;
+    // Open upward only when there isn't room below and there's more room above.
+    this.noteMenuUpward = spaceBelow < Math.min(desired, 180) && spaceAbove > spaceBelow;
+    // Align the menu's end (right) edge to the trigger, then clamp so it never
+    // spills off either viewport edge (the trigger sits near the left in RTL).
+    const menuW = 220;
+    const left = Math.min(
+      Math.max(margin, rect.right - menuW),
+      window.innerWidth - menuW - margin
+    );
+    this.noteMenuLeft = left;
+    if (this.noteMenuUpward) {
+      this.noteMenuBottom = window.innerHeight - rect.top + gap;
+    } else {
+      this.noteMenuTop = rect.bottom + gap;
+    }
+  }
+
+  /** Any click outside an open menu trigger closes it (trigger clicks call
+   *  stopPropagation, and the menu panel stops propagation on its own clicks). */
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    this.closeNoteMenu();
   }
 
   linkedTaskForNote(note: MeetingNote): Task | undefined {
@@ -512,6 +729,10 @@ export class MeetingNotesSectionComponent implements OnInit {
 
   async onNoteRowFileSelected(event: Event, noteId: string): Promise<void> {
     const input = event.target as HTMLInputElement;
+    if (this.draftMode) {
+      input.value = '';
+      return;
+    }
     if (!input.files?.length || !this.meeting) {
       return;
     }
@@ -530,6 +751,29 @@ export class MeetingNotesSectionComponent implements OnInit {
   private addNoteInternal(): MeetingNote | null {
     if (!this.meeting || !this.canAddNote()) {
       return null;
+    }
+    if (this.draftMode) {
+      const created: MeetingNote = {
+        id: `draft-note-${this.draftNoteNumber++}`,
+        type: this.newNote.type,
+        content: this.newNote.content.trim(),
+        ownerId: this.newNote.ownerId || undefined,
+        dueDate: this.newNote.dueDate || undefined,
+        createdByEmployeeId: this.workspace.currentEmployeeId,
+        createdAt: new Date().toISOString()
+      };
+      this.meeting.notes = [created, ...this.meeting.notes];
+      this.notesCollapsed = false;
+      this.pendingAttachmentFile = null;
+      this.newNote = {
+        type: this.newNote.type,
+        content: '',
+        ownerId: this.newNote.ownerId,
+        dueDate: this.newNote.dueDate
+      };
+      this.focusComposer();
+      this.changed.emit();
+      return created;
     }
     const created = this.workspace.addCustomerMeetingNote(this.meeting.id, this.newNote);
     if (!created) {

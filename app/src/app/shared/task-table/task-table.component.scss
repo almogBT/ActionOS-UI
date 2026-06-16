@@ -264,10 +264,6 @@
   z-index: 5;
   background: var(--bg-canvas);
   border: 1px solid transparent;
-}
-
-.task-table.headerless .task-table-header {
-  top: -2px;
 
   span {
     padding: 0 15px 8px;
@@ -292,6 +288,13 @@
     &:hover { color: var(--accent); }
   }
   .th-caret { font-size: 9px; color: var(--accent); }
+}
+
+/* Ungrouped ("All") view has no group header above it, so stick the column
+   header flush to the scroll-box top (−2px clears the scroll wrapper's padding)
+   instead of leaving a 34px gap the first rows peeked through. */
+.task-table.headerless .task-table-header {
+  top: -2px;
 }
 
 .task-row {

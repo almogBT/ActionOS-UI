@@ -145,7 +145,7 @@
     "prep": "הכנה",
     "wrapUp": "סכמו",
     "needsWrapUp": "דרוש סיכום",
-    "tasksCreatedLane": "פגישות עם משימות שהושלמו",
+    "tasksCreatedLane": "פגישות עם משימות בעבודה",
     "completedLane": "פגישות שכל המשימות הושלמו"
   },
   "home": {
@@ -720,7 +720,7 @@
     "noTasksInFilterYet": "אין משימות עדיין.",
     "reviewOpenTasks": "משימות פתוחות מפגישה זו",
     "reviewOpenTasksNote": "הפגישה תיסגר אוטומטית כשכל המשימות יסתיימו",
-    "tabNotes": "הערות",
+    "tabNotes": "נושאים שנדונו",
     "tabSummary": "סיכום",
     "captureSection": "במהלך ואחרי הפגישה",
     "captureSubtitle": "עברו בין רישום הערות לבין כתיבת הסיכום.",

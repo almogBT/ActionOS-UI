@@ -9,6 +9,11 @@ import {
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
 import { SearchableSelectComponent, SelectOption } from '../../shared/searchable-select/searchable-select.component';
 
+export interface DraftMeetingTaskCreatedEvent {
+  input: CreateMeetingTaskInput;
+  sourceNote: MeetingNote | null;
+}
+
 @Component({
   selector: 'app-meeting-task-creation',
   standalone: true,
@@ -53,7 +58,10 @@ import { SearchableSelectComponent, SelectOption } from '../../shared/searchable
 
           <label class="field-control">
             {{ 'meetingTask.dueDate' | t }}
-            <input type="date" name="taskDue" [(ngModel)]="form.dueDate" />
+            <!-- lang="en-GB" forces the native date control to display dd/mm/yyyy
+                 (it otherwise inherits the document's lang="en" → mm/dd/yyyy). The
+                 stored value is unchanged (always yyyy-mm-dd). -->
+            <input type="date" name="taskDue" lang="en-GB" [(ngModel)]="form.dueDate" />
           </label>
 
           <label class="field-control" *ngIf="features.taskPriority">
@@ -124,7 +132,9 @@ export class MeetingTaskCreationComponent implements OnInit, OnChanges {
   @Input({ required: true }) meetingId!: string;
   @Input({ required: true }) customerId!: string;
   @Input() sourceNote: MeetingNote | null = null;
+  @Input() draftMode = false;
   @Output() created = new EventEmitter<string>();
+  @Output() draftCreated = new EventEmitter<DraftMeetingTaskCreatedEvent>();
   @Output() cancelled = new EventEmitter<void>();
 
   readonly priorities: Priority[] = ['Low', 'Medium', 'High', 'Critical'];
@@ -189,9 +199,24 @@ export class MeetingTaskCreationComponent implements OnInit, OnChanges {
     if (!this.canCreate()) {
       return;
     }
+    const input: CreateMeetingTaskInput = {
+      ...this.form,
+      title: this.form.title.trim(),
+      description: this.form.description?.trim() ?? '',
+      sourceMeetingId: this.meetingId,
+      customerId: this.customerId
+    };
+    if (this.draftMode) {
+      this.draftCreated.emit({
+        input,
+        sourceNote: this.sourceNote
+      });
+      this.resetForm();
+      return;
+    }
     const task = this.workspace.createTaskFromMeeting(
       this.meetingId,
-      this.form,
+      input,
       this.sourceNote?.id
     );
     if (task) {

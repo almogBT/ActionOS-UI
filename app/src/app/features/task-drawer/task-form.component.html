@@ -342,8 +342,8 @@
         </button>
         <span class="action-bar-spacer"></span>
       </ng-container>
-      <button type="button" class="ghost-action" (click)="close()">
-        {{ 'common.close' | t }}
+      <button type="button" class="ghost-action" [disabled]="!canSaveTask(task)" (click)="saveAndClose(task)">
+        {{ 'common.save' | t }}
       </button>
     </div>
 </div>

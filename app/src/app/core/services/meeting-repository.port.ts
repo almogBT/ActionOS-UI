@@ -66,6 +66,7 @@ export class InMemoryCustomerMeetingRepository implements CustomerMeetingReposit
       meetingDate: input.meetingDate,
       meetingLeaderEmployeeId: input.meetingLeaderEmployeeId,
       internalParticipantEmployeeIds: input.internalParticipantEmployeeIds ?? [],
+      internalGuestParticipants: input.internalGuestParticipants ?? [],
       customerParticipants: input.customerParticipants ?? [],
       goal: input.goal?.trim(),
       summary: '',

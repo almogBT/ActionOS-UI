@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActionosI18nService } from '../../core/i18n/actionos-i18n.service';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import {
-  CreateCustomerMeetingInput, Customer, CustomerMeeting, CustomerMeetingStatus, CustomerParticipant,
+  CreateCustomerMeetingInput, CreateMeetingTaskInput, Customer, CustomerMeeting, CustomerMeetingStatus, CustomerParticipant,
   MeetingNote, Task
 } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
@@ -16,6 +16,7 @@ import { ParticipantChip, ParticipantPickerComponent, ParticipantPickerOption } 
 import { MeetingNotesSectionComponent } from './meeting-form/meeting-notes-section.component';
 import { MeetingSummaryDraft, MeetingSummarySectionComponent } from './meeting-form/meeting-summary-section.component';
 import { MeetingTasksSectionComponent } from './meeting-form/meeting-tasks-section.component';
+import { DraftMeetingTaskCreatedEvent } from './meeting-task-creation.component';
 
 export type MeetingFormSaveIntent = 'continue' | 'close';
 
@@ -57,13 +58,13 @@ interface MeetingClientOption {
         <span class="phase-dot">1</span>
         <span class="phase-label">{{ 'customerMeeting.stepSettings' | t }}</span>
       </button>
-      <span class="phase-line" [class.filled]="editing"></span>
-      <button type="button" class="phase-step" [class.active]="editing" [disabled]="!editing" (click)="scrollToId('capture-section')">
+      <span class="phase-line" [class.filled]="canAccessMeetingSections"></span>
+      <button type="button" class="phase-step" [class.active]="canAccessMeetingSections" [disabled]="!canAccessMeetingSections" (click)="scrollToId('capture-section')">
         <span class="phase-dot">2</span>
         <span class="phase-label">{{ 'customerMeeting.stepCapture' | t }}</span>
       </button>
       <span class="phase-line" [class.filled]="meetingTasksForCurrentMeeting.length > 0"></span>
-      <button type="button" class="phase-step" [class.active]="meetingTasksForCurrentMeeting.length > 0" [disabled]="!editing" (click)="scrollToId('tasks-section')">
+      <button type="button" class="phase-step" [class.active]="meetingTasksForCurrentMeeting.length > 0" [disabled]="!canAccessMeetingSections" (click)="scrollToId('tasks-section')">
         <span class="phase-dot">3</span>
         <span class="phase-label">{{ 'customerMeeting.stepTasks' | t }}</span>
       </button>
@@ -124,7 +125,7 @@ interface MeetingClientOption {
 
       <div *ngIf="!setupCollapsed">
         <div class="form-grid">
-          <div class="field-control wide" *ngIf="!startedWithCustomer && !pickedCustomerId">
+          <div class="field-control wide" *ngIf="showCustomerPicker">
               {{ 'customerMeeting.customer' | t }}
               <app-searchable-select
                 name="formCustomer"
@@ -228,10 +229,53 @@ interface MeetingClientOption {
                 [emptyText]="'home.noMatches' | t"
                 [options]="internalPickerOptions"
                 [selectedKeys]="form.internalParticipantEmployeeIds"
-                [chips]="internalChips"
+                [chips]="internalAllChips"
                 (toggle)="toggleInternal($event)"
-                (remove)="toggleInternal($event)"
-              ></app-participant-picker>
+                (remove)="removeInternalChip($event)"
+              >
+                <button
+                  type="button"
+                  class="ghost-action small add-participant-toggle"
+                  (click)="showAddInternalGuestRow = !showAddInternalGuestRow"
+                >
+                  {{ showAddInternalGuestRow ? ('common.cancel' | t) : ('+ ' + ('customerMeeting.addParticipant' | t)) }}
+                </button>
+
+                <div class="customer-add-row" *ngIf="showAddInternalGuestRow">
+                  <input
+                    type="text"
+                    name="internalGuestName"
+                    [(ngModel)]="customInternalGuest.name"
+                    [placeholder]="'customerMeeting.participantName' | t"
+                  />
+                  <input
+                    type="email"
+                    name="internalGuestEmail"
+                    [(ngModel)]="customInternalGuest.email"
+                    [placeholder]="'customerMeeting.participantEmail' | t"
+                  />
+                  <input
+                    type="tel"
+                    name="internalGuestPhone"
+                    [(ngModel)]="customInternalGuest.phone"
+                    [placeholder]="'customerMeeting.participantPhone' | t"
+                  />
+                  <input
+                    type="text"
+                    name="internalGuestRole"
+                    [(ngModel)]="customInternalGuest.role"
+                    [placeholder]="'customerMeeting.participantRole' | t"
+                  />
+                  <button
+                    type="button"
+                    class="primary-action small"
+                    [disabled]="!canAddInternalGuest()"
+                    (click)="addInternalGuest()"
+                  >
+                    + {{ 'customerMeeting.addParticipant' | t }}
+                  </button>
+                </div>
+              </app-participant-picker>
             </div>
 
             <div class="field-control">
@@ -318,7 +362,7 @@ interface MeetingClientOption {
       </div>
 
       <ng-container *ngIf="!collapsedSections.capture">
-      <ng-container *ngIf="editingMeeting as meeting; else runLocked">
+      <ng-container *ngIf="activeMeeting as meeting; else runLocked">
         <!-- Summary sits on top; Notes below. The old notes/summary tab toggle was
              replaced by this vertical stack so both are visible at once. -->
         <div class="capture-block">
@@ -341,9 +385,10 @@ interface MeetingClientOption {
           </div>
           <app-meeting-notes-section
             [meeting]="meeting"
+            [draftMode]="isDraftMeetingActive"
             [nextMeetingNotes]="nextMeetingNotesText"
             (nextMeetingNotesChange)="onNextMeetingNotesChanged($event)"
-            (changed)="reloadMeeting()"
+            (changed)="onMeetingContentChanged()"
             (createTaskFromNote)="onCreateTaskFromNote($event)"
           ></app-meeting-notes-section>
         </div>
@@ -370,11 +415,14 @@ interface MeetingClientOption {
       </div>
 
       <ng-container *ngIf="!collapsedSections.tasks">
-      <ng-container *ngIf="editingMeeting as meeting; else tasksLocked">
+      <ng-container *ngIf="activeMeeting as meeting; else tasksLocked">
         <app-meeting-tasks-section
           [meeting]="meeting"
           [creatingTaskForNote]="creatingTaskForNote"
+          [draftMode]="isDraftMeetingActive"
+          [draftTasks]="draftMeetingTasks"
           (taskCreated)="onTaskCreated()"
+          (draftTaskCreated)="onDraftTaskCreated($event)"
           (cancelCreate)="creatingTaskForNote = null"
         ></app-meeting-tasks-section>
       </ng-container>
@@ -387,8 +435,7 @@ interface MeetingClientOption {
       </ng-container>
     </section>
 
-    <!-- The form auto-saves on every change. Mail publishing is drawer-only;
-         embedded page forms keep the normal finish/reset flow without mail send. -->
+    <!-- New forms save only through the explicit action; existing meetings keep live updates. -->
     <div class="action-bar">
       <button
         type="button"
@@ -533,6 +580,7 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
   form!: CreateCustomerMeetingInput & {
     customerParticipants: CustomerParticipant[];
     internalParticipantEmployeeIds: string[];
+    internalGuestParticipants: CustomerParticipant[];
   };
   pickedCustomerId = '';
   meetingDateLocal = '';
@@ -542,6 +590,9 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
 
   customCustomerParticipant: CustomerParticipant = { name: '', email: '', phone: '', role: '' };
   private customParticipantPool: CustomerParticipantOption[] = [];
+  /** Draft for the our-side guest add row. No pool is kept — guests are not reused. */
+  customInternalGuest: CustomerParticipant = { name: '', email: '', phone: '', role: '' };
+  showAddInternalGuestRow = false;
   showProspectForm = false;
   newProspect = { name: '', contactName: '', contactEmail: '', contactPhone: '' };
   setupCollapsed = false;
@@ -565,9 +616,13 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
 
   editing = false;
   editingMeeting: CustomerMeeting | null = null;
+  draftMeeting: CustomerMeeting | null = null;
+  draftMeetingTasks: Task[] = [];
   creatingTaskForNote: MeetingNote | null = null;
   lastRecap = '';
   captureTab: 'notes' | 'summary' = 'summary';
+  private draftMeetingTaskSourceNoteIds = new Map<string, string>();
+  private draftMeetingTaskNumber = 1;
 
   @ViewChild(MeetingNotesSectionComponent) notesSection?: MeetingNotesSectionComponent;
 
@@ -596,6 +651,23 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
     }));
   }
 
+  /**
+   * Our-side guest chips. Keyed by `guest:<index>` so they never collide with employee
+   * IDs and so `removeInternalChip` can tell the two apart. Guests are not in the
+   * picker's option list — they show only as chips.
+   */
+  get internalGuestChips(): ParticipantChip[] {
+    return this.form.internalGuestParticipants.map((g, i) => ({
+      key: `guest:${i}`,
+      label: g.name
+    }));
+  }
+
+  /** Employee chips + guest chips, shown together under the internal picker. */
+  get internalAllChips(): ParticipantChip[] {
+    return [...this.internalChips, ...this.internalGuestChips];
+  }
+
   get customerPickerOptions(): ParticipantPickerOption[] {
     return this.customerParticipantOptions().map((p) => ({
       key: p.key,
@@ -622,15 +694,30 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
   get setupSummaryLine(): string {
     const customerName = this.selectedClientForPrep?.name ?? 'No customer';
     const when = this.meetingDateLocal ? this.meetingDateLocal.replace('T', ' ') : 'No date';
-    const participants = this.form.internalParticipantEmployeeIds.length + this.form.customerParticipants.length;
+    const participants = this.form.internalParticipantEmployeeIds.length + this.form.internalGuestParticipants.length + this.form.customerParticipants.length;
     return `${customerName} · ${when} · ${participants} participants`;
   }
 
+  get activeMeeting(): CustomerMeeting | null {
+    return this.editingMeeting ?? this.draftMeeting;
+  }
+
+  get isDraftMeetingActive(): boolean {
+    return !!this.draftMeeting && !this.editingMeeting;
+  }
+
+  get canAccessMeetingSections(): boolean {
+    return !!this.activeMeeting;
+  }
+
   get capturedNotesCount(): number {
-    return this.editingMeeting?.notes.length ?? 0;
+    return this.activeMeeting?.notes.length ?? 0;
   }
 
   get meetingTasksForCurrentMeeting(): Task[] {
+    if (this.isDraftMeetingActive) {
+      return this.draftMeetingTasks;
+    }
     if (!this.editingMeeting) {
       return [];
     }
@@ -640,6 +727,10 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
   /** Reveal subject/date/leader/participants only once a client is chosen. */
   get showPlanFields(): boolean {
     return this.startedWithCustomer || !!this.pickedCustomerId;
+  }
+
+  get showCustomerPicker(): boolean {
+    return !this.startedWithCustomer && !this.editingMeeting;
   }
 
   get selectedCustomerForPrep(): Customer | null {
@@ -692,7 +783,7 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
   }
 
   currentStatus(): CustomerMeetingStatus {
-    return this.editingMeeting?.status ?? 'Planned';
+    return this.activeMeeting?.status ?? 'Planned';
   }
 
   scrollToId(id: string): void {
@@ -715,29 +806,33 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
   }
 
   startOrCollapseSetup(): void {
-    if (!this.editing) {
-      const updated = this.persistMeeting(true);
-      if (!updated) {
-        return;
-      }
-      this.setupCollapsed = true;
-      this.captureTab = 'notes';
-      this.notesSection?.focusComposer();
-    } else {
-      this.setupCollapsed = true;
+    if (!this.canStartMeeting()) {
+      return;
     }
+    if (!this.editingMeeting && !this.ensureDraftMeeting()) {
+      return;
+    }
+    this.editing = true;
+    this.setupCollapsed = true;
+    this.captureTab = 'notes';
+    this.notesSection?.focusComposer();
   }
 
   /**
-   * Finish editing and close the drawer. The form already auto-saves on every change,
-   * so this just flushes any last edit and emits `saved` (intent 'close'); publishing the
-   * recap is a separate, explicit action in the Summary tab. If no draft was ever created
-   * (incomplete form), there's nothing to save — just close.
+   * Finish editing and close the drawer. For a new form this is the only create/save
+   * action; existing meetings still flush their last live edit before closing.
    */
   finish(): void {
     if (this.editingMeeting) {
       const updated = this.persistMeeting(false) ?? this.editingMeeting;
       this.saved.emit({ meetingId: updated.id, intent: 'close' });
+    } else if (this.canCreateDraft()) {
+      this.refreshDraftMeetingFromForm();
+      const created = this.persistMeeting(true);
+      if (created) {
+        this.persistDraftMeetingChildren(created);
+        this.saved.emit({ meetingId: created.id, intent: 'close' });
+      }
     } else {
       this.cancelled.emit();
     }
@@ -746,17 +841,18 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
   // ── Plan field changes ───────────────────────────────────────────────────────
 
   onPlanChanged(): void {
-    if (!this.editingMeeting) {
-      this.tryCreateDraftMeeting();
-    }
     if (this.editingMeeting) {
       this.persistMeeting(false);
+    } else {
+      this.refreshDraftMeetingFromForm();
     }
   }
 
   onSummaryChanged(): void {
     if (this.editingMeeting) {
       this.persistMeeting(false);
+    } else {
+      this.refreshDraftMeetingFromForm();
     }
   }
 
@@ -764,10 +860,19 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
     this.nextMeetingNotesText = value;
     if (this.editingMeeting) {
       this.persistMeeting(false);
+    } else {
+      this.refreshDraftMeetingFromForm();
     }
   }
 
   onProspectOrCustomerPicked(): void {
+    const nextCustomerId = this.resolveCustomerId();
+    if (nextCustomerId !== this.form.customerId) {
+      this.form.customerId = nextCustomerId;
+      this.form.customerParticipants = [];
+      this.customParticipantPool = [];
+      this.customCustomerParticipant = { name: '', email: '', phone: '', role: '' };
+    }
     this.showProspectForm = false;
     this.onPlanChanged();
   }
@@ -806,7 +911,7 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
     }
     this.pickedCustomerId = created.id;
     this.cancelProspectForm();
-    this.onPlanChanged();
+    this.onProspectOrCustomerPicked();
   }
 
   cancelProspectForm(): void {
@@ -824,6 +929,42 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
     } else {
       list.splice(index, 1);
     }
+    this.onPlanChanged();
+  }
+
+  /** Routes a chip removal: `guest:<index>` removes a guest, anything else is an employee. */
+  removeInternalChip(key: string): void {
+    if (key.startsWith('guest:')) {
+      const index = Number(key.slice('guest:'.length));
+      if (Number.isInteger(index) && index >= 0 && index < this.form.internalGuestParticipants.length) {
+        this.form.internalGuestParticipants.splice(index, 1);
+        this.onPlanChanged();
+      }
+      return;
+    }
+    this.toggleInternal(key);
+  }
+
+  canAddInternalGuest(): boolean {
+    return !!this.customInternalGuest.name?.trim();
+  }
+
+  /**
+   * Appends a one-off guest to THIS meeting only. Unlike the customer side there is no
+   * suggestion pool, so the guest can never resurface in a future meeting.
+   */
+  addInternalGuest(): void {
+    if (!this.canAddInternalGuest()) {
+      return;
+    }
+    this.form.internalGuestParticipants.push({
+      name: this.customInternalGuest.name.trim(),
+      email: this.customInternalGuest.email?.trim() || undefined,
+      phone: this.customInternalGuest.phone?.trim() || undefined,
+      role: this.customInternalGuest.role?.trim() || undefined
+    });
+    this.customInternalGuest = { name: '', email: '', phone: '', role: '' };
+    this.showAddInternalGuestRow = false;
     this.onPlanChanged();
   }
 
@@ -885,6 +1026,56 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
     setTimeout(() => this.scrollToId('tasks-section'), 0);
   }
 
+  onMeetingContentChanged(): void {
+    if (this.editingMeeting) {
+      this.reloadMeeting();
+    } else {
+      this.refreshDraftMeetingFromForm();
+    }
+  }
+
+  onDraftTaskCreated(event: DraftMeetingTaskCreatedEvent): void {
+    const meeting = this.ensureDraftMeeting();
+    if (!meeting) {
+      return;
+    }
+    const now = new Date().toISOString();
+    const taskId = `draft-meeting-task-${this.draftMeetingTaskNumber++}`;
+    const task: Task = {
+      id: taskId,
+      title: event.input.title.trim(),
+      description: event.input.description?.trim() ?? '',
+      source: 'meeting',
+      board: this.workspace.clientName(meeting.customerId) ?? 'Customer meeting',
+      customerId: meeting.customerId,
+      status: 'New',
+      priority: event.input.priority ?? 'Medium',
+      dueDate: event.input.dueDate || this.addDays(new Date().toISOString().slice(0, 10), 3),
+      assigneeIds: [],
+      watcherIds: [],
+      assignedToEmployeeId: event.input.assignedToEmployeeId,
+      openedByEmployeeId: this.workspace.currentEmployeeId,
+      watcherEmployeeIds: Array.from(new Set([this.workspace.currentEmployeeId, event.input.assignedToEmployeeId].filter(Boolean))),
+      attachmentIds: [],
+      notifications: [],
+      sourceMeetingId: meeting.id,
+      checklist: [],
+      createdAt: now,
+      updatedAt: now,
+      progressionNotes: []
+    };
+    this.draftMeetingTasks = [task, ...this.draftMeetingTasks];
+    if (event.sourceNote) {
+      const sourceNote = meeting.notes.find((note) => note.id === event.sourceNote?.id);
+      if (sourceNote) {
+        sourceNote.convertedTaskId = task.id;
+        this.draftMeetingTaskSourceNoteIds.set(task.id, sourceNote.id);
+      }
+    }
+    this.creatingTaskForNote = null;
+    this.notesSection?.focusComposer();
+  }
+
   onTaskCreated(): void {
     this.creatingTaskForNote = null;
     this.reloadMeeting();
@@ -923,8 +1114,14 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
     this.creatingTaskForNote = null;
     this.editing = false;
     this.editingMeeting = null;
+    this.draftMeeting = null;
+    this.draftMeetingTasks = [];
+    this.draftMeetingTaskSourceNoteIds.clear();
+    this.draftMeetingTaskNumber = 1;
     this.customCustomerParticipant = { name: '', email: '', phone: '', role: '' };
     this.customParticipantPool = [];
+    this.customInternalGuest = { name: '', email: '', phone: '', role: '' };
+    this.showAddInternalGuestRow = false;
     this.showProspectForm = false;
     this.showAddParticipantRow = false;
     this.showPrepBrief = false;
@@ -959,6 +1156,68 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
     return this.customer?.id || this.pickedCustomerId || this.initialCustomerId || '';
   }
 
+  private ensureDraftMeeting(): CustomerMeeting | null {
+    if (!this.canCreateDraft()) {
+      return null;
+    }
+    if (!this.draftMeeting) {
+      const now = new Date().toISOString();
+      this.draftMeeting = {
+        id: 'draft-customer-meeting',
+        customerId: this.resolveCustomerId(),
+        subject: this.form.subject.trim(),
+        meetingDate: this.fromLocalInput(this.meetingDateLocal),
+        meetingLeaderEmployeeId: this.form.meetingLeaderEmployeeId || this.workspace.currentEmployeeId,
+        internalParticipantEmployeeIds: [...this.form.internalParticipantEmployeeIds],
+        internalGuestParticipants: this.form.internalGuestParticipants.filter((p) => p.name.trim()).map((p) => ({ ...p })),
+        customerParticipants: this.form.customerParticipants.filter((p) => p.name.trim()).map((p) => ({ ...p })),
+        goal: this.form.goal?.trim() || undefined,
+        summary: this.summaryDraft.summary?.trim() || undefined,
+        nextMeetingNotes: this.nextMeetingNotesText?.trim() || undefined,
+        notes: [],
+        status: 'Planned',
+        attachmentIds: [],
+        createdAt: now,
+        updatedAt: now
+      };
+      return this.draftMeeting;
+    }
+    this.refreshDraftMeetingFromForm();
+    return this.draftMeeting;
+  }
+
+  private refreshDraftMeetingFromForm(): void {
+    if (!this.draftMeeting) {
+      return;
+    }
+    const customerId = this.resolveCustomerId();
+    const meetingDate = this.meetingDateLocal
+      ? this.fromLocalInput(this.meetingDateLocal)
+      : this.draftMeeting.meetingDate;
+    this.draftMeeting = {
+      ...this.draftMeeting,
+      customerId,
+      subject: this.form.subject.trim(),
+      meetingDate,
+      meetingLeaderEmployeeId: this.form.meetingLeaderEmployeeId || this.workspace.currentEmployeeId,
+      internalParticipantEmployeeIds: [...this.form.internalParticipantEmployeeIds],
+      internalGuestParticipants: this.form.internalGuestParticipants.filter((p) => p.name.trim()).map((p) => ({ ...p })),
+      customerParticipants: this.form.customerParticipants.filter((p) => p.name.trim()).map((p) => ({ ...p })),
+      goal: this.form.goal?.trim() || undefined,
+      summary: this.summaryDraft.summary?.trim() || undefined,
+      nextMeetingNotes: this.nextMeetingNotesText?.trim() || undefined,
+      updatedAt: new Date().toISOString()
+    };
+    const board = this.workspace.clientName(customerId) ?? 'Customer meeting';
+    this.draftMeetingTasks = this.draftMeetingTasks.map((task) => ({
+      ...task,
+      board,
+      customerId,
+      sourceMeetingId: this.draftMeeting?.id ?? task.sourceMeetingId,
+      updatedAt: new Date().toISOString()
+    }));
+  }
+
   private tryCreateDraftMeeting(): CustomerMeeting | null {
     if (this.editingMeeting || !this.canCreateDraft()) {
       return this.editingMeeting;
@@ -975,6 +1234,7 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
       meetingDate: this.fromLocalInput(this.meetingDateLocal),
       meetingLeaderEmployeeId: this.form.meetingLeaderEmployeeId || this.workspace.currentEmployeeId,
       internalParticipantEmployeeIds: this.form.internalParticipantEmployeeIds,
+      internalGuestParticipants: this.form.internalGuestParticipants.filter((p) => p.name.trim()),
       customerParticipants: this.form.customerParticipants.filter((p) => p.name.trim()),
       goal: this.form.goal
     });
@@ -1002,6 +1262,7 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
       meetingDate: this.fromLocalInput(this.meetingDateLocal),
       meetingLeaderEmployeeId: this.form.meetingLeaderEmployeeId || this.workspace.currentEmployeeId,
       internalParticipantEmployeeIds: this.form.internalParticipantEmployeeIds,
+      internalGuestParticipants: this.form.internalGuestParticipants.filter((p) => p.name.trim()),
       customerParticipants: this.form.customerParticipants.filter((p) => p.name.trim()),
       goal: this.form.goal,
       summary: this.summaryDraft.summary,
@@ -1014,6 +1275,50 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
     this.editing = true;
     this.editingMeeting = updated;
     return updated;
+  }
+
+  private persistDraftMeetingChildren(savedMeeting: CustomerMeeting): void {
+    const draft = this.draftMeeting;
+    if (!draft) {
+      return;
+    }
+    const noteIdMap = new Map<string, string>();
+    for (const draftNote of [...draft.notes].reverse()) {
+      const savedNote = this.workspace.addCustomerMeetingNote(savedMeeting.id, {
+        type: draftNote.type,
+        content: draftNote.content,
+        ownerId: draftNote.ownerId,
+        dueDate: draftNote.dueDate
+      });
+      if (savedNote) {
+        noteIdMap.set(draftNote.id, savedNote.id);
+      }
+    }
+    for (const draftTask of [...this.draftMeetingTasks].reverse()) {
+      const sourceNoteId = this.draftMeetingTaskSourceNoteIds.get(draftTask.id);
+      const savedTask = this.workspace.createTaskFromMeeting(
+        savedMeeting.id,
+        {
+          title: draftTask.title,
+          description: draftTask.description,
+          sourceMeetingId: savedMeeting.id,
+          customerId: savedMeeting.customerId,
+          assignedToEmployeeId: draftTask.assignedToEmployeeId,
+          dueDate: draftTask.dueDate,
+          priority: draftTask.priority
+        },
+        sourceNoteId ? noteIdMap.get(sourceNoteId) : undefined
+      );
+      if (savedTask && draftTask.progressionNotes?.length) {
+        for (const note of draftTask.progressionNotes) {
+          this.workspace.addTaskProgressionNote(savedTask.id, note.content);
+        }
+      }
+    }
+    this.draftMeeting = null;
+    this.draftMeetingTasks = [];
+    this.draftMeetingTaskSourceNoteIds.clear();
+    this.reloadMeeting();
   }
 
   private loadExistingMeeting(meetingId: string): void {
@@ -1030,6 +1335,7 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
       meetingDate: meeting.meetingDate,
       meetingLeaderEmployeeId: meeting.meetingLeaderEmployeeId,
       internalParticipantEmployeeIds: [...meeting.internalParticipantEmployeeIds],
+      internalGuestParticipants: (meeting.internalGuestParticipants ?? []).map((p) => ({ ...p })),
       customerParticipants: meeting.customerParticipants.map((p) => ({ ...p })),
       goal: meeting.goal ?? ''
     };
@@ -1107,6 +1413,7 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
       meetingDate: new Date().toISOString(),
       meetingLeaderEmployeeId: me,
       internalParticipantEmployeeIds: me ? [me] : [],
+      internalGuestParticipants: [] as CustomerParticipant[],
       customerParticipants: [] as CustomerParticipant[],
       goal: ''
     };
@@ -1122,5 +1429,11 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
       return '';
     }
     return new Date(value).toISOString();
+  }
+
+  private addDays(dateIso: string, days: number): string {
+    const date = new Date(`${dateIso}T00:00:00`);
+    date.setDate(date.getDate() + days);
+    return date.toISOString().slice(0, 10);
   }
 }

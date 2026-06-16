@@ -367,7 +367,7 @@ export class ActionosWorkspaceService {
    * `quickCaptureTaskDraft` (which is owned by the drawer / quick-capture flow)
    * so the always-present page form never collides with selecting/editing an
    * existing task in the drawer. Like the quick-capture draft it lives only in
-   * memory until the user assigns a client, at which point it is persisted.
+   * memory until the user explicitly saves it.
    */
   private embeddedTaskDraft: Task | null = null;
 
@@ -533,11 +533,13 @@ export class ActionosWorkspaceService {
         const bootstrap = await this.actionosApi.bootstrap(selectedOrg);
         this.applyBootstrap(bootstrap);
         await this.refreshDirectoryUsers(selectedOrg);
+        this.clearBackendIssue();
         this.lastBootstrapKey = bootstrapKey;
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('[ActionOS] Failed to load ActionOS bootstrap data. Access is fail-closed.', error);
         this.clearRuntimeState();
+        this.reportBackendIssue(this.bootstrapFailureMessage(error), error);
       } finally {
         this.bootstrapInFlight = null;
       }
@@ -1110,8 +1112,7 @@ export class ActionosWorkspaceService {
   /**
    * Open the task drawer on a fresh, unsaved task draft — the Tasks page
    * "New task" button. Mirrors the footer quick-capture flow: the draft lives
-   * only in memory (quickCaptureTaskDraft) and is persisted into tasksState the
-   * moment the user assigns it a client (see updateQuickCaptureTaskDraft).
+   * only in memory (quickCaptureTaskDraft) until the user explicitly saves it.
    */
   openNewTaskDraft(): void {
     this.quickCaptureTaskDraft = this.createQuickCaptureTaskDraft('');
@@ -2272,6 +2273,15 @@ export class ActionosWorkspaceService {
       internalParticipantEmployeeIds: participants
         .filter((participant) => participant.isInternal && !!participant.userId)
         .map((participant) => participant.userId as string),
+      // Internal participants with no userId are our-side guests (non-users), not employees.
+      internalGuestParticipants: participants
+        .filter((participant) => participant.isInternal && !participant.userId)
+        .map((participant) => ({
+          name: participant.displayName,
+          email: participant.email ?? undefined,
+          phone: participant.phone ?? undefined,
+          role: participant.role ?? undefined
+        })),
       customerParticipants: participants
         .filter((participant) => !participant.isInternal)
         .map((participant) => ({
@@ -2550,6 +2560,18 @@ export class ActionosWorkspaceService {
     }
 
     return detail ?? httpError.message;
+  }
+
+  private bootstrapFailureMessage(error: unknown): string {
+    return this.isForbiddenError(error)
+      ? 'You do not have permission to access ActionOS.'
+      : 'ActionOS could not load your workspace.';
+  }
+
+  private isForbiddenError(error: unknown): boolean {
+    return !!error
+      && typeof error === 'object'
+      && (error as { status?: number }).status === 403;
   }
 
   private resolveCustomerId(customerId: string): string {
@@ -3561,6 +3583,16 @@ export class ActionosWorkspaceService {
             phone: null,
             role: 'Participant'
           })),
+          // Our-side guests: internal but not a system user (no userId). Recorded on this
+          // meeting only — never seeded into future meetings.
+          ...(input.internalGuestParticipants ?? []).map((guest) => ({
+            isInternal: true,
+            userId: null,
+            displayName: guest.name,
+            email: guest.email ?? null,
+            phone: guest.phone ?? null,
+            role: guest.role ?? 'Guest'
+          })),
           ...(input.customerParticipants ?? []).map((participant) => ({
             isInternal: false,
             userId: null,
@@ -3594,7 +3626,7 @@ export class ActionosWorkspaceService {
     const updated = this.customerMeetingRepo.update(resolvedMeetingId, changes);
     if (updated) {
       this.recordActivity('meeting', updated.id, 'Customer meeting updated', updated.subject);
-      const participantsChanged = changes.internalParticipantEmployeeIds !== undefined || changes.customerParticipants !== undefined;
+      const participantsChanged = changes.internalParticipantEmployeeIds !== undefined || changes.internalGuestParticipants !== undefined || changes.customerParticipants !== undefined;
       const payload = {
         subject: changes.subject !== undefined ? changes.subject : undefined,
         meetingDateUtc: changes.meetingDate !== undefined
@@ -3618,6 +3650,14 @@ export class ActionosWorkspaceService {
                 email: this.employee(employeeId)?.email ?? null,
                 phone: null,
                 role: 'Participant'
+              }))),
+              ...((changes.internalGuestParticipants ?? updated.internalGuestParticipants ?? []).map((guest) => ({
+                isInternal: true,
+                userId: null,
+                displayName: guest.name,
+                email: guest.email ?? null,
+                phone: guest.phone ?? null,
+                role: guest.role ?? 'Guest'
               }))),
               ...((changes.customerParticipants ?? updated.customerParticipants).map((participant) => ({
                 isInternal: false,
@@ -3717,9 +3757,12 @@ export class ActionosWorkspaceService {
     }
     const customer = this.customer(meeting.customerId);
     const leaderName = this.employeeName(meeting.meetingLeaderEmployeeId);
-    const internalNames = meeting.internalParticipantEmployeeIds
-      .map((id) => this.employeeName(id))
-      .filter((n) => n && n !== '—');
+    const internalNames = [
+      ...meeting.internalParticipantEmployeeIds
+        .map((id) => this.employeeName(id))
+        .filter((n) => n && n !== '—'),
+      ...(meeting.internalGuestParticipants ?? []).map((g) => g.name).filter(Boolean)
+    ];
     const customerNames = meeting.customerParticipants.map((p) => p.name).filter(Boolean);
 
     const decisions = meeting.notes.filter((n) => n.type === 'decision');
@@ -3842,6 +3885,28 @@ export class ActionosWorkspaceService {
    *  offers the meeting picker only for unsaved drafts. */
   isUnsavedDraft(id: string): boolean {
     return this.quickCaptureTaskDraft?.id === id || this.embeddedTaskDraft?.id === id;
+  }
+
+  saveMeetingTaskDraft(id: string): Task | null {
+    const resolvedTaskId = this.resolveTaskId(id);
+    if (this.quickCaptureTaskDraft?.id === resolvedTaskId) {
+      const saved = this.persistTaskDraft(this.quickCaptureTaskDraft);
+      if (!saved) {
+        return null;
+      }
+      this.quickCaptureTaskDraft = null;
+      this.drawerOpen = true;
+      return saved;
+    }
+    if (this.embeddedTaskDraft?.id === resolvedTaskId) {
+      const saved = this.persistTaskDraft(this.embeddedTaskDraft);
+      if (!saved) {
+        return null;
+      }
+      this.embeddedTaskDraft = null;
+      return saved;
+    }
+    return this.Task(resolvedTaskId) ?? null;
   }
 
   Task(id: string): Task | undefined {
@@ -4220,43 +4285,13 @@ export class ActionosWorkspaceService {
     }
 
     const updated = this.applyQuickCaptureDraftChanges(draft, changes);
-    // Persist only once the draft has BOTH a client and a title (the backend
-    // requires a title) — keeps the client-first gate from saving a titleless task.
-    if (updated.customerId && updated.title.trim()) {
-      this.quickCaptureTaskDraft = null;
-      const saved = this.addTask({
-        title: updated.title,
-        description: updated.description,
-        board: this.clientName(updated.customerId) ?? updated.board,
-        source: updated.source,
-        customerId: updated.customerId,
-        sourceMeetingId: updated.sourceMeetingId || undefined,
-        openedByEmployeeId: updated.openedByEmployeeId,
-        assignedToEmployeeId: updated.assignedToEmployeeId,
-        priority: updated.priority,
-        status: updated.status,
-        dueDate: updated.dueDate,
-        assigneeId: updated.assigneeIds[0] || this.currentUserId,
-        checklist: updated.checklist,
-        watcherIds: updated.watcherIds,
-        watcherEmployeeIds: updated.watcherEmployeeIds,
-        waitingReason: updated.waitingReason,
-        treatmentNotes: updated.treatmentNotes,
-        completedAt: updated.completedAt
-      });
-      this.drawerOpen = true;
-      return saved;
-    }
-
     this.quickCaptureTaskDraft = updated;
     return updated;
   }
 
   /**
    * Embedded Tasks-page draft counterpart of `updateQuickCaptureTaskDraft`.
-   * Same persist-on-client-assign rule, but it never opens the drawer — the
-   * form is already on the page. Returns the saved task (with its new id) so the
-   * page can rebind the form to keep editing it inline.
+   * Keeps draft edits in memory until the form asks to save explicitly.
    */
   private updateEmbeddedTaskDraft(changes: UpdateMeetingTaskInput): Task | null {
     const draft = this.embeddedTaskDraft;
@@ -4265,36 +4300,34 @@ export class ActionosWorkspaceService {
     }
 
     const updated = this.applyQuickCaptureDraftChanges(draft, changes);
-    // Persist into a real task only once it has BOTH a client and a title — the
-    // backend rejects a task with no title. The client-first gate sets the client
-    // before the title is entered, so we keep editing in memory until the title
-    // arrives (mirrors the meeting form, which needs subject+customer+date first).
-    if (updated.customerId && updated.title.trim()) {
-      this.embeddedTaskDraft = null;
-      return this.addTask({
-        title: updated.title,
-        description: updated.description,
-        board: this.clientName(updated.customerId) ?? updated.board,
-        source: updated.source,
-        customerId: updated.customerId,
-        sourceMeetingId: updated.sourceMeetingId || undefined,
-        openedByEmployeeId: updated.openedByEmployeeId,
-        assignedToEmployeeId: updated.assignedToEmployeeId,
-        priority: updated.priority,
-        status: updated.status,
-        dueDate: updated.dueDate,
-        assigneeId: updated.assigneeIds[0] || this.currentUserId,
-        checklist: updated.checklist,
-        watcherIds: updated.watcherIds,
-        watcherEmployeeIds: updated.watcherEmployeeIds,
-        waitingReason: updated.waitingReason,
-        treatmentNotes: updated.treatmentNotes,
-        completedAt: updated.completedAt
-      });
-    }
-
     this.embeddedTaskDraft = updated;
     return updated;
+  }
+
+  private persistTaskDraft(draft: Task): Task | null {
+    if (!draft.customerId || !draft.title.trim()) {
+      return null;
+    }
+    return this.addTask({
+      title: draft.title,
+      description: draft.description,
+      board: this.clientName(draft.customerId) ?? draft.board,
+      source: draft.source,
+      customerId: draft.customerId,
+      sourceMeetingId: draft.sourceMeetingId || undefined,
+      openedByEmployeeId: draft.openedByEmployeeId,
+      assignedToEmployeeId: draft.assignedToEmployeeId,
+      priority: draft.priority,
+      status: draft.status,
+      dueDate: draft.dueDate,
+      assigneeId: draft.assigneeIds[0] || this.currentUserId,
+      checklist: draft.checklist,
+      watcherIds: draft.watcherIds,
+      watcherEmployeeIds: draft.watcherEmployeeIds,
+      waitingReason: draft.waitingReason,
+      treatmentNotes: draft.treatmentNotes,
+      completedAt: draft.completedAt
+    });
   }
 
   private applyQuickCaptureDraftChanges(task: Task, changes: UpdateMeetingTaskInput): Task {

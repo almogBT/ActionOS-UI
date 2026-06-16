@@ -145,7 +145,7 @@
     "prep": "Prep",
     "wrapUp": "Wrap up",
     "needsWrapUp": "Needs wrap-up",
-    "tasksCreatedLane": "Meetings with completed tasks",
+    "tasksCreatedLane": "Meetings with tasks in progress",
     "completedLane": "Meetings where all tasks are complete"
   },
   "home": {
@@ -720,7 +720,7 @@
     "noTasksInFilterYet": "No tasks yet.",
     "reviewOpenTasks": "Open tasks from this meeting",
     "reviewOpenTasksNote": "meeting will close automatically once all tasks are done",
-    "tabNotes": "Notes",
+    "tabNotes": "Topics discussed",
     "tabSummary": "Summary",
     "captureSection": "During & after the meeting",
     "captureSubtitle": "Switch between taking notes and writing the summary.",

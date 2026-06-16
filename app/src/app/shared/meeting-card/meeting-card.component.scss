@@ -352,10 +352,10 @@
   /* Flatten card-top so eyebrow + meta join the row's flex flow directly. */
   .card-top { display: contents; }
 
-  /* Customer name as an inline chip right after the subject — mirrors the task
-     row's `.client-chip` (replaces the old muted sub-line). */
+  /* Customer name as an inline chip — leads the row (on the title's start side),
+     mirroring the task row's `.client-chip` placement. */
   .card-eyebrow {
-    order: 2;
+    order: 1;
     flex: 0 0 auto;
     max-width: 180px;
     font-size: 12px;
@@ -367,9 +367,9 @@
     padding: 2px 10px;
   }
 
-  /* Subject — leads the row; shrinks with ellipsis so the chip stays beside it. */
+  /* Subject — follows the chip; shrinks with ellipsis so the chip stays beside it. */
   .card-body {
-    order: 1;
+    order: 2;
     flex: 0 1 auto;
     min-width: 0;
   }

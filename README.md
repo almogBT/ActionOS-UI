@@ -47,7 +47,7 @@ Backend provides:
 
 - Customers/groups source: `reportcentral.dig.Servitz_Customers_Groups`
 - Assignable users source: `reportcentral.emp.EasyDoc_Employees_Dim`
-- User filter: active and email containing `@fritz.` or `@critilog.`
+- User filter: employee, direct manager, or indirect manager role is `מנכ"ל` or `סמנכ"ל מכירות ופיתוח עיסקי`
 
 ## Docs Map
 

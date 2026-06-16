@@ -76,7 +76,7 @@
       </label>
     </div>
 
-    <div class="task-table" [class.with-select]="selectable" [class.priority-hidden]="!features.taskPriority" *ngIf="!isCollapsed(group.id)">
+    <div class="task-table" [class.with-select]="selectable" [class.priority-hidden]="!features.taskPriority" [class.headerless]="group.headerless" *ngIf="!isCollapsed(group.id)">
       <div class="task-table-header">
         <span class="th-select" *ngIf="selectable"></span>
         <span>
@@ -213,8 +213,8 @@
                 autofocus
               />
               <ng-template #titleDisplay>
-                <span class="task-title-text">{{ task.title }}</span>
                 <span *ngIf="taskContext(task) as ctx" class="client-chip" [title]="sourceMeetingName(task) ? (ctx + ' · ' + sourceMeetingName(task)) : ctx">{{ ctx }}</span>
+                <span class="task-title-text">{{ task.title }}</span>
                 <button
                   *ngIf="editable"
                   type="button"

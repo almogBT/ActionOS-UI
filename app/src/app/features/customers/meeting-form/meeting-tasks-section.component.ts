@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { CustomerMeeting, MeetingNote, Task } from '../../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../../core/services/actionos-workspace.service';
-import { MeetingTaskCreationComponent } from '../meeting-task-creation.component';
+import { DraftMeetingTaskCreatedEvent, MeetingTaskCreationComponent } from '../meeting-task-creation.component';
 import { MEETING_FORM_STYLES } from './meeting-form.styles';
 
 /**
@@ -25,14 +25,16 @@ import { MEETING_FORM_STYLES } from './meeting-form.styles';
       [meetingId]="meeting.id"
       [customerId]="meeting.customerId"
       [sourceNote]="creatingTaskForNote"
+      [draftMode]="draftMode"
       (created)="onCreated()"
+      (draftCreated)="onDraftCreated($event)"
       (cancelled)="onCancelCreate()"
     />
 
     <div class="linked-task-list" *ngIf="meetingTasks.length; else noLinkedTasks">
       <div class="linked-task-card" *ngFor="let task of meetingTasks">
         <div class="linked-task-row">
-          <button type="button" class="linked-task-title-btn" (click)="openMeetingTask(task)">
+          <button type="button" class="linked-task-title-btn" [disabled]="draftMode" (click)="openMeetingTask(task)">
             <strong>{{ task.title }}</strong>
             <small class="muted">
               {{ 'common.owner' | t }}: {{ workspace.employeeName(task.assignedToEmployeeId) }} · {{ 'common.due' | t }} {{ task.dueDate || '-' }}
@@ -94,8 +96,11 @@ import { MEETING_FORM_STYLES } from './meeting-form.styles';
 export class MeetingTasksSectionComponent {
   @Input() meeting!: CustomerMeeting;
   @Input() creatingTaskForNote: MeetingNote | null = null;
+  @Input() draftMode = false;
+  @Input() draftTasks: Task[] = [];
 
   @Output() taskCreated = new EventEmitter<void>();
+  @Output() draftTaskCreated = new EventEmitter<DraftMeetingTaskCreatedEvent>();
   @Output() cancelCreate = new EventEmitter<void>();
 
   expandedTaskId: string | null = null;
@@ -107,6 +112,10 @@ export class MeetingTasksSectionComponent {
     this.taskCreated.emit();
   }
 
+  onDraftCreated(event: DraftMeetingTaskCreatedEvent): void {
+    this.draftTaskCreated.emit(event);
+  }
+
   onCancelCreate(): void {
     this.cancelCreate.emit();
   }
@@ -114,6 +123,9 @@ export class MeetingTasksSectionComponent {
   get meetingTasks(): Task[] {
     if (!this.meeting) {
       return [];
+    }
+    if (this.draftMode) {
+      return this.draftTasks;
     }
     return this.workspace.meetingTasksByMeeting(this.meeting.id);
   }
@@ -127,11 +139,25 @@ export class MeetingTasksSectionComponent {
     if (!content) {
       return;
     }
+    if (this.draftMode) {
+      const note = {
+        id: `draft-progress-${Date.now()}`,
+        content,
+        authorEmployeeId: this.workspace.currentEmployeeId,
+        createdAt: new Date().toISOString()
+      };
+      task.progressionNotes = [...(task.progressionNotes ?? []), note];
+      this.newProgressionNoteByTask[task.id] = undefined;
+      return;
+    }
     this.workspace.addTaskProgressionNote(task.id, content);
     this.newProgressionNoteByTask[task.id] = undefined;
   }
 
   openMeetingTask(task: Task): void {
+    if (this.draftMode) {
+      return;
+    }
     this.workspace.selectMeetingTask(task, true);
   }
 }

@@ -160,8 +160,14 @@ export interface ActionosApiAttachmentDto {
   uploadedAtUtc: string;
 }
 
+export interface ActionosApiAccessDto {
+  role: 'admin' | 'user' | string;
+  permissions: string[];
+}
+
 export interface ActionosBootstrapDto {
   orgGroupId: string;
+  access?: ActionosApiAccessDto | null;
   users: ActionosApiUserDto[];
   allowedOrgs: ActionosApiClientSummaryDto[];
   customers: ActionosApiCustomerDto[];

@@ -211,7 +211,7 @@ export interface BoardTemplate {
 // ─────────────────────────────────────────────────────────────────────────
 // v3: Customer Meeting Management module
 // Future Fritz/Azure sources (see plans/17-meeting-module-monday-implementation.md):
-//   Employee  ← reportcental.emp.EasyDoc_Employees_Dim (active, fritz/critilog email)
+//   Employee  ← reportcental.emp.EasyDoc_Employees_Dim (role/manager allow-list)
 //   Customer  ← reportcental.[dig].[Servitz_Customers_Groups]
 // ─────────────────────────────────────────────────────────────────────────
 
@@ -271,6 +271,12 @@ export interface CustomerMeeting {
   meetingDate: string;
   meetingLeaderEmployeeId: string;
   internalParticipantEmployeeIds: string[];
+  /**
+   * Free-form people on OUR side who are not system users (e.g. a prospective hire).
+   * Attached to this meeting only — never created as users, emailed, or suggested in
+   * future meetings. Persisted to the backend as internal participants without a userId.
+   */
+  internalGuestParticipants?: CustomerParticipant[];
   customerParticipants: CustomerParticipant[];
   goal?: string;
   summary?: string;
@@ -291,6 +297,7 @@ export interface CreateCustomerMeetingInput {
   meetingDate: string;
   meetingLeaderEmployeeId: string;
   internalParticipantEmployeeIds?: string[];
+  internalGuestParticipants?: CustomerParticipant[];
   customerParticipants?: CustomerParticipant[];
   goal?: string;
 }
@@ -300,6 +307,7 @@ export interface UpdateCustomerMeetingInput {
   meetingDate?: string;
   meetingLeaderEmployeeId?: string;
   internalParticipantEmployeeIds?: string[];
+  internalGuestParticipants?: CustomerParticipant[];
   customerParticipants?: CustomerParticipant[];
   goal?: string;
   summary?: string;

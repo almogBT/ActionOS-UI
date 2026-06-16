@@ -85,9 +85,11 @@ export class MeetingCardComponent {
       .join('') || '?';
   }
 
-  /** Extra attendees beyond the leader (internal teammates + customer side). */
+  /** Extra attendees beyond the leader (internal teammates + our-side guests + customer side). */
   get participantCount(): number {
-    return this.meeting.internalParticipantEmployeeIds.length + this.meeting.customerParticipants.length;
+    return this.meeting.internalParticipantEmployeeIds.length
+      + (this.meeting.internalGuestParticipants?.length ?? 0)
+      + this.meeting.customerParticipants.length;
   }
 
   get summaryText(): string {

@@ -438,7 +438,7 @@ export const MEETING_FORM_STYLES = `
     .notes-list { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem; }
     .note-row {
       display: grid;
-      grid-template-columns: 110px 1fr auto;
+      grid-template-columns: 1fr auto;
       gap: 0.75rem;
       align-items: start;
       padding: 0.75rem;

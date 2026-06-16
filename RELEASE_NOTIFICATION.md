@@ -91,7 +91,7 @@ GET  /api/actionos/orgs/{orgGroupId}/users
 Data sources:
 
 - Customers/groups: `reportcentral.dig.Servitz_Customers_Groups`
-- Assignable users: `reportcentral.emp.EasyDoc_Employees_Dim` (active, fritz/critilog email filter)
+- Assignable users: `reportcentral.emp.EasyDoc_Employees_Dim` (employee/direct-manager/indirect-manager role filter)
 
 ActionOS-owned persistence tables: `ActionosBoards`, `ActionosBoardMembers`, `ActionosTasks`, `ActionosMeetings`, `ActionosAuditLog`
 
