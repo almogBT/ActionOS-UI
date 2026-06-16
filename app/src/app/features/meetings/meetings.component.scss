@@ -41,16 +41,12 @@
 }
 
 
-/* ── Two-column workbench: new-meeting form + meetings table ──────────────────
-   Column 1 (form pane) is first in the DOM, so under RTL it renders on the
-   RIGHT at ~1/3 width; the meetings table fills the LEFT at ~2/3. */
+/* ── Stacked workbench: new-meeting form on top, meetings table below ─────────
+   The form pane is first in the DOM, so a single-column grid puts it on TOP at
+   full page width; the meetings table follows underneath, also full width. */
 .meetings-layout {
-  /* The form pane is pinned to a fixed, drawer-like width and never shrinks; only
-     the meetings table column flexes with the available space. Change this single
-     value to make the form wider/narrower (the 960px drawer is the upper bound). */
-  --form-pane-w: 600px;
   display: grid;
-  grid-template-columns: var(--form-pane-w) minmax(0, 1fr);
+  grid-template-columns: 1fr;
   gap: 18px;
   align-items: start;
 }
@@ -105,12 +101,9 @@
 
 .new-meeting-pane {
   min-width: 0;
-  /* Keep the form visible while the table scrolls; the form's own action bar is
-     position:sticky bottom:0 and docks to the bottom of this scroll box. */
-  position: sticky;
-  top: 0;
-  max-height: calc(100vh - 140px);
-  overflow-y: auto;
+  /* Full-width card stacked above the table — flows in the normal page scroll
+     (no sticky / inner-scroll cap; those only made sense in the old side layout). */
+  width: 100%;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--bg-elevated);
@@ -123,25 +116,6 @@
    "Finish" bar — zero it out (the pane's own 14px bottom padding is enough).
    Scoped to the pane, so the drawer keeps its clearance. */
 .new-meeting-pane app-customer-meeting-form { padding-bottom: 0; }
-
-/* Once the viewport is too narrow to fit the 600px form AND a usable table side
-   by side, drop to a single column: the form pane (first in the DOM) stacks on
-   TOP and the table below it. Viewport-based threshold (≈ form + gap + a readable
-   table, with room for the app sidebar) — tune as needed. */
-@media (max-width: 1200px) {
-  .meetings-layout { grid-template-columns: 1fr; }
-  .new-meeting-pane {
-    position: static;
-    max-height: none;
-    overflow: visible;
-    /* Stacked: keep the form at its fixed width and centered rather than
-       stretching it across the full page. */
-    width: 100%;
-    max-width: var(--form-pane-w);
-    margin-inline: auto;
-  }
-}
-
 
 /* ── Needs-attention rail ──────────────────────────────────────────────── */
 .attention-rail {

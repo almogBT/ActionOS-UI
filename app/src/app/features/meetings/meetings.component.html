@@ -25,13 +25,13 @@
 
   <!-- Needs-your-attention rail intentionally hidden on this page (per request). -->
 
-  <!-- ── Two-column workbench (the split, below the full-width stats) ──────────
-       Form pane is FIRST in the DOM so that under RTL it renders on the right
-       (~1/3) and, when the layout collapses to one column on narrow screens,
-       it naturally stacks on TOP. The meetings table sits on the left (~2/3). -->
+  <!-- ── Stacked workbench (below the full-width stats) ───────────────────────
+       Form pane is FIRST in the DOM and the layout is a single column, so the
+       new-meeting form sits on TOP at full page width and the meetings table
+       follows underneath (also full width). -->
   <div class="meetings-layout">
 
-    <!-- Right (RTL start) / top on mobile: always-on new-meeting form -->
+    <!-- Top: always-on new-meeting form (full width) -->
     <aside class="new-meeting-pane" [class.collapsed]="!formOpen">
       <!-- Collapsible: clicking the title toggles the form (open by default). -->
       <header class="pane-title" [class.collapsed]="!formOpen">
@@ -61,7 +61,7 @@
       </div>
     </aside>
 
-    <!-- Left (RTL end) / bottom on mobile: filters + meeting lanes (table) -->
+    <!-- Bottom: filters + meeting lanes (table) -->
     <section class="panel">
       <div class="meetings-controls">
         <input

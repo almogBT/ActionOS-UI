@@ -36,13 +36,13 @@
     ></app-stat-tile>
   </app-calendar-stats>
 
-  <!-- ── Two-column workbench (the split, below the full-width stats) ──────────
-       Form pane is FIRST in the DOM so that under RTL it renders on the right
-       (~1/3) and, when the layout collapses to one column on narrow screens,
-       it naturally stacks on TOP. The task table sits on the left (~2/3). -->
+  <!-- ── Stacked workbench (below the full-width stats) ───────────────────────
+       Form pane is FIRST in the DOM and the layout is a single column, so the
+       new-task form sits on TOP at full page width and the task table follows
+       underneath (also full width). -->
   <div class="tasks-layout">
 
-    <!-- Right (RTL start) / top on mobile: always-on new-task form -->
+    <!-- Top: always-on new-task form (full width) -->
     <aside class="new-task-pane" [class.collapsed]="!formOpen">
       <!-- Collapsible: clicking the title toggles the form (open by default). -->
       <header class="pane-title" [class.collapsed]="!formOpen">
@@ -65,7 +65,7 @@
       </div>
     </aside>
 
-    <!-- Left (RTL end) / bottom on mobile: filters + shared task table -->
+    <!-- Bottom: filters + shared task table -->
     <div class="tasks-main">
 
       <!-- ── Controls: audience · group-by · count · origin · search (one row) ─── -->
