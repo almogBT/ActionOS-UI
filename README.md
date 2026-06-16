@@ -48,6 +48,8 @@ Backend provides:
 - Customers/groups source: `reportcentral.dig.Servitz_Customers_Groups`
 - Assignable users source: `reportcentral.emp.EasyDoc_Employees_Dim`
 - User filter: employee, direct manager, or indirect manager role is `מנכ"ל` or `סמנכ"ל מכירות ופיתוח עיסקי`
+- User dropdowns are hydrated from the filtered ActionOS users endpoint only; the
+  frontend does not enrich them with HomePage `/api/User/getAllUsers`.
 
 ## Docs Map
 

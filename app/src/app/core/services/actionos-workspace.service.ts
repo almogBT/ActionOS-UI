@@ -1,5 +1,4 @@
 import { inject, Injectable, signal } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
 import { ActionosI18nService } from '../i18n/actionos-i18n.service';
 import { ActionosAuthService } from './auth.service';
 import {
@@ -29,7 +28,6 @@ import {
   ActionosRepositoryService
 } from './actionos-repository.service';
 import { HostContextService } from './host-context.service';
-import { HomePageServerService, HomePageUserDto } from './homepage-server.service';
 
 interface TeamWorkload {
   member: Member;
@@ -87,7 +85,6 @@ export class ActionosWorkspaceService {
   private readonly i18n = inject(ActionosI18nService);
   private readonly actionosApi = inject(ActionosRepositoryService);
   private readonly hostContext = inject(HostContextService);
-  private readonly homePageServer = inject(HomePageServerService);
   private currentOrgGroupId: string | null = null;
   private initScheduled = false;
   private bootstrapInFlight: Promise<void> | null = null;
@@ -2033,18 +2030,6 @@ export class ActionosWorkspaceService {
       // eslint-disable-next-line no-console
       console.warn('[ActionOS] Failed to refresh ActionOS combined users directory.', error);
     }
-
-    await this.mergeHomePageDirectoryUsers();
-  }
-
-  private async mergeHomePageDirectoryUsers(): Promise<void> {
-    try {
-      const users = await firstValueFrom(this.homePageServer.getUsers());
-      this.mergeDirectoryUsersFromHomePage(users ?? []);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.warn('[ActionOS] Failed to merge HomePage/Azure users into ActionOS directory.', error);
-    }
   }
 
   private mergeDirectoryUsersFromApi(users: ActionosApiUserDto[]): void {
@@ -2054,23 +2039,6 @@ export class ActionosWorkspaceService {
       displayName: user.displayName,
       email: user.email,
       isActive: user.isActive ?? true
-    })));
-  }
-
-  private mergeDirectoryUsersFromHomePage(users: HomePageUserDto[]): void {
-    this.mergeDirectoryUsers(users.map(user => ({
-      id: this.firstDirectoryValue(user.id, user.Id),
-      azureObjectId: this.firstDirectoryValue(user.id, user.Id),
-      displayName: this.firstDirectoryValue(user.displayName, user.DisplayName),
-      email: this.firstDirectoryValue(
-        user.email,
-        user.Email,
-        user.mail,
-        user.Mail,
-        user.userPrincipalName,
-        user.UserPrincipalName
-      ),
-      isActive: user.isActive ?? user.IsActive ?? true
     })));
   }
 
@@ -2233,12 +2201,6 @@ export class ActionosWorkspaceService {
 
   private directoryKey(value: string | undefined | null): string {
     return (value ?? '').trim().toLowerCase();
-  }
-
-  private firstDirectoryValue(...values: Array<string | null | undefined>): string {
-    return values
-      .map(value => value?.trim() ?? '')
-      .find(value => !!value) ?? '';
   }
 
   private mapCustomerFromApi(row: ActionosApiCustomerDto, nowIso: string): Customer {
