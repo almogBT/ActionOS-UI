@@ -1149,17 +1149,28 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
 
   private canCreateDraft(): boolean {
     const customerId = this.resolveCustomerId();
-    return !!this.form.subject.trim() && !!customerId && !!this.meetingDateLocal;
+    return !!this.form.subject.trim() && !!customerId && !!this.meetingDateLocal && !!this.resolveMeetingLeaderEmployeeId();
   }
 
   private resolveCustomerId(): string {
     return this.customer?.id || this.pickedCustomerId || this.initialCustomerId || '';
   }
 
+  private resolveMeetingLeaderEmployeeId(): string {
+    if (this.form.meetingLeaderEmployeeId && this.workspace.isAssignable(this.form.meetingLeaderEmployeeId)) {
+      return this.form.meetingLeaderEmployeeId;
+    }
+    if (this.workspace.currentEmployeeId && this.workspace.isAssignable(this.workspace.currentEmployeeId)) {
+      return this.workspace.currentEmployeeId;
+    }
+    return this.form.internalParticipantEmployeeIds.find((id) => this.workspace.isAssignable(id)) ?? '';
+  }
+
   private ensureDraftMeeting(): CustomerMeeting | null {
     if (!this.canCreateDraft()) {
       return null;
     }
+    const meetingLeaderEmployeeId = this.resolveMeetingLeaderEmployeeId();
     if (!this.draftMeeting) {
       const now = new Date().toISOString();
       this.draftMeeting = {
@@ -1167,7 +1178,7 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
         customerId: this.resolveCustomerId(),
         subject: this.form.subject.trim(),
         meetingDate: this.fromLocalInput(this.meetingDateLocal),
-        meetingLeaderEmployeeId: this.form.meetingLeaderEmployeeId || this.workspace.currentEmployeeId,
+        meetingLeaderEmployeeId,
         internalParticipantEmployeeIds: [...this.form.internalParticipantEmployeeIds],
         internalGuestParticipants: this.form.internalGuestParticipants.filter((p) => p.name.trim()).map((p) => ({ ...p })),
         customerParticipants: this.form.customerParticipants.filter((p) => p.name.trim()).map((p) => ({ ...p })),
@@ -1194,12 +1205,13 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
     const meetingDate = this.meetingDateLocal
       ? this.fromLocalInput(this.meetingDateLocal)
       : this.draftMeeting.meetingDate;
+    const meetingLeaderEmployeeId = this.resolveMeetingLeaderEmployeeId();
     this.draftMeeting = {
       ...this.draftMeeting,
       customerId,
       subject: this.form.subject.trim(),
       meetingDate,
-      meetingLeaderEmployeeId: this.form.meetingLeaderEmployeeId || this.workspace.currentEmployeeId,
+      meetingLeaderEmployeeId,
       internalParticipantEmployeeIds: [...this.form.internalParticipantEmployeeIds],
       internalGuestParticipants: this.form.internalGuestParticipants.filter((p) => p.name.trim()).map((p) => ({ ...p })),
       customerParticipants: this.form.customerParticipants.filter((p) => p.name.trim()).map((p) => ({ ...p })),
@@ -1227,12 +1239,16 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
     if (!customerId) {
       return null;
     }
+    const meetingLeaderEmployeeId = this.resolveMeetingLeaderEmployeeId();
+    if (!meetingLeaderEmployeeId) {
+      return null;
+    }
 
     const created = this.workspace.addCustomerMeeting({
       customerId,
       subject: this.form.subject,
       meetingDate: this.fromLocalInput(this.meetingDateLocal),
-      meetingLeaderEmployeeId: this.form.meetingLeaderEmployeeId || this.workspace.currentEmployeeId,
+      meetingLeaderEmployeeId,
       internalParticipantEmployeeIds: this.form.internalParticipantEmployeeIds,
       internalGuestParticipants: this.form.internalGuestParticipants.filter((p) => p.name.trim()),
       customerParticipants: this.form.customerParticipants.filter((p) => p.name.trim()),
@@ -1256,11 +1272,15 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
     if (!this.editingMeeting) {
       return null;
     }
+    const meetingLeaderEmployeeId = this.resolveMeetingLeaderEmployeeId();
+    if (!meetingLeaderEmployeeId) {
+      return null;
+    }
 
     const updated = this.workspace.updateCustomerMeetingSummary(this.editingMeeting.id, {
       subject: this.form.subject,
       meetingDate: this.fromLocalInput(this.meetingDateLocal),
-      meetingLeaderEmployeeId: this.form.meetingLeaderEmployeeId || this.workspace.currentEmployeeId,
+      meetingLeaderEmployeeId,
       internalParticipantEmployeeIds: this.form.internalParticipantEmployeeIds,
       internalGuestParticipants: this.form.internalGuestParticipants.filter((p) => p.name.trim()),
       customerParticipants: this.form.customerParticipants.filter((p) => p.name.trim()),
@@ -1404,15 +1424,17 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
   }
 
   private emptyForm() {
-    // The meeting leader is always the current user (no field shown), and that
-    // user is also pre-selected on our side so they don't have to add themselves.
+    // The current user is preselected only when they are also in the assignable
+    // directory. Demo/support users outside that list can still save by choosing
+    // an assignable our-side participant, who becomes the hidden meeting leader.
     const me = this.workspace?.currentEmployeeId ?? '';
+    const assignableMe = me && this.workspace?.isAssignable(me) ? me : '';
     return {
       customerId: this.customer?.id ?? '',
       subject: '',
       meetingDate: new Date().toISOString(),
-      meetingLeaderEmployeeId: me,
-      internalParticipantEmployeeIds: me ? [me] : [],
+      meetingLeaderEmployeeId: assignableMe,
+      internalParticipantEmployeeIds: assignableMe ? [assignableMe] : [],
       internalGuestParticipants: [] as CustomerParticipant[],
       customerParticipants: [] as CustomerParticipant[],
       goal: ''

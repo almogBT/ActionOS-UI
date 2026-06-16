@@ -50,6 +50,9 @@ Backend provides:
 - User filter: employee, direct manager, or indirect manager role is `מנכ"ל` or `סמנכ"ל מכירות ופיתוח עיסקי`
 - User dropdowns are hydrated from the filtered ActionOS users endpoint only; the
   frontend does not enrich them with HomePage `/api/User/getAllUsers`.
+- New meeting leader is hidden. The UI uses the current user only when they are
+  in the filtered assignable list; otherwise it uses the first selected our-side
+  employee from the dropdown.
 
 ## Docs Map
 
