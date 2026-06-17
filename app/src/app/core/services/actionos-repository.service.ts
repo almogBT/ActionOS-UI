@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { MailNotificationPrefs } from '../models/actionos.models';
 
 export interface ActionosApiUserDto {
   userId: string;
@@ -174,6 +175,7 @@ export interface ActionosBootstrapDto {
   meetings: ActionosApiCustomerMeetingDto[];
   tasks: ActionosApiTaskDto[];
   attachments: ActionosApiAttachmentDto[];
+  mailNotificationPrefs?: MailNotificationPrefs | null;
 }
 
 export interface CreateActionosCustomerRequest {
@@ -335,6 +337,18 @@ export class ActionosRepositoryService {
     return await firstValueFrom(
       this.http.get<ActionosApiUserDto[]>(
         `${this.base}/api/actionos/orgs/${encodeURIComponent(orgGroupId)}/users`
+      )
+    );
+  }
+
+  async updateMailNotificationPreferences(
+    orgGroupId: string,
+    request: Partial<MailNotificationPrefs>
+  ): Promise<MailNotificationPrefs> {
+    return await firstValueFrom(
+      this.http.patch<MailNotificationPrefs>(
+        `${this.base}/api/actionos/orgs/${encodeURIComponent(orgGroupId)}/mail-notification-preferences`,
+        request
       )
     );
   }

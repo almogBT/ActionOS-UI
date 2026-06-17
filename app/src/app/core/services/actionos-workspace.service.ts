@@ -77,6 +77,13 @@ const UNIFIED_TASK_STATUSES: TaskStatus[] = [
   'Cancelled'
 ];
 
+const DEFAULT_MAIL_NOTIFICATION_PREFS: MailNotificationPrefs = {
+  newTasks: true,
+  overdueTasks: true,
+  dueTodayTasks: true,
+  meetingSummaries: true
+};
+
 @Injectable({ providedIn: 'root' })
 export class ActionosWorkspaceService {
   private readonly realtimeRefreshIntervalMs = 15000;
@@ -211,26 +218,59 @@ export class ActionosWorkspaceService {
   readonly mailNotifPrefs = signal<MailNotificationPrefs>(this.loadMailNotifPrefs());
 
   private loadMailNotifPrefs(): MailNotificationPrefs {
-    const defaults: MailNotificationPrefs = {
-      newTasks: false,
-      overdueTasks: false,
-      dueTodayTasks: false,
-      meetingSummaries: false,
-    };
     try {
       const raw = localStorage.getItem(this.MAIL_NOTIF_KEY);
-      return raw ? { ...defaults, ...JSON.parse(raw) } : defaults;
+      return raw
+        ? this.normalizeMailNotifPrefs(JSON.parse(raw) as Partial<MailNotificationPrefs>)
+        : { ...DEFAULT_MAIL_NOTIFICATION_PREFS };
     } catch {
-      return defaults;
+      return { ...DEFAULT_MAIL_NOTIFICATION_PREFS };
     }
   }
 
   toggleMailNotif(key: keyof MailNotificationPrefs): void {
-    this.mailNotifPrefs.update(prefs => {
-      const updated = { ...prefs, [key]: !prefs[key] };
-      localStorage.setItem(this.MAIL_NOTIF_KEY, JSON.stringify(updated));
-      return updated;
-    });
+    const previous = this.mailNotifPrefs();
+    const updated = { ...previous, [key]: !previous[key] };
+    this.mailNotifPrefs.set(updated);
+    this.persistMailNotifPrefs(updated);
+
+    const orgGroupId = this.getOrgGroupForMutation();
+    if (!orgGroupId) {
+      return;
+    }
+
+    this.persistAndRefresh(
+      this.actionosApi.updateMailNotificationPreferences(orgGroupId, updated),
+      {
+        failureMessage: 'ActionOS could not save mail notification preferences.',
+        onSuccess: (saved) => {
+          const normalized = this.normalizeMailNotifPrefs(saved);
+          this.mailNotifPrefs.set(normalized);
+          this.persistMailNotifPrefs(normalized);
+        },
+        onFailure: () => {
+          this.mailNotifPrefs.set(previous);
+          this.persistMailNotifPrefs(previous);
+        }
+      }
+    );
+  }
+
+  private normalizeMailNotifPrefs(prefs?: Partial<MailNotificationPrefs> | null): MailNotificationPrefs {
+    return {
+      newTasks: prefs?.newTasks ?? DEFAULT_MAIL_NOTIFICATION_PREFS.newTasks,
+      overdueTasks: prefs?.overdueTasks ?? DEFAULT_MAIL_NOTIFICATION_PREFS.overdueTasks,
+      dueTodayTasks: prefs?.dueTodayTasks ?? DEFAULT_MAIL_NOTIFICATION_PREFS.dueTodayTasks,
+      meetingSummaries: prefs?.meetingSummaries ?? DEFAULT_MAIL_NOTIFICATION_PREFS.meetingSummaries
+    };
+  }
+
+  private persistMailNotifPrefs(prefs: MailNotificationPrefs): void {
+    try {
+      localStorage.setItem(this.MAIL_NOTIF_KEY, JSON.stringify(prefs));
+    } catch {
+      // Ignore storage failures; the API is the source of truth in backend mode.
+    }
   }
 
   // ── Inbox feed read/dismiss state ───────────────────────────────────────
@@ -1925,6 +1965,9 @@ export class ActionosWorkspaceService {
     this.employeeStore.employees = users.map((user) => this.mapEmployeeFromApi(user));
     this.membersState = users.map((user) => this.mapMemberFromApi(user));
     this.customerStore.customers = customers;
+    const mailPrefs = this.normalizeMailNotifPrefs(bootstrap.mailNotificationPrefs);
+    this.mailNotifPrefs.set(mailPrefs);
+    this.persistMailNotifPrefs(mailPrefs);
 
     this.customerMeetingStore.customerMeetings = (bootstrap.meetings ?? []).map((row) =>
       this.mapCustomerMeetingFromApi(row)
