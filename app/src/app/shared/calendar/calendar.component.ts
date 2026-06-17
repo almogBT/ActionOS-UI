@@ -83,7 +83,7 @@ export class CalendarComponent {
 
   readonly periodLabel = computed(() => {
     const mode = this.calendarMode();
-    const locale = this.i18n.language === 'he' ? 'he-IL' : 'en-US';
+    const locale = this.i18n.language === 'he' ? 'he-IL' : 'en-GB';
     if (mode === 'month') {
       return new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(this._cursor());
     }
@@ -102,7 +102,7 @@ export class CalendarComponent {
   });
 
   readonly weekdayLabels = computed(() => {
-    const locale = this.i18n.language === 'he' ? 'he-IL' : 'en-US';
+    const locale = this.i18n.language === 'he' ? 'he-IL' : 'en-GB';
     const fmt = new Intl.DateTimeFormat(locale, { weekday: 'short' });
     const base = new Date(2024, 0, 7); // Sun Jan 7 2024
     return Array.from({ length: 7 }, (_, i) => {
@@ -247,7 +247,7 @@ export class CalendarComponent {
   }
 
   weekDayLabel(date: Date): string {
-    const locale = this.i18n.language === 'he' ? 'he-IL' : 'en-US';
+    const locale = this.i18n.language === 'he' ? 'he-IL' : 'en-GB';
     return new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(date);
   }
 

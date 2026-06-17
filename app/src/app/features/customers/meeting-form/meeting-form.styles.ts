@@ -144,7 +144,6 @@ export const MEETING_FORM_STYLES = `
       box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.18);
     }
     .action-bar-spacer { flex: 1; }
-    .plan-bottom-action { padding: 16px 0 4px; display: flex; justify-content: flex-end; }
     .plan-layout {
       display: grid;
       grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.65fr);
@@ -576,11 +575,6 @@ export const MEETING_FORM_STYLES = `
       display: block;
       margin-top: 2px;
     }
-    @keyframes pulse-border {
-      0%, 100% { box-shadow: 0 0 0 0 transparent; }
-      50% { box-shadow: 0 0 0 4px var(--accent-soft); }
-    }
-    .start-ready { animation: pulse-border 2s ease-in-out infinite; }
     .linked-chip { background: var(--olive-soft); color: var(--olive); }
     .recap-preview {
       margin: 0;

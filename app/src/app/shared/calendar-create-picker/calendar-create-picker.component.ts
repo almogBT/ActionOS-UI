@@ -144,10 +144,12 @@ export class CalendarCreatePickerComponent {
     if (!this.slot) {
       return '';
     }
-    const locale = this.i18n.language === 'he' ? 'he-IL' : 'en-US';
+    const locale = this.i18n.language === 'he' ? 'he-IL' : 'en-GB';
+    // en-GB gives day-before-month ordering for the date part. hour12 is set
+    // explicitly so switching off en-US doesn't silently flip the time to 24h.
     return new Intl.DateTimeFormat(locale, {
       weekday: 'short', month: 'short', day: 'numeric',
-      hour: '2-digit', minute: '2-digit'
+      hour: '2-digit', minute: '2-digit', hour12: true
     }).format(this.slot);
   }
 }

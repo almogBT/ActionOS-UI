@@ -629,7 +629,7 @@ export class CustomerListComponent {
   }
 
   private formatDate(iso: string): string {
-    const locale = this.i18n.language === 'he' ? 'he-IL' : 'en-US';
+    const locale = this.i18n.language === 'he' ? 'he-IL' : 'en-GB';
     return new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric' }).format(new Date(iso));
   }
 

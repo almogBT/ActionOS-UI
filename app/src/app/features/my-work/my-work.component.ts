@@ -238,7 +238,7 @@ export class MyWorkComponent {
 
     this.todayLabelCache.language = this.i18n.language;
     this.todayLabelCache.today = today;
-    this.todayLabelCache.value = new Intl.DateTimeFormat(this.i18n.language === 'he' ? 'he-IL' : 'en-US', {
+    this.todayLabelCache.value = new Intl.DateTimeFormat(this.i18n.language === 'he' ? 'he-IL' : 'en-GB', {
       weekday: 'long', month: 'long', day: 'numeric'
     }).format(new Date());
     return this.todayLabelCache.value;

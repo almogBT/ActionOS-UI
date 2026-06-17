@@ -106,7 +106,7 @@ interface MeetingClientOption {
 
       <article class="meeting-setup-summary" *ngIf="setupCollapsed">
         <div class="summary-copy">
-          <strong>{{ form.subject.trim() || ('customerMeeting.untitledMeeting' | t) }}</strong>
+          <strong>{{ effectiveSubject() || ('customerMeeting.untitledMeeting' | t) }}</strong>
           <small>{{ setupSummaryLine }}</small>
         </div>
         <div class="topbar-actions">
@@ -205,7 +205,7 @@ interface MeetingClientOption {
                 name="subject"
                 [(ngModel)]="form.subject"
                 (ngModelChange)="onPlanChanged()"
-                [placeholder]="'customerMeeting.subjectPlaceholder' | t"
+                [placeholder]="autoResolvedTitle || ('customerMeeting.subjectPlaceholder' | t)"
               />
             </label>
 
@@ -340,17 +340,6 @@ interface MeetingClientOption {
           </div>
       </div>
 
-      <div class="plan-bottom-action" *ngIf="!setupCollapsed && showPlanFields">
-        <button
-          type="button"
-          class="primary-action"
-          [class.start-ready]="!editing && canStartMeeting()"
-          [disabled]="!canStartMeeting()"
-          (click)="startOrCollapseSetup()"
-        >
-          {{ editing ? ('customerMeeting.collapseSetup' | t) : ('customerMeeting.startMeeting' | t) }}
-        </button>
-      </div>
       </ng-container>
     </section>
 
@@ -691,6 +680,46 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
 
   // ── Stepper / tab helpers ──────────────────────────────────────────────────
 
+  /**
+   * The title we fall back to when the user leaves the subject blank:
+   * `Client · YYYY-MM-DD · participant names`. Built from the current form state so
+   * it updates live (shown as the subject placeholder). Returns '' when no client is
+   * chosen yet — without a client there is nothing meaningful to title the meeting.
+   */
+  get autoResolvedTitle(): string {
+    const clientName = this.selectedClientForPrep?.name?.trim();
+    if (!clientName) {
+      return '';
+    }
+    const datePart = this.meetingDateLocal ? this.meetingDateLocal.slice(0, 10) : '';
+    const names = this.allParticipantNames();
+    const shown = names.slice(0, 3);
+    const extra = names.length - shown.length;
+    const participantPart = shown.length
+      ? shown.join(', ') + (extra > 0 ? ` +${extra}` : '')
+      : '';
+    return [clientName, datePart, participantPart].filter(Boolean).join(' · ');
+  }
+
+  /** The user's typed subject, or the auto-resolved title when they left it blank. */
+  effectiveSubject(): string {
+    return this.form.subject.trim() || this.autoResolvedTitle;
+  }
+
+  /** All meeting attendees by name, in order: internal employees, our-side guests, customer-side. */
+  private allParticipantNames(): string[] {
+    const internal = this.form.internalParticipantEmployeeIds
+      .map((id) => this.workspace.employee(id)?.fullName?.trim())
+      .filter((name): name is string => !!name);
+    const guests = this.form.internalGuestParticipants
+      .map((g) => g.name?.trim())
+      .filter((name): name is string => !!name);
+    const customer = this.form.customerParticipants
+      .map((p) => p.name?.trim())
+      .filter((name): name is string => !!name);
+    return [...internal, ...guests, ...customer];
+  }
+
   get setupSummaryLine(): string {
     const customerName = this.selectedClientForPrep?.name ?? 'No customer';
     const when = this.meetingDateLocal ? this.meetingDateLocal.replace('T', ' ') : 'No date';
@@ -767,6 +796,7 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
       this.form.customerId = this.customer.id;
       this.pickedCustomerId = this.customer.id;
       this.startedWithCustomer = true;
+      this.autoUnlockSections();
     }
 
     if (
@@ -779,6 +809,7 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
       this.form.customerId = this.initialCustomerId;
       this.pickedCustomerId = this.initialCustomerId;
       this.startedWithCustomer = true;
+      this.autoUnlockSections();
     }
   }
 
@@ -801,21 +832,31 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
 
   // ── Finish / start ─────────────────────────────────────────────────────────────
 
-  canStartMeeting(): boolean {
-    return this.canCreateDraft();
+  /**
+   * Creates the draft meeting automatically as soon as the plan is valid (client +
+   * date + leader). This replaces the old explicit "Start meeting" button: the
+   * Capture/Tasks sections are gated behind `activeMeeting`, so creating the draft
+   * here is what unlocks them. Safe to call repeatedly — `ensureDraftMeeting`
+   * creates the draft once and only refreshes it afterwards.
+   */
+  private autoUnlockSections(): void {
+    if (!this.editingMeeting && this.canCreateDraft()) {
+      this.ensureDraftMeeting();
+    }
   }
 
-  startOrCollapseSetup(): void {
-    if (!this.canStartMeeting()) {
-      return;
+  /**
+   * Writes the auto-resolved title into the subject field when the user left it
+   * blank, so the generated title persists and is visible (not just a placeholder).
+   * Called on the explicit save (finish) per the "fill on save" behavior.
+   */
+  private commitAutoTitleIfBlank(): void {
+    if (!this.form.subject.trim()) {
+      const auto = this.autoResolvedTitle;
+      if (auto) {
+        this.form.subject = auto;
+      }
     }
-    if (!this.editingMeeting && !this.ensureDraftMeeting()) {
-      return;
-    }
-    this.editing = true;
-    this.setupCollapsed = true;
-    this.captureTab = 'notes';
-    this.notesSection?.focusComposer();
   }
 
   /**
@@ -823,6 +864,7 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
    * action; existing meetings still flush their last live edit before closing.
    */
   finish(): void {
+    this.commitAutoTitleIfBlank();
     if (this.editingMeeting) {
       const updated = this.persistMeeting(false) ?? this.editingMeeting;
       this.saved.emit({ meetingId: updated.id, intent: 'close' });
@@ -843,8 +885,12 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
   onPlanChanged(): void {
     if (this.editingMeeting) {
       this.persistMeeting(false);
-    } else {
+    } else if (this.draftMeeting) {
       this.refreshDraftMeetingFromForm();
+    } else {
+      // No draft yet: try to create one so Capture/Tasks unlock as soon as the
+      // plan becomes valid (formerly the job of the "Start meeting" button).
+      this.autoUnlockSections();
     }
   }
 
@@ -1144,12 +1190,15 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
       } else if (this.initialCustomerId) {
         this.form.customerId = this.initialCustomerId;
       }
+      // When the client is already decided (Customer 360 entry) the plan is valid
+      // from the start, so unlock Capture/Tasks now without waiting for an edit.
+      this.autoUnlockSections();
     }
   }
 
   private canCreateDraft(): boolean {
     const customerId = this.resolveCustomerId();
-    return !!this.form.subject.trim() && !!customerId && !!this.meetingDateLocal && !!this.resolveMeetingLeaderEmployeeId();
+    return !!this.effectiveSubject() && !!customerId && !!this.meetingDateLocal && !!this.resolveMeetingLeaderEmployeeId();
   }
 
   private resolveCustomerId(): string {
@@ -1176,7 +1225,7 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
       this.draftMeeting = {
         id: 'draft-customer-meeting',
         customerId: this.resolveCustomerId(),
-        subject: this.form.subject.trim(),
+        subject: this.effectiveSubject(),
         meetingDate: this.fromLocalInput(this.meetingDateLocal),
         meetingLeaderEmployeeId,
         internalParticipantEmployeeIds: [...this.form.internalParticipantEmployeeIds],
@@ -1209,7 +1258,7 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
     this.draftMeeting = {
       ...this.draftMeeting,
       customerId,
-      subject: this.form.subject.trim(),
+      subject: this.effectiveSubject(),
       meetingDate,
       meetingLeaderEmployeeId,
       internalParticipantEmployeeIds: [...this.form.internalParticipantEmployeeIds],
@@ -1246,7 +1295,7 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
 
     const created = this.workspace.addCustomerMeeting({
       customerId,
-      subject: this.form.subject,
+      subject: this.effectiveSubject(),
       meetingDate: this.fromLocalInput(this.meetingDateLocal),
       meetingLeaderEmployeeId,
       internalParticipantEmployeeIds: this.form.internalParticipantEmployeeIds,
@@ -1278,7 +1327,7 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
     }
 
     const updated = this.workspace.updateCustomerMeetingSummary(this.editingMeeting.id, {
-      subject: this.form.subject,
+      subject: this.effectiveSubject(),
       meetingDate: this.fromLocalInput(this.meetingDateLocal),
       meetingLeaderEmployeeId,
       internalParticipantEmployeeIds: this.form.internalParticipantEmployeeIds,
