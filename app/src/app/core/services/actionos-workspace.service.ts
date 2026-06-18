@@ -78,10 +78,10 @@ const UNIFIED_TASK_STATUSES: TaskStatus[] = [
 ];
 
 const DEFAULT_MAIL_NOTIFICATION_PREFS: MailNotificationPrefs = {
-  newTasks: true,
-  overdueTasks: true,
-  dueTodayTasks: true,
-  meetingSummaries: true
+  newTasks: false,
+  overdueTasks: false,
+  dueTodayTasks: false,
+  meetingSummaries: false
 };
 
 @Injectable({ providedIn: 'root' })

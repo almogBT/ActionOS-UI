@@ -35,7 +35,7 @@ export class HeaderComponent {
   readonly features = ACTIONOS_FEATURES;
 
   readonly quickCaptureTypes: QuickCaptureType[] = ['task', 'action', 'decision', 'blocker', 'note'];
-  readonly mailNotifKeys: (keyof MailNotificationPrefs)[] = ['newTasks', 'overdueTasks', 'dueTodayTasks', 'meetingSummaries'];
+  readonly mailNotifKeys: (keyof MailNotificationPrefs)[] = ['newTasks', 'meetingSummaries'];
   quickCaptureType: QuickCaptureType = 'task';
   commandText = '';
 

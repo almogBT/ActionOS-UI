@@ -664,7 +664,7 @@
       "Closed": "נסגרה"
     },
     "wrapUp": "סיכום",
-    "publishRecap": "שלח סיכום במייל",
+    "publishRecap": "פרסם סיכום",
     "publishRecapHint": "בונה סיכום מלא מהתוכן, ההחלטות, המשימות, החסמים ותאריך הפגישה הבאה.",
     "planSection": "תכנון",
     "planSubtitle": "הכן את ההקשר לפני שמנהלים את הפגישה",
@@ -873,10 +873,10 @@
   "settings": {
     "mailNotifications": "התראות מייל",
     "mailNotif": {
-      "newTasks": "התראה במייל על משימות חדשות",
+      "newTasks": "משימות חדשות והקצאה מחדש",
       "overdueTasks": "על משימות באיחור",
       "dueTodayTasks": "משימות להיום",
-      "meetingSummaries": "כל סיכום פגישה"
+      "meetingSummaries": "פגישות חדשות"
     }
   }
 }

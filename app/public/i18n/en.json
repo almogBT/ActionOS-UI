@@ -873,10 +873,10 @@
   "settings": {
     "mailNotifications": "Mail notifications",
     "mailNotif": {
-      "newTasks": "Email notification for new tasks",
+      "newTasks": "New and reassigned tasks",
       "overdueTasks": "Overdue task alerts",
       "dueTodayTasks": "Tasks due today reminders",
-      "meetingSummaries": "All meeting summaries"
+      "meetingSummaries": "New meetings"
     }
   }
 }
