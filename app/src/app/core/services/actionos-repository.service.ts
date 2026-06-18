@@ -324,11 +324,12 @@ export class ActionosRepositoryService {
     console.info(`[ActionOS API] ${label}: ${method} ${path}`, payload ?? '');
   }
 
-  async bootstrap(orgGroupId: string): Promise<ActionosBootstrapDto> {
+  async bootstrap(orgGroupId?: string | null): Promise<ActionosBootstrapDto> {
+    const options = orgGroupId ? { params: { orgGroupId } } : undefined;
     return await firstValueFrom(
       this.http.get<ActionosBootstrapDto>(
         `${this.base}/api/actionos/bootstrap`,
-        { params: { orgGroupId } }
+        options
       )
     );
   }

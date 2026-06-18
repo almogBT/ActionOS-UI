@@ -550,13 +550,13 @@ export class ActionosWorkspaceService {
     this.currentOrgGroupId = selectedOrg;
     const token = this.auth.getToken() ?? '';
 
-    if (!selectedOrg) {
+    if (!token) {
       this.clearRuntimeState();
       this.lastBootstrapKey = null;
       return;
     }
 
-    const bootstrapKey = `${selectedOrg}|${token}`;
+    const bootstrapKey = token;
     if (this.lastBootstrapKey === bootstrapKey) {
       return;
     }
@@ -569,7 +569,10 @@ export class ActionosWorkspaceService {
       try {
         const bootstrap = await this.actionosApi.bootstrap(selectedOrg);
         this.applyBootstrap(bootstrap);
-        await this.refreshDirectoryUsers(selectedOrg);
+        const directoryOrgId = selectedOrg || bootstrap.orgGroupId || bootstrap.allowedOrgs?.[0]?.orgGroupId || null;
+        if (directoryOrgId) {
+          await this.refreshDirectoryUsers(directoryOrgId);
+        }
         this.clearBackendIssue();
         this.lastBootstrapKey = bootstrapKey;
       } catch (error) {
@@ -2437,7 +2440,8 @@ export class ActionosWorkspaceService {
   }
 
   private async refreshFromBackend(): Promise<void> {
-    if (!this.currentOrgGroupId) {
+    const token = this.auth.getToken() ?? '';
+    if (!token) {
       return;
     }
 
@@ -2457,7 +2461,6 @@ export class ActionosWorkspaceService {
     }
 
     const orgGroupId = this.currentOrgGroupId;
-    const token = this.auth.getToken() ?? '';
     this.lastRefreshStartedAt = Date.now();
     // Snapshot the data revision before fetching. If any optimistic write lands
     // while the snapshot is in flight, the revision changes and we must discard
@@ -2467,9 +2470,6 @@ export class ActionosWorkspaceService {
     this.refreshInFlight = (async () => {
       try {
         const bootstrap = await this.actionosApi.bootstrap(orgGroupId);
-        if (this.currentOrgGroupId !== orgGroupId) {
-          return;
-        }
         if (this.hasPendingWrites || this.dataRevision !== revisionAtStart) {
           // Local optimistic state changed (a new edit or a queued write) while
           // we were fetching. Applying this snapshot would clobber it, so drop
@@ -2478,8 +2478,11 @@ export class ActionosWorkspaceService {
           return;
         }
         this.applyBootstrap(bootstrap);
-        await this.refreshDirectoryUsers(orgGroupId);
-        this.lastBootstrapKey = `${orgGroupId}|${token}`;
+        const directoryOrgId = orgGroupId || bootstrap.orgGroupId || bootstrap.allowedOrgs?.[0]?.orgGroupId || null;
+        if (directoryOrgId) {
+          await this.refreshDirectoryUsers(directoryOrgId);
+        }
+        this.lastBootstrapKey = token;
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('[ActionOS] Failed to refresh ActionOS data after mutation.', error);
@@ -3652,6 +3655,11 @@ export class ActionosWorkspaceService {
     if (updated) {
       this.recordActivity('meeting', updated.id, 'Customer meeting updated', updated.subject);
       const participantsChanged = changes.internalParticipantEmployeeIds !== undefined || changes.internalGuestParticipants !== undefined || changes.customerParticipants !== undefined;
+      const meetingLeaderEmployeeId = changes.meetingLeaderEmployeeId ?? updated.meetingLeaderEmployeeId;
+      const internalParticipantEmployeeIds = Array.from(new Set([
+        meetingLeaderEmployeeId,
+        ...(changes.internalParticipantEmployeeIds ?? updated.internalParticipantEmployeeIds)
+      ].filter((employeeId): employeeId is string => !!employeeId)));
       const payload = {
         subject: changes.subject !== undefined ? changes.subject : undefined,
         meetingDateUtc: changes.meetingDate !== undefined
@@ -3668,13 +3676,13 @@ export class ActionosWorkspaceService {
         status: changes.status !== undefined ? changes.status : undefined,
         participants: participantsChanged
           ? [
-              ...((changes.internalParticipantEmployeeIds ?? updated.internalParticipantEmployeeIds).map((employeeId) => ({
+              ...(internalParticipantEmployeeIds.map((employeeId) => ({
                 isInternal: true,
                 userId: employeeId,
                 displayName: this.employeeName(employeeId),
                 email: this.employee(employeeId)?.email ?? null,
                 phone: null,
-                role: 'Participant'
+                role: employeeId === meetingLeaderEmployeeId ? 'Meeting Leader' : 'Participant'
               }))),
               ...((changes.internalGuestParticipants ?? updated.internalGuestParticipants ?? []).map((guest) => ({
                 isInternal: true,
