@@ -2268,10 +2268,11 @@ export class ActionosWorkspaceService {
     const participants = row.participants ?? [];
     const notes = row.notes ?? [];
     const nextMeetingDate = row.nextMeetingDateUtc ? row.nextMeetingDateUtc.slice(0, 10) : undefined;
+    const customerId = this.canonicalCustomerId(row.customerId);
 
     return {
       id: row.id.toString(),
-      customerId: row.customerId,
+      customerId,
       subject: row.subject,
       meetingDate: row.meetingDateUtc,
       meetingLeaderEmployeeId: row.meetingLeaderUserId,
@@ -3299,6 +3300,7 @@ export class ActionosWorkspaceService {
     }
 
     const byId = new Map<string, { id: string; name: string }>();
+    const representedExternalIds = new Set<string>();
     const add = (id: string | null | undefined, name: string | null | undefined): void => {
       const trimmedId = id?.trim();
       if (!trimmedId || byId.has(trimmedId)) {
@@ -3307,10 +3309,16 @@ export class ActionosWorkspaceService {
       byId.set(trimmedId, { id: trimmedId, name: name?.trim() || trimmedId });
     };
 
-    this.externalCustomerGroups.forEach(group => add(group.id, group.name));
     this.customers.forEach(customer => {
       add(customer.id, customer.name);
-      add(customer.externalGroupId, customer.name);
+      if (customer.externalGroupId?.trim()) {
+        representedExternalIds.add(customer.externalGroupId.trim().toLowerCase());
+      }
+    });
+    this.externalCustomerGroups.forEach(group => {
+      if (!representedExternalIds.has(group.id.trim().toLowerCase())) {
+        add(group.id, group.name);
+      }
     });
 
     const value = Array.from(byId.values()).sort((a, b) => a.name.localeCompare(b.name));
@@ -3345,8 +3353,20 @@ export class ActionosWorkspaceService {
     return this.customerByExternalGroupCache.value;
   }
 
+  private canonicalCustomerId(customerId: string | null | undefined): string {
+    const resolvedId = this.resolveCustomerId(customerId ?? '').trim();
+    if (!resolvedId) {
+      return '';
+    }
+
+    const customer = this.customerStore.customers.find((item) =>
+      item.externalGroupId?.trim().toLowerCase() === resolvedId.toLowerCase()
+    );
+    return customer?.id ?? resolvedId;
+  }
+
   customer(id: string): Customer | undefined {
-    return this.customerById().get(this.resolveCustomerId(id));
+    return this.customerById().get(this.canonicalCustomerId(id));
   }
 
   clientName(id: string): string | undefined {
@@ -3365,7 +3385,7 @@ export class ActionosWorkspaceService {
   }
 
   private clientLookupIds(id: string | undefined | null): string[] {
-    const resolvedId = this.resolveCustomerId(id ?? '').trim();
+    const resolvedId = this.canonicalCustomerId(id);
     if (!resolvedId) {
       return [];
     }
@@ -3553,7 +3573,7 @@ export class ActionosWorkspaceService {
   }
 
   addCustomerMeeting(input: CreateCustomerMeetingInput): CustomerMeeting {
-    const customerId = this.resolveCustomerId(input.customerId);
+    const customerId = this.canonicalCustomerId(input.customerId);
     const meeting = this.customerMeetingRepo.add({ ...input, customerId });
     const localMeetingId = meeting.id;
     this.recordActivity('meeting', meeting.id, 'Customer meeting created', meeting.subject);
