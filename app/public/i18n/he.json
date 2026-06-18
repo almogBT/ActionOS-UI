@@ -128,6 +128,8 @@
     "needsAttentionHint": "פגישות עם משימות פתוחות",
     "ledBadge": "הובל",
     "searchPlaceholder": "חיפוש פגישות...",
+    "userFilterPlaceholder": "הוסף משתתף...",
+    "userFilterLabel": "השתתפו",
     "filterAll": "הכל",
     "filterThisWeek": "השבוע",
     "filterFollowups": "דורש מעקב",
@@ -434,6 +436,10 @@
     "list": {
       "eyebrow": "עבודה פתוחה",
       "title": "משימות"
+    },
+    "userFilter": {
+      "label": "פתח או אחראי",
+      "placeholder": "הוסף משתמש..."
     },
     "searchPlaceholder": "חיפוש משימות...",
     "noTasksTitle": "אין כאן משימות כרגע",

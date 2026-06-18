@@ -223,6 +223,10 @@
   min-width: 150px;
 }
 
+.user-filter-select {
+  flex-basis: 190px;
+}
+
 .meetings-search {
   flex: 1 1 160px;          /* takes the leftover width on the row */
   height: 34px;
@@ -265,6 +269,60 @@
     &:hover  { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
     &.active { background: var(--accent); border-color: var(--accent); color: #fff; }
   }
+}
+
+.selected-user-filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0 -4px;
+}
+
+.selected-user-label {
+  color: var(--text-tertiary);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.user-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 220px;
+  min-height: 26px;
+  padding: 3px 8px 3px 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+}
+
+.chip-remove {
+  display: inline-grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  line-height: 1;
 }
 
 /* ── Meeting lanes ─────────────────────────────────────────────────────── */

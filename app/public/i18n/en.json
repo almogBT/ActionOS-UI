@@ -128,6 +128,8 @@
     "needsAttentionHint": "Meetings with open tasks",
     "ledBadge": "Led",
     "searchPlaceholder": "Search meetings...",
+    "userFilterPlaceholder": "Add attendee...",
+    "userFilterLabel": "Attended by",
     "filterAll": "All",
     "filterThisWeek": "This week",
     "filterFollowups": "Needs follow-up",
@@ -434,6 +436,10 @@
     "list": {
       "eyebrow": "Open work",
       "title": "Tasks"
+    },
+    "userFilter": {
+      "label": "Opened or assigned",
+      "placeholder": "Add user..."
     },
     "searchPlaceholder": "Search tasks...",
     "noTasksTitle": "Nothing here right now",

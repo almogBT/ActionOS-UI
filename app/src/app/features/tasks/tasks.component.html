@@ -99,6 +99,13 @@
           <select class="origin-select" [(ngModel)]="origin" [attr.aria-label]="'tasks.origin.label' | t">
             <option *ngFor="let o of originOptions; trackBy: trackOrigin" [value]="o.id">{{ o.labelKey | t }}</option>
           </select>
+          <app-searchable-select
+            class="user-filter-select"
+            [(ngModel)]="userFilterToAdd"
+            [options]="userFilterOptions"
+            [placeholder]="'tasks.userFilter.placeholder' | t"
+            (ngModelChange)="addUserFilter($event)"
+          ></app-searchable-select>
           <input
             type="search"
             class="tasks-search"
@@ -109,6 +116,19 @@
       </div>
 
       <!-- ── The one shared task table — scrolls inside its own box (below) ───── -->
+      <div class="selected-user-filters" *ngIf="selectedUserFilterIds.length">
+        <span class="selected-user-label">{{ 'tasks.userFilter.label' | t }}</span>
+        <button
+          *ngFor="let employeeId of selectedUserFilterIds; trackBy: trackUserFilter"
+          type="button"
+          class="user-filter-chip"
+          (click)="removeUserFilter(employeeId)"
+        >
+          <span>{{ userFilterName(employeeId) }}</span>
+          <span class="chip-remove" aria-hidden="true">x</span>
+        </button>
+      </div>
+
       <div class="tasks-table-scroll">
         <app-task-table
           [tasks]="filteredTasks"

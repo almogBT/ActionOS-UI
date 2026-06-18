@@ -75,6 +75,13 @@
           [options]="customerFilterOptions"
           class="filter-select"
         ></app-searchable-select>
+        <app-searchable-select
+          class="filter-select user-filter-select"
+          [(ngModel)]="userFilterToAdd"
+          [options]="userFilterOptions"
+          [placeholder]="'meetingsOverview.userFilterPlaceholder' | t"
+          (ngModelChange)="addUserFilter($event)"
+        ></app-searchable-select>
         <div class="filter-strip">
           <button
             *ngFor="let f of quickFilterOptions; trackBy: trackQuickFilter"
@@ -86,6 +93,19 @@
       </div>
 
       <!-- ── Meeting lanes (card grids) ───────────────────────────────────── -->
+      <div class="selected-user-filters" *ngIf="selectedUserFilterIds.length">
+        <span class="selected-user-label">{{ 'meetingsOverview.userFilterLabel' | t }}</span>
+        <button
+          *ngFor="let employeeId of selectedUserFilterIds; trackBy: trackUserFilter"
+          type="button"
+          class="user-filter-chip"
+          (click)="removeUserFilter(employeeId)"
+        >
+          <span>{{ userFilterName(employeeId) }}</span>
+          <span class="chip-remove" aria-hidden="true">x</span>
+        </button>
+      </div>
+
       <div *ngFor="let bucket of buckets; trackBy: trackBucket" class="lane-section" [class.collapsed]="isLaneCollapsed(bucket.lane)">
         <button
           type="button"

@@ -65,6 +65,8 @@ export class MeetingsComponent implements OnInit, OnChanges {
 
   /** Free-text search across subject / customer / goal. */
   search = '';
+  userFilterToAdd = '';
+  selectedUserFilterIds: string[] = [];
 
   /** Quick-filter pill currently active. */
   quickFilter: QuickFilter = 'all';
@@ -87,11 +89,17 @@ export class MeetingsComponent implements OnInit, OnChanges {
   private filteredMeetingsCache: {
     scopedMeetings: CustomerMeeting[];
     search: string;
+    userIdsKey: string;
     quickFilter: QuickFilter;
     currentEmployeeId: string;
     today: string;
     weekEnd: string;
     result: CustomerMeeting[];
+  } | null = null;
+  private userFilterOptionsCache: {
+    employeeIdsKey: string;
+    selectedIdsKey: string;
+    options: SelectOption[];
   } | null = null;
   private attentionMeetingsCache: {
     scopedMeetings: CustomerMeeting[];
@@ -171,6 +179,7 @@ export class MeetingsComponent implements OnInit, OnChanges {
   get filteredMeetings(): CustomerMeeting[] {
     const scopedMeetings = this.customerScopedMeetings;
     const search = this.search.trim().toLowerCase();
+    const userIdsKey = this.selectedUserFilterIds.join('|');
     const today = this.todayIso();
     const weekEnd = this.weekEndIso(today);
     const currentEmployeeId = this.workspace.currentEmployeeId;
@@ -179,6 +188,7 @@ export class MeetingsComponent implements OnInit, OnChanges {
       cached &&
       cached.scopedMeetings === scopedMeetings &&
       cached.search === search &&
+      cached.userIdsKey === userIdsKey &&
       cached.quickFilter === this.quickFilter &&
       cached.currentEmployeeId === currentEmployeeId &&
       cached.today === today &&
@@ -197,6 +207,10 @@ export class MeetingsComponent implements OnInit, OnChanges {
       );
     }
 
+    if (this.selectedUserFilterIds.length) {
+      list = list.filter(m => this.selectedUserFilterIds.every(id => this.meetingAttendeeIds(m).includes(id)));
+    }
+
     switch (this.quickFilter) {
       case 'week':      list = list.filter(m => this.isWithinWeek(m, today, weekEnd)); break;
       case 'led':       list = list.filter(m => this.isMeetingLed(m)); break;
@@ -205,6 +219,7 @@ export class MeetingsComponent implements OnInit, OnChanges {
     this.filteredMeetingsCache = {
       scopedMeetings,
       search,
+      userIdsKey,
       quickFilter: this.quickFilter,
       currentEmployeeId,
       today,
@@ -215,7 +230,27 @@ export class MeetingsComponent implements OnInit, OnChanges {
   }
 
   get hasActiveFilters(): boolean {
-    return this.quickFilter !== 'all' || !!this.search.trim() || this.customerFilter !== 'all';
+    return this.quickFilter !== 'all'
+      || !!this.search.trim()
+      || this.customerFilter !== 'all'
+      || this.selectedUserFilterIds.length > 0;
+  }
+
+  get userFilterOptions(): SelectOption[] {
+    const employees = this.workspace.employees;
+    const employeeIdsKey = employees.map(e => e.id).join('|');
+    const selectedIdsKey = this.selectedUserFilterIds.join('|');
+    const cached = this.userFilterOptionsCache;
+    if (cached && cached.employeeIdsKey === employeeIdsKey && cached.selectedIdsKey === selectedIdsKey) {
+      return cached.options;
+    }
+
+    const selected = new Set(this.selectedUserFilterIds);
+    const options = employees
+      .filter(e => !selected.has(e.id))
+      .map(e => ({ value: e.id, label: e.fullName }));
+    this.userFilterOptionsCache = { employeeIdsKey, selectedIdsKey, options };
+    return options;
   }
 
   // ── Attention rail ──────────────────────────────────────────────────────────
@@ -299,6 +334,23 @@ export class MeetingsComponent implements OnInit, OnChanges {
 
   isMeetingLed(m: CustomerMeeting): boolean {
     return m.meetingLeaderEmployeeId === this.workspace.currentEmployeeId;
+  }
+
+  addUserFilter(employeeId: string): void {
+    if (!employeeId || this.selectedUserFilterIds.includes(employeeId)) {
+      this.userFilterToAdd = '';
+      return;
+    }
+    this.selectedUserFilterIds = [...this.selectedUserFilterIds, employeeId];
+    this.userFilterToAdd = '';
+  }
+
+  removeUserFilter(employeeId: string): void {
+    this.selectedUserFilterIds = this.selectedUserFilterIds.filter(id => id !== employeeId);
+  }
+
+  userFilterName(employeeId: string): string {
+    return this.workspace.employeeName(employeeId);
   }
 
   meetingActionItems(m: CustomerMeeting): MeetingNote[] {
@@ -427,6 +479,8 @@ export class MeetingsComponent implements OnInit, OnChanges {
     this.quickFilter = 'all';
     this.search = '';
     this.customerFilter = 'all';
+    this.selectedUserFilterIds = [];
+    this.userFilterToAdd = '';
   }
 
   trackQuickFilter(_: number, filter: { id: QuickFilter }): QuickFilter {
@@ -439,6 +493,10 @@ export class MeetingsComponent implements OnInit, OnChanges {
 
   trackMeeting(_: number, meeting: CustomerMeeting): string {
     return meeting.id;
+  }
+
+  trackUserFilter(_: number, employeeId: string): string {
+    return employeeId;
   }
 
   private assignLane(m: CustomerMeeting, today: string): MeetingLane {
@@ -474,6 +532,10 @@ export class MeetingsComponent implements OnInit, OnChanges {
   private isWithinWeek(m: CustomerMeeting, today: string, weekEnd: string): boolean {
     const day = m.meetingDate.slice(0, 10);
     return day >= today && day <= weekEnd;
+  }
+
+  private meetingAttendeeIds(meeting: CustomerMeeting): string[] {
+    return [meeting.meetingLeaderEmployeeId, ...meeting.internalParticipantEmployeeIds];
   }
 
   private todayIso(): string {

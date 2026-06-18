@@ -8,6 +8,7 @@ import { ActionosWorkspaceService } from '../../core/services/actionos-workspace
 import { ACTIONOS_FEATURES } from '../../core/config/actionos-ui.config';
 import { CalendarStatsComponent } from '../../shared/calendar-stats/calendar-stats.component';
 import { IconComponent } from '../../shared/icons/icon.component';
+import { SearchableSelectComponent, SelectOption } from '../../shared/searchable-select/searchable-select.component';
 import { StatTileComponent } from '../../shared/stat-tile/stat-tile.component';
 import { GroupMode, TaskTableComponent } from '../../shared/task-table/task-table.component';
 import { MetricTasksModalComponent } from '../workspace-home/metric-tasks-modal.component';
@@ -30,6 +31,7 @@ export type TaskLens     = 'open' | 'overdue' | 'today' | 'blocked';
     TranslatePipe,
     CalendarStatsComponent,
     IconComponent,
+    SearchableSelectComponent,
     StatTileComponent,
     TaskTableComponent,
     MetricTasksModalComponent,
@@ -65,6 +67,8 @@ export class TasksComponent implements OnInit {
   origin: TaskOrigin     = 'all';
   groupBy: GroupMode     = 'none';
   search = '';
+  userFilterToAdd = '';
+  selectedUserFilterIds: string[] = [];
   openLens: TaskLens | null = null;
 
   readonly audienceOptions: { id: TaskAudience; labelKey: string }[] = [
@@ -95,8 +99,14 @@ export class TasksComponent implements OnInit {
     base: Task[] | null;
     origin: TaskOrigin | null;
     search: string;
+    userIdsKey: string;
     value: Task[];
-  } = { base: null, origin: null, search: '', value: [] };
+  } = { base: null, origin: null, search: '', userIdsKey: '', value: [] };
+  private readonly userFilterOptionsCache: {
+    employeeIdsKey: string;
+    selectedIdsKey: string;
+    options: SelectOption[];
+  } = { employeeIdsKey: '', selectedIdsKey: '', options: [] };
   private readonly taskCalendarEventsCache: { source: Task[] | null; value: CalendarEvent[] } = {
     source: null,
     value: []
@@ -152,16 +162,23 @@ export class TasksComponent implements OnInit {
   get filteredTasks(): Task[] {
     let list = this.baseOpenTasks;
     const term = this.search.trim().toLowerCase();
+    const userIdsKey = this.selectedUserFilterIds.join('|');
     if (
       this.filteredTasksCache.base === list &&
       this.filteredTasksCache.origin === this.origin &&
-      this.filteredTasksCache.search === term
+      this.filteredTasksCache.search === term &&
+      this.filteredTasksCache.userIdsKey === userIdsKey
     ) {
       return this.filteredTasksCache.value;
     }
 
     if (this.origin === 'meeting')    list = list.filter(t => t.source === 'meeting');
     if (this.origin === 'standalone') list = list.filter(t => t.source !== 'meeting');
+    if (this.selectedUserFilterIds.length) {
+      list = list.filter(t => this.selectedUserFilterIds.every(id =>
+        t.openedByEmployeeId === id || t.assignedToEmployeeId === id
+      ));
+    }
     if (term) {
       list = list.filter(t =>
         t.title.toLowerCase().includes(term) ||
@@ -171,8 +188,47 @@ export class TasksComponent implements OnInit {
     this.filteredTasksCache.base = this.baseOpenTasks;
     this.filteredTasksCache.origin = this.origin;
     this.filteredTasksCache.search = term;
+    this.filteredTasksCache.userIdsKey = userIdsKey;
     this.filteredTasksCache.value = list;
     return list;
+  }
+
+  get userFilterOptions(): SelectOption[] {
+    const employees = this.workspace.employees;
+    const employeeIdsKey = employees.map(e => e.id).join('|');
+    const selectedIdsKey = this.selectedUserFilterIds.join('|');
+    if (
+      this.userFilterOptionsCache.employeeIdsKey === employeeIdsKey &&
+      this.userFilterOptionsCache.selectedIdsKey === selectedIdsKey
+    ) {
+      return this.userFilterOptionsCache.options;
+    }
+
+    const selected = new Set(this.selectedUserFilterIds);
+    const options = employees
+      .filter(e => !selected.has(e.id))
+      .map(e => ({ value: e.id, label: e.fullName }));
+    this.userFilterOptionsCache.employeeIdsKey = employeeIdsKey;
+    this.userFilterOptionsCache.selectedIdsKey = selectedIdsKey;
+    this.userFilterOptionsCache.options = options;
+    return options;
+  }
+
+  addUserFilter(employeeId: string): void {
+    if (!employeeId || this.selectedUserFilterIds.includes(employeeId)) {
+      this.userFilterToAdd = '';
+      return;
+    }
+    this.selectedUserFilterIds = [...this.selectedUserFilterIds, employeeId];
+    this.userFilterToAdd = '';
+  }
+
+  removeUserFilter(employeeId: string): void {
+    this.selectedUserFilterIds = this.selectedUserFilterIds.filter(id => id !== employeeId);
+  }
+
+  userFilterName(employeeId: string): string {
+    return this.workspace.employeeName(employeeId);
   }
 
   // ── Stat tiles ────────────────────────────────────────────────────────────
@@ -353,4 +409,5 @@ export class TasksComponent implements OnInit {
   trackAudience(_index: number, option: { id: TaskAudience }): TaskAudience { return option.id; }
   trackOrigin(_index: number, option: { id: TaskOrigin }): TaskOrigin { return option.id; }
   trackGroupBy(_index: number, option: { id: GroupMode }): GroupMode { return option.id; }
+  trackUserFilter(_index: number, employeeId: string): string { return employeeId; }
 }
