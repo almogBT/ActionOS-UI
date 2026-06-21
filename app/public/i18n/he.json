@@ -786,6 +786,7 @@
       "Cancelled": "בוטלה"
     },
     "notificationEvents": {
+      "created": "נוצרה",
       "assigned": "הוקצתה",
       "status-changed": "סטטוס שונה",
       "due-soon": "מתקרבת לתאריך יעד"

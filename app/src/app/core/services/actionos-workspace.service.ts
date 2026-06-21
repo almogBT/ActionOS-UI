@@ -2352,7 +2352,7 @@ export class ActionosWorkspaceService {
       watcherEmployeeIds: Array.from(new Set(watcherIds)),
       attachmentIds: [],
       notifications: (row.notifications ?? []).map((notification) => ({
-        event: (notification.eventType as 'assigned' | 'status-changed' | 'due-soon'),
+        event: (notification.eventType as 'created' | 'assigned' | 'status-changed' | 'due-soon'),
         channel: (notification.channel as 'email' | 'in-app'),
         sentAt: notification.sentAtUtc,
         recipientEmployeeId: notification.recipientUserId

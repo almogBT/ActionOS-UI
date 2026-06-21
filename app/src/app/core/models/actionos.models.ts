@@ -317,7 +317,7 @@ export interface UpdateCustomerMeetingInput {
   status?: CustomerMeetingStatus;
 }
 
-export type NotificationEvent = 'assigned' | 'status-changed' | 'due-soon';
+export type NotificationEvent = 'created' | 'assigned' | 'status-changed' | 'due-soon';
 export type NotificationChannel = 'email' | 'in-app';
 
 export interface NotificationLogEntry {

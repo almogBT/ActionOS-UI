@@ -786,6 +786,7 @@
       "Cancelled": "Cancelled"
     },
     "notificationEvents": {
+      "created": "Created",
       "assigned": "Assigned",
       "status-changed": "Status changed",
       "due-soon": "Due soon"
