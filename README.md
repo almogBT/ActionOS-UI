@@ -38,10 +38,11 @@ Path:
 
 Backend provides:
 
-- `/api/actionos/*` routes for clients, boards, tasks, meetings, and org users
+- `/api/actionos/*` routes for global bootstrap, customers, boards, tasks,
+  meetings, attachments, directory users, and current-user mail preferences
 - ActionOS-owned DB tables for internal workflow data
 - source reads from Azure/reportcentral customer and employee tables
-- org-scoped access checks in service layer
+- ActionOS permission checks plus entity visibility in the service layer
 
 ## Data Source Rules
 
@@ -53,6 +54,9 @@ Backend provides:
 - New meeting leader is hidden. The UI uses the current user only when they are
   in the filtered assignable list; otherwise it uses the first selected our-side
   employee from the dropdown.
+- The host selected organization is ignored by ActionOS. Customers are global to
+  permitted ActionOS users; ordinary users are limited by task ownership,
+  watcher/assignment, meeting participation, and board membership.
 
 ## Docs Map
 

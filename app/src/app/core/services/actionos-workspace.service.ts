@@ -92,7 +92,6 @@ export class ActionosWorkspaceService {
   private readonly i18n = inject(ActionosI18nService);
   private readonly actionosApi = inject(ActionosRepositoryService);
   private readonly hostContext = inject(HostContextService);
-  private currentOrgGroupId: string | null = null;
   private initScheduled = false;
   private bootstrapInFlight: Promise<void> | null = null;
   private refreshInFlight: Promise<void> | null = null;
@@ -234,13 +233,8 @@ export class ActionosWorkspaceService {
     this.mailNotifPrefs.set(updated);
     this.persistMailNotifPrefs(updated);
 
-    const orgGroupId = this.getOrgGroupForMutation();
-    if (!orgGroupId) {
-      return;
-    }
-
     this.persistAndRefresh(
-      this.actionosApi.updateMailNotificationPreferences(orgGroupId, updated),
+      this.actionosApi.updateMailNotificationPreferences(updated),
       {
         failureMessage: 'ActionOS could not save mail notification preferences.',
         onSuccess: (saved) => {
@@ -458,9 +452,6 @@ export class ActionosWorkspaceService {
 
   constructor() {
     this.startRealtimeSync();
-    this.hostContext.selectedOrg$.subscribe(() => {
-      this.scheduleInitialize();
-    });
     this.auth.tokenChanged$.subscribe(() => {
       this.scheduleInitialize();
     });
@@ -491,10 +482,6 @@ export class ActionosWorkspaceService {
   }
 
   private requestRealtimeRefresh(force: boolean): void {
-    if (!this.currentOrgGroupId) {
-      return;
-    }
-
     const now = Date.now();
     if (!force && now - this.lastRefreshStartedAt < this.minRefreshGapMs) {
       return;
@@ -546,8 +533,6 @@ export class ActionosWorkspaceService {
   }
 
   async initialize(): Promise<void> {
-    const selectedOrg = this.normalizeOrgGroupId(this.hostContext.snapshot.selectedOrg);
-    this.currentOrgGroupId = selectedOrg;
     const token = this.auth.getToken() ?? '';
 
     if (!token) {
@@ -567,12 +552,9 @@ export class ActionosWorkspaceService {
 
     this.bootstrapInFlight = (async () => {
       try {
-        const bootstrap = await this.actionosApi.bootstrap(selectedOrg);
+        const bootstrap = await this.actionosApi.bootstrap();
         this.applyBootstrap(bootstrap);
-        const directoryOrgId = selectedOrg || bootstrap.orgGroupId || bootstrap.allowedOrgs?.[0]?.orgGroupId || null;
-        if (directoryOrgId) {
-          await this.refreshDirectoryUsers(directoryOrgId);
-        }
+        await this.refreshDirectoryUsers();
         this.clearBackendIssue();
         this.lastBootstrapKey = bootstrapKey;
       } catch (error) {
@@ -1349,11 +1331,8 @@ export class ActionosWorkspaceService {
     this.saveToStorage();
 
     const localTaskId = task.id;
-    const orgGroupId = this.getOrgGroupForMutation();
     const resolvedSourceMeetingId = task.sourceMeetingId ? this.resolveMeetingId(task.sourceMeetingId) : '';
-    if (orgGroupId) {
       const createTaskRequest = {
-        orgGroupId,
         boardId: null,
         customerId: task.customerId || null,
         title: task.title,
@@ -1391,7 +1370,6 @@ export class ActionosWorkspaceService {
       } else {
         this.persistAndRefresh(createAndPromote(sourceMeetingNumeric));
       }
-    }
 
     return task;
   }
@@ -1922,15 +1900,6 @@ export class ActionosWorkspaceService {
     this.activityState = [activity, ...this.activityState].slice(0, 50);
   }
 
-  private normalizeOrgGroupId(value: string | null | undefined): string | null {
-    if (typeof value !== 'string') {
-      return null;
-    }
-
-    const trimmed = value.trim();
-    return trimmed.length ? trimmed : null;
-  }
-
   private clearRuntimeState(): void {
     this.membersState = [];
     this.tasksState = [];
@@ -1995,20 +1964,12 @@ export class ActionosWorkspaceService {
       this.mapAttachmentFromApi(row)
     );
 
-    const allowedOrgs = (bootstrap.allowedOrgs ?? [])
-      .filter((row) => !!row.orgGroupId?.trim())
-      .map((row) => ({
-        id: row.orgGroupId.trim(),
-        name: row.displayName?.trim() || row.orgGroupId.trim()
+    this.externalCustomerGroups = customers
+      .filter((customer) => !!customer.externalGroupId)
+      .map((customer) => ({
+        id: customer.externalGroupId!,
+        name: customer.name
       }));
-    this.externalCustomerGroups = allowedOrgs.length
-      ? allowedOrgs
-      : customers
-          .filter((customer) => !!customer.externalGroupId)
-          .map((customer) => ({
-            id: customer.externalGroupId!,
-            name: customer.name
-          }));
 
     this.nextTaskNumber = this.computeNextTaskNumber(this.tasksState);
     this.nextMemberNumber = this.membersState.length + 1;
@@ -2068,9 +2029,9 @@ export class ActionosWorkspaceService {
     };
   }
 
-  private async refreshDirectoryUsers(orgGroupId: string): Promise<void> {
+  private async refreshDirectoryUsers(): Promise<void> {
     try {
-      const users = await this.actionosApi.getOrgUsers(orgGroupId);
+      const users = await this.actionosApi.getDirectoryUsers();
       this.mergeDirectoryUsersFromApi(users ?? []);
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -2460,7 +2421,6 @@ export class ActionosWorkspaceService {
       return;
     }
 
-    const orgGroupId = this.currentOrgGroupId;
     this.lastRefreshStartedAt = Date.now();
     // Snapshot the data revision before fetching. If any optimistic write lands
     // while the snapshot is in flight, the revision changes and we must discard
@@ -2469,7 +2429,7 @@ export class ActionosWorkspaceService {
 
     this.refreshInFlight = (async () => {
       try {
-        const bootstrap = await this.actionosApi.bootstrap(orgGroupId);
+        const bootstrap = await this.actionosApi.bootstrap();
         if (this.hasPendingWrites || this.dataRevision !== revisionAtStart) {
           // Local optimistic state changed (a new edit or a queued write) while
           // we were fetching. Applying this snapshot would clobber it, so drop
@@ -2478,10 +2438,7 @@ export class ActionosWorkspaceService {
           return;
         }
         this.applyBootstrap(bootstrap);
-        const directoryOrgId = orgGroupId || bootstrap.orgGroupId || bootstrap.allowedOrgs?.[0]?.orgGroupId || null;
-        if (directoryOrgId) {
-          await this.refreshDirectoryUsers(directoryOrgId);
-        }
+        await this.refreshDirectoryUsers();
         this.lastBootstrapKey = token;
       } catch (error) {
         // eslint-disable-next-line no-console
@@ -2530,11 +2487,6 @@ export class ActionosWorkspaceService {
   private saveToStorage(): void {
     this.bumpDataRevision();
     // Real backend mode: keep state in memory and backend only.
-  }
-
-  private getOrgGroupForMutation(): string | null {
-    const orgGroupId = this.currentOrgGroupId ?? this.normalizeOrgGroupId(this.hostContext.snapshot.selectedOrg);
-    return orgGroupId;
   }
 
   private reportBackendIssue(message: string, error?: unknown): void {
@@ -3416,17 +3368,10 @@ export class ActionosWorkspaceService {
   }
 
   addCustomer(input: CreateCustomerInput): Customer | null {
-    const orgGroupId = this.getOrgGroupForMutation();
-    if (!orgGroupId) {
-      this.reportBackendIssue('ActionOS could not save this customer because no organization is selected.');
-      return null;
-    }
-
     const customer = this.customerRepo.add(input);
     this.recordActivity('member', customer.id, 'Customer added', customer.name);
     this.pendingCustomerIds.add(customer.id);
     this.persistAndRefresh(this.actionosApi.createCustomer({
-      orgGroupId,
       name: input.name,
       type: input.type,
       externalGroupId: input.externalGroupId ?? null,
@@ -4081,8 +4026,6 @@ export class ActionosWorkspaceService {
     this.saveToStorage();
 
     const localTaskId = task.id;
-    const orgGroupId = this.getOrgGroupForMutation();
-    if (orgGroupId) {
       if (resolvedSourceNoteId) {
         this.runMeetingNoteMutation(resolvedMeetingId, resolvedSourceNoteId, (meetingIdNumeric, noteIdNumeric) =>
           this.actionosApi.convertMeetingNoteToTask(meetingIdNumeric, noteIdNumeric, {
@@ -4102,7 +4045,6 @@ export class ActionosWorkspaceService {
       } else {
         this.runMeetingMutation(resolvedMeetingId, (meetingIdNumeric) =>
           this.actionosApi.createTask({
-            orgGroupId,
             boardId: null,
             customerId: task.customerId || null,
             title: task.title,
@@ -4129,7 +4071,6 @@ export class ActionosWorkspaceService {
           })
         );
       }
-    }
     return task;
   }
 
@@ -4623,12 +4564,9 @@ export class ActionosWorkspaceService {
   ): Promise<Attachment> {
     const attachment = await this.attachments.upload(file, entityType, entityId, this.currentEmployeeId);
     this.recordActivity('task', entityId, 'Attachment uploaded', attachment.fileName);
-    const orgGroupId = this.getOrgGroupForMutation();
-    if (orgGroupId) {
       if (entityType === 'meeting-task') {
         this.runTaskMutation(entityId, (taskIdNumeric) =>
           this.actionosApi.uploadAttachment({
-            orgGroupId,
             entityType,
             entityId: taskIdNumeric.toString(),
             file
@@ -4636,13 +4574,11 @@ export class ActionosWorkspaceService {
         );
       } else {
         this.persistAndRefresh(this.actionosApi.uploadAttachment({
-          orgGroupId,
           entityType,
           entityId,
           file
         }));
       }
-    }
     return attachment;
   }
 
@@ -4694,17 +4630,13 @@ export class ActionosWorkspaceService {
       const updatedIds = [...(note.attachmentIds ?? []), attachment.id];
       this.customerMeetingRepo.updateNote(resolvedMeetingId, resolvedNoteId, { attachmentIds: updatedIds });
     }
-    const orgGroupId = this.getOrgGroupForMutation();
-    if (orgGroupId) {
       this.runMeetingNoteMutation(resolvedMeetingId, resolvedNoteId, (_meetingIdNumeric, noteIdNumeric) =>
         this.actionosApi.uploadAttachment({
-          orgGroupId,
           entityType: 'meeting-note',
           entityId: noteIdNumeric.toString(),
           file
         })
       );
-    }
     return attachment;
   }
 

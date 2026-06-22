@@ -9,7 +9,6 @@ const HOST_CONTEXT_STORAGE_KEY = 'actionos.host.context.v1';
 export interface ActionosHostContext {
   token: string | null;
   lang: ActionosLanguage;
-  selectedOrg: string | null;
   moduleSlugName: string | null;
   environmentName: string | null;
 }
@@ -18,7 +17,6 @@ interface HostSetDataMessage {
   type: 'set-data';
   token?: string | null;
   lang?: string | null;
-  selectedOrg?: string | null;
   moduleSlugName?: string | null;
   environmentName?: string | null;
 }
@@ -62,10 +60,6 @@ export class HostContextService {
   readonly context$: Observable<ActionosHostContext> = this.contextSubject.asObservable();
   readonly token$: Observable<string | null> = this.context$.pipe(
     map(ctx => ctx.token),
-    distinctUntilChanged()
-  );
-  readonly selectedOrg$: Observable<string | null> = this.context$.pipe(
-    map(ctx => ctx.selectedOrg),
     distinctUntilChanged()
   );
   readonly language$: Observable<ActionosLanguage> = this.context$.pipe(
@@ -117,7 +111,6 @@ export class HostContextService {
       this.zone.run(() => this.merge({
         token: typeof data.token === 'string' ? data.token : null,
         lang,
-        selectedOrg: this.normalizeNullable(data.selectedOrg),
         moduleSlugName: this.normalizeNullable(data.moduleSlugName),
         environmentName: this.normalizeNullable(data.environmentName),
       }));
@@ -148,7 +141,6 @@ export class HostContextService {
         return {
           token: null,
           lang: 'en',
-          selectedOrg: null,
           moduleSlugName: null,
           environmentName: null
         };
@@ -157,7 +149,6 @@ export class HostContextService {
       return {
         token: typeof parsed.token === 'string' ? parsed.token : null,
         lang: parsed.lang === 'he' ? 'he' : 'en',
-        selectedOrg: this.normalizeNullable(parsed.selectedOrg),
         moduleSlugName: this.normalizeNullable(parsed.moduleSlugName),
         environmentName: this.normalizeNullable(parsed.environmentName)
       };
@@ -165,7 +156,6 @@ export class HostContextService {
       return {
         token: null,
         lang: 'en',
-        selectedOrg: null,
         moduleSlugName: null,
         environmentName: null
       };

@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { AppComponent } from './app.component';
+import { DEFAULT_VIEW } from './core/config/actionos-ui.config';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
@@ -17,10 +18,10 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should start on the workspace home view', () => {
+  it('should start on the configured default view', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.activeView()).toEqual('home');
+    expect(app.activeView()).toEqual(DEFAULT_VIEW);
   });
 
   it('should render the ActionOS shell', () => {

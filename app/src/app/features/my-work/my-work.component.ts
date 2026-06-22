@@ -465,7 +465,7 @@ export class MyWorkComponent {
 
   // ── Right rail: clients (from the allowed external customer groups) ───────
   // Source is workspace.externalCustomerGroups — the org groups this user is
-  // allowed to see (from the bootstrap allowedOrgs), not the full customer list.
+  // available in the global ActionOS customer catalog.
   railClientSearch = '';
 
   get railClients(): { id: string; name: string }[] {

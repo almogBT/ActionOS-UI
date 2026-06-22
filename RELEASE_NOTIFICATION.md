@@ -1,5 +1,18 @@
 # ActionOS Release Notification
 
+## Unreleased - OrgGroupId removal
+
+- ActionOS no longer accepts or sends Unified `selectedOrg` / `OrgGroupId` for
+  bootstrap, customers, boards, tasks, meetings, attachments, directory users,
+  uploads, or mail preferences.
+- Mail notification preferences are global per user.
+- Customers are global to permitted ActionOS users; ordinary-user visibility is
+  based on task ownership/watchers, meeting participation/leadership/creator,
+  and board creator/member access.
+- Database rollout requires the read-only preflight audit and the matching
+  manual `006_actionos_remove_org_group_scope.sql` or
+  `006_actionos_prod_remove_org_group_scope.sql` script.
+
 **Release date:** 2026-05-31  
 **Release version:** v3.2  
 **Previous version:** v3.1 (2026-05-26)

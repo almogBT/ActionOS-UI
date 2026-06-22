@@ -21,7 +21,7 @@ describe('CalendarComponent', () => {
     const event: CalendarEvent = {
       id: 'task-1',
       title: 'Prepare release',
-      startsAt: '2026-06-03T09:00:00',
+      startsAt: '2099-06-03T09:00:00',
       durationMinutes: 30,
       kind: 'task',
       attendeeCount: 0,

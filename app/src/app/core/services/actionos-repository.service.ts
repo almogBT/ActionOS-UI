@@ -12,15 +12,8 @@ export interface ActionosApiUserDto {
   azureObjectId?: string | null;
 }
 
-export interface ActionosApiClientSummaryDto {
-  orgGroupId: string;
-  displayName: string;
-  description?: string | null;
-}
-
 export interface ActionosApiCustomerDto {
   id: string;
-  orgGroupId: string;
   externalGroupId?: string | null;
   name: string;
   type: string;
@@ -60,7 +53,6 @@ export interface ActionosApiMeetingNoteDto {
 
 export interface ActionosApiCustomerMeetingDto {
   id: number;
-  orgGroupId: string;
   customerId: string;
   subject: string;
   meetingDateUtc: string;
@@ -122,7 +114,6 @@ export interface ActionosApiTaskNoteDto {
 export interface ActionosApiTaskDto {
   id: number;
   boardId?: number | null;
-  orgGroupId: string;
   customerId?: string | null;
   title: string;
   description?: string | null;
@@ -149,7 +140,6 @@ export interface ActionosApiTaskDto {
 
 export interface ActionosApiAttachmentDto {
   id: number;
-  orgGroupId: string;
   entityType: string;
   entityId: string;
   fileName: string;
@@ -167,10 +157,8 @@ export interface ActionosApiAccessDto {
 }
 
 export interface ActionosBootstrapDto {
-  orgGroupId: string;
   access?: ActionosApiAccessDto | null;
   users: ActionosApiUserDto[];
-  allowedOrgs: ActionosApiClientSummaryDto[];
   customers: ActionosApiCustomerDto[];
   meetings: ActionosApiCustomerMeetingDto[];
   tasks: ActionosApiTaskDto[];
@@ -179,7 +167,6 @@ export interface ActionosBootstrapDto {
 }
 
 export interface CreateActionosCustomerRequest {
-  orgGroupId: string;
   name: string;
   type: string;
   externalGroupId?: string | null;
@@ -261,7 +248,6 @@ export interface CreateActionosTaskChecklistItemRequest {
 }
 
 export interface CreateActionosTaskRequest {
-  orgGroupId: string;
   boardId?: number | null;
   customerId?: string | null;
   title: string;
@@ -297,7 +283,6 @@ export interface UpdateTaskChecklistItemRequest {
 }
 
 export interface CreateActionosAttachmentRequest {
-  orgGroupId: string;
   entityType: string;
   entityId: string;
   fileName: string;
@@ -307,7 +292,6 @@ export interface CreateActionosAttachmentRequest {
 }
 
 export interface UploadActionosAttachmentRequest {
-  orgGroupId: string;
   entityType: string;
   entityId: string;
   file: File;
@@ -324,31 +308,24 @@ export class ActionosRepositoryService {
     console.info(`[ActionOS API] ${label}: ${method} ${path}`, payload ?? '');
   }
 
-  async bootstrap(orgGroupId?: string | null): Promise<ActionosBootstrapDto> {
-    const options = orgGroupId ? { params: { orgGroupId } } : undefined;
+  async bootstrap(): Promise<ActionosBootstrapDto> {
     return await firstValueFrom(
-      this.http.get<ActionosBootstrapDto>(
-        `${this.base}/api/actionos/bootstrap`,
-        options
-      )
+      this.http.get<ActionosBootstrapDto>(`${this.base}/api/actionos/bootstrap`)
     );
   }
 
-  async getOrgUsers(orgGroupId: string): Promise<ActionosApiUserDto[]> {
+  async getDirectoryUsers(): Promise<ActionosApiUserDto[]> {
     return await firstValueFrom(
-      this.http.get<ActionosApiUserDto[]>(
-        `${this.base}/api/actionos/orgs/${encodeURIComponent(orgGroupId)}/users`
-      )
+      this.http.get<ActionosApiUserDto[]>(`${this.base}/api/actionos/directory/users`)
     );
   }
 
   async updateMailNotificationPreferences(
-    orgGroupId: string,
     request: Partial<MailNotificationPrefs>
   ): Promise<MailNotificationPrefs> {
     return await firstValueFrom(
       this.http.patch<MailNotificationPrefs>(
-        `${this.base}/api/actionos/orgs/${encodeURIComponent(orgGroupId)}/mail-notification-preferences`,
+        `${this.base}/api/actionos/me/mail-notification-preferences`,
         request
       )
     );
@@ -522,8 +499,8 @@ export class ActionosRepositoryService {
     );
   }
 
-  async getAttachments(orgGroupId: string, entityType?: string, entityId?: string): Promise<ActionosApiAttachmentDto[]> {
-    let params = new HttpParams().set('orgGroupId', orgGroupId);
+  async getAttachments(entityType?: string, entityId?: string): Promise<ActionosApiAttachmentDto[]> {
+    let params = new HttpParams();
     if (entityType) {
       params = params.set('entityType', entityType);
     }
@@ -544,7 +521,6 @@ export class ActionosRepositoryService {
 
   async uploadAttachment(request: UploadActionosAttachmentRequest): Promise<ActionosApiAttachmentDto> {
     const form = new FormData();
-    form.set('orgGroupId', request.orgGroupId);
     form.set('entityType', request.entityType);
     form.set('entityId', request.entityId);
     form.set('file', request.file, request.file.name);
