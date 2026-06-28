@@ -149,7 +149,8 @@ interface MeetingClientOption {
 
                 <div class="dup-warning" *ngIf="prospectDuplicateMatches.length">
                   <strong class="dup-warning-title">⚠ {{ 'customers.possibleDuplicateTitle' | t }}</strong>
-                  <p class="dup-warning-text">{{ 'customers.possibleDuplicateText' | t }}</p>
+                  <p class="dup-warning-text" *ngIf="!exactProspectDuplicateMatch">{{ 'customers.possibleDuplicateText' | t }}</p>
+                  <p class="dup-warning-text exact" *ngIf="exactProspectDuplicateMatch">{{ 'customers.exactDuplicateBlockedText' | t }}</p>
                   <ul class="dup-warning-list">
                     <li *ngFor="let match of prospectDuplicateMatches">
                       <button type="button" class="dup-match" (click)="useExistingCustomer(match.customer)">
@@ -184,11 +185,11 @@ interface MeetingClientOption {
                   <button
                     type="button"
                     class="primary-action"
-                    [class.warn-action]="prospectDuplicateMatches.length"
+                    [class.warn-action]="prospectDuplicateMatches.length && !exactProspectDuplicateMatch"
                     [disabled]="!canAddProspect()"
                     (click)="addProspect()"
                   >
-                    {{ (prospectDuplicateMatches.length ? 'customers.addAnyway' : 'customers.addAndSelect') | t }}
+                    {{ (prospectDuplicateMatches.length && !exactProspectDuplicateMatch ? 'customers.addAnyway' : 'customers.addAndSelect') | t }}
                   </button>
                   <button type="button" class="ghost-action" (click)="cancelProspectForm()">
                     {{ 'common.cancel' | t }}
@@ -926,7 +927,11 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
   // ── Prospect creation ────────────────────────────────────────────────────────
 
   canAddProspect(): boolean {
-    return !!this.newProspect.name.trim();
+    return !!this.newProspect.name.trim() && !this.exactProspectDuplicateMatch;
+  }
+
+  get exactProspectDuplicateMatch(): Customer | null {
+    return this.workspace.exactCustomerNameMatch(this.newProspect.name);
   }
 
   /** Existing customers that look like the prospect name being typed (incl. cross-language). */

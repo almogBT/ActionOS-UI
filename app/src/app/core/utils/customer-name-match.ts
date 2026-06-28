@@ -17,9 +17,9 @@
  * `customerNameSimilarity` combines both into a 0..1 score, and
  * `findSimilarCustomers` returns the likely-duplicate candidates for a name.
  *
- * Matching is intentionally loose (recall over precision): the UI only *warns*
- * and always lets the user add anyway, so a false positive costs one click while
- * a false negative costs a duplicate record.
+ * Matching is intentionally loose (recall over precision): similar matches only
+ * warn, while exact-name matches are checked separately and blocked for prospect
+ * creation.
  */
 
 /** Default similarity threshold above which two names are treated as "likely the same". */
@@ -187,6 +187,20 @@ export function customerNameSimilarity(a: string, b: string): number {
 export interface NamedCustomer {
   id: string;
   name: string;
+}
+
+/** Returns the strict comparison key used for the prospect duplicate hard block. */
+export function customerExactNameKey(name: string | null | undefined): string {
+  return (name ?? '').trim().toLowerCase();
+}
+
+/** True when two customer names are the same after trimming edges and lower-casing. */
+export function customerNamesEqualExact(
+  left: string | null | undefined,
+  right: string | null | undefined
+): boolean {
+  const leftKey = customerExactNameKey(left);
+  return !!leftKey && leftKey === customerExactNameKey(right);
 }
 
 export interface SimilarCustomerMatch<T extends NamedCustomer> {

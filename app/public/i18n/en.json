@@ -595,7 +595,8 @@
     "addAndSelect": "Add & select",
     "addAnyway": "Add anyway",
     "possibleDuplicateTitle": "Possible duplicate",
-    "possibleDuplicateText": "A similar customer may already exist. Pick one below to use it, or add anyway."
+    "possibleDuplicateText": "A similar customer may already exist. Pick one below to use it, or add anyway.",
+    "exactDuplicateBlockedText": "This exact customer name already exists. Select the existing customer instead of adding a new prospect."
   },
   "customerType": {
     "Existing": "Customer",

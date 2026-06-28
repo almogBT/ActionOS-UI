@@ -52,10 +52,10 @@ type SortDir = 'asc' | 'desc';
             <button
               type="submit"
               class="primary-action"
-              [class.warn-action]="duplicateMatches.length"
-              [disabled]="!newCustomer.name.trim()"
+              [class.warn-action]="duplicateMatches.length && !exactDuplicateMatch"
+              [disabled]="!newCustomer.name.trim() || !!exactDuplicateMatch"
             >
-              {{ (duplicateMatches.length ? 'customers.addAnyway' : 'customers.save') | t }}
+              {{ (duplicateMatches.length && !exactDuplicateMatch ? 'customers.addAnyway' : 'customers.save') | t }}
             </button>
             <button type="button" class="ghost-action" (click)="closeAddModal()">
               {{ 'common.close' | t }}
@@ -81,7 +81,8 @@ type SortDir = 'asc' | 'desc';
             (click)="$event.stopPropagation()"
           >
             <strong class="dup-warning-title">⚠ {{ 'customers.possibleDuplicateTitle' | t }}</strong>
-            <p class="dup-warning-text">{{ 'customers.possibleDuplicateText' | t }}</p>
+            <p class="dup-warning-text" *ngIf="!exactDuplicateMatch">{{ 'customers.possibleDuplicateText' | t }}</p>
+            <p class="dup-warning-text exact" *ngIf="exactDuplicateMatch">{{ 'customers.exactDuplicateBlockedText' | t }}</p>
             <ul class="dup-warning-list">
               <li *ngFor="let match of duplicateMatches">
                 <button type="button" class="dup-match" (click)="openExisting(match.customer)">
@@ -510,6 +511,13 @@ export class CustomerListComponent {
     return findSimilarCustomers(this.newCustomer.name, this.workspace.customers);
   }
 
+  get exactDuplicateMatch(): Customer | null {
+    if (this.newCustomer.type !== 'Prospect') {
+      return null;
+    }
+    return this.workspace.exactCustomerNameMatch(this.newCustomer.name);
+  }
+
   /** Re-evaluates duplicate matches as the user types (the getter handles the work). */
   onNewNameChanged(): void {
     // No-op body: bound for change detection; `duplicateMatches` recomputes reactively.
@@ -578,7 +586,7 @@ export class CustomerListComponent {
   }
 
   addCustomer(): void {
-    if (!this.newCustomer.name.trim()) {
+    if (!this.newCustomer.name.trim() || this.exactDuplicateMatch) {
       return;
     }
     const created = this.workspace.addCustomer(this.newCustomer);

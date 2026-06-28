@@ -595,7 +595,8 @@
     "addAndSelect": "הוסף ובחר",
     "addAnyway": "הוסף בכל זאת",
     "possibleDuplicateTitle": "ייתכן שכבר קיים",
-    "possibleDuplicateText": "ייתכן שכבר קיים לקוח דומה. בחר אחד מהרשימה כדי להשתמש בו, או הוסף בכל זאת."
+    "possibleDuplicateText": "ייתכן שכבר קיים לקוח דומה. בחר אחד מהרשימה כדי להשתמש בו, או הוסף בכל זאת.",
+    "exactDuplicateBlockedText": "שם הלקוח הזה כבר קיים בדיוק. בחר את הלקוח הקיים במקום להוסיף ליד חדש."
   },
   "customerType": {
     "Existing": "לקוח",

@@ -28,6 +28,7 @@ import {
   ActionosRepositoryService
 } from './actionos-repository.service';
 import { HostContextService } from './host-context.service';
+import { customerNamesEqualExact } from '../utils/customer-name-match';
 
 interface TeamWorkload {
   member: Member;
@@ -3367,7 +3368,22 @@ export class ActionosWorkspaceService {
     );
   }
 
+  exactCustomerNameMatch(name: string, excludeCustomerId?: string): Customer | null {
+    const excludedId = excludeCustomerId ? this.resolveCustomerId(excludeCustomerId) : '';
+    return this.customers.find(customer =>
+      (!excludedId || this.resolveCustomerId(customer.id) !== excludedId)
+      && customerNamesEqualExact(customer.name, name)
+    ) ?? null;
+  }
+
   addCustomer(input: CreateCustomerInput): Customer | null {
+    if (input.type === 'Prospect' && this.exactCustomerNameMatch(input.name)) {
+      this.reportBackendIssue(
+        `Customer "${input.name.trim()}" already exists. Select the existing customer instead of creating a duplicate prospect.`
+      );
+      return null;
+    }
+
     const customer = this.customerRepo.add(input);
     this.recordActivity('member', customer.id, 'Customer added', customer.name);
     this.pendingCustomerIds.add(customer.id);
@@ -3388,7 +3404,20 @@ export class ActionosWorkspaceService {
   }
 
   updateCustomer(id: string, changes: Partial<Customer>): Customer | null {
-    const updated = this.customerRepo.update(this.resolveCustomerId(id), changes);
+    const resolvedId = this.resolveCustomerId(id);
+    const current = this.customer(resolvedId);
+    const nextName = changes.name ?? current?.name ?? '';
+    const nextType = changes.type ?? current?.type;
+    if ((changes.name !== undefined || changes.type !== undefined)
+      && nextType === 'Prospect'
+      && this.exactCustomerNameMatch(nextName, resolvedId)) {
+      this.reportBackendIssue(
+        `Customer "${nextName.trim()}" already exists. Select the existing customer instead of creating a duplicate prospect.`
+      );
+      return null;
+    }
+
+    const updated = this.customerRepo.update(resolvedId, changes);
     if (updated) {
       this.recordActivity('member', updated.id, 'Customer updated', updated.name);
       if (updated.id.toLowerCase().startsWith('local-')) {
