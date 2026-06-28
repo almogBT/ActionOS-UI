@@ -4,6 +4,7 @@ import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import {
   CustomerMeeting, MeetingNote, Task } from '../../core/models/actionos.models';
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
+import { AppDatePipe } from '../../shared/pipes/app-date.pipe';
 
 /**
  * Popup shown when the user clicks a meeting note tile. Surfaces the full note
@@ -13,7 +14,7 @@ import { ActionosWorkspaceService } from '../../core/services/actionos-workspace
 @Component({
   selector: 'app-note-detail-modal',
   standalone: true,
-  imports: [CommonModule, TranslatePipe],
+  imports: [CommonModule, TranslatePipe, AppDatePipe],
   template: `
     <div
       class="modal-backdrop"
@@ -47,7 +48,7 @@ import { ActionosWorkspaceService } from '../../core/services/actionos-workspace
           </div>
           <div *ngIf="note.createdAt">
             <dt>{{ 'noteDetail.capturedAt' | t }}</dt>
-            <dd>{{ note.createdAt | slice:0:16 }}</dd>
+            <dd>{{ note.createdAt | appDate:'datetime':'-' }}</dd>
           </div>
           <div *ngIf="note.ownerId">
             <dt>{{ 'common.owner' | t }}</dt>
@@ -55,7 +56,7 @@ import { ActionosWorkspaceService } from '../../core/services/actionos-workspace
           </div>
           <div *ngIf="note.dueDate">
             <dt>{{ 'common.dueDate' | t }}</dt>
-            <dd>{{ note.dueDate }}</dd>
+            <dd>{{ note.dueDate | appDate:'date':'-' }}</dd>
           </div>
           <div *ngIf="meeting">
             <dt>{{ 'noteDetail.fromMeeting' | t }}</dt>

@@ -6,6 +6,7 @@ import { CustomerMeeting, MeetingNote, Task } from '../../core/models/actionos.m
 import { ActionosWorkspaceService } from '../../core/services/actionos-workspace.service';
 import { DrawerShellComponent } from '../shared/drawer-shell/drawer-shell.component';
 import { MeetingPrepBriefComponent } from '../customers/meeting-prep-brief.component';
+import { AppDatePipe } from '../../shared/pipes/app-date.pipe';
 
 type CatchUpTab = 'catchup' | 'prep';
 type TaskBucket = 'overdue' | 'open' | 'waiting' | 'done';
@@ -38,7 +39,7 @@ const BUCKET_ORDER: Record<TaskBucket, number> = { overdue: 0, open: 1, waiting:
 @Component({
   selector: 'app-catch-up-drawer',
   standalone: true,
-  imports: [CommonModule, TranslatePipe, DrawerShellComponent, MeetingPrepBriefComponent],
+  imports: [CommonModule, TranslatePipe, DrawerShellComponent, MeetingPrepBriefComponent, AppDatePipe],
   template: `
     <app-drawer-shell
       [open]="workspace.catchUpDrawerOpen"
@@ -60,7 +61,7 @@ const BUCKET_ORDER: Record<TaskBucket, number> = { overdue: 0, open: 1, waiting:
               <ng-template #firstMeet>
                 <span class="muted">{{ 'catchUp.noMeetings' | t }}</span>
               </ng-template>
-              <span class="muted" *ngIf="nextMeetingDate"> · {{ 'catchUp.nextMeeting' | t }} {{ nextMeetingDate | slice:0:10 }}</span>
+              <span class="muted" *ngIf="nextMeetingDate"> · {{ 'catchUp.nextMeeting' | t }} {{ nextMeetingDate | appDate:'date':'-' }}</span>
             </div>
           </div>
           <button type="button" class="cu-close" (click)="close()" [attr.aria-label]="'common.close' | t">✕</button>
@@ -103,7 +104,7 @@ const BUCKET_ORDER: Record<TaskBucket, number> = { overdue: 0, open: 1, waiting:
                 <header class="cu-meeting-head">
                   <div>
                     <strong class="cu-subject">{{ g.meeting.subject }}</strong>
-                    <span class="cu-date">{{ g.meeting.meetingDate | slice:0:10 }}</span>
+                    <span class="cu-date">{{ g.meeting.meetingDate | appDate:'date':'-' }}</span>
                   </div>
                   <span class="status-chip" [ngClass]="workspace.statusClass(g.meeting.status)">
                     {{ ('customerMeeting.statusValues.' + g.meeting.status) | t }}
@@ -144,7 +145,7 @@ const BUCKET_ORDER: Record<TaskBucket, number> = { overdue: 0, open: 1, waiting:
                         <strong>{{ task.title }}</strong>
                         <small class="muted">
                           {{ workspace.employeeName(task.assignedToEmployeeId) }}
-                          <span *ngIf="task.dueDate"> · {{ 'common.due' | t }} {{ task.dueDate }}</span>
+                          <span *ngIf="task.dueDate"> · {{ 'common.due' | t }} {{ task.dueDate | appDate:'date':'-' }}</span>
                         </small>
                       </span>
                       <span class="status-chip" [ngClass]="workspace.statusClass(task.status)">

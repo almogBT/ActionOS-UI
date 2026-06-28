@@ -6,6 +6,7 @@ import { CustomerMeeting, MeetingNote, Task } from '../../../core/models/actiono
 import { ActionosWorkspaceService } from '../../../core/services/actionos-workspace.service';
 import { DraftMeetingTaskCreatedEvent, MeetingTaskCreationComponent } from '../meeting-task-creation.component';
 import { MEETING_FORM_STYLES } from './meeting-form.styles';
+import { AppDatePipe } from '../../../shared/pipes/app-date.pipe';
 
 /**
  * Tasks generated from a meeting: always-visible task creation plus all linked
@@ -18,7 +19,7 @@ import { MEETING_FORM_STYLES } from './meeting-form.styles';
 @Component({
   selector: 'app-meeting-tasks-section',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe, MeetingTaskCreationComponent],
+  imports: [CommonModule, FormsModule, TranslatePipe, MeetingTaskCreationComponent, AppDatePipe],
   template: `
     <app-meeting-task-creation
       *ngIf="meeting.customerId"
@@ -37,7 +38,7 @@ import { MEETING_FORM_STYLES } from './meeting-form.styles';
           <button type="button" class="linked-task-title-btn" [disabled]="draftMode" (click)="openMeetingTask(task)">
             <strong>{{ task.title }}</strong>
             <small class="muted">
-              {{ 'common.owner' | t }}: {{ workspace.employeeName(task.assignedToEmployeeId) }} · {{ 'common.due' | t }} {{ task.dueDate || '-' }}
+              {{ 'common.owner' | t }}: {{ workspace.employeeName(task.assignedToEmployeeId) }} · {{ 'common.due' | t }} {{ task.dueDate | appDate:'date':'-' }}
             </small>
           </button>
           <div class="linked-task-meta">
@@ -58,7 +59,7 @@ import { MEETING_FORM_STYLES } from './meeting-form.styles';
 
         <div class="progression-notes-panel" *ngIf="expandedTaskId === task.id">
           <div class="progression-note-row" *ngFor="let pn of task.progressionNotes">
-            <span class="muted">{{ pn.createdAt | slice:0:10 }} · {{ workspace.employeeName(pn.authorEmployeeId) }}</span>
+            <span class="muted">{{ pn.createdAt | appDate:'date':'-' }} · {{ workspace.employeeName(pn.authorEmployeeId) }}</span>
             <p>{{ pn.content }}</p>
           </div>
           <div class="progression-empty" *ngIf="!task.progressionNotes?.length">
