@@ -231,6 +231,7 @@ export interface UpdateActionosCustomerMeetingNoteRequest {
   content?: string | null;
   ownerUserId?: string | null;
   dueDateUtc?: string | null;
+  clearDueDateUtc?: boolean | null;
 }
 
 export interface ConvertMeetingNoteToTaskRequest {
@@ -274,6 +275,7 @@ export interface UpdateActionosTaskRequest {
   treatmentNotes?: string | null;
   assignedUserId?: string | null;
   dueDateUtc?: string | null;
+  clearDueDateUtc?: boolean | null;
 }
 
 export interface UpdateTaskChecklistItemRequest {

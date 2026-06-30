@@ -441,7 +441,8 @@ export class TaskTableComponent {
   }
 
   changeDueDate(task: Task, dueDate: string): void {
-    this.workspace.updateMeetingTask(task.id, { dueDate });
+    // Empty date input means the user intentionally removed the due date.
+    this.workspace.updateMeetingTask(task.id, { dueDate: dueDate || null });
   }
 
   changeAssignee(task: Task, employeeId: string): void {

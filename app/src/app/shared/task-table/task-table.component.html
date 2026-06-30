@@ -246,7 +246,7 @@
               *ngIf="editable; else dueReadonly"
               type="date"
               class="due-input"
-              [ngModel]="task.dueDate | slice:0:10"
+              [ngModel]="task.dueDate ?? ''"
               (ngModelChange)="changeDueDate(task, $event)"
             />
             <ng-template #dueReadonly>

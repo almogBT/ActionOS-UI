@@ -78,7 +78,7 @@ import { MEETING_FORM_STYLES } from './meeting-form.styles';
         <input #noteAttachInput type="file" style="display:none" (change)="onPendingAttachSelected($event)" />
       </div>
 
-      <p class="muted action-hint" *ngIf="newNote.type === 'action' && (!newNote.ownerId || !newNote.dueDate)">
+      <p class="muted action-hint" *ngIf="newNote.type === 'action' && !newNote.ownerId">
         {{ 'customerMeeting.actionNeedsOwnerDue' | t }}
       </p>
     </form>
@@ -500,10 +500,8 @@ export class MeetingNotesSectionComponent implements OnInit, OnDestroy {
   }
 
   setNoteType(type: NoteType): void {
+    // Due date stays user-selected; action notes can become undated tasks.
     this.newNote.type = type;
-    if (type === 'action' && !this.newNote.dueDate) {
-      this.newNote.dueDate = new Date().toISOString().slice(0, 10);
-    }
   }
 
   onComposerKeydown(event: KeyboardEvent): void {
@@ -518,7 +516,7 @@ export class MeetingNotesSectionComponent implements OnInit, OnDestroy {
       return false;
     }
     if (this.newNote.type === 'action') {
-      return !!this.newNote.ownerId && !!this.newNote.dueDate;
+      return !!this.newNote.ownerId;
     }
     return true;
   }
@@ -545,7 +543,7 @@ export class MeetingNotesSectionComponent implements OnInit, OnDestroy {
     if (note.type !== 'action') {
       return true;
     }
-    return !!note.ownerId && !!note.dueDate;
+    return !!note.ownerId;
   }
 
   requestTaskCreation(note: MeetingNote): void {
@@ -578,7 +576,7 @@ export class MeetingNotesSectionComponent implements OnInit, OnDestroy {
       return false;
     }
     if (this.editingNoteDraft.type === 'action') {
-      return !!this.editingNoteDraft.ownerId && !!this.editingNoteDraft.dueDate;
+      return !!this.editingNoteDraft.ownerId;
     }
     return true;
   }
@@ -597,7 +595,7 @@ export class MeetingNotesSectionComponent implements OnInit, OnDestroy {
         type: this.editingNoteDraft.type ?? this.meeting.notes[index].type,
         content: this.editingNoteDraft.content.trim(),
         ownerId: this.editingNoteDraft.ownerId,
-        dueDate: this.editingNoteDraft.dueDate
+        dueDate: this.editingNoteDraft.dueDate || undefined
       };
       this.cancelEditingNote();
       this.changed.emit();

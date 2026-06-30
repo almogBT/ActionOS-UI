@@ -61,12 +61,12 @@ export class HeaderComponent {
 
   readonly dueTodayTasks = computed(() => {
     const today = this.workspace.todayIso;
-    return this.workspace.myTasks.filter(task => task.dueDate <= today);
+    return this.workspace.myTasks.filter(task => !!task.dueDate && task.dueDate <= today);
   });
 
   readonly overdueTasks = computed(() => {
     const today = this.workspace.todayIso;
-    return this.workspace.myTasks.filter(task => task.dueDate < today);
+    return this.workspace.myTasks.filter(task => !!task.dueDate && task.dueDate < today);
   });
 
   readonly dueTodayOnlyTasks = computed(() => {

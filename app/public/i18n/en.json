@@ -668,7 +668,7 @@
     "saveAndClose": "Save & Close",
     "finish": "Finish",
     "completePlanToStart": "Complete the plan section to unlock this area.",
-    "actionNeedsOwnerDue": "Action items require both an owner and a due date.",
+    "actionNeedsOwnerDue": "Action items require an owner.",
     "createTaskFromNote": "Turn into a task",
     "convertedToTask": "Task created",
     "statusValues": {
@@ -734,7 +734,7 @@
     "notesTabHint": "Jot down decisions, blockers, and action items as they come up.",
     "summaryTabHint": "Recap the conversation and plan the next meeting.",
     "assignTasks": "Assign tasks",
-    "assignTasksSubtitle": "Turn what you captured into clear tasks with an owner and a due date.",
+    "assignTasksSubtitle": "Turn what you captured into clear tasks with an owner and optional due date.",
     "stepSettings": "Set up",
     "stepCapture": "Capture",
     "stepTasks": "Tasks",

@@ -642,13 +642,13 @@ export class ActionosWorkspaceService {
   }
 
   get overdueTasks(): Task[] {
-    return this.openTasks.filter(task => task.dueDate < this.todayIso);
+    return this.openTasks.filter(task => !!task.dueDate && task.dueDate < this.todayIso);
   }
 
   get dueSoonTasks(): Task[] {
     const soon = this.addDays(this.todayIso, 7);
 
-    return this.openTasks.filter(task => task.dueDate >= this.todayIso && task.dueDate <= soon);
+    return this.openTasks.filter(task => !!task.dueDate && task.dueDate >= this.todayIso && task.dueDate <= soon);
   }
 
   get overdueMeetingTasks(): Task[] {
@@ -675,7 +675,7 @@ export class ActionosWorkspaceService {
 
   get topThreeToday(): Task[] {
     return this.myTasks
-      .filter(task => task.dueDate <= this.addDays(this.todayIso, 1))
+      .filter(task => !!task.dueDate && task.dueDate <= this.addDays(this.todayIso, 1))
       .slice()
       .sort((left, right) => this.priorityScore(right.priority) - this.priorityScore(left.priority))
       .slice(0, 3);
@@ -683,7 +683,7 @@ export class ActionosWorkspaceService {
 
   get triageQueue(): Task[] {
     const riskyTasks = this.openTasks.filter(
-      task => task.status === 'New' || !task.assignedToEmployeeId || task.dueDate < this.todayIso
+      task => task.status === 'New' || !task.assignedToEmployeeId || (!!task.dueDate && task.dueDate < this.todayIso)
     );
 
     return this.uniqueTasks(riskyTasks).slice(0, 12);
@@ -1003,7 +1003,7 @@ export class ActionosWorkspaceService {
         title: note.content,
         assignedToEmployeeId: assignee,
         priority: 'Medium',
-        dueDate: note.dueDate ?? this.addDays(this.todayIso, 3),
+        dueDate: note.dueDate || undefined,
         sourceMeetingId: resolvedMeetingId
       },
       resolvedNoteId
@@ -1098,11 +1098,11 @@ export class ActionosWorkspaceService {
 
   myWorkTasks(tab: MyWorkTab): Task[] {
     if (tab === 'today') {
-      return this.myTasks.filter(task => task.dueDate <= this.todayIso);
+      return this.myTasks.filter(task => !!task.dueDate && task.dueDate <= this.todayIso);
     }
 
     if (tab === 'upcoming') {
-      return this.myTasks.filter(task => task.dueDate > this.todayIso);
+      return this.myTasks.filter(task => !!task.dueDate && task.dueDate > this.todayIso);
     }
 
     if (tab === 'watched') {
@@ -1230,6 +1230,7 @@ export class ActionosWorkspaceService {
     const nextCompletedAt = nextStatus === 'Done'
       ? (task.completedAt || new Date().toISOString())
       : (nextStatus ? undefined : task.completedAt);
+    const nextDueDate = changes.dueDate !== undefined ? changes.dueDate || undefined : task.dueDate;
 
     this.tasksState = this.tasksState.map(item => {
       if (item.id !== resolvedTaskId) {
@@ -1253,6 +1254,7 @@ export class ActionosWorkspaceService {
         blockedBy: nextBlockedBy,
         waitingReason: nextWaitingReason,
         completedAt: nextCompletedAt,
+        dueDate: nextDueDate,
         updatedAt: new Date().toISOString()
       };
     });
@@ -1276,7 +1278,8 @@ export class ActionosWorkspaceService {
         assignedUserId: changes.assigneeIds !== undefined ? (nextAssignedToEmployeeId || null) : undefined,
         dueDateUtc: changes.dueDate !== undefined
           ? (changes.dueDate ? new Date(`${changes.dueDate}T12:00:00.000Z`).toISOString() : null)
-          : undefined
+          : undefined,
+        clearDueDateUtc: changes.dueDate === null || changes.dueDate === '' ? true : undefined
       })
     );
   }
@@ -1303,7 +1306,8 @@ export class ActionosWorkspaceService {
       customerId,
       status: input.status ?? 'New',
       priority: input.priority,
-      dueDate: input.dueDate || this.todayIso,
+      // Due date is optional; keep a blank task undated instead of defaulting to today.
+      dueDate: input.dueDate || undefined,
       assigneeIds: [resolvedAssigneeMemberId],
       sourceMeetingId: input.sourceMeetingId ?? '',
       openedByEmployeeId,
@@ -1391,7 +1395,7 @@ export class ActionosWorkspaceService {
       type: kind,
       content: trimmedContent,
       ownerId: kind === 'action' || kind === 'blocker' ? this.currentUserId : undefined,
-      dueDate: kind === 'action' ? this.addDays(this.todayIso, 2) : undefined
+      dueDate: undefined
     });
   }
 
@@ -1414,7 +1418,7 @@ export class ActionosWorkspaceService {
       customerId: '',
       status: 'New',
       priority: 'Medium',
-      dueDate: this.addDays(this.todayIso, 2),
+      // New task drafts intentionally start without a due date.
       assigneeIds: [resolvedAssigneeMemberId],
       sourceMeetingId: '',
       openedByEmployeeId,
@@ -1493,7 +1497,7 @@ export class ActionosWorkspaceService {
       source: 'meeting',
       sourceMeetingId: this.meetingState.id,
       priority: overrides?.priority || 'High',
-      dueDate: overrides?.dueDate || note.dueDate || this.addDays(this.todayIso, 3),
+      dueDate: overrides?.dueDate || note.dueDate || undefined,
       assigneeId: overrides?.assigneeId || note.ownerId || this.currentUserId
     });
 
@@ -2288,7 +2292,7 @@ export class ActionosWorkspaceService {
     const sourceMeetingId = row.sourceMeetingId?.toString() ?? '';
     const watcherIds = (row.watchers ?? []).map((watcher) => watcher.userId).filter((id) => !!id);
     const status = this.toUnifiedStatus(row.status as TaskStatus);
-    const dueDate = row.dueDateUtc ? row.dueDateUtc.slice(0, 10) : this.todayIso;
+    const dueDate = row.dueDateUtc ? row.dueDateUtc.slice(0, 10) : undefined;
     const meetingName = sourceMeetingId ? this.customerMeeting(sourceMeetingId)?.subject : undefined;
     const customerName = row.customerId ? customerById.get(row.customerId)?.name : undefined;
     const waitingReason = row.waitingReason ?? undefined;
@@ -3051,7 +3055,7 @@ export class ActionosWorkspaceService {
         customerId: task.customerId ?? '',
         status,
         priority: task.priority ?? 'Medium',
-        dueDate: task.dueDate ?? this.todayIso,
+        dueDate: task.dueDate || undefined,
         assigneeIds,
         watcherIds,
         assignedToEmployeeId,
@@ -3731,7 +3735,10 @@ export class ActionosWorkspaceService {
           noteType: changes.type ?? null,
           content: changes.content ?? null,
           ownerUserId: changes.ownerId ?? null,
-          dueDateUtc: changes.dueDate ? new Date(`${changes.dueDate}T12:00:00.000Z`).toISOString() : null
+          dueDateUtc: changes.dueDate !== undefined
+            ? (changes.dueDate ? new Date(`${changes.dueDate}T12:00:00.000Z`).toISOString() : null)
+            : undefined,
+          clearDueDateUtc: changes.dueDate === null || changes.dueDate === '' ? true : undefined
         })
       );
     }
@@ -4023,7 +4030,7 @@ export class ActionosWorkspaceService {
       assignedToEmployeeId: input.assignedToEmployeeId,
       assigneeIds: assigneeMemberId ? [assigneeMemberId] : [],
       priority: input.priority ?? 'Medium',
-      dueDate: input.dueDate ?? this.addDays(this.todayIso, 3),
+      dueDate: input.dueDate || undefined,
       status: 'New',
       attachmentIds: [],
       watcherIds: creatorMemberId ? [creatorMemberId] : [],
@@ -4239,6 +4246,7 @@ export class ActionosWorkspaceService {
       board: next.customerId
         ? (this.clientName(next.customerId) ?? this.tasksState[index].board)
         : this.tasksState[index].board,
+      dueDate: next.dueDate !== undefined ? next.dueDate || undefined : this.tasksState[index].dueDate,
       updatedAt: new Date().toISOString()
     };
     this.tasksState = this.tasksState.map(task => task.id === resolvedTaskId ? updated : task);
@@ -4261,7 +4269,8 @@ export class ActionosWorkspaceService {
         assignedUserId: next.assignedToEmployeeId !== undefined ? next.assignedToEmployeeId : undefined,
         dueDateUtc: next.dueDate !== undefined
           ? (next.dueDate ? new Date(`${next.dueDate}T12:00:00.000Z`).toISOString() : null)
-          : undefined
+          : undefined,
+        clearDueDateUtc: next.dueDate === null || next.dueDate === '' ? true : undefined
       })
     );
 
@@ -4360,7 +4369,7 @@ export class ActionosWorkspaceService {
       source: sourceMeetingId ? 'meeting' : 'board',
       status: changes.status ?? task.status,
       priority: changes.priority ?? task.priority,
-      dueDate: changes.dueDate !== undefined ? changes.dueDate : task.dueDate,
+      dueDate: changes.dueDate !== undefined ? changes.dueDate || undefined : task.dueDate,
       assignedToEmployeeId,
       assigneeIds: changes.assignedToEmployeeId !== undefined ? [assigneeMemberId] : task.assigneeIds,
       watcherEmployeeIds: Array.from(

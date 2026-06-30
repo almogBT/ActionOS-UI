@@ -679,7 +679,7 @@
     "saveAndClose": "שמור וסגור",
     "finish": "סיום",
     "completePlanToStart": "השלם את חלק התכנון כדי לפתוח אזור זה.",
-    "actionNeedsOwnerDue": "פעולות דורשות גם אחראי וגם תאריך יעד.",
+    "actionNeedsOwnerDue": "פעולות דורשות אחראי.",
     "statusCriteria": {
       "Planned": "הפגישה מוגדרת",
       "Draft Summary": "תיעדנו הערות או סיכום",
@@ -734,7 +734,7 @@
     "notesTabHint": "רשמו החלטות, חסמים ומשימות תוך כדי הפגישה.",
     "summaryTabHint": "סכמו את השיחה ותכננו את הפגישה הבאה.",
     "assignTasks": "הקצאת משימות",
-    "assignTasksSubtitle": "הפכו את מה שרשמתם למשימות ברורות עם אחראי ותאריך יעד.",
+    "assignTasksSubtitle": "הפכו את מה שרשמתם למשימות ברורות עם אחראי ותאריך יעד אופציונלי.",
     "stepSettings": "הגדרה",
     "stepCapture": "תיעוד",
     "stepTasks": "משימות",

@@ -203,6 +203,7 @@ export class MeetingTaskCreationComponent implements OnInit, OnChanges {
       ...this.form,
       title: this.form.title.trim(),
       description: this.form.description?.trim() ?? '',
+      dueDate: this.form.dueDate || undefined,
       sourceMeetingId: this.meetingId,
       customerId: this.customerId
     };

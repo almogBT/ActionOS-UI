@@ -1101,7 +1101,7 @@ export class CustomerMeetingFormComponent implements OnInit, OnChanges {
       customerId: meeting.customerId,
       status: 'New',
       priority: event.input.priority ?? 'Medium',
-      dueDate: event.input.dueDate || this.addDays(new Date().toISOString().slice(0, 10), 3),
+      dueDate: event.input.dueDate || undefined,
       assigneeIds: [],
       watcherIds: [],
       assignedToEmployeeId: event.input.assignedToEmployeeId,

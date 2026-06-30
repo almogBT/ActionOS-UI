@@ -38,7 +38,7 @@ import { AppDatePipe } from '../../../shared/pipes/app-date.pipe';
           <button type="button" class="linked-task-title-btn" [disabled]="draftMode" (click)="openMeetingTask(task)">
             <strong>{{ task.title }}</strong>
             <small class="muted">
-              {{ 'common.owner' | t }}: {{ workspace.employeeName(task.assignedToEmployeeId) }} · {{ 'common.due' | t }} {{ task.dueDate | appDate:'date':'-' }}
+              {{ 'common.owner' | t }}: {{ workspace.employeeName(task.assignedToEmployeeId) }}<ng-container *ngIf="task.dueDate"> · {{ 'common.due' | t }} {{ task.dueDate | appDate:'date':'-' }}</ng-container>
             </small>
           </button>
           <div class="linked-task-meta">

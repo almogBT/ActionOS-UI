@@ -399,8 +399,10 @@ export class TaskFormComponent {
     return /^status changed from /i.test(body.trim());
   }
 
-  updateMeetingTaskField<K extends keyof Task>(task: Task, field: K, value: Task[K]): void {
-    const result = this.workspace.updateMeetingTask(task.id, { [field]: value } as UpdateMeetingTaskInput);
+  updateMeetingTaskField<K extends keyof Task>(task: Task, field: K, value: Task[K] | null): void {
+    // Native date inputs emit an empty string when cleared; use null to request a backend clear.
+    const normalizedValue = field === 'dueDate' ? ((value as string | null | undefined) || null) : value;
+    const result = this.workspace.updateMeetingTask(task.id, { [field]: normalizedValue } as UpdateMeetingTaskInput);
     // Existing tasks can still be promoted through aliases after backend create.
     // If an id changes, tell the host to rebind so editing continues cleanly.
     if (result && result.id !== task.id) {

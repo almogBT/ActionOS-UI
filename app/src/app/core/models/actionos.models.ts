@@ -63,7 +63,7 @@ export interface Task {
   customerId: string;
   status: TaskStatus;
   priority: Priority;
-  dueDate: string;
+  dueDate?: string;
   assigneeIds: string[];
   watcherIds: string[];
   assignedToEmployeeId: string;
@@ -114,7 +114,7 @@ export interface UpdateTaskInput {
   customerId?: string;
   status?: TaskStatus;
   priority?: Priority;
-  dueDate?: string;
+  dueDate?: string | null;
   assigneeIds?: string[];
   watcherIds?: string[];
   sourceMeetingId?: string;
@@ -146,7 +146,7 @@ export interface UpdateMeetingNoteInput {
   type?: NoteType;
   content?: string;
   ownerId?: string;
-  dueDate?: string;
+  dueDate?: string | null;
   attachmentIds?: string[];
 }
 
@@ -344,7 +344,7 @@ export interface UpdateMeetingTaskInput {
   customerId?: string;
   sourceMeetingId?: string;
   assignedToEmployeeId?: string;
-  dueDate?: string;
+  dueDate?: string | null;
   priority?: Priority;
   status?: TaskStatus;
   watcherEmployeeIds?: string[];
